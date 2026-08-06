@@ -959,6 +959,10 @@ and `@utility animate-out`, as the last declaration in each:
 
 - [ ] **Step 2: Move the accordion animations from `@theme` to `@utility`**
 
+This `@theme inline` block is hand-written and safe to edit. The generated
+region is `shadcn-tokens:begin` … `shadcn-tokens:end` earlier in the file, and
+`@theme inline` sits after its closing marker. Stay outside the markers.
+
 Delete these two lines from the `@theme inline` block:
 
 ```css
