@@ -27,4 +27,33 @@ RSpec.describe "Exit animations", :js do
       expect(animations_on(content)).to include("enter")
     end
   end
+
+  describe "a floating layer" do
+    let(:content) { "[data-slot=popover-content]" }
+
+    def trigger = find("[data-slot=popover-trigger]")
+
+    before do
+      visit_preview(:popover)
+      wait_for_stimulus
+      force_animations(content)
+      trigger.click
+      expect(page).to have_css(content)
+      press(:escape)
+    end
+
+    it "schedules the exit animation the component ships" do
+      expect(animations_on(content)).to include("exit")
+    end
+
+    it "keeps the content in the document until the animation finishes" do
+      expect(page).to have_css(content)
+      expect(page).to have_no_css(content) # Capybara waits out the 400ms
+    end
+
+    it "stops answering the dismiss layer as soon as it starts closing" do
+      expect(state_of(content)).to eq("closed")
+      expect(trigger["aria-expanded"]).to eq("false")
+    end
+  end
 end

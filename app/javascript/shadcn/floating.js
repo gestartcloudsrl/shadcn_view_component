@@ -11,6 +11,7 @@
 import { createWrapper, position } from "shadcn/popper"
 import * as topLayer from "shadcn/top_layer"
 import { pushLayer, removeLayer } from "shadcn/dismiss"
+import { ExitQueue } from "shadcn/animation"
 
 export class FloatingLayer {
   constructor(options) {
@@ -32,6 +33,7 @@ export class FloatingLayer {
     this.layer = null
     this.placeholder = null
     this.frame = null
+    this.exits = new ExitQueue()
     this.reposition = this.reposition.bind(this)
   }
 
@@ -39,19 +41,15 @@ export class FloatingLayer {
     if (this.open) return
     this.open = true
 
-    // Leave a marker where the content was, so closing puts it back exactly
-    // there. Appending to `home` instead would quietly reorder the markup —
-    // after one open/close a Select's content ends up after the hidden input.
-    this.placeholder = document.createComment("shadcn-floating-content")
-    this.content.replaceWith(this.placeholder)
-
-    this.wrapper = createWrapper()
-    this.placeholder.parentNode.insertBefore(this.wrapper, this.placeholder)
-    this.wrapper.appendChild(this.content)
-
-    // Above every stacking context, without leaving the DOM.
-    topLayer.enable(this.wrapper)
-    topLayer.show(this.wrapper)
+    // Reopened before the exit finished — the wrapper, the placeholder and the
+    // content are all still in place, so only the interaction state has to come
+    // back. Rebuilding them would strand the old placeholder and leave a second
+    // wrapper in the DOM.
+    if (this.exits.has(this.content)) {
+      this.exits.cancel(this.content)
+    } else {
+      this.mount()
+    }
 
     this.content.hidden = false
     this.content.dataset.state = "open"
@@ -71,10 +69,28 @@ export class FloatingLayer {
     this.onOpen()
   }
 
+  // Leave a marker where the content was, so closing puts it back exactly
+  // there. Appending to `home` instead would quietly reorder the markup —
+  // after one open/close a Select's content ends up after the hidden input.
+  mount() {
+    this.placeholder = document.createComment("shadcn-floating-content")
+    this.content.replaceWith(this.placeholder)
+
+    this.wrapper = createWrapper()
+    this.placeholder.parentNode.insertBefore(this.wrapper, this.placeholder)
+    this.wrapper.appendChild(this.content)
+
+    // Above every stacking context, without leaving the DOM.
+    topLayer.enable(this.wrapper)
+    topLayer.show(this.wrapper)
+  }
+
   hide() {
     if (!this.open) return
     this.open = false
 
+    // Everything here is interaction state, and all of it is immediate: a layer
+    // that is fading out must not answer Escape or an outside click.
     window.removeEventListener("scroll", this.reposition, true)
     window.removeEventListener("resize", this.reposition)
 
@@ -84,8 +100,17 @@ export class FloatingLayer {
     if (this.layer) removeLayer(this.layer)
     this.layer = null
 
+    // This is what starts the exit animation, so it has to be set before the
+    // queue looks for one.
     this.content.dataset.state = "closed"
     if (this.trigger) this.trigger.dataset.state = "closed"
+
+    this.exits.defer(this.content, () => this.dismount())
+
+    this.onClose()
+  }
+
+  dismount() {
     this.content.hidden = true
 
     if (this.placeholder?.parentNode) {
@@ -100,8 +125,6 @@ export class FloatingLayer {
       this.wrapper.remove()
     }
     this.wrapper = null
-
-    this.onClose()
   }
 
   toggle() {
@@ -138,5 +161,8 @@ export class FloatingLayer {
 
   destroy() {
     this.hide()
+    // Turbo may be detaching the element; there is nothing to animate for and
+    // nowhere to put the content back afterwards.
+    this.exits.flushAll()
   }
 }

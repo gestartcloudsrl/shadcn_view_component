@@ -161,6 +161,19 @@
     display: none !important;
   }
 
+  /* Content on its way out stays painted but stops intercepting clicks, as
+     Radix does. The marker is written by `ExitQueue` and lives only for the
+     length of the animation.
+
+     Keyed on the marker rather than on `[data-state="closed"]`, which is also
+     written to *triggers* — `floating.js` sets it on the trigger,
+     `accordion_controller` on the trigger and its header — and every one of
+     those carries a `data-slot`. Keying on state would make each closed select,
+     dropdown and accordion permanently unclickable. */
+  [data-slot][data-exiting] {
+    pointer-events: none;
+  }
+
   /* Floating layers are promoted to the top layer with the Popover API, so a
      stacking context above them cannot bury them. That brings a set of UA
      defaults — `inset: 0`, `width: fit-content`, a border, a background — which
