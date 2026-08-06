@@ -1,0 +1,5 @@
+<div class="flex w-[320px] flex-col gap-4">
+  <%= render(Shadcn::Input::Component.new(type: "email", placeholder: "m@example.com")) %>
+  <%= render(Shadcn::Input::Component.new(placeholder: "Disabled", disabled: true)) %>
+  <%= render(Shadcn::Input::Component.new(placeholder: "Invalid", "aria-invalid": "true")) %>
+</div>

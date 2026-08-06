@@ -1,0 +1,32 @@
+<div class="relative z-10 flex items-center gap-3 rounded-lg border bg-card p-4" data-testid="stacking-header">
+<span class="text-sm text-muted-foreground">A toolbar at z-10
+</span>
+<div data-slot="dialog" style="display:contents" data-controller="shadcn--dialog" data-shadcn--dialog-open-value="false" data-shadcn--dialog-modal-value="true" data-shadcn--dialog-dismissable-value="true">
+<button data-slot="dialog-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" data-state="closed" data-shadcn--dialog-target="trigger" data-action="shadcn--dialog#open" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3"> Open dialog
+</button>
+<div data-slot="dialog-portal" style="display:contents">
+<div data-slot="dialog-overlay" data-state="closed" hidden="hidden" data-shadcn--dialog-target="overlay" class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+</div>
+<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg">
+<div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">
+<h2 data-slot="dialog-title" class="text-lg leading-none font-semibold">Am I on top?
+</h2>
+<p data-slot="dialog-description" class="text-sm text-muted-foreground">If the panel below covers this, the modal lost to a stacking context.
+</p>
+</div>
+<button data-slot="dialog-close" type="button" data-action="shadcn--dialog#close" class="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+<path d="M18 6 6 18"/>
+<path d="m6 6 12 12"/>
+</svg>
+<span class="sr-only">Close
+</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="relative z-20 mt-2 h-96 rounded-lg border bg-muted p-4" data-testid="stacking-sibling">
+<span class="text-sm font-medium">A sibling at z-20
+</span>
+</div>

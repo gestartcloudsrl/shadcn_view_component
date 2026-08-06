@@ -1,0 +1,14 @@
+<%# A <label for> does not name a <button>, so a Switch is named with
+    `aria-labelledby` pointing at its label — which is what the FormBuilder
+    does for you. %>
+<div class="flex items-center gap-6">
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Switch::Component.new(name: "airplane", "aria-labelledby": "switch-airplane-label")) %>
+    <%= render(Shadcn::Label::Component.new(id: "switch-airplane-label")) { "Airplane mode" } %>
+  </div>
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Switch::Component.new(size: :sm, checked: true, "aria-labelledby": "switch-small-label")) %>
+    <%= render(Shadcn::Label::Component.new(id: "switch-small-label")) { "Small, on" } %>
+  </div>
+  <%= render(Shadcn::Switch::Component.new(disabled: true, "aria-label": "Disabled")) %>
+</div>

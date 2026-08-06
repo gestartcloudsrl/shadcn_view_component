@@ -1,0 +1,10 @@
+<%= render(Shadcn::Accordion::Component.new(type: :single, collapsible: true, value: "item-1", class: "w-[420px]")) do |acc| %>
+  <% [["item-1", "Is it accessible?", "Yes. It adheres to the WAI-ARIA design pattern."],
+      ["item-2", "Is it styled?", "Yes. It comes with default styles that match the other components."],
+      ["item-3", "Is it animated?", "Yes. It is animated by default, but you can disable it."]].each do |value, question, answer| %>
+    <% acc.with_item(value:) do |item| %>
+      <% item.with_trigger { question } %>
+      <% item.with_panel { answer } %>
+    <% end %>
+  <% end %>
+<% end %>

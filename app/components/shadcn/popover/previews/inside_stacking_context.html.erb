@@ -1,0 +1,30 @@
+<%# A floating layer inside an ancestor that creates a stacking context.
+
+    `position: fixed` escapes overflow clipping but never escapes a stacking
+    context, so the content's `z-50` is scoped to the header's `z-10` and the
+    section below — `z-20` — paints over it. This is ordinary Rails markup: a
+    sticky header, a card with `isolate`, anything with `opacity < 1`. %>
+
+<div class="relative z-10 flex items-center gap-3 rounded-lg border bg-card p-4"
+     data-testid="stacking-header">
+  <span class="text-sm text-muted-foreground">A header at z-10</span>
+
+  <%= render(Shadcn::Popover::Component.new) do |popover| %>
+    <% popover.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) do %>
+      Open popover
+    <% end %>
+    <% popover.with_popover_content do |content| %>
+      <% content.with_header do %>
+        <%= render(Shadcn::Popover::Title::Component.new) { "Am I on top?" } %>
+        <%= render(Shadcn::Popover::Description::Component.new) do %>
+          If the striped panel covers this, the layer lost to a stacking context.
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="relative z-20 mt-2 h-40 rounded-lg border bg-muted p-4"
+     data-testid="stacking-sibling">
+  <span class="text-sm font-medium">A sibling at z-20</span>
+</div>

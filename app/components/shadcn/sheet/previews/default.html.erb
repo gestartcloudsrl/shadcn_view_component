@@ -1,0 +1,16 @@
+<div class="flex items-center gap-2">
+  <% %i[right left top bottom].each do |side| %>
+    <%= render(Shadcn::Sheet::Component.new) do |s| %>
+      <% s.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { side.to_s.capitalize } %>
+      <% s.with_dialog_content(side:) do |c| %>
+        <% c.with_header do |h| %>
+          <% h.with_title { "Edit profile" } %>
+          <% h.with_description { "Make changes to your profile here." } %>
+        <% end %>
+        <% c.with_footer do %>
+          <%= render(Shadcn::Sheet::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Close" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

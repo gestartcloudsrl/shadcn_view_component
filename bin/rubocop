@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+require "rubygems"
+require "bundler/setup"
+
+# Explicit `load` rather than `exec`, so the gem's own .rubocop.yml is picked up
+# from the project root however the binstub is invoked.
+load Gem.bin_path("rubocop", "rubocop")

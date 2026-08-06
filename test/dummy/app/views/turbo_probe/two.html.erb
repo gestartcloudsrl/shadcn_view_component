@@ -1,0 +1,6 @@
+<div class="flex flex-col gap-6" data-testid="page-two">
+  <h1 class="text-lg font-semibold">Page two</h1>
+  <%= link_to "Back to page one", turbo_probe_one_path, class: "underline", data: { testid: "to-one" } %>
+
+  <%= render(Shadcn::Checkbox::Component.new(id: "cb", name: "terms")) %>
+</div>

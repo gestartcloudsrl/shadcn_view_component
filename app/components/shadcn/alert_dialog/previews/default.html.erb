@@ -1,0 +1,13 @@
+<%= render(Shadcn::AlertDialog::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :destructive)) { "Delete account" } %>
+  <% d.with_dialog_content do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "Are you absolutely sure?" } %>
+      <% h.with_description { "This action cannot be undone. It will permanently delete your account." } %>
+    <% end %>
+    <% c.with_footer do %>
+      <%= render(Shadcn::AlertDialog::Cancel::Component.new) { "Cancel" } %>
+      <%= render(Shadcn::AlertDialog::Action::Component.new) { "Continue" } %>
+    <% end %>
+  <% end %>
+<% end %>

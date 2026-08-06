@@ -1,0 +1,4 @@
+<%= render(Shadcn::Tooltip::Component.new) do |t| %>
+  <% t.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Hover me" } %>
+  <% t.with_tooltip_content { "Add to library" } %>
+<% end %>

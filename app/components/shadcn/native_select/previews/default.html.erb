@@ -1,0 +1,9 @@
+<div class="flex items-center gap-4">
+  <% %i[default sm].each do |size| %>
+    <%= render(Shadcn::NativeSelect::Component.new(size:, "aria-label": "Favourite fruit")) do %>
+      <% %w[Apple Banana Blueberry].each do |fruit| %>
+        <%= render(Shadcn::NativeSelect::Option::Component.new(value: fruit.downcase)) { fruit } %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

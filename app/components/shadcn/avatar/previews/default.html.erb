@@ -1,0 +1,13 @@
+<div class="flex items-center gap-4">
+  <% %i[sm default lg].each do |size| %>
+    <%= render(Shadcn::Avatar::Component.new(size:)) do |a| %>
+      <% a.with_fallback { "CN" } %>
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Avatar::Group::Component.new) do %>
+    <% 3.times do %>
+      <%= render(Shadcn::Avatar::Component.new) do |a| %><% a.with_fallback { "AB" } %><% end %>
+    <% end %>
+    <%= render(Shadcn::Avatar::GroupCount::Component.new) { "+3" } %>
+  <% end %>
+</div>

@@ -1,0 +1,25 @@
+# Every user-visible string the components render. shadcn hardcodes these in
+# English; a Rails app is likely not English-only, so they go through I18n with
+# the upstream text as the default. Override any key in your own locale files.
+en:
+  shadcn_view_component:
+    breadcrumb:
+      label: breadcrumb
+      more: More
+    dialog:
+      close: Close
+    pagination:
+      label: pagination
+      previous: Previous
+      next: Next
+      go_to_previous: Go to previous page
+      go_to_next: Go to next page
+      more: More pages
+    spinner:
+      loading: Loading
+    theme:
+      toggle: Toggle theme
+      label: Theme
+      light: Light
+      dark: Dark
+      system: System

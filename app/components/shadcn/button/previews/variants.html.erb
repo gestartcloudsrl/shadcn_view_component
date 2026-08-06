@@ -1,0 +1,5 @@
+<div class="flex flex-wrap items-center gap-2">
+  <% %i[default secondary destructive outline ghost link].each do |variant| %>
+    <%= render(Shadcn::Button::Component.new(variant:)) { variant.to_s.capitalize } %>
+  <% end %>
+</div>

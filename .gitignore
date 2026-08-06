@@ -1,0 +1,19 @@
+/.bundle/
+/pkg/
+/tmp/
+*.gem
+
+# Tooling scratch, not project source.
+/.claude/
+
+# A library should resolve against a range of dependency versions, so the lock
+# is not checked in — the CI matrix would otherwise all run the same one.
+/Gemfile.lock
+
+/test/dummy/log/*.log
+/test/dummy/tmp/
+/test/dummy/.tailwindcss-*
+
+# Compiled by `bin/rails tailwindcss:build`.
+/test/dummy/app/assets/builds/*
+!/test/dummy/app/assets/builds/.keep

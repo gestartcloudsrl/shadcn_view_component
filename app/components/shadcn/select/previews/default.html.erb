@@ -1,0 +1,17 @@
+<%= render(Shadcn::Select::Component.new(name: "fruit", placeholder: "Select a fruit")) do |s| %>
+  <%# `role="combobox"` forbids taking the name from its own content. %>
+  <% s.with_trigger(class: "w-[200px]", "aria-label": "Favourite fruit") do |tr| %>
+    <% tr.with_value(placeholder: "Select a fruit") %>
+  <% end %>
+  <%# Items go in the block rather than through the `item` slot, so the group
+      label keeps its place above them: slot content renders before block
+      content. %>
+  <% s.with_select_content do %>
+    <%= render(Shadcn::Select::Group::Component.new) do %>
+      <%= render(Shadcn::Select::Label::Component.new) { "Fruits" } %>
+      <% %w[Apple Banana Blueberry Grapes Pineapple].each do |fruit| %>
+        <%= render(Shadcn::Select::Item::Component.new(value: fruit.downcase)) { fruit } %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,7 @@
+<div class="flex items-center gap-4">
+  <%= render(Shadcn::Spinner::Component.new) %>
+  <%= render(Shadcn::Spinner::Component.new(class: "size-8")) %>
+  <%= render(Shadcn::Button::Component.new(disabled: true)) do %>
+    <%= render(Shadcn::Spinner::Component.new) %> Loading
+  <% end %>
+</div>

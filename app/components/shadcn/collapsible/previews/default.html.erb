@@ -1,0 +1,9 @@
+<%= render(Shadcn::Collapsible::Component.new(class: "flex w-[420px] flex-col gap-2")) do |c| %>
+  <% c.with_trigger(class: "flex items-center justify-between rounded-md border px-4 py-2 text-sm font-medium") do %>
+    @peduarte starred 3 repositories
+  <% end %>
+  <% c.with_panel(class: "flex flex-col gap-2") do %>
+    <div class="rounded-md border px-4 py-2 font-mono text-sm">@radix-ui/colors</div>
+    <div class="rounded-md border px-4 py-2 font-mono text-sm">@stitches/react</div>
+  <% end %>
+<% end %>

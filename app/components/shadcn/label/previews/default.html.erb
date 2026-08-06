@@ -1,0 +1,4 @@
+<div class="flex items-center gap-2">
+  <%= render(Shadcn::Checkbox::Component.new(id: "terms")) %>
+  <%= render(Shadcn::Label::Component.new(for: "terms")) { "Accept terms and conditions" } %>
+</div>

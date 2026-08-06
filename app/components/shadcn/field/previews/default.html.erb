@@ -1,0 +1,28 @@
+<%= render(Shadcn::Field::Group::Component.new(class: "w-[420px]")) do %>
+  <%= render(Shadcn::Field::Component.new) do |f| %>
+    <% f.with_label(for: "field-email") { "Email" } %>
+    <% f.with_field_content do %>
+      <%= render(Shadcn::Input::Component.new(id: "field-email", type: "email", placeholder: "m@example.com")) %>
+    <% end %>
+    <% f.with_description { "We will never share your email." } %>
+  <% end %>
+  <%= render(Shadcn::Field::Separator::Component.new) { "Or" } %>
+  <%= render(Shadcn::Field::Component.new(orientation: :horizontal)) do |f| %>
+    <%# The Switch is a <button role="switch">, which a <label for> cannot name,
+        so it points at the label instead. %>
+    <% f.with_label(id: "field-news-label", for: "field-news") { "Subscribe to the newsletter" } %>
+    <% f.with_field_content do %>
+      <%= render(Shadcn::Switch::Component.new(id: "field-news", "aria-labelledby": "field-news-label")) %>
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Field::Component.new) do |f| %>
+    <% f.with_label(for: "field-password") { "Password" } %>
+    <% f.with_field_content do %>
+      <%= render(Shadcn::Input::Component.new(id: "field-password", type: "password",
+                                              "aria-invalid": "true",
+                                              "aria-describedby": "field-password-error")) %>
+    <% end %>
+    <% f.with_error(id: "field-password-error",
+                    errors: ["Password is too short", "Password needs a digit"]) %>
+  <% end %>
+<% end %>

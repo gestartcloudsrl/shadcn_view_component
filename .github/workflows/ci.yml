@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - run: bin/rubocop --format github
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.2", "3.3", "3.4"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      # The system specs drive a real browser.
+      - uses: browser-actions/setup-chrome@v1
+
+      # Through bin/setup rather than its steps, so the documented entry point
+      # is exercised too.
+      - name: Setup
+        run: ./bin/setup
+
+      - name: Specs
+        run: bundle exec rspec
+
+      - name: Save failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capybara-failures-ruby-${{ matrix.ruby }}
+          path: test/dummy/tmp/capybara
+          if-no-files-found: ignore
+
+      # The generated theme files are committed; regenerating must be a no-op,
+      # or someone edited them by hand instead of the source JSON.
+      - name: Generated files are up to date
+        run: |
+          bundle exec rake themes:build
+          git diff --exit-code

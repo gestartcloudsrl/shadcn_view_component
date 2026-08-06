@@ -1,0 +1,179 @@
+// Port of the positioning half of Radix's Popper.
+//
+// Radix wraps floating content in a fixed-position element carrying
+// `data-radix-popper-content-wrapper` and publishes a set of CSS custom
+// properties that the shadcn Tailwind classes read directly — e.g.
+// `origin-(--radix-popover-content-transform-origin)` and
+// `max-h-(--radix-select-content-available-height)`. Those names have to match
+// exactly, so `prefix` names the component the variables belong to.
+
+const SIDES = [ "top", "right", "bottom", "left" ]
+
+const OPPOSITE = { top: "bottom", bottom: "top", left: "right", right: "left" }
+
+export function createWrapper() {
+  const wrapper = document.createElement("div")
+  wrapper.setAttribute("data-radix-popper-content-wrapper", "")
+  Object.assign(wrapper.style, {
+    position: "fixed",
+    left: "0",
+    top: "0",
+    minWidth: "max-content",
+    zIndex: "50"
+  })
+  return wrapper
+}
+
+function measure(anchor) {
+  const rect = anchor.getBoundingClientRect()
+  return {
+    top: rect.top,
+    left: rect.left,
+    right: rect.right,
+    bottom: rect.bottom,
+    width: rect.width,
+    height: rect.height
+  }
+}
+
+function place(side, align, anchorRect, size, sideOffset, alignOffset) {
+  let x
+  let y
+
+  switch (side) {
+    case "top":
+      y = anchorRect.top - size.height - sideOffset
+      break
+    case "bottom":
+      y = anchorRect.bottom + sideOffset
+      break
+    case "left":
+      x = anchorRect.left - size.width - sideOffset
+      break
+    case "right":
+      x = anchorRect.right + sideOffset
+      break
+  }
+
+  const vertical = side === "top" || side === "bottom"
+
+  if (vertical) {
+    if (align === "start") x = anchorRect.left + alignOffset
+    else if (align === "end") x = anchorRect.right - size.width - alignOffset
+    else x = anchorRect.left + anchorRect.width / 2 - size.width / 2 + alignOffset
+  } else {
+    if (align === "start") y = anchorRect.top + alignOffset
+    else if (align === "end") y = anchorRect.bottom - size.height - alignOffset
+    else y = anchorRect.top + anchorRect.height / 2 - size.height / 2 + alignOffset
+  }
+
+  return { x, y }
+}
+
+function fits(side, anchorRect, size, sideOffset, padding, viewport) {
+  switch (side) {
+    case "top":
+      return anchorRect.top - size.height - sideOffset >= padding
+    case "bottom":
+      return anchorRect.bottom + size.height + sideOffset <= viewport.height - padding
+    case "left":
+      return anchorRect.left - size.width - sideOffset >= padding
+    case "right":
+      return anchorRect.right + size.width + sideOffset <= viewport.width - padding
+  }
+  return true
+}
+
+function availableSpace(side, anchorRect, sideOffset, padding, viewport) {
+  switch (side) {
+    case "top":
+      return anchorRect.top - sideOffset - padding
+    case "bottom":
+      return viewport.height - anchorRect.bottom - sideOffset - padding
+    case "left":
+      return anchorRect.left - sideOffset - padding
+    case "right":
+      return viewport.width - anchorRect.right - sideOffset - padding
+  }
+  return 0
+}
+
+// Positions `content` (already inside a wrapper from `createWrapper`) relative
+// to `anchor`, flipping and shifting to stay on screen. Returns the resolved
+// side and align, which callers mirror onto `data-side` / `data-align`.
+export function position(anchor, content, options = {}) {
+  const {
+    side = "bottom",
+    align = "center",
+    sideOffset = 0,
+    alignOffset = 0,
+    collisionPadding = 8,
+    prefix = "popper",
+    matchAnchorWidth = false
+  } = options
+
+  const wrapper = content.parentElement
+  const viewport = { width: window.innerWidth, height: window.innerHeight }
+  const anchorRect = measure(anchor)
+
+  if (matchAnchorWidth) content.style.minWidth = `${anchorRect.width}px`
+
+  // Measure without a stale transform in the way.
+  wrapper.style.transform = "translate(0, 0)"
+  const size = { width: content.offsetWidth, height: content.offsetHeight }
+
+  let resolvedSide = side
+  if (!fits(side, anchorRect, size, sideOffset, collisionPadding, viewport)) {
+    const flipped = OPPOSITE[side]
+    if (fits(flipped, anchorRect, size, sideOffset, collisionPadding, viewport)) {
+      resolvedSide = flipped
+    } else {
+      // Neither fits: take whichever has more room.
+      resolvedSide =
+        availableSpace(flipped, anchorRect, sideOffset, collisionPadding, viewport) >
+        availableSpace(side, anchorRect, sideOffset, collisionPadding, viewport)
+          ? flipped
+          : side
+    }
+  }
+
+  let { x, y } = place(resolvedSide, align, anchorRect, size, sideOffset, alignOffset)
+
+  // Shift back into the viewport along the cross axis.
+  const maxX = viewport.width - size.width - collisionPadding
+  const maxY = viewport.height - size.height - collisionPadding
+  x = Math.min(Math.max(collisionPadding, x), Math.max(collisionPadding, maxX))
+  y = Math.min(Math.max(collisionPadding, y), Math.max(collisionPadding, maxY))
+
+  wrapper.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`
+
+  const available = availableSpace(resolvedSide, anchorRect, sideOffset, collisionPadding, viewport)
+  const originX = resolvedSide === "left" ? "100%" : resolvedSide === "right" ? "0%" : "50%"
+  const originY = resolvedSide === "top" ? "100%" : resolvedSide === "bottom" ? "0%" : "50%"
+  const transformOrigin = `${originX} ${originY}`
+
+  const vars = {
+    [`--radix-${prefix}-content-transform-origin`]: transformOrigin,
+    [`--radix-${prefix}-content-available-width`]: `${viewport.width - collisionPadding * 2}px`,
+    [`--radix-${prefix}-content-available-height`]: `${Math.max(0, available)}px`,
+    "--radix-popper-transform-origin": transformOrigin,
+    "--radix-popper-available-width": `${viewport.width - collisionPadding * 2}px`,
+    "--radix-popper-available-height": `${Math.max(0, available)}px`,
+    "--radix-popper-anchor-width": `${anchorRect.width}px`,
+    "--radix-popper-anchor-height": `${anchorRect.height}px`,
+    [`--radix-${prefix}-trigger-width`]: `${anchorRect.width}px`,
+    [`--radix-${prefix}-trigger-height`]: `${anchorRect.height}px`
+  }
+
+  for (const [ name, value ] of Object.entries(vars)) {
+    content.style.setProperty(name, value)
+    wrapper.style.setProperty(name, value)
+  }
+
+  content.dataset.side = resolvedSide
+  content.dataset.align = align
+
+  return { side: resolvedSide, align }
+}
+
+export { SIDES }

@@ -1,0 +1,33 @@
+<% content_for :head do %>
+  <meta name="turbo-refresh-method" content="morph">
+<% end %>
+
+<div class="flex flex-col gap-6" data-testid="page-one">
+  <h1 class="text-lg font-semibold">Page one</h1>
+  <%= link_to "Go to page two", turbo_probe_two_path, class: "underline", data: { testid: "to-two" } %>
+
+  <%= render(Shadcn::Dialog::Component.new) do |dialog| %>
+    <% dialog.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open dialog" } %>
+    <% dialog.with_dialog_content do |content| %>
+      <% content.with_header do |header| %>
+        <% header.with_title { "A dialog on page one" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Select::Component.new(name: "fruit", placeholder: "Select a fruit")) do |select| %>
+    <% select.with_trigger(class: "w-[200px]") { |trigger| trigger.with_value(placeholder: "Select a fruit") } %>
+    <% select.with_select_content do %>
+      <% %w[Apple Banana].each do |fruit| %>
+        <%= render(Shadcn::Select::Item::Component.new(value: fruit.downcase)) { fruit } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Accordion::Component.new(type: :single, collapsible: true, class: "w-[420px]")) do |acc| %>
+    <% acc.with_item(value: "a") do |item| %>
+      <% item.with_trigger { "Is it accessible?" } %>
+      <% item.with_panel { "Yes." } %>
+    <% end %>
+  <% end %>
+</div>

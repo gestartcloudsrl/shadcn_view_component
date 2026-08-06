@@ -1,0 +1,5 @@
+<div class="flex w-[420px] flex-col gap-4">
+  <% [0, 33, 66, 100].each do |value| %>
+    <%= render(Shadcn::Progress::Component.new(value:, "aria-label": "Upload progress")) %>
+  <% end %>
+</div>

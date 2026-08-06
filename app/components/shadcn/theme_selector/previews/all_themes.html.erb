@@ -1,0 +1,20 @@
+<div class="flex flex-col gap-6">
+  <%= render(Shadcn::ThemeSelector::Component.new(
+        themes: ShadcnViewComponent::Themes::ALL,
+        value: shadcn_theme_name,
+        label: "Palette"
+      )) %>
+
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <% ShadcnViewComponent::Themes::ALL.each do |theme| %>
+      <div class="theme-<%= theme[:name] %> flex flex-col gap-2 rounded-lg border bg-card p-3">
+        <span class="text-xs font-medium text-card-foreground"><%= theme[:title] %></span>
+        <div class="flex gap-1">
+          <% %w[bg-primary bg-secondary bg-muted bg-accent bg-destructive].each do |swatch| %>
+            <span class="size-5 rounded-sm border <%= swatch %>"></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="flex flex-col gap-4">
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Checkbox::Component.new(id: "cb1", name: "terms")) %>
+    <%= render(Shadcn::Label::Component.new(for: "cb1")) { "Accept terms and conditions" } %>
+  </div>
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Checkbox::Component.new(id: "cb2", checked: true)) %>
+    <%= render(Shadcn::Label::Component.new(for: "cb2")) { "Checked by default" } %>
+  </div>
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Checkbox::Component.new(id: "cb3", disabled: true)) %>
+    <%= render(Shadcn::Label::Component.new(for: "cb3")) { "Disabled" } %>
+  </div>
+</div>

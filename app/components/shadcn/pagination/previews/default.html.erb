@@ -1,0 +1,18 @@
+<%= render(Shadcn::Pagination::Component.new) do %>
+  <%= render(Shadcn::Pagination::Content::Component.new) do %>
+    <%= render(Shadcn::Pagination::Item::Component.new) do %>
+      <%= render(Shadcn::Pagination::Previous::Component.new(href: "#")) %>
+    <% end %>
+    <% [["1", false], ["2", true], ["3", false]].each do |label, active| %>
+      <%= render(Shadcn::Pagination::Item::Component.new) do %>
+        <%= render(Shadcn::Pagination::Link::Component.new(href: "#", active:)) { label } %>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::Pagination::Item::Component.new) do %>
+      <%= render(Shadcn::Pagination::Ellipsis::Component.new) %>
+    <% end %>
+    <%= render(Shadcn::Pagination::Item::Component.new) do %>
+      <%= render(Shadcn::Pagination::Next::Component.new(href: "#")) %>
+    <% end %>
+  <% end %>
+<% end %>

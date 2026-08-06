@@ -1,0 +1,5 @@
+<div class="flex flex-wrap items-center gap-2">
+  <% [:xs, :sm, :default, :lg].each do |size| %>
+    <%= render(Shadcn::Button::Component.new(size:, variant: :outline)) { size.to_s } %>
+  <% end %>
+</div>

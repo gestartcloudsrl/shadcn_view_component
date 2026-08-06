@@ -1,0 +1,141 @@
+<form class="w-[420px]" action="#" accept-charset="UTF-8" method="post">
+<div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&amp;&gt;[data-slot=field-group]]:gap-4">
+<div data-slot="field" role="group" data-orientation="vertical" data-invalid="true" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto">
+<label data-slot="field-label" id="signup_email_label" for="signup_email" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10">Email
+</label>
+<div data-slot="field-content" class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug">
+<input data-slot="input" id="signup_email" name="signup[email]" value="not-an-email" aria-invalid="true" aria-describedby="signup_email_description signup_email_error" type="email" class="h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40">
+</div>
+<p data-slot="field-description" id="signup_email_description" class="text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&amp;]:-mt-1.5 [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary">We never share it.
+</p>
+<div data-slot="field-error" role="alert" id="signup_email_error" class="text-sm font-normal text-destructive">
+<ul class="ml-4 flex list-disc flex-col gap-1">
+<li>must contain @
+</li>
+<li>is too short (minimum is 6 characters)
+</li>
+</ul>
+</div>
+</div>
+<div data-slot="field" role="group" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto">
+<label data-slot="field-label" id="signup_bio_label" for="signup_bio" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10">Bio
+</label>
+<div data-slot="field-content" class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug">
+<textarea data-slot="textarea" id="signup_bio" name="signup[bio]" value="Rails developer." aria-describedby="signup_bio_description" class="flex field-sizing-content min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:aria-invalid:ring-destructive/40"> Rails developer.
+</textarea>
+</div>
+<p data-slot="field-description" id="signup_bio_description" class="text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&amp;]:-mt-1.5 [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary">A sentence or two.
+</p>
+</div>
+<div data-slot="field" role="group" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto">
+<label data-slot="field-label" id="signup_plan_label" for="signup_plan" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10">Plan
+</label>
+<div data-slot="field-content" class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug">
+<div data-slot="select" style="display:contents" data-controller="shadcn--select" data-shadcn--select-open-value="false" data-shadcn--select-value-value="pro" data-shadcn--select-placeholder-value="Choose a plan" data-shadcn--select-side-value="bottom" data-shadcn--select-align-value="center" data-shadcn--select-side-offset-value="4">
+<button data-slot="select-trigger" type="button" role="combobox" aria-expanded="false" aria-autocomplete="none" data-size="default" data-state="closed" data-shadcn--select-target="trigger" data-action="click-&gt;shadcn--select#toggle keydown-&gt;shadcn--select#triggerKeydown" id="signup_plan" aria-labelledby="signup_plan_label" class="flex w-fit items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<span data-slot="select-value" data-shadcn--select-target="value">Pro
+</span>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</button>
+<div data-slot="select-content" role="listbox" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--select-target="content" data-action="keydown-&gt;shadcn--select#contentKeydown" class="relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+<div data-slot="select-scroll-up-button" class="flex cursor-default items-center justify-center py-1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up size-4">
+<path d="m18 15-6-6-6 6"/>
+</svg>
+</div>
+<div class="p-1">
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="free" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Free
+</span>
+</div>
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="true" data-value="pro" data-state="checked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Pro
+</span>
+</div>
+</div>
+<div data-slot="select-scroll-down-button" class="flex cursor-default items-center justify-center py-1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</div>
+</div>
+<input type="hidden" name="signup[plan]" value="pro" data-shadcn--select-target="input">
+</div>
+</div>
+</div>
+<div data-slot="field" role="group" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto">
+<label data-slot="field-label" id="signup_visibility_label" for="signup_visibility" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10">Visibility
+</label>
+<div data-slot="field-content" class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug">
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="public" data-shadcn--radio-group-disabled-value="false" class="grid gap-3">
+<div class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="public" tabindex="0" aria-checked="true" data-state="checked" data-value="public" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="signup_visibility_public" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="signup_visibility_public" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Public
+</label>
+</div>
+<div class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="private" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="private" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="signup_visibility_private" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="signup_visibility_private" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Private
+</label>
+</div>
+<input type="hidden" name="signup[visibility]" value="public" data-shadcn--radio-group-target="input">
+</div>
+</div>
+</div>
+<div data-slot="field" role="group" data-orientation="horizontal" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-row items-center [&amp;&gt;[data-slot=field-label]]:flex-auto has-[&gt;[data-slot=field-content]]:items-start has-[&gt;[data-slot=field-content]]:[&amp;&gt;[role=checkbox],[role=radio]]:mt-px">
+<label data-slot="field-label" id="signup_newsletter_label" for="signup_newsletter" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10">Send me the newsletter
+</label>
+<div data-slot="field-content" class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug">
+<button data-slot="switch" type="button" role="switch" value="true" aria-checked="true" data-state="checked" data-size="default" data-controller="shadcn--switch" data-shadcn--switch-checked-value="true" data-shadcn--switch-disabled-value="false" data-shadcn--switch-input-id-value="shadcn-switch-x" data-action="click-&gt;shadcn--switch#toggle keydown-&gt;shadcn--switch#keydown" id="signup_newsletter" aria-describedby="signup_newsletter_description" aria-labelledby="signup_newsletter_label" class="peer group/switch inline-flex shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-[1.15rem] data-[size=default]:w-8 data-[size=sm]:h-3.5 data-[size=sm]:w-6 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80">
+<span data-slot="switch-thumb" data-state="checked" data-shadcn--switch-target="thumb" class="pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0 dark:data-[state=checked]:bg-primary-foreground dark:data-[state=unchecked]:bg-foreground">
+</span>
+</button>
+<input type="checkbox" id="shadcn-switch-x" name="signup[newsletter]" value="true" checked="checked" aria-hidden="true" tabindex="-1" style="transform:translateX(-100%);position:absolute;pointer-events:none;opacity:0;margin:0">
+</div>
+</div>
+<div data-slot="field" role="group" data-orientation="horizontal" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-row items-center [&amp;&gt;[data-slot=field-label]]:flex-auto has-[&gt;[data-slot=field-content]]:items-start has-[&gt;[data-slot=field-content]]:[&amp;&gt;[role=checkbox],[role=radio]]:mt-px">
+<label data-slot="field-label" id="signup_agreed_label" for="signup_agreed" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[&gt;[data-slot=field]]:w-full has-[&gt;[data-slot=field]]:flex-col has-[&gt;[data-slot=field]]:rounded-md has-[&gt;[data-slot=field]]:border [&amp;&gt;*]:data-[slot=field]:p-4 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10">I accept the terms
+</label>
+<div data-slot="field-content" class="group/field-content flex flex-1 flex-col gap-1.5 leading-snug">
+<button data-slot="checkbox" type="button" role="checkbox" value="false" aria-checked="false" data-state="unchecked" data-controller="shadcn--checkbox" data-shadcn--checkbox-checked-value="false" data-shadcn--checkbox-indeterminate-value="false" data-shadcn--checkbox-disabled-value="false" data-shadcn--checkbox-input-id-value="shadcn-checkbox-x" data-action="click-&gt;shadcn--checkbox#toggle keydown-&gt;shadcn--checkbox#keydown" id="signup_agreed" aria-describedby="signup_agreed_description" aria-labelledby="signup_agreed_label" class="peer size-4 shrink-0 rounded-[4px] border border-input shadow-xs transition-shadow outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:bg-input/30 dark:aria-invalid:ring-destructive/40 dark:data-[state=checked]:bg-primary">
+<span data-slot="checkbox-indicator" data-state="unchecked" data-shadcn--checkbox-target="indicator" hidden="hidden" class="grid place-content-center text-current transition-none">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-3.5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</button>
+<input type="checkbox" id="shadcn-checkbox-x" name="signup[agreed]" value="false" aria-hidden="true" tabindex="-1" style="transform:translateX(-100%);position:absolute;pointer-events:none;opacity:0;margin:0">
+</div>
+</div>
+<button data-slot="button" data-variant="default" data-size="default" type="submit" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3">Create account
+</button>
+</div>
+</form>

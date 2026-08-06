@@ -1,0 +1,19 @@
+<%= render(Shadcn::DropdownMenu::Component.new) do |m| %>
+  <% m.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open menu" } %>
+  <%# Items go in the block rather than through the `item` slot, so the label
+      and separators keep their place between them. %>
+  <% m.with_menu_content(class: "w-56") do %>
+    <%= render(Shadcn::DropdownMenu::Label::Component.new) { "My Account" } %>
+    <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+    <%= render(Shadcn::DropdownMenu::Group::Component.new) do %>
+      <%= render(Shadcn::DropdownMenu::Item::Component.new) do %>
+        Profile
+        <%= render(Shadcn::DropdownMenu::Shortcut::Component.new) { "⌘P" } %>
+      <% end %>
+      <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Billing" } %>
+      <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Settings" } %>
+    <% end %>
+    <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+    <%= render(Shadcn::DropdownMenu::Item::Component.new(variant: :destructive)) { "Log out" } %>
+  <% end %>
+<% end %>

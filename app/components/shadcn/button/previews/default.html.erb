@@ -1,0 +1,8 @@
+<div class="flex flex-wrap items-center gap-2">
+  <%= render(Shadcn::Button::Component.new) { "Button" } %>
+  <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Outline" } %>
+  <%= render(Shadcn::Button::Component.new(disabled: true)) { "Disabled" } %>
+  <%= render(Shadcn::Button::Component.new(size: :icon, "aria-label": "Loading")) do %>
+    <%= render(Shadcn::Spinner::Component.new) %>
+  <% end %>
+</div>

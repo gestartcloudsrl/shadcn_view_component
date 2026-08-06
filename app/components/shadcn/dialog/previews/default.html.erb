@@ -1,0 +1,17 @@
+<%= render(Shadcn::Dialog::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Edit profile" } %>
+  <% d.with_dialog_content do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "Edit profile" } %>
+      <% h.with_description { "Make changes to your profile here. Click save when you are done." } %>
+    <% end %>
+    <div class="flex flex-col gap-4">
+      <%= render(Shadcn::Label::Component.new(for: "dlg-name")) { "Name" } %>
+      <%= render(Shadcn::Input::Component.new(id: "dlg-name", value: "Pedro Duarte")) %>
+    </div>
+    <% c.with_footer do %>
+      <%= render(Shadcn::Dialog::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Cancel" } %>
+      <%= render(Shadcn::Button::Component.new) { "Save changes" } %>
+    <% end %>
+  <% end %>
+<% end %>

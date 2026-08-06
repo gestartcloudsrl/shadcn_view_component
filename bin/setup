@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+APP_ROOT = File.expand_path("..", __dir__)
+DUMMY = File.join(APP_ROOT, "test/dummy")
+
+# Options such as `chdir:` have to stay keywords: splatted into `*args` they
+# reach `system` as a positional Hash and it raises.
+def system!(*args, **options)
+  system(*args, exception: true, **options)
+end
+
+FileUtils.chdir(APP_ROOT) do
+  puts "== Installing dependencies =="
+  system!("bundle install")
+
+  # The gallery is styled by a compiled bundle, so an unbuilt Tailwind looks
+  # like a library with no CSS rather than an error.
+  puts "\n== Building Tailwind =="
+  system!(File.join(DUMMY, "bin/rails"), "tailwindcss:build", chdir: DUMMY)
+
+  puts "\n== Done =="
+  puts "Run the gallery with:  cd test/dummy && bin/rails s   # http://localhost:3000/lookbook"
+  puts "Keep CSS fresh with:   cd test/dummy && bin/rails tailwindcss:watch"
+  puts "Run the specs with:    bundle exec rspec"
+end

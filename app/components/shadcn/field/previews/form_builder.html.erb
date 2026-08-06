@@ -1,0 +1,38 @@
+<%# The FormBuilder integration: ids, names, error text, `aria-invalid` and
+    `aria-describedby` all come from the model. %>
+<% signup = Struct.new(:email, :bio, :plan, :newsletter, :visibility, :agreed, :errors, keyword_init: true) do
+     def self.name = "Signup"
+     def to_model = self
+     def model_name = ActiveModel::Name.new(self.class, nil, "Signup")
+     def persisted? = false
+     def to_key = nil
+   end.new(
+     email: "not-an-email", bio: "Rails developer.", plan: "pro",
+     newsletter: true, visibility: "public", agreed: false,
+     errors: ActiveModel::Errors.new(Object.new).tap { |e|
+       e.add(:email, "must contain @")
+       e.add(:email, "is too short (minimum is 6 characters)")
+     }
+   ) %>
+
+<%= shadcn_form_with(model: signup, url: "#", scope: :signup, class: "w-[420px]") do |f| %>
+  <%= render(Shadcn::Field::Group::Component.new) do %>
+    <%= f.shadcn_input_field :email, label: "Email", description: "We never share it.", type: "email" %>
+
+    <%= f.shadcn_textarea_field :bio, label: "Bio", description: "A sentence or two." %>
+
+    <%= f.shadcn_field :plan, label: "Plan" do %>
+      <%= f.shadcn_select :plan, [["Free", "free"], ["Pro", "pro"]], placeholder: "Choose a plan" %>
+    <% end %>
+
+    <%= f.shadcn_field :visibility, label: "Visibility" do %>
+      <%= f.shadcn_radio_group :visibility, [["Public", "public"], ["Private", "private"]] %>
+    <% end %>
+
+    <%= f.shadcn_switch_field :newsletter, label: "Send me the newsletter" %>
+
+    <%= f.shadcn_checkbox_field :agreed, label: "I accept the terms" %>
+
+    <%= f.shadcn_submit "Create account" %>
+  <% end %>
+<% end %>

@@ -1,0 +1,9 @@
+<%= render(Shadcn::Popover::Component.new) do |p| %>
+  <% p.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open popover" } %>
+  <% p.with_popover_content do |c| %>
+    <% c.with_header do |h| %>
+      <%= render(Shadcn::Popover::Title::Component.new) { "Dimensions" } %>
+      <%= render(Shadcn::Popover::Description::Component.new) { "Set the dimensions for the layer." } %>
+    <% end %>
+  <% end %>
+<% end %>

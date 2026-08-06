@@ -1,0 +1,20 @@
+<div class="flex flex-col gap-6">
+  <div class="flex items-center gap-3">
+    <%= render(Shadcn::ModeToggle::Component.new) %>
+    <span class="text-sm text-muted-foreground">Light / Dark / System</span>
+  </div>
+
+  <%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm")) do |card| %>
+    <% card.with_header do |header| %>
+      <% header.with_title { "It follows the mode" } %>
+      <% header.with_description { "Every token swaps with the .dark class." } %>
+    <% end %>
+    <% card.with_card_content do %>
+      <div class="flex flex-wrap gap-2">
+        <%= render(Shadcn::Button::Component.new) { "Primary" } %>
+        <%= render(Shadcn::Button::Component.new(variant: :secondary)) { "Secondary" } %>
+        <%= render(Shadcn::Badge::Component.new) { "Badge" } %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

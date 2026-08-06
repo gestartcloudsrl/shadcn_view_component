@@ -1,0 +1,12 @@
+<%= render(Shadcn::Tabs::Component.new(value: "account", class: "w-[420px]")) do |t| %>
+  <% t.with_list do |l| %>
+    <% l.with_trigger(value: "account") { "Account" } %>
+    <% l.with_trigger(value: "password") { "Password" } %>
+  <% end %>
+  <% t.with_panel(value: "account") do %>
+    <div class="rounded-lg border p-4 text-sm">Make changes to your account here.</div>
+  <% end %>
+  <% t.with_panel(value: "password") do %>
+    <div class="rounded-lg border p-4 text-sm">Change your password here.</div>
+  <% end %>
+<% end %>

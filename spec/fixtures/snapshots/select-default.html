@@ -1,0 +1,83 @@
+<div data-slot="select" style="display:contents" data-controller="shadcn--select" data-shadcn--select-open-value="false" data-shadcn--select-value-value="" data-shadcn--select-placeholder-value="Select a fruit" data-shadcn--select-side-value="bottom" data-shadcn--select-align-value="center" data-shadcn--select-side-offset-value="4">
+<button data-slot="select-trigger" type="button" role="combobox" aria-expanded="false" aria-autocomplete="none" data-size="default" data-state="closed" data-placeholder="true" data-shadcn--select-target="trigger" data-action="click-&gt;shadcn--select#toggle keydown-&gt;shadcn--select#triggerKeydown" aria-label="Favourite fruit" class="flex items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground w-[200px]">
+<span data-slot="select-value" data-shadcn--select-target="value">Select a fruit
+</span>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</button>
+<div data-slot="select-content" role="listbox" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--select-target="content" data-action="keydown-&gt;shadcn--select#contentKeydown" class="relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+<div data-slot="select-scroll-up-button" class="flex cursor-default items-center justify-center py-1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up size-4">
+<path d="m18 15-6-6-6 6"/>
+</svg>
+</div>
+<div class="p-1">
+<div data-slot="select-group" role="group">
+<div data-slot="select-label" class="px-2 py-1.5 text-xs text-muted-foreground">Fruits
+</div>
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="apple" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Apple
+</span>
+</div>
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="banana" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Banana
+</span>
+</div>
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="blueberry" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Blueberry
+</span>
+</div>
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="grapes" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Grapes
+</span>
+</div>
+<div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="pineapple" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
+<span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
+<span hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-4">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</span>
+<span data-slot="select-item-text">Pineapple
+</span>
+</div>
+</div>
+</div>
+<div data-slot="select-scroll-down-button" class="flex cursor-default items-center justify-center py-1">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</div>
+</div>
+<input type="hidden" name="fruit" value="" data-shadcn--select-target="input">
+</div>

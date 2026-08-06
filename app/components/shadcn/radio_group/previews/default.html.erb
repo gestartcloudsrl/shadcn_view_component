@@ -1,0 +1,8 @@
+<%= render(Shadcn::RadioGroup::Component.new(name: "plan", value: "comfortable")) do |g| %>
+  <% [["default", "Default"], ["comfortable", "Comfortable"], ["compact", "Compact"]].each do |value, text| %>
+    <div class="flex items-center gap-2">
+      <% g.with_item(value:, checked: value == "comfortable", id: "r-#{value}") %>
+      <%= render(Shadcn::Label::Component.new(for: "r-#{value}")) { text } %>
+    </div>
+  <% end %>
+<% end %>

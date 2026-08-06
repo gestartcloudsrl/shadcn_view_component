@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "shadcn ViewComponent" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+
+    <%# Applies the stored mode and palette before the first paint. %>
+    <%= shadcn_theme_script_tag %>
+
+    <%= yield :head %>
+
+    <%# Without this the browser requests /favicon.ico and logs a 404, which the
+        system specs would report as a console error. %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="<%= shadcn_theme_class %> bg-background text-foreground font-sans antialiased">
+    <div class="flex items-center justify-end gap-2 border-b px-6 py-2">
+      <%= render(Shadcn::ThemeSelector::Component.new(value: shadcn_theme_name)) %>
+      <%= render(Shadcn::ModeToggle::Component.new) %>
+    </div>
+
+    <div class="p-6"><%= yield %></div>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-6">
+  <%= render(Shadcn::ThemeSelector::Component.new(value: shadcn_theme_name)) %>
+
+  <%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm")) do |card| %>
+    <% card.with_header do |header| %>
+      <% header.with_title { "Pick a palette" } %>
+      <% header.with_description { "The theme-* class on <body> re-points every token." } %>
+    <% end %>
+    <% card.with_card_content do %>
+      <div class="flex flex-wrap gap-2">
+        <%= render(Shadcn::Button::Component.new) { "Primary" } %>
+        <%= render(Shadcn::Button::Component.new(variant: :secondary)) { "Secondary" } %>
+        <%= render(Shadcn::Button::Component.new(variant: :destructive)) { "Destructive" } %>
+        <%= render(Shadcn::Badge::Component.new) { "Badge" } %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

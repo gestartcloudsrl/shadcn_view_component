@@ -1,0 +1,25 @@
+<%# A modal opened from inside a stacking context — a "Delete" button in a
+    sticky toolbar, say. The overlay and the content are separate fixed
+    elements, so both have to reach the top layer, and in that order. %>
+
+<div class="relative z-10 flex items-center gap-3 rounded-lg border bg-card p-4"
+     data-testid="stacking-header">
+  <span class="text-sm text-muted-foreground">A toolbar at z-10</span>
+
+  <%= render(Shadcn::Dialog::Component.new) do |dialog| %>
+    <% dialog.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) do %>
+      Open dialog
+    <% end %>
+    <% dialog.with_dialog_content do |content| %>
+      <% content.with_header do |header| %>
+        <% header.with_title { "Am I on top?" } %>
+        <% header.with_description { "If the panel below covers this, the modal lost to a stacking context." } %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="relative z-20 mt-2 h-96 rounded-lg border bg-muted p-4"
+     data-testid="stacking-sibling">
+  <span class="text-sm font-medium">A sibling at z-20</span>
+</div>

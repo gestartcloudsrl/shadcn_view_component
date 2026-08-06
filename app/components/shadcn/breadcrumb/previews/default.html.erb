@@ -1,0 +1,15 @@
+<%= render(Shadcn::Breadcrumb::Component.new) do %>
+  <%= render(Shadcn::Breadcrumb::List::Component.new) do %>
+    <%= render(Shadcn::Breadcrumb::Item::Component.new) do %>
+      <%= render(Shadcn::Breadcrumb::Link::Component.new(href: "#")) { "Home" } %>
+    <% end %>
+    <%= render(Shadcn::Breadcrumb::Separator::Component.new) %>
+    <%= render(Shadcn::Breadcrumb::Item::Component.new) do %>
+      <%= render(Shadcn::Breadcrumb::Ellipsis::Component.new) %>
+    <% end %>
+    <%= render(Shadcn::Breadcrumb::Separator::Component.new) %>
+    <%= render(Shadcn::Breadcrumb::Item::Component.new) do %>
+      <%= render(Shadcn::Breadcrumb::Page::Component.new) { "Breadcrumb" } %>
+    <% end %>
+  <% end %>
+<% end %>

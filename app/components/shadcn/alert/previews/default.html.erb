@@ -1,0 +1,8 @@
+<div class="flex max-w-xl flex-col gap-4">
+  <% %i[default destructive].each do |variant| %>
+    <%= render(Shadcn::Alert::Component.new(variant:)) do |a| %>
+      <% a.with_title { "Heads up!" } %>
+      <% a.with_description { "You can add components to your app using the CLI." } %>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,18 @@
+<%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm")) do |card| %>
+  <% card.with_header do |h| %>
+    <% h.with_title { "Login to your account" } %>
+    <% h.with_description { "Enter your email below to login." } %>
+    <% h.with_action do %>
+      <%= render(Shadcn::Button::Component.new(variant: :link, size: :sm)) { "Sign Up" } %>
+    <% end %>
+  <% end %>
+  <% card.with_card_content do %>
+    <div class="flex flex-col gap-4">
+      <%= render(Shadcn::Label::Component.new(for: "email")) { "Email" } %>
+      <%= render(Shadcn::Input::Component.new(id: "email", type: "email", placeholder: "m@example.com")) %>
+    </div>
+  <% end %>
+  <% card.with_footer(class: "flex-col gap-2") do %>
+    <%= render(Shadcn::Button::Component.new(class: "w-full")) { "Login" } %>
+  <% end %>
+<% end %>

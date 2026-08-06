@@ -1,0 +1,6 @@
+<div class="flex items-center gap-2">
+  <%= render(Shadcn::Toggle::Component.new) { "Default" } %>
+  <%= render(Shadcn::Toggle::Component.new(variant: :outline, pressed: true)) { "Outline, on" } %>
+  <%= render(Shadcn::Toggle::Component.new(size: :sm)) { "Small" } %>
+  <%= render(Shadcn::Toggle::Component.new(size: :lg, disabled: true)) { "Disabled" } %>
+</div>

@@ -1,0 +1,19 @@
+# Rails' own style, which is what this codebase was already written in — double
+# quotes, spaces inside array brackets, no cop policing line length or method
+# size. It keeps reviews about the code rather than the formatting.
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  Exclude:
+    # Generated from vendor/shadcn/themes.json by `rake themes:build`; the
+    # generator is the thing to lint, not its output.
+    - lib/shadcn_view_component/themes.rb
+    # A Rails-generated application, not this gem's code.
+    - test/dummy/**/*
+    # Upstream shadcn sources, kept verbatim for the parity spec.
+    - vendor/**/*
+    - bin/**/*
+    - tmp/**/*

@@ -1,0 +1,5 @@
+<div class="flex items-center gap-3">
+  <%= render(Shadcn::ModeSwitcher::Component.new) %>
+  <%= render(Shadcn::ModeSwitcher::Component.new(variant: :outline)) %>
+  <span class="text-sm text-muted-foreground">Flips straight between light and dark.</span>
+</div>

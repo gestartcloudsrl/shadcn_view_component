@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Design tokens + animation utilities shipped by the engine. */
+@import "../../../../../app/assets/stylesheets/shadcn.css";
+
+/* The colour palettes. Must come after shadcn.css: `.theme-*` and `:root`
+   have the same specificity, so source order decides. */
+@import "../../../../../app/assets/stylesheets/shadcn-themes.css";
+
+/* Scan the engine's components, not just the dummy app. */
+@source "../../../../../app/components";
