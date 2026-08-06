@@ -134,8 +134,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
 }
 
@@ -272,6 +270,14 @@
   --tw-enter-rotate: initial;
   --tw-enter-translate-x: initial;
   --tw-enter-translate-y: initial;
+
+  /* A declared departure from upstream: tw-animate-css ships no reduced-motion
+     handling. Nested inside the utility because the components apply it through
+     variants — the emitted class is `data-[state=closed]:animate-out`, which a
+     top-level `.animate-out` rule would not match. */
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms;
+  }
 }
 
 @utility animate-out {
@@ -282,6 +288,32 @@
   --tw-exit-rotate: initial;
   --tw-exit-translate-x: initial;
   --tw-exit-translate-y: initial;
+
+  /* A declared departure from upstream: tw-animate-css ships no reduced-motion
+     handling. Nested inside the utility because the components apply it through
+     variants — the emitted class is `data-[state=closed]:animate-out`, which a
+     top-level `.animate-out` rule would not match. */
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms;
+  }
+}
+
+/* Defined as utilities rather than `@theme` entries, which is the only place a
+   media query can reach them. The generated class name is unchanged. */
+@utility animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms;
+  }
+}
+
+@utility animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms;
+  }
 }
 
 @utility fade-in-* {
