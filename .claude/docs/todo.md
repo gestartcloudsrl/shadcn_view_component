@@ -25,10 +25,10 @@ decided is in `decisions/`.
       that is the claim least tested.
 - [ ] **Exit animations do not play.** `hidden` is set immediately on close, so
       every `data-[state=closed]:animate-out` class is inert. The markup matches
-      shadcn; the behaviour does not. Designed in
-      [decisions/05-exit-animations.md](decisions/05-exit-animations.md), which
-      waits on `getAnimations()` rather than `animationend`, and finds a third
-      closing path the line above missed — the accordion.
+      shadcn; the behaviour does not. Planned in
+      [plans/2026-08-06-exit-animations.md](plans/2026-08-06-exit-animations.md),
+      which waits on `getAnimations()` rather than `animationend`, and finds a
+      third closing path this entry used to miss — the accordion.
 - [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.
