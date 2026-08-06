@@ -11,6 +11,11 @@ require "spec_helper"
 # screen at a given moment, so those do not race. The presence assertions do:
 # `have_css`/`have_no_css` retry for up to `Capybara.default_max_wait_time`, so
 # they only hold because `force_animations` keeps the forced duration under it.
+# A property read taken while an animation is still expected to be running is a
+# third case, covered by neither: there is no retry to save it, so it only
+# holds because the forced duration comfortably outlasts the round trip to read
+# it — see the accordion's height assertions below, forced to 3s for that
+# reason.
 RSpec.describe "Exit animations", :js do
   describe "the harness" do
     let(:content) { "[data-slot=dialog-content]" }
@@ -186,10 +191,21 @@ RSpec.describe "Exit animations", :js do
     # animated transition is its trigger being clicked once.
     let(:content) { "[data-value=item-1] [data-slot=accordion-content]" }
 
+    # 3s, not the shared 400ms: the height assertions below take a
+    # moment-in-time read rather than something Capybara retries, so the
+    # forced duration has to still be running when the round trip to read it
+    # lands.
     before do
       visit_preview(:accordion)
       wait_for_stimulus
-      force_animations(content)
+      force_animations(content, duration: "3s")
+    end
+
+    def height_now
+      page.evaluate_script(
+        "document.querySelector('#{content}')" \
+        ".style.getPropertyValue('--radix-accordion-content-height')"
+      )
     end
 
     context "when a panel is collapsed" do
@@ -204,15 +220,40 @@ RSpec.describe "Exit animations", :js do
 
       # `--radix-accordion-content-height` is what the keyframes interpolate
       # towards. Clearing it early leaves the animation collapsing to a height
-      # that no longer exists.
+      # that no longer exists; leaving it published after landing is an
+      # orphan custom property on a panel with nothing left animating.
+      #
+      # `have_no_css` cannot gate the landing here the way it does for a fade:
+      # `accordion-up` animates a real `height`, so WebDriver already reports
+      # the panel as not displayed at its zero-height last frame — before the
+      # teardown that actually clears the property has run. The `hidden`
+      # attribute is set in that same teardown call, so waiting on it directly
+      # means the property is already gone by the time this reads it.
       it "keeps the height it is collapsing towards until it lands" do
-        height = page.evaluate_script(
-          "document.querySelector('#{content}')" \
-          ".style.getPropertyValue('--radix-accordion-content-height')"
-        )
+        expect(height_now).not_to be_empty
 
-        expect(height).not_to be_empty
-        expect(page).to have_no_css(content)
+        expect(page).to have_css("#{content}[hidden]", visible: :all)
+
+        expect(height_now).to be_empty
+      end
+    end
+
+    context "when reopened before the collapse finishes" do
+      before do
+        expect(page).to have_css(content)
+        click_button "Is it accessible?" # starts the collapse
+        click_button "Is it accessible?" # reopens mid-exit
+      end
+
+      it "keeps the panel open instead of the cancelled collapse's stale teardown dismounting it" do
+        # Reopening flips `data-state` back to open, which cancels the running
+        # `accordion-up` and rejects `finished` — the deferred teardown's own
+        # continuation still resolves and, without `cancel()`, would flush
+        # once it drains: well under this sleep, since it settles within a
+        # microtask.
+        sleep 0.2
+
+        expect(page).to have_css(content)
       end
     end
   end
