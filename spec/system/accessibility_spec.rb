@@ -19,15 +19,18 @@ RSpec.describe "Accessibility", :js do
     expect(page).to check
   end
 
-  # Every family, at rest.
-  %w[
-    alert avatar badge breadcrumb button card checkbox collapsible field
-    input kbd label native_select pagination progress radio_group select
-    separator skeleton spinner switch table tabs textarea toggle toggle_group
-    accordion dialog alert_dialog sheet dropdown_menu popover tooltip
-    mode_toggle mode_switcher theme_selector
-  ].each do |family|
-    it "#{family} has no violations" do
+  # Read off disk rather than typed out, so a component added tomorrow is
+  # audited without anyone remembering to add it here.
+  families = Dir[Pathname(__dir__).join("../../app/components/shadcn/*/previews/default.html.erb")]
+             .map { |path| Pathname(path).parent.parent.basename.to_s }
+             .sort
+
+  it "found the previews it audits" do
+    expect(families.size).to be >= 35
+  end
+
+  families.each do |family|
+    it "#{family} has no violations at rest" do
       visit_preview(family)
       wait_for_stimulus
 
@@ -35,8 +38,8 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
-  describe "with the layer open" do
-    it "dialog" do
+  context "with the dialog open" do
+    it "has no violations" do
       visit_preview(:dialog)
       wait_for_stimulus
       click_button "Edit profile"
@@ -44,8 +47,10 @@ RSpec.describe "Accessibility", :js do
 
       audit
     end
+  end
 
-    it "alert dialog" do
+  context "with the alert dialog open" do
+    it "has no violations" do
       visit_preview(:alert_dialog)
       wait_for_stimulus
       click_button "Delete account"
@@ -53,8 +58,10 @@ RSpec.describe "Accessibility", :js do
 
       audit
     end
+  end
 
-    it "sheet" do
+  context "with the sheet open" do
+    it "has no violations" do
       visit_preview(:sheet)
       wait_for_stimulus
       click_button "Right"
@@ -62,8 +69,10 @@ RSpec.describe "Accessibility", :js do
 
       audit
     end
+  end
 
-    it "dropdown menu" do
+  context "with the dropdown menu open" do
+    it "has no violations" do
       visit_preview(:dropdown_menu)
       wait_for_stimulus
       within(all("[data-slot=dropdown-menu]").last) { find("[data-slot=dropdown-menu-trigger]").click }
@@ -71,8 +80,10 @@ RSpec.describe "Accessibility", :js do
 
       audit
     end
+  end
 
-    it "select" do
+  context "with the select open" do
+    it "has no violations" do
       visit_preview(:select)
       wait_for_stimulus
       within(all("[data-slot=select]").last) { find("[data-slot=select-trigger]").click }
@@ -80,8 +91,10 @@ RSpec.describe "Accessibility", :js do
 
       audit
     end
+  end
 
-    it "popover" do
+  context "with the popover open" do
+    it "has no violations" do
       visit_preview(:popover)
       wait_for_stimulus
       find("[data-slot=popover-trigger]").click
@@ -89,8 +102,10 @@ RSpec.describe "Accessibility", :js do
 
       audit
     end
+  end
 
-    it "tooltip" do
+  context "with the tooltip open" do
+    it "has no violations" do
       visit_preview(:tooltip)
       wait_for_stimulus
       find("[data-slot=tooltip-trigger]").hover
@@ -100,23 +115,22 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
-  describe "in dark mode" do
-    # Contrast is the one thing that genuinely differs between the two modes.
-    {
-      "button" => :variants,
-      "badge" => :default,
-      "alert" => :default,
-      "card" => :default,
-      "field" => :default,
-      "table" => :default
-    }.each do |family, example|
-      it "#{family} keeps its contrast" do
-        visit_preview(family, example)
-        wait_for_stimulus
-        page.execute_script("document.documentElement.classList.add('dark')")
+  # Contrast is the one thing that genuinely differs between the two modes, so
+  # this is a curated handful rather than every family again.
+  context "when the dark class is on" do
+    def expect_contrast(family, example = :default)
+      visit_preview(family, example)
+      wait_for_stimulus
+      page.execute_script("document.documentElement.classList.add('dark')")
 
-        expect(page).to be_axe_clean.checking_only(:"color-contrast")
-      end
+      expect(page).to be_axe_clean.checking_only(:"color-contrast")
     end
+
+    it("keeps the button variants readable") { expect_contrast("button", :variants) }
+    it("keeps the badge readable") { expect_contrast("badge") }
+    it("keeps the alert readable") { expect_contrast("alert") }
+    it("keeps the card readable") { expect_contrast("card") }
+    it("keeps the field readable") { expect_contrast("field") }
+    it("keeps the table readable") { expect_contrast("table") }
   end
 end

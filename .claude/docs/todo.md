@@ -60,6 +60,10 @@ combobox, slider.
       marks as intentional — dropdown wraps around, select clamps.
 - [ ] **`previews_spec` and `snapshot_spec` overlap.** Both render every preview;
       the former only asserts it does not raise.
+- [ ] **Two components name their trigger differently.** `ThemeSelector` uses
+      `<label for>` pointing at the trigger; the FormBuilder uses
+      `aria-labelledby`. Both pass axe — `<button>` is a labelable element — but
+      one of them should probably follow the other.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 
 ## Deliberately not doing

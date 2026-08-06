@@ -5,139 +5,156 @@ require "spec_helper"
 RSpec.describe "Popover", :js do
   let(:content) { "[data-slot=popover-content]" }
 
+  def trigger = find("[data-slot=popover-trigger]")
+
   before do
     visit_preview(:popover)
     wait_for_stimulus
   end
 
-  it "opens and closes from the trigger" do
-    trigger = find("[data-slot=popover-trigger]")
-
+  it "starts closed, with a dialog-haspopup trigger" do
     expect(trigger["aria-haspopup"]).to eq("dialog")
     expect(page).to have_no_css(content)
-
-    trigger.click
-    expect(page).to have_css(content)
-    expect(find(content)["role"]).to eq("dialog")
-    expect(find("[data-slot=popover-trigger]")["aria-expanded"]).to eq("true")
-
-    find("[data-slot=popover-trigger]").click
-    expect(page).to have_no_css(content)
   end
 
-  it "positions itself below the trigger with the requested offset" do
-    find("[data-slot=popover-trigger]").click
+  context "when opened from the trigger" do
+    before do
+      trigger.click
+      expect(page).to have_css(content)
+    end
 
-    gap = page.evaluate_script(<<~JS)
-      (() => {
-        const t = document.querySelector("[data-slot=popover-trigger]").getBoundingClientRect();
-        const c = document.querySelector("[data-slot=popover-content]").getBoundingClientRect();
-        return Math.round(c.top - t.bottom);
-      })()
-    JS
+    it "exposes a dialog and marks the trigger expanded", :aggregate_failures do
+      expect(find(content)["role"]).to eq("dialog")
+      expect(trigger["aria-expanded"]).to eq("true")
+    end
 
-    expect(gap).to be_between(3, 5) # sideOffset: 4
-  end
+    it "positions itself below the trigger with the requested offset" do
+      gap = page.evaluate_script(<<~JS)
+        (() => {
+          const t = document.querySelector("[data-slot=popover-trigger]").getBoundingClientRect();
+          const c = document.querySelector("[data-slot=popover-content]").getBoundingClientRect();
+          return Math.round(c.top - t.bottom);
+        })()
+      JS
 
-  it "publishes the transform origin its animation classes read" do
-    find("[data-slot=popover-trigger]").click
+      expect(gap).to be_between(3, 5) # sideOffset: 4
+    end
 
-    origin = page.evaluate_script(<<~JS)
-      document.querySelector("[data-slot=popover-content]")
-        .style.getPropertyValue("--radix-popover-content-transform-origin")
-    JS
+    it "records the side it resolved to" do
+      expect(find(content)["data-side"]).to eq("bottom")
+    end
 
-    expect(origin).to eq("50% 0%")
-  end
+    it "publishes the transform origin its animation classes read" do
+      origin = page.evaluate_script(<<~JS)
+        document.querySelector("[data-slot=popover-content]")
+          .style.getPropertyValue("--radix-popover-content-transform-origin")
+      JS
 
-  it "records the side it resolved to" do
-    find("[data-slot=popover-trigger]").click
+      expect(origin).to eq("50% 0%")
+    end
 
-    expect(find(content)["data-side"]).to eq("bottom")
-  end
+    it "closes from the trigger again" do
+      trigger.click
 
-  it "closes on Escape and on an outside click" do
-    find("[data-slot=popover-trigger]").click
-    press(:escape)
-    expect(page).to have_no_css(content)
+      expect(page).to have_no_css(content)
+    end
 
-    find("[data-slot=popover-trigger]").click
-    click_outside
-    expect(page).to have_no_css(content)
+    it "closes on Escape" do
+      press(:escape)
+
+      expect(page).to have_no_css(content)
+    end
+
+    it "closes on an outside click" do
+      click_outside
+
+      expect(page).to have_no_css(content)
+    end
   end
 end
 
 RSpec.describe "Tooltip", :js do
   let(:content) { "[data-slot=tooltip-content]" }
 
+  def trigger = find("[data-slot=tooltip-trigger]")
+  def focus_trigger = page.execute_script("document.querySelector('[data-slot=tooltip-trigger]').focus()")
+
   before do
     visit_preview(:tooltip)
     wait_for_stimulus
   end
 
-  it "opens on hover and closes on leave" do
-    expect(page).to have_no_css(content)
-
-    find("[data-slot=tooltip-trigger]").hover
-    expect(page).to have_css(content, text: "Add to library")
-
-    click_outside # moves the pointer away from the trigger
+  it "starts closed" do
     expect(page).to have_no_css(content)
   end
 
-  it "opens on keyboard focus and describes the trigger while open" do
-    page.execute_script("document.querySelector('[data-slot=tooltip-trigger]').focus()")
+  context "when hovered" do
+    before do
+      trigger.hover
+      expect(page).to have_css(content)
+    end
 
-    expect(page).to have_css(content)
-    expect(find("[data-slot=tooltip-trigger]")["aria-describedby"]).to eq(find(content)["id"])
-    expect(find(content)["role"]).to eq("tooltip")
+    it "shows the tip" do
+      expect(page).to have_css(content, text: "Add to library")
+    end
+
+    it "opens on its preferred side when there is room" do
+      expect(find(content)["data-side"]).to eq("top")
+    end
+
+    it "keeps the content inside the viewport" do
+      inside = page.evaluate_script(<<~JS)
+        (() => {
+          const r = document.querySelector("[data-slot=tooltip-content]").getBoundingClientRect();
+          return r.top >= 0 && r.left >= 0 &&
+                 r.bottom <= innerHeight && r.right <= innerWidth;
+        })()
+      JS
+
+      expect(inside).to be(true)
+    end
+
+    it "never takes focus" do
+      expect(page.evaluate_script("document.activeElement.dataset.slot")).not_to eq("tooltip-content")
+    end
+
+    it "closes when the pointer leaves" do
+      click_outside # moves the pointer away from the trigger
+
+      expect(page).to have_no_css(content)
+    end
   end
 
-  it "gives up the describedby link once closed" do
-    page.execute_script("document.querySelector('[data-slot=tooltip-trigger]').focus()")
-    expect(page).to have_css(content)
+  context "when the preferred side has no room" do
+    it "flips to the other side" do
+      # Pin the trigger to the very top of the viewport, so `side: :top` cannot fit.
+      page.execute_script(<<~JS)
+        const trigger = document.querySelector("[data-slot=tooltip-trigger]");
+        Object.assign(trigger.style, { position: "fixed", top: "0px", left: "200px" });
+      JS
 
-    page.execute_script("document.querySelector('[data-slot=tooltip-trigger]').blur()")
-    expect(page).to have_no_css(content)
-    expect(find("[data-slot=tooltip-trigger]")["aria-describedby"]).to be_nil
+      trigger.hover
+
+      expect(find(content)["data-side"]).to eq("bottom")
+    end
   end
 
-  it "opens on its preferred side when there is room" do
-    find("[data-slot=tooltip-trigger]").hover
+  context "when focused from the keyboard" do
+    before do
+      focus_trigger
+      expect(page).to have_css(content)
+    end
 
-    expect(find(content)["data-side"]).to eq("top")
-  end
+    it "opens and describes the trigger", :aggregate_failures do
+      expect(trigger["aria-describedby"]).to eq(find(content)["id"])
+      expect(find(content)["role"]).to eq("tooltip")
+    end
 
-  it "flips to the other side when the preferred one has no room" do
-    # Pin the trigger to the very top of the viewport, so `side: :top` cannot fit.
-    page.execute_script(<<~JS)
-      const trigger = document.querySelector("[data-slot=tooltip-trigger]");
-      Object.assign(trigger.style, { position: "fixed", top: "0px", left: "200px" });
-    JS
+    it "gives up the describedby link once closed" do
+      page.execute_script("document.querySelector('[data-slot=tooltip-trigger]').blur()")
 
-    find("[data-slot=tooltip-trigger]").hover
-
-    expect(find(content)["data-side"]).to eq("bottom")
-  end
-
-  it "keeps the content inside the viewport" do
-    find("[data-slot=tooltip-trigger]").hover
-
-    inside = page.evaluate_script(<<~JS)
-      (() => {
-        const r = document.querySelector("[data-slot=tooltip-content]").getBoundingClientRect();
-        return r.top >= 0 && r.left >= 0 &&
-               r.bottom <= innerHeight && r.right <= innerWidth;
-      })()
-    JS
-
-    expect(inside).to be(true)
-  end
-
-  it "never takes focus" do
-    find("[data-slot=tooltip-trigger]").hover
-    expect(page).to have_css(content)
-
-    expect(page.evaluate_script("document.activeElement.dataset.slot")).not_to eq("tooltip-content")
+      expect(page).to have_no_css(content)
+      expect(trigger["aria-describedby"]).to be_nil
+    end
   end
 end

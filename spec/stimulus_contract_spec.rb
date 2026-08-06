@@ -46,11 +46,23 @@ RSpec.describe "Ruby ↔ Stimulus contract" do
     identifier && [ file, identifier, value ]
   end
 
+  # Everything below is generated from what the scans found, so a scan that stops
+  # matching — a quoting change in the Ruby, a renamed attribute — produces no
+  # examples at all and leaves the suite green while proving nothing. These
+  # floors are well under the current counts; they are a tripwire, not a target.
+  it "found the wiring it is meant to be checking", :aggregate_failures do
+    expect(sources.size).to be >= 15, "no controller sources were read"
+    expect(used_controllers.size).to be >= 12
+    expect(actions.size).to be >= 35
+    expect(targets.size).to be >= 25
+    expect(values.size).to be >= 40
+  end
+
   describe "controllers" do
     used_controllers.each do |identifier|
       short = identifier.delete_prefix("shadcn--")
 
-      it "#{identifier} has a controller file and is registered" do
+      it "#{identifier} has a controller file and is registered", :aggregate_failures do
         expect(sources[identifier]).not_to be_nil, "no #{short}_controller.js"
         expect(registry).to match(/^\s+"?#{Regexp.escape(short)}"?:/),
                             "#{short} is missing from the CONTROLLERS map in index.js"

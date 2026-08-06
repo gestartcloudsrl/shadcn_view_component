@@ -21,22 +21,53 @@ RSpec.describe "Theming", :js do
   end
 
   describe "mode" do
-    it "follows the system preference when nothing is stored" do
-      expect(stored("shadcn-ui-mode")).to be_nil
+    context "with nothing stored" do
+      it "follows the system preference" do
+        expect(stored("shadcn-ui-mode")).to be_nil
 
-      system_dark = page.evaluate_script("matchMedia('(prefers-color-scheme: dark)').matches")
-      expect(html_class.include?("dark")).to eq(system_dark)
+        system_dark = page.evaluate_script("matchMedia('(prefers-color-scheme: dark)').matches")
+
+        expect(html_class.include?("dark")).to eq(system_dark)
+      end
     end
 
-    it "switches to dark and back to light" do
-      choose_mode(:dark)
-      expect(html_class).to include("dark")
-      expect(page.evaluate_script("document.documentElement.style.colorScheme")).to eq("dark")
-      expect(stored("shadcn-ui-mode")).to eq("dark")
+    context "when dark is chosen" do
+      before { choose_mode(:dark) }
 
-      choose_mode(:light)
-      expect(html_class).not_to include("dark")
-      expect(page.evaluate_script("document.documentElement.style.colorScheme")).to eq("light")
+      it "marks the document dark and remembers it" do
+        expect(html_class).to include("dark")
+        expect(page.evaluate_script("document.documentElement.style.colorScheme")).to eq("dark")
+        expect(stored("shadcn-ui-mode")).to eq("dark")
+      end
+
+      it "mirrors the mode into a cookie so the server can render it" do
+        expect(page.driver.browser.manage.cookie_named("shadcn-ui-mode")[:value]).to eq("dark")
+      end
+
+      it "marks the chosen mode in the menu" do
+        within(first("[data-slot=mode-toggle]")) { find("[data-slot=dropdown-menu-trigger]").click }
+
+        active = all("[data-slot=dropdown-menu-item][data-mode]")
+                 .to_h { |item| [ item["data-mode"], item["data-active"] ] }
+
+        expect(active).to eq("light" => "false", "dark" => "true", "system" => "false")
+      end
+
+      # The whole point of the inline script: the preference is applied before
+      # the first paint, not after the module graph loads.
+      it "survives a reload with no flash of the wrong mode" do
+        visit_preview(:card)
+
+        expect(html_class).to include("dark")
+        expect(page.evaluate_script("document.documentElement.dataset.shadcnTheme")).not_to be_nil
+      end
+
+      it "goes back to light when light is chosen" do
+        choose_mode(:light)
+
+        expect(html_class).not_to include("dark")
+        expect(page.evaluate_script("document.documentElement.style.colorScheme")).to eq("light")
+      end
     end
 
     it "repoints the tokens, which is what the components read" do
@@ -44,31 +75,8 @@ RSpec.describe "Theming", :js do
       light = token("background")
 
       choose_mode(:dark)
+
       expect(token("background")).not_to eq(light)
-    end
-
-    it "marks the chosen mode in the menu" do
-      choose_mode(:dark)
-      within(first("[data-slot=mode-toggle]")) { find("[data-slot=dropdown-menu-trigger]").click }
-
-      active = all("[data-slot=dropdown-menu-item][data-mode]").to_h { |i| [ i["data-mode"], i["data-active"] ] }
-      expect(active).to eq("light" => "false", "dark" => "true", "system" => "false")
-    end
-
-    # The whole point of the inline script: the preference is applied before the
-    # first paint, not after the module graph loads.
-    it "survives a reload with no flash of the wrong mode" do
-      choose_mode(:dark)
-      visit_preview(:card)
-
-      expect(html_class).to include("dark")
-      expect(page.evaluate_script("document.documentElement.dataset.shadcnTheme")).not_to be_nil
-    end
-
-    it "mirrors the mode into a cookie so the server can render it" do
-      choose_mode(:dark)
-
-      expect(page.driver.browser.manage.cookie_named("shadcn-ui-mode")[:value]).to eq("dark")
     end
   end
 
@@ -80,12 +88,17 @@ RSpec.describe "Theming", :js do
       find("[data-slot=select-item][data-value=#{name}]").click
     end
 
-    it "swaps the theme class on the body" do
+    it "starts on neutral" do
       expect(body_theme).to eq("theme-neutral")
+    end
 
-      choose_theme(:mauve)
-      expect(body_theme).to eq("theme-mauve")
-      expect(stored("shadcn-ui-theme")).to eq("mauve")
+    context "when another palette is chosen" do
+      before { choose_theme(:mauve) }
+
+      it "swaps the theme class on the body and remembers it" do
+        expect(body_theme).to eq("theme-mauve")
+        expect(stored("shadcn-ui-theme")).to eq("mauve")
+      end
     end
 
     it "changes the tokens the components resolve against" do
@@ -93,6 +106,7 @@ RSpec.describe "Theming", :js do
       neutral = token("primary")
 
       choose_theme(:mauve)
+
       expect(token("primary")).not_to eq(neutral)
     end
 
@@ -118,11 +132,11 @@ RSpec.describe "Theming", :js do
     it "flips straight between light and dark" do
       visit_preview(:mode_switcher)
       wait_for_stimulus
+      was_dark = html_class.include?("dark")
 
-      before = html_class.include?("dark")
       first("[data-slot=mode-switcher]").find("[data-slot=button]").click
 
-      expect(html_class.include?("dark")).to eq(!before)
+      expect(html_class.include?("dark")).to eq(!was_dark)
     end
   end
 end

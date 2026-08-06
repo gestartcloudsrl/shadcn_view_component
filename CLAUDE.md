@@ -83,8 +83,10 @@ These bite while editing, so they are here rather than in the docs.
   reorders things — see the select and dropdown previews for why they render
   items in the block.
 - **Select, Checkbox and Switch are `<button>`s with an ARIA role**, so they need
-  `aria-labelledby`/`aria-label`; a `<label for>` does not name a button. The
-  FormBuilder does it, a bare component does not.
+  a name pointed at them — the FormBuilder wires `aria-labelledby`, a bare
+  component has nothing. (`<label for>` *does* name a button, which is what
+  `ThemeSelector` relies on; `role="combobox"` is the case that cannot take its
+  name from content.)
 - **The gallery layout carries its own ModeToggle and ThemeSelector**, so in
   system specs a preview's dropdown or select is not the only one on the page —
   scope lookups (`all("[data-slot=select]").last`).

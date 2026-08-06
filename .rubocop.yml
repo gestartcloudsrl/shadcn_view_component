@@ -64,10 +64,11 @@ RSpec/ExpectInHook:
   Exclude:
     - spec/system/**/*
 
-# These two hold the expectation. `audit` wraps the axe matcher so the WCAG
-# standard is stated once; `expect_classes` asserts that every class shadcn
-# emits is present, which is the one assertion the whole port exists to make.
+# These hold the expectation. `audit` wraps the axe matcher so the WCAG standard
+# is stated once, and the `expect_*` helpers assert the thing their name says —
+# `expect_classes` in particular is the one assertion the whole port exists to
+# make.
 RSpec/NoExpectationExample:
   AllowedPatterns:
     - ^audit
-    - ^expect_classes
+    - ^expect_

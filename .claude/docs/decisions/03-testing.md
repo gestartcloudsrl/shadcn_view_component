@@ -64,6 +64,38 @@ preview. **A red axe run is not automatically a product bug.**
 The genuine finding was that Select, Checkbox and Switch had no accessible name;
 see [bugs-fixed](04-bugs-fixed.md).
 
+## The pass against rspec-conventions
+
+Applying the [skill](../../skills/rspec-conventions/SKILL.md) to every spec was
+mostly restructuring — contexts instead of conditions in descriptions, setup
+lifted out of repeated examples — but four assertions turned out to prove less
+than they read like, and one gap was filled:
+
+- **`button_spec`'s variant and size loops** asserted only that `data-variant`
+  echoed its argument, which is written by `element_attributes` and never
+  touches the style block. 14 examples for one line. They now name the class
+  that distinguishes each variant; mutating a class string fails them, and did
+  not before.
+- **`smoke_spec`'s `have_css("[data-controller]")`** was satisfied by the
+  gallery layout's own ModeToggle and ThemeSelector on every page, so it passed
+  whatever the family did. It now asserts the family's own identifier.
+- **`parity_spec` and `stimulus_contract_spec` went green when their extractors
+  broke.** Nothing extracted means nothing missing. Both now have a tripwire;
+  breaking the TSX tokenizer or the action scan fails loudly instead of quietly
+  dropping 41 examples.
+- **The FormBuilder's `aria-labelledby`** — the fix for the accessible-name bug —
+  had no test at all. Removing it from `shadcn_switch` now fails one example.
+
+Two lists became derived rather than typed: the accessibility audit reads the
+preview families off disk (which added `aspect_ratio`, and covers anything added
+later), and the smoke spec derives its families from the controllers directory.
+
+One correction while doing it: **`<label for>` does name a `<button>`** — button
+is a labelable element. `ThemeSelector` relies on exactly that and axe accepts
+it. The FormBuilder's `aria-labelledby` is still right for `role="combobox"`,
+which may not take its name from content, but the two are inconsistent with each
+other; see [todo](../todo.md).
+
 ## What is still unverified
 
 - Parity in the removal direction (above).

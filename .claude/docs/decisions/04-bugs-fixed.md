@@ -54,8 +54,10 @@ neutral palette the docs claimed. Now generated from the same JSON by
 ## Select, Checkbox and Switch had no accessible name
 
 Found by axe, and true **even through the FormBuilder**. They are `<button>`s
-carrying an ARIA role: a `<label for>` does not name a button, and
-`role="combobox"` goes further and forbids taking the name from content.
+carrying an ARIA role, and `role="combobox"` forbids taking the name from
+content. (The original note here said `<label for>` cannot name a button. It
+can — button is a labelable element — and `ThemeSelector` names its trigger that
+way; see [testing](03-testing.md).)
 shadcn/Radix have the same gap. The FormBuilder now wires `aria-labelledby`, and
 the previews demonstrate it.
 

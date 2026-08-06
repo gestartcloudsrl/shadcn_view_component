@@ -66,11 +66,16 @@ RSpec.describe "shadcn/ui parity" do
   end
 
   ports.each do |tsx, directory|
-    it "carries every Tailwind class #{tsx}.tsx emits" do
+    it "carries every Tailwind class #{tsx}.tsx emits", :aggregate_failures do
       allowed = allowed_missing.fetch(tsx, [])
       ported = ShadcnSource.ruby_classes(directory, also: inherits.fetch(directory, []))
+      expected = ShadcnSource.tsx_classes(tsx)
 
-      missing = ShadcnSource.tsx_classes(tsx).reject do |klass|
+      # Without this the comparison is vacuous when the tokenizer stops
+      # matching: nothing extracted means nothing missing means green.
+      expect(expected).not_to be_empty, "no classes were extracted from #{tsx}.tsx"
+
+      missing = expected.reject do |klass|
         ported.include?(klass) || allowed.include?(klass)
       end
 

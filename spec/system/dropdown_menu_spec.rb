@@ -37,73 +37,75 @@ RSpec.describe "DropdownMenu", :js do
     end
   end
 
-  it "opens on click and exposes a menu" do
-    open_menu
+  context "when opened by click" do
+    before { open_menu }
 
-    within(preview) do
-      expect(find(content)["role"]).to eq("menu")
-      expect(find(trigger)["aria-expanded"]).to eq("true")
-      expect(page).to have_css("[data-slot=dropdown-menu-item]", text: "Profile")
+    it "exposes a menu and marks the trigger expanded" do
+      within(preview) do
+        expect(find(content)["role"]).to eq("menu")
+        expect(find(trigger)["aria-expanded"]).to eq("true")
+        expect(page).to have_css("[data-slot=dropdown-menu-item]", text: "Profile")
+      end
+    end
+
+    it "jumps to an item by typing" do
+      press("b")
+
+      expect(highlighted).to eq("Billing")
+    end
+
+    it "highlights on hover" do
+      find("[data-slot=dropdown-menu-item]", text: "Settings").hover
+
+      expect(highlighted).to eq("Settings")
+    end
+
+    it "closes when an item is chosen, and returns focus to the trigger" do
+      find("[data-slot=dropdown-menu-item]", text: "Billing").click
+
+      expect(page).to have_no_css(content)
+      expect(page.evaluate_script("document.activeElement.dataset.slot")).to eq("dropdown-menu-trigger")
+    end
+
+    it "closes on Escape" do
+      press(:escape)
+
+      expect(page).to have_no_css(content)
+    end
+
+    it "closes when clicking outside" do
+      click_outside
+
+      expect(page).to have_no_css(content)
     end
   end
 
-  it "opens on ArrowDown with the first item highlighted" do
-    within(preview) { find(trigger).send_keys(:arrow_down) }
+  context "when opened with ArrowDown" do
+    before { within(preview) { find(trigger).send_keys(:arrow_down) } }
 
-    expect(page).to have_css(content)
-    expect(highlighted).to start_with("Profile")
+    it "highlights the first item" do
+      expect(page).to have_css(content)
+      expect(highlighted).to start_with("Profile")
+    end
+
+    it "moves the highlight with the arrow keys, wrapping around" do
+      press(:arrow_down)
+      expect(highlighted).to eq("Billing")
+
+      press(:arrow_up)
+      expect(highlighted).to start_with("Profile")
+
+      press(:arrow_up)
+      expect(highlighted).to eq("Log out")
+    end
   end
 
-  it "opens on ArrowUp with the last item highlighted" do
-    within(preview) { find(trigger).send_keys(:arrow_up) }
+  context "when opened with ArrowUp" do
+    it "highlights the last item" do
+      within(preview) { find(trigger).send_keys(:arrow_up) }
 
-    expect(page).to have_css(content)
-    expect(highlighted).to eq("Log out")
-  end
-
-  it "moves the highlight with the arrow keys and wraps around" do
-    within(preview) { find(trigger).send_keys(:arrow_down) }
-    expect(highlighted).to start_with("Profile")
-
-    press(:arrow_down)
-    expect(highlighted).to eq("Billing")
-
-    press(:arrow_up)
-    expect(highlighted).to start_with("Profile")
-
-    press(:arrow_up)
-    expect(highlighted).to eq("Log out")
-  end
-
-  it "jumps to an item by typing" do
-    open_menu
-    press("b")
-
-    expect(highlighted).to eq("Billing")
-  end
-
-  it "closes when an item is chosen, and returns focus to the trigger" do
-    open_menu
-    find("[data-slot=dropdown-menu-item]", text: "Billing").click
-
-    expect(page).to have_no_css(content)
-    expect(page.evaluate_script("document.activeElement.dataset.slot")).to eq("dropdown-menu-trigger")
-  end
-
-  it "closes on Escape and when clicking outside" do
-    open_menu
-    press(:escape)
-    expect(page).to have_no_css(content)
-
-    open_menu
-    click_outside
-    expect(page).to have_no_css(content)
-  end
-
-  it "highlights on hover" do
-    open_menu
-    find("[data-slot=dropdown-menu-item]", text: "Settings").hover
-
-    expect(highlighted).to eq("Settings")
+      expect(page).to have_css(content)
+      expect(highlighted).to eq("Log out")
+    end
   end
 end

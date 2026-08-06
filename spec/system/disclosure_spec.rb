@@ -12,9 +12,11 @@ RSpec.describe "Accordion", :js do
     wait_for_stimulus
   end
 
-  it "opens the item it was given and links trigger to panel" do
+  it "opens the item it was given" do
     expect(states).to eq(%w[open closed closed])
+  end
 
+  it "links the open trigger to its panel", :aggregate_failures do
     trigger = all("[data-slot=accordion-trigger]").first
     panel = find("[data-slot=accordion-content]", visible: true)
 
@@ -23,17 +25,21 @@ RSpec.describe "Accordion", :js do
     expect(panel["aria-labelledby"]).to eq(trigger["id"])
   end
 
-  it "opens one at a time in single mode" do
-    click_button "Is it styled?"
+  context "when another item is opened" do
+    it "closes the one that was open, in single mode" do
+      click_button "Is it styled?"
 
-    expect(states).to eq(%w[closed open closed])
-    expect(page).to have_text("It comes with default styles")
+      expect(states).to eq(%w[closed open closed])
+      expect(page).to have_text("It comes with default styles")
+    end
   end
 
-  it "collapses the open item when collapsible" do
-    click_button "Is it accessible?"
+  context "when the open item's own trigger is clicked" do
+    it "collapses it, leaving nothing open" do
+      click_button "Is it accessible?"
 
-    expect(states).to eq(%w[closed closed closed])
+      expect(states).to eq(%w[closed closed closed])
+    end
   end
 
   it "publishes the height the keyframes animate to" do
@@ -62,40 +68,46 @@ end
 RSpec.describe "Collapsible", :js do
   let(:content) { "[data-slot=collapsible-content]" }
 
+  def trigger = find("[data-slot=collapsible-trigger]")
+
   before do
     visit_preview(:collapsible)
     wait_for_stimulus
   end
 
-  it "toggles and keeps aria-expanded in step" do
-    trigger = find("[data-slot=collapsible-trigger]")
-
+  it "starts closed, with the trigger saying so" do
     expect(trigger["aria-expanded"]).to eq("false")
-    expect(page).to have_no_css(content)
-
-    trigger.click
-    expect(page).to have_css(content)
-    expect(find("[data-slot=collapsible-trigger]")["aria-expanded"]).to eq("true")
-    expect(page).to have_text("@radix-ui/colors")
-
-    find("[data-slot=collapsible-trigger]").click
     expect(page).to have_no_css(content)
   end
 
-  it "points the trigger at the panel it controls" do
-    find("[data-slot=collapsible-trigger]").click
+  context "when opened" do
+    before { trigger.click }
 
-    expect(find("[data-slot=collapsible-trigger]")["aria-controls"]).to eq(find(content)["id"])
+    it "reveals the panel and marks the trigger expanded" do
+      expect(page).to have_css(content)
+      expect(page).to have_text("@radix-ui/colors")
+      expect(trigger["aria-expanded"]).to eq("true")
+    end
+
+    it "points the trigger at the panel it controls" do
+      expect(trigger["aria-controls"]).to eq(find(content)["id"])
+    end
+
+    it "closes again on a second click" do
+      trigger.click
+
+      expect(page).to have_no_css(content)
+    end
   end
 end
 
 RSpec.describe "Tabs", :js do
+  def selected = find("[data-slot=tabs-trigger][data-state=active]").text.strip
+
   before do
     visit_preview(:tabs)
     wait_for_stimulus
   end
-
-  def selected = find("[data-slot=tabs-trigger][data-state=active]").text.strip
 
   it "shows the panel for the selected tab only" do
     expect(selected).to eq("Account")
@@ -103,7 +115,7 @@ RSpec.describe "Tabs", :js do
     expect(page).to have_no_text("Change your password")
   end
 
-  it "wires each trigger to its panel" do
+  it "wires each trigger to its panel", :aggregate_failures do
     trigger = find("[data-slot=tabs-trigger]", text: "Account")
     panel = find("[data-slot=tabs-content]", visible: true)
 
@@ -113,26 +125,31 @@ RSpec.describe "Tabs", :js do
     expect(panel["aria-labelledby"]).to eq(trigger["id"])
   end
 
-  it "switches on click" do
-    click_button "Password"
-
-    expect(selected).to eq("Password")
-    expect(page).to have_text("Change your password")
-  end
-
   it "uses a roving tabindex" do
     tabindexes = all("[data-slot=tabs-trigger]").map { |trigger| trigger["tabindex"] }
 
     expect(tabindexes).to eq(%w[0 -1])
   end
 
-  it "moves and activates with the arrow keys" do
-    find("[data-slot=tabs-trigger]", text: "Account").send_keys(:arrow_right)
+  context "when another tab is clicked" do
+    it "selects it and swaps the panel" do
+      click_button "Password"
 
-    expect(selected).to eq("Password")
-    expect(page).to have_text("Change your password")
+      expect(selected).to eq("Password")
+      expect(page).to have_text("Change your password")
+    end
+  end
 
-    press(:arrow_left)
-    expect(selected).to eq("Account")
+  context "when the arrow keys are used" do
+    it "moves and activates in one step" do
+      find("[data-slot=tabs-trigger]", text: "Account").send_keys(:arrow_right)
+
+      expect(selected).to eq("Password")
+      expect(page).to have_text("Change your password")
+
+      press(:arrow_left)
+
+      expect(selected).to eq("Account")
+    end
   end
 end

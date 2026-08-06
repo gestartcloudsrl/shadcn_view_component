@@ -96,10 +96,9 @@ RSpec.describe "A modal inside a stacking context", :js do
   end
 
   # Both are fixed and both are promoted, so the order they are shown in decides
-  # which sits on top.
-  it "keeps the content above its own overlay" do
-    expect(topmost_at_centre_of("[data-slot=dialog-content]")).to eq("self")
-
+  # which sits on top. The content sitting on top is the example above; this one
+  # is the other half — the overlay still covering everything else.
+  it "keeps its overlay over the rest of the page" do
     covered = page.evaluate_script(<<~JS)
       (() => {
         const overlay = document.querySelector("[data-slot=dialog-overlay]");
@@ -110,11 +109,14 @@ RSpec.describe "A modal inside a stacking context", :js do
     expect(covered).to be(true)
   end
 
-  it "still traps focus and closes on Escape" do
+  it "still traps focus" do
     expect(page.evaluate_script("document.querySelector('#{content}').contains(document.activeElement)"))
       .to be(true)
+  end
 
+  it "still closes on Escape" do
     press(:escape)
+
     expect(page).to have_no_css(content)
   end
 end
