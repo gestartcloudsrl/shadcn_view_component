@@ -91,6 +91,16 @@ registry is 146KB, the palette CSS is 4.8KB gzipped, inlined SVG compresses away
 **`rubocop-rails-omakase`**, because it is the style the code was already written
 in: adopting it cost one offence rather than a reformat.
 
+**`rubocop-rspec` on top, with the size cops off.** `ExampleLength` and
+`MultipleExpectations` accounted for 150 of the 184 offences and are the same
+thing omakase already drops for application code; a system spec is one user
+journey and asserting each step of it in place is the point. What the plugin did
+find worth fixing: nine constants declared inside `describe` blocks, which land
+on `Object` — `previews_spec` had defined a global `COMPONENTS` duplicating
+`ShadcnSource::COMPONENTS`. They are locals now. `LeakyLocalVariable` is off in
+turn, because generating examples from a directory listing needs the list at
+group-definition time, which is exactly what `let` cannot give.
+
 **`Gemfile.lock` is not committed** — a library should resolve against a range,
 and committing it would make the three-Ruby CI matrix run the same versions.
 

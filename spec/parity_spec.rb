@@ -17,7 +17,7 @@ require_relative "support/shadcn_source"
 # output — and neither alone is "1:1 verified".
 RSpec.describe "shadcn/ui parity" do
   # TSX file => the component directory that ports it.
-  PORTS = {
+  ports = {
     "accordion" => "accordion",
     "alert" => "alert",
     "alert-dialog" => "alert_dialog",
@@ -55,20 +55,20 @@ RSpec.describe "shadcn/ui parity" do
   }.freeze
 
   # Families that reuse parts of another rather than restating their classes.
-  INHERITS = { "sheet" => %w[dialog], "alert_dialog" => %w[dialog] }.freeze
+  inherits = { "sheet" => %w[dialog], "alert_dialog" => %w[dialog] }.freeze
 
   # Tokens the port legitimately does not carry. `--gap` is a bare CSS variable
   # the tokenizer picks out of an inline style, not a utility.
-  ALLOWED_MISSING = { "toggle-group" => %w[--gap] }.freeze
+  allowed_missing = { "toggle-group" => %w[--gap] }.freeze
 
   it "ports every component vendored for comparison" do
-    expect(PORTS.keys.sort).to eq(ShadcnSource.vendored_components)
+    expect(ports.keys.sort).to eq(ShadcnSource.vendored_components)
   end
 
-  PORTS.each do |tsx, directory|
+  ports.each do |tsx, directory|
     it "carries every Tailwind class #{tsx}.tsx emits" do
-      allowed = ALLOWED_MISSING.fetch(tsx, [])
-      ported = ShadcnSource.ruby_classes(directory, also: INHERITS.fetch(directory, []))
+      allowed = allowed_missing.fetch(tsx, [])
+      ported = ShadcnSource.ruby_classes(directory, also: inherits.fetch(directory, []))
 
       missing = ShadcnSource.tsx_classes(tsx).reject do |klass|
         ported.include?(klass) || allowed.include?(klass)

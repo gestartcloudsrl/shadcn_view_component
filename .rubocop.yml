@@ -4,6 +4,9 @@
 inherit_gem:
   rubocop-rails-omakase: rubocop.yml
 
+plugins:
+  - rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 3.1
   NewCops: enable
@@ -17,3 +20,54 @@ AllCops:
     - vendor/**/*
     - bin/**/*
     - tmp/**/*
+
+# --- rubocop-rspec ---------------------------------------------------------
+# Omakase drops the Metrics cops so reviews stay about the code. These two are
+# the same policy applied to specs, and the system specs are where it matters:
+# one example is one user journey — open the dialog, tab through it, press
+# Escape — and every step of it is worth asserting in place.
+RSpec/ExampleLength:
+  Enabled: false
+RSpec/MultipleExpectations:
+  Enabled: false
+
+# Several specs generate their examples from disk: every preview template, every
+# vendored TSX. That list has to exist when the group is *defined*, which is
+# precisely what `let` cannot do, so a local read at definition time is the
+# pattern here rather than a leak.
+RSpec/LeakyLocalVariable:
+  Enabled: false
+
+# One spec per component family, not per part: button_spec.rb covers
+# Shadcn::Button::Component together with the parts declared alongside it.
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+# The top-level specs cover a rule rather than a class — parity with upstream,
+# the rendered snapshots, the Ruby↔Stimulus contract — and theming spans every
+# component that reads a token.
+RSpec/DescribeClass:
+  Exclude:
+    - spec/*_spec.rb
+    - spec/components/shadcn/theming_spec.rb
+
+# Dialog, AlertDialog and Sheet share a controller, and so does each of the other
+# grouped files. Nesting them under one outer group would invent a hierarchy the
+# components do not have.
+RSpec/MultipleDescribes:
+  Enabled: false
+
+# Waiting for a layer to open is setup, not assertion: the expectation is there
+# to fail loudly when the fixture never got into the state the examples assume,
+# instead of leaving them to time out one by one.
+RSpec/ExpectInHook:
+  Exclude:
+    - spec/system/**/*
+
+# These two hold the expectation. `audit` wraps the axe matcher so the WCAG
+# standard is stated once; `expect_classes` asserts that every class shadcn
+# emits is present, which is the one assertion the whole port exists to make.
+RSpec/NoExpectationExample:
+  AllowedPatterns:
+    - ^audit
+    - ^expect_classes

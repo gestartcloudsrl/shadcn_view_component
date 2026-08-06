@@ -14,16 +14,14 @@ require "spec_helper"
 #     SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb
 #
 RSpec.describe "rendered output snapshots" do
-  FIXTURES = Pathname(__dir__).join("fixtures/snapshots")
-  PREVIEWS = Pathname(__dir__).join("../app/components/shadcn")
-
-  # Ids built with SecureRandom differ per render and say nothing about parity.
-  VOLATILE = /\b(shadcn-(?:checkbox|switch)-)[0-9a-f]{8}\b/
+  fixtures = Pathname(__dir__).join("fixtures/snapshots")
+  previews = Pathname(__dir__).join("../app/components/shadcn")
 
   # One element per line, so a diff points at the element that changed instead
-  # of at one enormous line.
+  # of at one enormous line. Generated ids differ per render and say nothing
+  # about parity, so they are flattened first.
   def self.normalize(html)
-    html.gsub(VOLATILE, '\1x')
+    html.gsub(/\b(shadcn-(?:checkbox|switch)-)[0-9a-f]{8}\b/, '\1x')
         .gsub(/\s+/, " ")
         .gsub(/\s*</, "\n<")
         .strip + "\n"
@@ -31,11 +29,11 @@ RSpec.describe "rendered output snapshots" do
 
   def normalize(html) = self.class.normalize(html)
 
-  templates = Dir[PREVIEWS.join("*/previews/*.html.erb")].sort
+  templates = Dir[previews.join("*/previews/*.html.erb")].sort
 
   it "has a preview to snapshot for nearly every family" do
     families = templates.map { |path| Pathname(path).parent.parent.basename.to_s }.uniq
-    all = Dir[PREVIEWS.join("*/component.rb")].map { |path| Pathname(path).parent.basename.to_s }
+    all = Dir[previews.join("*/component.rb")].map { |path| Pathname(path).parent.basename.to_s }
 
     # `icon` is the only part with no preview of its own — it only ever appears
     # inside another component.
@@ -43,14 +41,14 @@ RSpec.describe "rendered output snapshots" do
   end
 
   templates.each do |template|
-    name = Pathname(template).relative_path_from(PREVIEWS).to_s.sub("/previews/", "-").sub(".html.erb", "")
-    fixture = FIXTURES.join("#{name}.html")
+    name = Pathname(template).relative_path_from(previews).to_s.sub("/previews/", "-").sub(".html.erb", "")
+    fixture = fixtures.join("#{name}.html")
 
     it "renders #{name} unchanged" do
       rendered = normalize(ApplicationController.renderer.render(inline: File.read(template)))
 
       if ENV["SNAPSHOTS"] == "overwrite"
-        FIXTURES.mkpath
+        fixtures.mkpath
         fixture.write(rendered)
       end
 

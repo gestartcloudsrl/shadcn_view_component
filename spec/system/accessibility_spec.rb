@@ -12,10 +12,8 @@ require "axe-rspec"
 # parents and children, focusability. It does not replace a screen reader.
 RSpec.describe "Accessibility", :js do
   # WCAG 2.1 AA is what shadcn's own components target.
-  STANDARD = %i[wcag2a wcag2aa wcag21a wcag21aa].freeze
-
   def audit(within: nil)
-    check = Axe::Matchers::BeAxeClean.new.according_to(*STANDARD)
+    check = Axe::Matchers::BeAxeClean.new.according_to(:wcag2a, :wcag2aa, :wcag21a, :wcag21aa)
     check = check.within(within) if within
 
     expect(page).to check

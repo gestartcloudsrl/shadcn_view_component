@@ -21,4 +21,5 @@ group :development, :test do
   gem "nokogiri"
   gem "debug"
   gem "rubocop-rails-omakase", require: false
+  gem "rubocop-rspec", require: false
 end
