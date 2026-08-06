@@ -134,6 +134,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
 }
 
@@ -262,6 +264,11 @@
   }
 }
 
+/* A declared departure from upstream: tw-animate-css ships no reduced-motion
+   handling. Nested inside each utility rather than a top-level `.animate-in`/
+   `.animate-out` rule because the components apply these through variants —
+   the compiled selector always carries the state, e.g.
+   `data-[state=open]:animate-in`, which a bare `.animate-in` would not match. */
 @utility animate-in {
   animation-name: enter;
   animation-duration: var(--tw-duration, 150ms);
@@ -271,10 +278,6 @@
   --tw-enter-translate-x: initial;
   --tw-enter-translate-y: initial;
 
-  /* A declared departure from upstream: tw-animate-css ships no reduced-motion
-     handling. Nested inside the utility because the components apply it through
-     variants — the emitted class is `data-[state=closed]:animate-out`, which a
-     top-level `.animate-out` rule would not match. */
   @media (prefers-reduced-motion: reduce) {
     animation-duration: 0.01ms;
   }
@@ -289,30 +292,36 @@
   --tw-exit-translate-x: initial;
   --tw-exit-translate-y: initial;
 
-  /* A declared departure from upstream: tw-animate-css ships no reduced-motion
-     handling. Nested inside the utility because the components apply it through
-     variants — the emitted class is `data-[state=closed]:animate-out`, which a
-     top-level `.animate-out` rule would not match. */
   @media (prefers-reduced-motion: reduce) {
     animation-duration: 0.01ms;
   }
 }
 
-/* Defined as utilities rather than `@theme` entries, which is the only place a
-   media query can reach them. The generated class name is unchanged. */
+/* Defined as utilities rather than staying `@theme`-only entries, because a
+   utility body is the only place a media query can reach them. The
+   `--animate-accordion-*` tokens stay in `@theme inline` above and are
+   consumed by `var()` here, so a host redefining them still retunes the
+   accordion; only the reduced-motion override is new.
+
+   `!important`: measured in the built bundle that, for this pair specifically,
+   Tailwind compiles the nested `@media` block *before* the plain declaration
+   rather than after — the reverse of `animate-in`/`animate-out` above, at the
+   same specificity. Without `!important` the plain rule's shorthand duration
+   wins the tie and reduced motion is silently ignored; confirmed both ways in
+   headless Chrome with `--force-prefers-reduced-motion`. */
 @utility animate-accordion-down {
-  animation: accordion-down 0.2s ease-out;
+  animation: var(--animate-accordion-down);
 
   @media (prefers-reduced-motion: reduce) {
-    animation-duration: 0.01ms;
+    animation-duration: 0.01ms !important;
   }
 }
 
 @utility animate-accordion-up {
-  animation: accordion-up 0.2s ease-out;
+  animation: var(--animate-accordion-up);
 
   @media (prefers-reduced-motion: reduce) {
-    animation-duration: 0.01ms;
+    animation-duration: 0.01ms !important;
   }
 }
 
