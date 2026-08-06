@@ -60,7 +60,7 @@ combobox, slider.
       marks as intentional — dropdown wraps around, select clamps.
 - [ ] **`previews_spec` and `snapshot_spec` overlap.** Both render every preview;
       the former only asserts it does not raise.
-- [ ] **No `bin/console`** for poking at components in isolation.
+- [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 
 ## Deliberately not doing
 

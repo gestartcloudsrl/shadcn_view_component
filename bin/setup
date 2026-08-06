@@ -23,4 +23,5 @@ FileUtils.chdir(APP_ROOT) do
   puts "Run the gallery with:  cd test/dummy && bin/rails s   # http://localhost:3000/lookbook"
   puts "Keep CSS fresh with:   cd test/dummy && bin/rails tailwindcss:watch"
   puts "Run the specs with:    bundle exec rspec"
+  puts "Poke at a component:   bin/console"
 end

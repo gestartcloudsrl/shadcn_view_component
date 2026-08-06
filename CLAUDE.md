@@ -22,6 +22,7 @@ alternatives were already measured and rejected.
 bin/setup                                     # bundle install + build Tailwind
 bundle exec rake                              # everything (rspec)
 bin/rubocop                                   # Rails omakase style; -a to autocorrect
+bin/console                                   # IRB + dummy app; `render`, `slots`, `upstream`, `reload!`
 
 bundle exec rspec spec/system                 # browser specs only (needs Chrome)
 bundle exec rspec spec/system/dialog_spec.rb

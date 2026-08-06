@@ -1,0 +1,103 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# An IRB session with the dummy application booted, because a ViewComponent
+# needs a Rails view context to render: a plain `bundle console` would hand you
+# the constants and nothing able to turn them into HTML.
+#
+#   RAILS_ENV=test bin/console   # boot in the environment the specs use
+
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../Gemfile", __dir__)
+require "bundler/setup"
+
+ENV["RAILS_ENV"] ||= "development"
+require File.expand_path("../test/dummy/config/environment", __dir__)
+require "view_component/test_helpers"
+require "irb"
+
+module ShadcnConsole
+  include ViewComponent::TestHelpers
+
+  ROOT = File.expand_path("..", __dir__)
+
+  # The exact markup a browser would receive. `render_inline` returns a parsed
+  # fragment, which normalises whitespace and attribute order; this returns the
+  # string the component actually produced, which is what the snapshots compare.
+  def render(component, **args, &block)
+    render_inline(component, **args, &block)
+    rendered_content
+  end
+
+  # The same markup, indented for reading. Indenting inserts whitespace that the
+  # component did not emit, so believe `render` over this one whenever
+  # whitespace matters.
+  def show(component, **args, &block)
+    puts Nokogiri::HTML5.fragment(render(component, **args, &block)).to_xhtml(indent: 2)
+    nil
+  end
+
+  # A fragment to query: doc(Shadcn::Card::Component.new).css("[data-slot]").
+  def doc(component, **args, &block)
+    render_inline(component, **args, &block)
+  end
+
+  # Every data-slot emitted, in document order — the quickest way to see which
+  # parts a family renders and in which nesting.
+  def slots(component, **args, &block)
+    doc(component, **args, &block).css("[data-slot]").map { |node| node["data-slot"] }
+  end
+
+  # Component class names, read from disk rather than from `Shadcn.constants`:
+  # Zeitwerk loads lazily, so the constants only report what this session
+  # happens to have touched.
+  def components(pattern = nil)
+    names = Dir[File.join(ROOT, "app/components/shadcn/**/component.rb")].map do |path|
+      path.delete_prefix(File.join(ROOT, "app/components/")).delete_suffix(".rb").camelize
+    end
+    names = names.grep(/#{pattern}/i) if pattern
+    names.sort
+  end
+
+  # The upstream TSX a family was ported from, for reading side by side.
+  def upstream(name)
+    slug = name.to_s.underscore.tr("_", "-")
+    path = [ "ui", "examples" ]
+      .map { |dir| File.join(ROOT, "vendor/shadcn", dir, "#{slug}.tsx") }
+      .find { |candidate| File.exist?(candidate) }
+
+    return puts("No vendored source for #{name.inspect}.") unless path
+
+    puts File.read(path)
+    nil
+  end
+
+  # Pick up edits to components and style blocks without restarting. Both resets
+  # matter: the style blocks are re-evaluated on reload, and their compiled class
+  # strings are memoised.
+  def reload!
+    Rails.application.reloader.reload!
+    ShadcnViewComponent.reset!
+    @vc_test_controller = nil
+    true
+  end
+end
+
+extend ShadcnConsole
+
+puts <<~BANNER
+  shadcn_view_component #{ShadcnViewComponent::VERSION} — #{Rails.env}
+
+    render Shadcn::Button::Component.new(variant: :outline) { "Save" }
+    show   Shadcn::Card::Component.new          # indented, for reading
+    doc    Shadcn::Card::Component.new          # Nokogiri fragment, for .css
+    slots  Shadcn::Alert::Component.new
+    components "menu"                           # class names matching /menu/i
+    upstream "dropdown-menu"                    # the TSX it was ported from
+    reload!                                     # after editing a component
+
+  ShadcnViewComponent.cn(...) merges classes; render_preview(:default, from: …)
+  renders a Lookbook preview.
+BANNER
+
+ARGV.clear
+IRB.start(__FILE__)

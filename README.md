@@ -358,6 +358,7 @@ Three deliberate ones, all documented at the point where they happen:
 ```sh
 bin/setup                  # bundle install + build Tailwind
 bundle exec rake           # the whole suite
+bin/console                # IRB with the dummy app, to render components
 cd test/dummy && bin/rails s
 ```
 
