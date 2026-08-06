@@ -9,8 +9,23 @@ A Rails engine gem that ports [shadcn/ui](https://ui.shadcn.com) to ViewComponen
 Radix UI's behaviour is reimplemented in Stimulus — no React, no npm dependency
 at runtime.
 
-"1:1" is the constraint every decision answers to. When upstream and idiomatic
-Rails disagree, upstream wins on *markup* and Rails wins on *API*.
+Two constraints decide everything here, and between them they settle most
+questions without having to ask.
+
+**It is 1:1 with upstream.** When upstream and idiomatic Rails disagree, upstream
+wins on *markup* and Rails wins on *API*.
+
+**It is a library to be published, not an application.** The code runs inside
+someone else's Rails app, against their models, their Tailwind config, their
+Turbo, their CSP — none of which can be inspected from here. So when a choice is
+borderline, take the one that survives a host you cannot see. That is what
+already decided: `Shadcn::` namespacing (a host's `Card` model would collide),
+caller attributes beating component defaults, the gem owning
+`[data-slot][hidden]` rather than trusting Tailwind preflight to be loaded, a
+cache sized for a real page rather than the library's own defaults, and
+`Gemfile.lock` staying uncommitted so the matrix resolves against a range.
+Ambiguity resolves toward "has to hold up in an app I will never see", not
+toward "good enough here".
 
 **Read [`.claude/docs/`](.claude/docs/README.md) before changing anything
 structural** — it holds why the port is shaped the way it is, and which
