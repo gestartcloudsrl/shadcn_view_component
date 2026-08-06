@@ -3,8 +3,8 @@
 /tmp/
 *.gem
 
-# Tooling scratch, not project source.
-/.claude/
+# Session scratch. `.claude/docs/` is deliberate and stays tracked.
+/.claude/council-cache/
 
 # A library should resolve against a range of dependency versions, so the lock
 # is not checked in — the CI matrix would otherwise all run the same one.
