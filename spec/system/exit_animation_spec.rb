@@ -124,4 +124,42 @@ RSpec.describe "Exit animations", :js do
       expect(page).to have_css(content)
     end
   end
+
+  describe "the dialog family" do
+    let(:content) { "[data-slot=dialog-content]" }
+    let(:overlay) { "[data-slot=dialog-overlay]" }
+
+    before do
+      visit_preview(:dialog)
+      wait_for_stimulus
+      force_animations(content)
+      force_animations(overlay, duration: "200ms")
+      click_button "Edit profile"
+      expect(page).to have_css(content)
+      press(:escape)
+    end
+
+    it "schedules an exit animation on the content" do
+      expect(animations_on(content)).to include("exit")
+    end
+
+    # Sheet content is `duration-300` against the overlay's `duration-200`. One
+    # shared wait would hold whichever finishes first on screen past its own
+    # animation, so each element waits on its own.
+    it "lets the overlay finish before the content" do
+      expect(page).to have_no_css(overlay)
+      expect(page).to have_css(content)
+      expect(page).to have_no_css(content)
+    end
+
+    it "gives focus back and unlocks scrolling without waiting" do
+      expect(page.evaluate_script("document.activeElement.dataset.slot")).to eq("dialog-trigger")
+      expect(page.evaluate_script("document.body.style.overflow")).to eq("")
+    end
+
+    it "does not intercept clicks while it fades" do
+      expect(page.evaluate_script("getComputedStyle(document.querySelector('#{overlay}')).pointerEvents"))
+        .to eq("none")
+    end
+  end
 end
