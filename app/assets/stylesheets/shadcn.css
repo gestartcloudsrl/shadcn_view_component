@@ -134,8 +134,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
 }
 
@@ -266,9 +264,18 @@
 
 /* A declared departure from upstream: tw-animate-css ships no reduced-motion
    handling. Nested inside each utility rather than a top-level `.animate-in`/
-   `.animate-out` rule because the components apply these through variants —
-   the compiled selector always carries the state, e.g.
-   `data-[state=open]:animate-in`, which a bare `.animate-in` would not match. */
+   `.animate-out` rule, because most components apply these through variants
+   such as `data-[state=open]:animate-in` — a single, bracket-containing class
+   token a hand-written `.animate-in` selector would not match, even though
+   `tooltip/content` applies the bare `animate-in` form the same selector
+   would have matched. Nesting reaches both compiled shapes uniformly.
+
+   Unlike the accordion pair below, neither utility needs `!important` here:
+   that requirement comes from `--animate-accordion-*` also existing as a
+   theme key, which arms Tailwind's own built-in `animate-*` utility for the
+   same class name. No `--animate-in` or `--animate-out` key exists today,
+   here or upstream; if one is ever added, this pair would need `!important`
+   too. */
 @utility animate-in {
   animation-name: enter;
   animation-duration: var(--tw-duration, 150ms);
@@ -297,18 +304,33 @@
   }
 }
 
-/* Defined as utilities rather than staying `@theme`-only entries, because a
-   utility body is the only place a media query can reach them. The
-   `--animate-accordion-*` tokens stay in `@theme inline` above and are
-   consumed by `var()` here, so a host redefining them still retunes the
-   accordion; only the reduced-motion override is new.
+/* Not `@theme inline`, unlike the tokens above: `inline` substitutes the
+   literal value at every place a theme variable is used, so a host could only
+   retune the accordion by rebuilding with an overridden token. A plain
+   `@theme` block keeps `var(--animate-accordion-down)` below as a live
+   reference, so a host's own `:root { --animate-accordion-up: … }` — written
+   after this stylesheet loads, no rebuild required — still reaches it. */
+@theme {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
 
-   `!important`: measured in the built bundle that, for this pair specifically,
-   Tailwind compiles the nested `@media` block *before* the plain declaration
-   rather than after — the reverse of `animate-in`/`animate-out` above, at the
-   same specificity. Without `!important` the plain rule's shorthand duration
-   wins the tie and reduced motion is silently ignored; confirmed both ways in
-   headless Chrome with `--force-prefers-reduced-motion`. */
+/* Defined as utilities rather than staying `@theme`-only entries, because a
+   utility body is the only place a media query can reach them.
+
+   `animate-accordion-down`/`animate-accordion-up` are both a utility name
+   here *and* an `--animate-*` theme key above, so Tailwind's own built-in
+   `animate-*` utility — which is driven by matching theme keys, not by
+   anything written here — also matches them: it emits a second, unconditional
+   rule for the same compiled selector, later in the bundle, whose `animation`
+   shorthand resets `animation-duration` regardless of `prefers-reduced-motion`.
+   That collision exists in any build where the token is defined, including a
+   host's own if they retune the accordion by writing their own
+   `--animate-accordion-up` — dropping the token to avoid the collision was
+   rejected for exactly that reason, since it would just move the collision
+   into every host that defines one. `!important` on the override is what
+   survives it either way; confirmed in headless Chrome with
+   `--force-prefers-reduced-motion`, with and without `!important` present. */
 @utility animate-accordion-down {
   animation: var(--animate-accordion-down);
 
