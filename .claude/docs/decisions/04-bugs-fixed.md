@@ -68,6 +68,36 @@ on `scroll` with capture. Coalesced into one `requestAnimationFrame` — with th
 opening placement kept synchronous, or the layer flashes at the top-left for a
 frame.
 
+## The backdrop could re-enter the top layer above its own dialog
+
+Introduced while making exit animations play, and caught in review rather than
+by a spec — the worst of that batch, because of where it leaves the user.
+
+The overlay carries no `duration-*` class at all: 150ms is the `animate-out`
+default. Dialog content is `duration-200`, sheet content `duration-300`. So once
+the DOM teardown waits for the animation, the overlay's teardown always runs
+*first*, and `hidePopover()` takes it out of the top layer while the content is
+still in it.
+
+Reopen inside that window and the overlay's `showPopover()` appends it to the
+**top**, while the content's throws `InvalidStateError` — it never stopped
+showing — and is swallowed by the `catch` in `top_layer.js`, leaving it in its
+older, lower slot. The `bg-black/50` now paints over the dialog and eats its
+clicks. Dialog and Sheet let you out on the next click. **AlertDialog does not:
+Radix keeps it dismiss-proof on outside clicks on purpose, so the user is left
+with a dimmed, unclickable dialog and no way out.**
+
+Fixed by restacking on reopen — `topLayer.hide(element)` before `show()`, but
+only for an element that had an exit pending, so a cold open is untouched.
+Waiting for both elements together would also have removed the cause, and was
+rejected: it holds the overlay painted 150ms past its own animation, which is
+the thing separate waits exist to avoid.
+
+The general shape is worth more than the instance. Making a synchronous teardown
+asynchronous opens a window in which the DOM is half torn down, and every such
+window needs its interruptions enumerated — reopen, `disconnect`, and a Turbo
+snapshot each found a different bug in the same change.
+
 ## `bin/setup` raised a `TypeError`
 
 `chdir:` was not a keyword in the `system!` signature, so it reached `system` as

@@ -143,13 +143,21 @@ RSpec.describe "Exit animations", :js do
       expect(animations_on(content)).to include("exit")
     end
 
-    # Sheet content is `duration-300` against the overlay's `duration-200`. One
-    # shared wait would hold whichever finishes first on screen past its own
-    # animation, so each element waits on its own.
+    # Dialog content is `duration-200` (sheet content `duration-300`); the
+    # overlay carries no `duration-*` class and falls back to `animate-out`'s
+    # default of 150ms — forced to 200ms above so it still outlives the
+    # content in this example. One shared wait would hold whichever finishes
+    # first on screen past its own animation, so each element waits on its
+    # own.
     it "lets the overlay finish before the content" do
       expect(page).to have_no_css(overlay)
       expect(page).to have_css(content)
       expect(page).to have_no_css(content)
+
+      # `have_no_css` alone would also pass if `hidden` were never set:
+      # `hidePopover()`'s own UA style already yields `display: none`.
+      expect(page.evaluate_script("document.querySelector('#{overlay}').hidden")).to be(true)
+      expect(page.evaluate_script("document.querySelector('#{content}').hidden")).to be(true)
     end
 
     it "gives focus back and unlocks scrolling without waiting" do
@@ -160,6 +168,70 @@ RSpec.describe "Exit animations", :js do
     it "does not intercept clicks while it fades" do
       expect(page.evaluate_script("getComputedStyle(document.querySelector('#{overlay}')).pointerEvents"))
         .to eq("none")
+    end
+
+    # `have_no_css` only proves the overlay stopped painting, which `hidden`
+    # alone already guarantees. Leaving it a popover the browser still
+    # considers open is what would let a later `showPopover()` throw and get
+    # swallowed instead of actually moving it — the failure mode below.
+    it "takes the overlay out of the top layer once its exit finishes, not just out of the render" do
+      expect(page).to have_no_css(overlay)
+
+      expect(page.evaluate_script("document.querySelector('#{overlay}').matches(':popover-open')")).to be(false)
+    end
+  end
+
+  # The overlay carries no `duration-*` class, so `animate-out`'s 150ms
+  # default applies, while alert dialog content is `duration-200` — the
+  # overlay always leaves the top layer first. Reopening in that window used
+  # to restack the overlay above the content instead of below: `showPopover()`
+  # on the overlay re-adds it fresh to the top of the stack, while
+  # `showPopover()` on the still-open content throws (it was never actually
+  # hidden) and is swallowed, leaving the content at its old, lower slot.
+  describe "reopening after the overlay has left the top layer but before the content has" do
+    let(:content) { "[data-slot=alert-dialog-content]" }
+    let(:overlay) { "[data-slot=alert-dialog-overlay]" }
+
+    before do
+      visit_preview(:alert_dialog)
+      wait_for_stimulus
+      force_animations(overlay, duration: "50ms")
+      force_animations(content, duration: "3s")
+      click_button "Delete account"
+      expect(page).to have_css(content)
+      press(:escape)
+
+      # The overlay's own exit has finished and taken it out of the top
+      # layer; the content — forced far longer — is still mid-exit.
+      expect(page).to have_no_css("#{overlay}[data-exiting]", visible: :all)
+      expect(page).to have_css("#{content}[data-exiting]", visible: :all)
+
+      click_button "Delete account"
+    end
+
+    it "keeps the content above the overlay instead of restacking it underneath" do
+      expect(page.evaluate_script(<<~JS)).to be(true)
+        !!document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)?.closest("#{content}")
+      JS
+    end
+
+    # AlertDialog refuses to dismiss on an outside click, so a wrongly-stacked
+    # overlay leaves no way out at all: a backdrop the user cannot see
+    # through, over a dialog they cannot reach.
+    it "still reaches the content with a click, instead of the overlay swallowing it" do
+      within(content) { click_button "Cancel" }
+
+      expect(page).to have_no_css(content)
+    end
+
+    # Without `cancel()`, the exit's own continuation — settled by the state
+    # flip cancelling the running animation, not by this call — still
+    # resolves and flushes the stale teardown once it does, dismounting the
+    # dialog that just reopened.
+    it "keeps the reopened content on screen once the original exit would otherwise have finished" do
+      sleep 0.5
+
+      expect(page).to have_css(content)
     end
   end
 end

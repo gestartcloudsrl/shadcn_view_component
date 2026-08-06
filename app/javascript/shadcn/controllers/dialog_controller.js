@@ -108,12 +108,24 @@ export default class extends Controller {
       topLayer.enable(element)
 
       if (this.openValue) {
+        // The overlay is faster than the content, so it can already have left
+        // the top layer while the content is still in it. Showing it again
+        // without taking the content out too would stack the backdrop *above*
+        // the dialog.
+        if (this.exits.has(element)) topLayer.hide(element)
         this.exits.cancel(element)
         element.hidden = false
         topLayer.show(element)
-      } else if (!element.hidden) {
-        // Each element waits on its own animations: sheet content is
-        // `duration-300` against the overlay's `duration-200`.
+      } else if (element.hidden) {
+        // A morph can rewrite `hidden` back to true without going through an
+        // exit — `hidePopover()` on a never-shown popover costs nothing, so
+        // there is no reason to skip it just because nothing is animating.
+        topLayer.hide(element)
+      } else {
+        // Each element waits on its own animations: dialog content is
+        // `duration-200` (sheet content `duration-300`), while the overlay
+        // carries no `duration-*` class and falls back to `animate-out`'s
+        // default of 150ms.
         this.exits.defer(element, () => {
           element.hidden = true
           topLayer.hide(element)
