@@ -25,8 +25,10 @@ decided is in `decisions/`.
       that is the claim least tested.
 - [ ] **Exit animations do not play.** `hidden` is set immediately on close, so
       every `data-[state=closed]:animate-out` class is inert. The markup matches
-      shadcn; the behaviour does not. Fixing it means waiting for `animationend`
-      before hiding, in `floating.js#hide` and `dialog_controller#render`.
+      shadcn; the behaviour does not. Designed in
+      [decisions/05-exit-animations.md](decisions/05-exit-animations.md), which
+      waits on `getAnimations()` rather than `animationend`, and finds a third
+      closing path the line above missed — the accordion.
 - [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.

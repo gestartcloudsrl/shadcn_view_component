@@ -31,8 +31,8 @@ fixed the same problem with far less change.
 
 **The blocker I had feared did not exist.** Exit animations were the reason to
 hesitate — and they never play today anyway, because closing sets `hidden`
-immediately, so every `data-[state=closed]:animate-out` class is inert. Worth
-knowing before anyone tries to add them; see [todo](../todo.md).
+immediately, so every `data-[state=closed]:animate-out` class is inert. The
+design that makes them play is [exit animations](05-exit-animations.md).
 
 ## Controllers re-sync on `turbo:morph`
 
