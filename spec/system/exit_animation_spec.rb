@@ -181,6 +181,42 @@ RSpec.describe "Exit animations", :js do
     end
   end
 
+  describe "the accordion" do
+    # The preview is `collapsible: true` with `item-1` already open, so the
+    # animated transition is its trigger being clicked once.
+    let(:content) { "[data-value=item-1] [data-slot=accordion-content]" }
+
+    before do
+      visit_preview(:accordion)
+      wait_for_stimulus
+      force_animations(content)
+    end
+
+    context "when a panel is collapsed" do
+      before do
+        expect(page).to have_css(content)
+        click_button "Is it accessible?"
+      end
+
+      it "schedules the collapse animation" do
+        expect(animations_on(content)).to include("accordion-up")
+      end
+
+      # `--radix-accordion-content-height` is what the keyframes interpolate
+      # towards. Clearing it early leaves the animation collapsing to a height
+      # that no longer exists.
+      it "keeps the height it is collapsing towards until it lands" do
+        height = page.evaluate_script(
+          "document.querySelector('#{content}')" \
+          ".style.getPropertyValue('--radix-accordion-content-height')"
+        )
+
+        expect(height).not_to be_empty
+        expect(page).to have_no_css(content)
+      end
+    end
+  end
+
   # The overlay carries no `duration-*` class, so `animate-out`'s 150ms
   # default applies, while alert dialog content is `duration-200` — the
   # overlay always leaves the top layer first. Reopening in that window used

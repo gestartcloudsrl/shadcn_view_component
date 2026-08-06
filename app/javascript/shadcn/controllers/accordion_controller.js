@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { uniqueId } from "shadcn/id"
+import { ExitQueue } from "shadcn/animation"
 
 // Radix's Accordion in `single` and `multiple` modes.
 //
@@ -16,7 +17,14 @@ export default class extends Controller {
   }
 
   connect() {
+    this.exits = new ExitQueue()
     this.render()
+  }
+
+  disconnect() {
+    // Turbo may be detaching the element; a continuation would then be
+    // operating on a subtree that has left the document.
+    this.exits.flushAll()
   }
 
   get multiple() {
@@ -100,13 +108,19 @@ export default class extends Controller {
       content.dataset.state = state
 
       if (isOpen) {
+        this.exits.cancel(content)
         content.hidden = false
         content.style.setProperty(
           "--radix-accordion-content-height",
           `${content.scrollHeight}px`
         )
-      } else {
-        content.hidden = true
+      } else if (!content.hidden) {
+        // The height stays published until the collapse lands — it is what
+        // `animate-accordion-up` interpolates towards.
+        this.exits.defer(content, () => {
+          content.hidden = true
+          content.style.removeProperty("--radix-accordion-content-height")
+        })
       }
     })
   }
