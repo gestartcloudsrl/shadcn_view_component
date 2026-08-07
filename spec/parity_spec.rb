@@ -26,6 +26,7 @@ RSpec.describe "shadcn/ui parity" do
     "badge" => "badge",
     "breadcrumb" => "breadcrumb",
     "button" => "button",
+    "button-group" => "button_group",
     "card" => "card",
     "checkbox" => "checkbox",
     "collapsible" => "collapsible",
@@ -59,7 +60,7 @@ RSpec.describe "shadcn/ui parity" do
   # document so the two lists cannot drift: adding a TSX without deciding which
   # side it belongs on fails the example below, which is the whole point of it.
   not_yet_ported = %w[
-    attachment bubble button-group calendar carousel chart combobox command
+    attachment bubble calendar carousel chart combobox command
     context-menu direction drawer form hover-card input-group input-otp
     item marker menubar message message-scroller navigation-menu resizable
     scroll-area sidebar slider sonner
