@@ -175,17 +175,23 @@ if you would rather be explicit, and works with `fields_for` too.
 | `lucide-react` icons | `Shadcn::Icon::Component`, with the lucide SVGs inlined |
 
 Eleven lucide icons are bundled — the ones the ported components themselves
-use, out of lucide's ~1,500. Register another at boot to make it available the
-same way:
+use, out of lucide's ~1,500. Register another through
+`ShadcnViewComponent::IconRegistry` — the same place `cache_size` above
+lives — so it works from `config/initializers/`, where nothing autoloadable
+resolves yet, `Shadcn::` included:
 
 ```ruby
 # config/initializers/shadcn_view_component.rb
-Shadcn::Icon.register("star", %(<path d="M12 2 15 9l7 .5-5 4 1 7-6-3z"/>))
+ShadcnViewComponent::IconRegistry.register("star", %(<path d="M12 2 15 9l7 .5-5 4 1 7-6-3z"/>))
 ```
 
 ```erb
 <%= render Shadcn::Icon::Component.new("star", class: "size-4") %>
 ```
+
+`Shadcn::Icon.register` / `.registered` delegate to the same registry and read
+more naturally from a view or another component — anywhere autoloading has
+already run, which is everywhere except an initializer.
 
 An unknown name raises where `Rails.env.local?` is true — development and
 test, where a typo can still be fixed — and renders nothing everywhere else,

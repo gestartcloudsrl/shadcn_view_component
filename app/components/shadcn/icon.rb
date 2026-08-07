@@ -3,8 +3,13 @@
 module Shadcn
   # `Shadcn::Icon.register` / `.registered`, kept in this sibling file — the
   # same split every other family uses between its shared module and
-  # `component.rb` — so the constant is reachable from a host's initializer
-  # without first loading `Icon::Component` to trigger it.
+  # `component.rb` — so `Shadcn::Icon` resolves without first loading
+  # `Icon::Component`, and these read naturally from a view or another
+  # component without going through it. That does *not* extend to a host's
+  # initializer: no autoloadable constant, this one included, resolves there
+  # — `ShadcnViewComponent::IconRegistry`, required directly in
+  # `lib/shadcn_view_component.rb`, is the entry point the README documents
+  # for that case.
   #
   # The storage itself lives in `ShadcnViewComponent::IconRegistry`, under
   # `lib/`, rather than on this module: `app/components` reloads in
