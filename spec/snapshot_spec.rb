@@ -14,6 +14,19 @@ require "spec_helper"
 #     SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb
 #
 RSpec.describe "rendered output snapshots" do
+  # `SNAPSHOTS=overwrite` makes every example below write the golden it is
+  # about to compare against, instead of comparing against what is already
+  # committed — regenerating a fixture and then asserting it equals what was
+  # just written proves only that writing a file is deterministic. Fine
+  # locally, where the point is to read the diff before committing it; on CI,
+  # where nothing reads that diff, it would turn every run green while
+  # checking nothing at all.
+  context "when running on CI", if: ENV["CI"] do
+    it "does not run with SNAPSHOTS=overwrite" do
+      expect(ENV["SNAPSHOTS"]).not_to eq("overwrite")
+    end
+  end
+
   fixtures = Pathname(__dir__).join("fixtures/snapshots")
   previews = Pathname(__dir__).join("../app/components/shadcn")
 
