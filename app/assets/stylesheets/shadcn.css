@@ -324,14 +324,16 @@
    anything written here — also matches them: it contributes a second
    `animation:` declaration to the same compiled rule, after this one,
    resetting `animation-duration` regardless of `prefers-reduced-motion`.
-   Invisible in a minified build once both declarations resolve to the same
-   text — build with `bin/rails tailwindcss:build[debug]` to see both. That
-   collision exists in any build where the token is defined, including a
-   host's own if they retune the accordion by writing their own
-   `--animate-accordion-up` — dropping the token to avoid the collision was
-   rejected for exactly that reason, since it would just move the collision
-   into every host that defines one. `!important` on the override is what
-   survives it either way; confirmed in headless Chrome with
+   Both resolve to the same text here, so the bundle carries one `animation:`
+   line rather than two and what the appended declaration leaves visible is
+   the order: this rule compiles `@media` first and `animation:` last, the
+   reverse of the source and of `animate-in` above. Removing the theme key
+   restores the source order. That collision exists in any build where the
+   token is defined, including a host's own if they retune the accordion by
+   writing their own `--animate-accordion-up` — dropping the token to avoid
+   the collision was rejected for exactly that reason, since it would just
+   move the collision into every host that defines one. `!important` on the
+   override is what survives it either way; confirmed in headless Chrome with
    `--force-prefers-reduced-motion`. */
 @utility animate-accordion-down {
   animation: var(--animate-accordion-down);
