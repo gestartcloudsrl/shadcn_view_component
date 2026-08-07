@@ -237,11 +237,10 @@ RSpec.describe "Exit animations", :js do
     # Dialog content is `duration-200` (sheet content `duration-300`); the
     # overlay carries no `duration-*` class and falls back to `animate-out`'s
     # default of 150ms — forced to 200ms above so the content still outlives
-    # it in this example. One shared wait would hold whichever finishes
-    # first on screen past its own animation, so each element waits on its
-    # own.
+    # it in this example. Waiting on the content alone covers both hidden
+    # checks below: the overlay's shorter forced duration has already
+    # elapsed by the time the content's has.
     it "lets the overlay finish before the content" do
-      expect(page).to have_no_css(overlay)
       expect(page).to have_css(content)
       expect(page).to have_no_css(content)
 
@@ -385,15 +384,11 @@ RSpec.describe "Exit animations", :js do
       click_button "Delete account"
     end
 
-    it "keeps the content above the overlay instead of restacking it underneath" do
-      expect(page.evaluate_script(<<~JS)).to be(true)
-        !!document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)?.closest("#{content}")
-      JS
-    end
-
     # AlertDialog refuses to dismiss on an outside click, so a wrongly-stacked
     # overlay leaves no way out at all: a backdrop the user cannot see
-    # through, over a dialog they cannot reach.
+    # through, over a dialog they cannot reach. A click that reaches the
+    # content proves the content is on top, and proves it the way a user
+    # meets it.
     it "still reaches the content with a click, instead of the overlay swallowing it" do
       within(content) { click_button "Cancel" }
 

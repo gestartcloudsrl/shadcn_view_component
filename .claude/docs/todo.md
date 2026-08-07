@@ -92,8 +92,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 - [ ] **`select_controller` and `dropdown_menu_controller` share ~60 near-identical
       lines** (roving focus, typeahead) with *deliberate* divergences that nothing
       marks as intentional — dropdown wraps around, select clamps.
-- [ ] **`previews_spec` and `snapshot_spec` overlap.** Both render every preview;
-      the former only asserts it does not raise.
 - [ ] **Two components name their trigger differently.** `ThemeSelector` uses
       `<label for>` pointing at the trigger; the FormBuilder uses
       `aria-labelledby`. Both pass axe — `<button>` is a labelable element — but
@@ -124,11 +122,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       says in place why it is `!important`; nothing says anywhere that this is
       the constraint the set of them adds up to. `02-javascript.md` records it
       only from the side that bit the test harness.
-- [ ] **`exit_animation_spec.rb` overlaps itself.** The AlertDialog
-      `elementFromPoint` example is largely subsumed by the click example
-      beneath it — a click that reaches the content proves the content is on
-      top — and a `have_no_css(overlay)` line is repeated across two examples in
-      the dialog group.
 - [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
       it out of the tab order, and that now waits for the animation.
       `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
