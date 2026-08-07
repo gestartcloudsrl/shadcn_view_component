@@ -134,8 +134,8 @@ the `RSpec/*` section of [.rubocop.yml](../../../.rubocop.yml).
    behaviour per example.
 
 2. **Examples generated in a loop are allowed when the list comes from disk.**
-   The style guide says never; `parity_spec`, `snapshot_spec`, `previews_spec`
-   and `accessibility_spec` all do it, so that adding a preview or vendoring a
+   The style guide says never; `parity_spec`, `snapshot_spec` and
+   `accessibility_spec` all do it, so that adding a preview or vendoring a
    new TSX creates its example automatically. The list is read into a **local**,
    not a constant, because it has to exist when the group is defined — which is
    why `LeakyLocalVariable` is off. Do **not** use this for a handful of

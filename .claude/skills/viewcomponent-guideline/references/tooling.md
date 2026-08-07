@@ -144,10 +144,10 @@ initializer "shadcn_view_component.previews" do |app|
 end
 ```
 
-**Previews here are load-bearing, not decorative.** `snapshot_spec`,
-`previews_spec` and `accessibility_spec` all read the preview list off disk, so
-adding a preview is what puts a component under test. A component without one is
-invisible to three suites that will nonetheless pass.
+**Previews here are load-bearing, not decorative.** `snapshot_spec` and
+`accessibility_spec` both read the preview list off disk, so adding a preview
+is what puts a component under test. A component without one is invisible to
+two suites that will nonetheless pass.
 
 ## i18n
 

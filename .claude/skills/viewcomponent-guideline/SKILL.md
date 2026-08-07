@@ -166,8 +166,8 @@ Four deliberate divergences. The reasoning is in
 - Read `ApplicationViewComponent` before adding anything to it — most of what
   you need is already there, including `render_element`, `element_attributes`
   and the class cache.
-- A new component needs a preview, or it is invisible to `snapshot_spec`,
-  `previews_spec` and `accessibility_spec` — in this repo those derive their
-  lists from what is on disk.
+- A new component needs a preview, or it is invisible to `snapshot_spec` and
+  `accessibility_spec` — in this repo both derive their lists from what is on
+  disk.
 - Never describe a component spec as proving more than it does. Rendered HTML is
   not behaviour, and axe is not a screen reader.
