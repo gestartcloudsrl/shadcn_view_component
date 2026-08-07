@@ -27,19 +27,28 @@ decided is in `decisions/`.
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.
 
-## Components not ported (27)
+## Components not ported (23)
 
-All 27 are now vendored, so this list is derived from what the sources actually
-import rather than from memory. `spec/parity_spec.rb` holds the same list as
-`not_yet_ported` and fails if the two drift.
+All 27 unported sources were vendored, so this list is derived from what they
+actually import rather than from memory, and `spec/parity_spec.rb` holds it as
+`not_yet_ported` and fails if the two drift. Four have since been ported —
+`empty`, `button-group`, `input-group`, `item` — leaving 23.
 
-The grouping this replaced was wrong in four ways, each recorded below.
+The grouping this replaced was wrong in four ways, each recorded below. A fifth
+error was mine, and is recorded with the group it belongs to.
 
-- **Markup only** (8) — no library, `radix-ui` only for `Slot`, no React state
-  at all: `empty`, `input-group`, `button-group`, `item`, `message`, `bubble`,
-  `attachment`, `marker`.
-  *Four of these were filed under "AI chat set", which implied a difficulty they
-  do not have — `message` imports nothing whatsoever.*
+- **Markup only** (4 left): `message`, `bubble`, `attachment`, `marker` — no
+  library, `radix-ui` only for `Slot`, no state and no event handlers.
+  *All four were filed under "AI chat set", which implied a difficulty they do
+  not have — `message` imports nothing whatsoever. They are now the easiest
+  things left in the backlog.*
+
+  *`input-group` was in this group and should not have been.* It has an
+  `onClick` on its addon — clicking the addon focuses the group's control — so
+  it needed a Stimulus controller and a system spec. The classification missed
+  it because it was reached by grepping for React hooks and not for inline
+  event handlers. All eight candidates were re-checked with the right
+  instrument afterwards; `input-group` was the only one affected.
 
 - **Radix behaviour to reimplement in Stimulus** (7): `hover-card` (44 lines),
   `scroll-area` (58), `slider` (63), `navigation-menu` (168), `context-menu`
