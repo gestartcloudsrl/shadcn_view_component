@@ -89,16 +89,18 @@ A generation token guards the continuations: `cancel()` followed by a fresh
 `defer()` in one tick would otherwise let the first continuation flush the
 second exit's teardown.
 
-### Two things given up on purpose
+### One thing given up on purpose
 
-**A floating layer no longer follows its anchor while it fades.** `hide()` drops
-the scroll and resize listeners at once. Radix keeps the content mounted
-through its exit animation — `menu.tsx:253` wraps `MenuContentImpl` in
-`<Presence present={forceMount || context.open}>` — but whether Popper keeps
-repositioning it while it is mounted is not checkable, since Radix's Popper
-implementation is not among the vendored files. Matching it needs a second
-flag beside `this.open`, which both `reposition()` and `applyPosition()`
-return early on. See [todo](../todo.md).
+A floating layer keeps following its anchor while it fades: `reposition()` and
+`applyPosition()` guard on `this.mounted`, a flag that stays true from `mount()`
+until `dismount()` — later than `this.open`, which `hide()` still flips
+immediately, since that is what interaction (Escape, an outside click) has to
+answer to. Radix keeps the content mounted through its exit animation —
+`menu.tsx:253` wraps `MenuContentImpl` in `<Presence present={forceMount ||
+context.open}>` — but whether Popper keeps repositioning it while mounted is
+still not checkable, since Radix's Popper implementation is not among the
+vendored files; matching it was taken as the safer default rather than as a
+proven parity claim.
 
 **`prefers-reduced-motion` collapses these animations**, which nothing in the
 vendored upstream does. The utilities themselves come from `tw-animate-css`,

@@ -98,6 +98,38 @@ RSpec.describe "Exit animations", :js do
         expect(state_of("[data-slot=select-content]")).to eq("closed")
       end
     end
+
+    # The preview alone is not tall enough for `window.scrollBy` to move
+    # anything, which would make the two reads below equal for a reason that
+    # has nothing to do with tracking — the window just never moved. A
+    # trailing spacer, not a taller shared preview, is what buys the room.
+    it "keeps following its anchor while it fades" do
+      page.execute_script(<<~JS)
+        document.body.insertAdjacentHTML("beforeend", "<div style='height: 2000px'></div>")
+      JS
+      force_animations(content, duration: "3s")
+      trigger.click
+      expect(page).to have_css(content)
+
+      before_scroll = page.evaluate_script(
+        "document.querySelector('#{content}').getBoundingClientRect().top"
+      )
+      press(:escape)
+      page.execute_script("window.scrollBy(0, 120)")
+
+      # `reposition()` coalesces into a `requestAnimationFrame`, deliberately —
+      # applying the transform reads `offsetWidth`, which would force a
+      # synchronous layout on every scroll event otherwise. A round trip to the
+      # driver can land inside that one frame, so give it room to run before
+      # reading the geometry it produces.
+      sleep 0.1
+
+      after_scroll = page.evaluate_script(
+        "document.querySelector('#{content}').getBoundingClientRect().top"
+      )
+
+      expect(after_scroll).not_to eq(before_scroll)
+    end
   end
 
   # Tooltip opens and closes on hover, so reopening before an exit has settled

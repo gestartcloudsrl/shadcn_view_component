@@ -29,6 +29,7 @@ export class FloatingLayer {
     this.onDismiss = options.onDismiss || null
 
     this.open = false
+    this.mounted = false
     this.wrapper = null
     this.layer = null
     this.placeholder = null
@@ -73,6 +74,8 @@ export class FloatingLayer {
   // there. Appending to `home` instead would quietly reorder the markup —
   // after one open/close a Select's content ends up after the hidden input.
   mount() {
+    this.mounted = true
+
     this.placeholder = document.createComment("shadcn-floating-content")
     this.content.replaceWith(this.placeholder)
 
@@ -89,14 +92,11 @@ export class FloatingLayer {
     if (!this.open) return
     this.open = false
 
-    // Everything here is interaction state, and all of it is immediate: a layer
-    // that is fading out must not answer Escape or an outside click.
-    window.removeEventListener("scroll", this.reposition, true)
-    window.removeEventListener("resize", this.reposition)
-
-    if (this.frame) cancelAnimationFrame(this.frame)
-    this.frame = null
-
+    // Interaction state is immediate: a layer that is fading out must not
+    // answer Escape or an outside click. Positioning is not interaction
+    // state — the content stays mounted through the exit (`this.mounted`
+    // goes false only in `dismount()`), so a scroll or resize during the fade
+    // still moves it instead of leaving it stranded over its old anchor.
     if (this.layer) removeLayer(this.layer)
     this.layer = null
 
@@ -111,6 +111,14 @@ export class FloatingLayer {
   }
 
   dismount() {
+    window.removeEventListener("scroll", this.reposition, true)
+    window.removeEventListener("resize", this.reposition)
+
+    if (this.frame) cancelAnimationFrame(this.frame)
+    this.frame = null
+
+    this.mounted = false
+
     this.content.hidden = true
 
     if (this.placeholder?.parentNode) {
@@ -136,7 +144,7 @@ export class FloatingLayer {
   // which forces a synchronous layout, so coalesce into one frame instead of
   // reflowing on every event.
   reposition() {
-    if (!this.open || !this.trigger || this.frame) return
+    if (!this.mounted || !this.trigger || this.frame) return
 
     this.frame = requestAnimationFrame(() => {
       this.frame = null
@@ -147,7 +155,7 @@ export class FloatingLayer {
   // The opening position cannot wait for a frame: the wrapper starts at the
   // top-left of the viewport, so a deferred first placement flashes there.
   applyPosition() {
-    if (!this.open || !this.trigger) return
+    if (!this.mounted || !this.trigger) return
 
     position(this.trigger, this.content, {
       side: this.side,
