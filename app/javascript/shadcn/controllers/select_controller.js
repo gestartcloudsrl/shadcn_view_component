@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { uniqueId } from "shadcn/id"
 import { FloatingLayer } from "shadcn/floating"
+import { Typeahead } from "shadcn/typeahead"
 
 // Radix's Select: a `role="combobox"` trigger driving a `role="listbox"` layer.
 //
@@ -21,8 +22,7 @@ export default class extends Controller {
   connect() {
     if (!this.hasContentTarget || !this.hasTriggerTarget) return
 
-    this.typeahead = ""
-    this.typeaheadTimer = null
+    this.typeahead = new Typeahead()
 
     this.contentTarget.hidden = true
     this.contentTarget.id ||= uniqueId("shadcn-select")
@@ -75,6 +75,8 @@ export default class extends Controller {
     const current = items.indexOf(this.highlighted)
 
     switch (event.key) {
+      // A listbox has ends: clamp rather than wrap, unlike the dropdown menu's
+      // cycle. Radix's Select does the same.
       case "ArrowDown":
         event.preventDefault()
         this.highlight(items[Math.min(current + 1, items.length - 1)])
@@ -103,7 +105,8 @@ export default class extends Controller {
     }
 
     if (event.key.length === 1 && !event.metaKey && !event.ctrlKey) {
-      this.search(event.key)
+      const match = this.typeahead.search(event.key, this.enabledItems)
+      if (match) this.highlight(match)
     }
   }
 
@@ -150,17 +153,6 @@ export default class extends Controller {
 
   clearHighlight() {
     this.itemTargets.forEach((item) => delete item.dataset.highlighted)
-  }
-
-  search(character) {
-    clearTimeout(this.typeaheadTimer)
-    this.typeahead += character.toLowerCase()
-    this.typeaheadTimer = setTimeout(() => (this.typeahead = ""), 1000)
-
-    const match = this.enabledItems.find((item) =>
-      item.textContent.trim().toLowerCase().startsWith(this.typeahead)
-    )
-    if (match) this.highlight(match)
   }
 
   render() {

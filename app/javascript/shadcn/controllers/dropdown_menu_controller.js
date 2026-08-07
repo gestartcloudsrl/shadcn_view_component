@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { uniqueId } from "shadcn/id"
 import { FloatingLayer } from "shadcn/floating"
+import { Typeahead } from "shadcn/typeahead"
 
 // Radix's DropdownMenu: a `role="menu"` layer with the ARIA menu keyboard
 // pattern — arrow keys move a `data-highlighted` cursor, typing jumps to a
@@ -18,8 +19,7 @@ export default class extends Controller {
   connect() {
     if (!this.hasContentTarget || !this.hasTriggerTarget) return
 
-    this.typeahead = ""
-    this.typeaheadTimer = null
+    this.typeahead = new Typeahead()
 
     this.contentTarget.hidden = true
     this.contentTarget.id ||= uniqueId("shadcn-dropdown")
@@ -84,6 +84,8 @@ export default class extends Controller {
     const current = items.indexOf(this.highlighted)
 
     switch (event.key) {
+      // A menu is a cycle: wrap past the ends rather than clamp, unlike the
+      // select listbox. Radix's DropdownMenu does the same.
       case "ArrowDown":
         event.preventDefault()
         this.highlight(items[(current + 1) % items.length])
@@ -112,7 +114,8 @@ export default class extends Controller {
     }
 
     if (event.key.length === 1 && !event.metaKey && !event.ctrlKey) {
-      this.search(event.key)
+      const match = this.typeahead.search(event.key, this.enabledItems)
+      if (match) this.highlight(match)
     }
   }
 
@@ -172,16 +175,5 @@ export default class extends Controller {
   radioSiblings(item) {
     const group = item.closest("[data-slot='dropdown-menu-radio-group']") || this.contentTarget
     return Array.from(group.querySelectorAll("[role='menuitemradio']"))
-  }
-
-  search(character) {
-    clearTimeout(this.typeaheadTimer)
-    this.typeahead += character.toLowerCase()
-    this.typeaheadTimer = setTimeout(() => (this.typeahead = ""), 1000)
-
-    const match = this.enabledItems.find((item) =>
-      item.textContent.trim().toLowerCase().startsWith(this.typeahead)
-    )
-    if (match) this.highlight(match)
   }
 }

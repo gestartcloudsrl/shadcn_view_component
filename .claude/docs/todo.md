@@ -83,9 +83,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
-- [ ] **`select_controller` and `dropdown_menu_controller` share ~60 near-identical
-      lines** (roving focus, typeahead) with *deliberate* divergences that nothing
-      marks as intentional — dropdown wraps around, select clamps.
 - [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
       drops the scroll and resize listeners immediately, so a layer scrolled
       during its exit animation detaches from the trigger for the length of it.
