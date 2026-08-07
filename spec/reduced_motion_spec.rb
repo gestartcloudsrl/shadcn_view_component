@@ -22,31 +22,22 @@ require "spec_helper"
 # inspection; only the rendered duration tells them apart, which is exactly
 # how this shipped broken once already.
 #
-# File reading, not a browser — but it rebuilds the bundle itself first rather
-# than trusting whatever `tailwindcss:build` last left on disk. The first
-# version of this spec asserted the bundle's mtime was newer than shadcn.css's,
-# and that went red on a comment-only source edit that did not change the
-# compiled output at all: Tailwind's CLI skips rewriting the file when the
-# result would be byte-identical to what is already there, so the bundle's
-# mtime does not reliably track "was this produced from the current source".
-# Rebuilding removes the question rather than trying to detect it — cheap
-# enough to not need the shortcut (`tailwindcss:build` reports well under a
-# second for this bundle), and correctness here is the entire point of the
-# spec.
+# File reading, not a browser — but it does not trust whatever
+# `tailwindcss:build` last left on disk on its own. The first version of this
+# spec asserted the bundle's mtime was newer than shadcn.css's, and that went
+# red on a comment-only source edit that did not change the compiled output at
+# all: Tailwind's CLI skips rewriting the file when the result would be
+# byte-identical to what is already there, so the bundle's mtime does not
+# reliably track "was this produced from the current source". Rebuilding
+# removes the question rather than trying to detect it.
 #
-# Built once for the file, from a `before` hook rather than the `describe` body:
-# the body runs while RSpec is still *loading* spec files, and an exception
-# there ends the run at "0 examples, 0 failures, 1 error occurred outside of
-# examples" — measured — so a broken Tailwind build would take down every other
-# spec, including the ones that would have said what broke. From a hook the same
-# failure is one red example. Once rather than per example because it is idempotent
-# — the same source on disk always produces the same output — so it carries
-# none of the leaked-state risk `before(:context)` is otherwise avoided for.
+# The rebuild itself lives in `spec_helper.rb`'s `before(:suite)` hook, not
+# here — see the comment there for why it runs once for the whole suite rather
+# than once per file. This spec only reads the bundle that hook already built.
 RSpec.describe "reduced motion in the compiled bundle" do
   root = Pathname(__dir__).join("..")
   dummy = root.join("test/dummy")
   bundle_path = dummy.join("app/assets/builds/tailwind.css")
-  built = false
 
   # Whether the utility's reduced-motion override needs `!important` to survive
   # the collision described above — true only for the two names that are also
@@ -83,13 +74,6 @@ RSpec.describe "reduced motion in the compiled bundle" do
 
     escaped_variant = variant.gsub(/[\[\]=]/) { |char| "\\#{char}" }
     ".#{escaped_variant}\\:#{utility}[data-state=#{state}]"
-  end
-
-  before do
-    unless built
-      system(dummy.join("bin/rails").to_s, "tailwindcss:build", chdir: dummy.to_s, exception: true)
-      built = true
-    end
   end
 
   # Without this, a broken scan pattern makes every example below vacuously
