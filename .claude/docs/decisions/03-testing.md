@@ -59,9 +59,12 @@ nothing failing. Static analysis of the JS, not execution of it.
 Reads the *compiled* bundle. What it reads is always fresh rather than
 whatever a previous run left on disk, but the freshness comes from
 `spec_helper.rb`'s suite-wide `before(:suite)` hook, not from this spec — it
-used to rebuild the bundle itself, but that duplicated the same build every
-other spec that reads the bundle also needed, so it moved up a level. It
-asserts the `@media (prefers-reduced-motion: reduce)` block for every
+used to build the bundle itself in a per-file `before` hook, but
+`config.order = :random` meant that hook could run *after* the specs that
+read the bundle, which then asserted against whatever the previous run had
+left on disk; moving the build to a suite-wide hook that always runs first
+removes the ordering hazard. It asserts the
+`@media (prefers-reduced-motion: reduce)` block for every
 `animate-*` class the components actually apply — scanned off
 `app/components`, not typed out — and
 that the accordion pair carries `!important` there. That last part is the point:
