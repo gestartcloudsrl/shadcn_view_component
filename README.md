@@ -291,6 +291,14 @@ Palettes also scope, so you can theme one region of a page:
 `shadcn-themes.css` are generated from `vendor/shadcn/themes.json` — run
 `rake themes:build` after refreshing it.
 
+### A few rules resist an ordinary `!important`
+
+`[data-slot][hidden]`, `[data-slot][data-exiting]` and the two
+`animate-accordion-*` reduced-motion overrides in `shadcn.css` are
+`!important` inside a cascade layer, which beats an `!important` of your own
+at any specificity. An inline `style` attribute gets past it, and so does a
+`@layer` declared earlier than this stylesheet in your document.
+
 ## Components
 
 **Theming** — mode-toggle, mode-switcher, theme-selector

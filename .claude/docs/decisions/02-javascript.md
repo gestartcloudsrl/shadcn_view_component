@@ -200,3 +200,35 @@ visible in the compiled output and what to look for instead, which cost one
 review round to work out — lives in the comment above
 `@utility animate-accordion-down` in `shadcn.css`. One copy, because three
 would drift.
+
+### What the set of them costs a host
+
+Four rules in `shadcn.css` carry `!important` from inside a layer:
+`[data-slot][hidden]` and `[data-slot][data-exiting]`, both in `@layer base`,
+and the two `animate-accordion-*` reduced-motion overrides above, both in
+`@layer utilities`. Each says in place why it needs `!important`; none of them
+says what the set adds up to for a host, and this doc has only ever recorded
+the reversal from the side that bit the test harness.
+
+The constraint is the same one, applied four times: an unlayered `!important`
+on the same selector cannot touch any of them, at any specificity, so a host
+cannot switch one off with an `!important` of its own. Checked against the
+built bundle rather than assumed — for both `[data-slot][hidden]` and an
+`animate-accordion-down` element under forced `prefers-reduced-motion`, an
+ordinary unlayered `!important` rule left the computed value unchanged in
+headless Chrome. Two things did get through the same check: an inline `style`
+attribute, and a `@layer` declared before Tailwind's own in the document —
+either one flipped the computed value where the plain override could not.
+
+Not all four are equally worth a host reaching for that escape.
+`[data-slot][hidden]` exists so a closed overlay stays hidden even without
+Tailwind's preflight loaded; there's no legitimate reason to want an element
+the gem has marked `hidden` to render anyway, so this one is deliberate rather
+than in the way. The two accordion overrides exist only to win the naming
+collision with Tailwind's built-in `animate-*` utility described above — a
+host that wants full-speed accordion motion under `prefers-reduced-motion` has
+a real reason to reach past it. `[data-slot][data-exiting]` sits in between:
+it stops a closing layer from swallowing a click meant for whatever is behind
+it, which is what most hosts want, but something outside the accordion's own
+carve-out — a custom exiting element that should stay interactive through its
+own exit — has a legitimate reason to override it too.

@@ -105,15 +105,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       `animate-accordion-*` in `app/components`, and nothing there uses this
       one. Nothing consumes it today: InputOTP, the component it exists for, is
       unported.
-- [ ] **The gem's `!important` rules cannot be overridden the ordinary way.**
-      `[data-slot][hidden]`, `[data-slot][data-exiting]` and the two
-      `animate-accordion-*` overrides all carry `!important` from inside a
-      cascade layer, and a layered `!important` beats an unlayered one at any
-      specificity — so a host cannot switch one off with an `!important` of
-      their own either, only inline or from a layer declared earlier. Each rule
-      says in place why it is `!important`; nothing says anywhere that this is
-      the constraint the set of them adds up to. `02-javascript.md` records it
-      only from the side that bit the test harness.
 - [ ] **Two previews claim `<label for>` cannot name a `<button>`.**
       `switch/previews/default.html.erb` and `field/previews/default.html.erb`
       both say so, and it is exactly the misconception
