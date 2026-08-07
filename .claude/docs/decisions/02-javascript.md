@@ -53,6 +53,18 @@ timeout, and that timeout then becomes the *normal* path in a host that has not
 loaded this stylesheet. An empty `getAnimations()` list is unambiguous: the
 teardown runs synchronously and behaviour is exactly what it was.
 
+**Not every running animation counts.** An `animation-iteration-count: infinite`
+animation reports `"running"` and has no end to reach, and caller classes
+concatenate onto a component's own, so a host utility carrying one —
+`animate-pulse` among them — reaches closing content through supported API.
+Measured: an Escaped dialog still in the document five seconds later, `hidden`
+never set, `pointer-events: none`, with everything that closes it already run.
+The queue filters on the effect's `endTime` being finite rather than on
+`playState` alone; if that empties the list the teardown takes the synchronous
+branch above, which is right for an element whose only animation is not an exit.
+A timeout was rejected as the fix: the constant would be arbitrary, and the layer
+would still be stuck for its length.
+
 ### The interruptions are the whole problem
 
 Making a synchronous teardown asynchronous opens a window in which the DOM is

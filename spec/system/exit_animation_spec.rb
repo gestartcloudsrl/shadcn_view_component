@@ -8,14 +8,18 @@ require "spec_helper"
 # frame could paint. These examples are what stops that coming back.
 #
 # The animation assertions read what the browser *scheduled*, never what is on
-# screen at a given moment, so those do not race. The presence assertions do:
-# `have_css`/`have_no_css` retry for up to `Capybara.default_max_wait_time`, so
-# they only hold because `force_animations` keeps the forced duration under it.
-# A property read taken while an animation is still expected to be running is a
-# third case, covered by neither: there is no retry to save it, so it only
-# holds because the forced duration comfortably outlasts the round trip to read
-# it — see the accordion's height assertions below, forced to 3s for that
-# reason.
+# screen at a given moment, so those do not race. Everything else here is
+# pinned between the two ends of the forced duration, and which end depends on
+# what is being asserted.
+#
+# `have_no_css` waits for the element to go and retries for up to
+# `Capybara.default_max_wait_time`, so it holds only while the forced duration
+# stays under that. A mid-exit `have_css` needs the opposite: retrying only
+# helps something that is about to appear, and this one is about to disappear,
+# so it holds only while the duration outlasts the round trip that reads it. A
+# property read taken mid-exit has no retry at all and wants the same thing
+# with more margin, which is why the accordion's height assertions below are
+# forced to 3s rather than the shared 400ms.
 RSpec.describe "Exit animations", :js do
   describe "the harness" do
     let(:content) { "[data-slot=dialog-content]" }
@@ -130,6 +134,88 @@ RSpec.describe "Exit animations", :js do
     end
   end
 
+  # Only a close → reopen → close arms the generation token, and only if the
+  # reopen and the second close share a task: the first exit's continuation
+  # settles a microtask after its animation is cancelled, so anything Capybara
+  # does between two of its own commands has already drained it.
+  describe "closing, reopening and closing again inside one exit window" do
+    let(:content) { "[data-slot=popover-content]" }
+
+    before do
+      visit_preview(:popover)
+      wait_for_stimulus
+      force_animations(content, duration: "3s")
+      find("[data-slot=popover-trigger]").click
+      expect(page).to have_css(content)
+      press(:escape)
+      expect(page).to have_css("#{content}[data-exiting]", visible: :all)
+
+      # One script for both toggles, so the first close's continuation cannot
+      # drain between them. A synthetic `click`, not a real one: it fires no
+      # `pointerdown`, so `dismiss.js` does not see an outside click.
+      page.execute_script(<<~JS)
+        const trigger = document.querySelector("[data-slot=popover-trigger]")
+        trigger.click()
+        trigger.click()
+      JS
+    end
+
+    it "leaves the second exit to its own animation, not the first exit's continuation" do
+      expect(page).to have_css("#{content}[data-exiting]", visible: :all)
+    end
+  end
+
+  # Caller classes concatenate onto a component's own, so a host utility
+  # carrying an endless animation — `animate-pulse` among them — reaches
+  # closing content through supported API. Before `animation.js` filtered those
+  # out, one was enough to strand the layer: dismissed and unfocused, but still
+  # in the document and still `pointer-events: none`.
+  describe "a layer carrying an animation that never ends" do
+    let(:content) { "[data-slot=dialog-content]" }
+
+    # `element.animate` rather than a class, because it needs no rule to win a
+    # cascade this harness has already been bitten by. It stands in for the CSS
+    # spelling: `{ iterations: Infinity }` and `animation-iteration-count:
+    # infinite` were both measured to report `endTime: Infinity`, which is what
+    # `animation.js` filters on.
+    def animate_forever(selector)
+      page.execute_script(<<~JS)
+        document.querySelectorAll("#{selector}").forEach((el) =>
+          el.animate([ { opacity: 1 }, { opacity: 0.99 } ], { duration: 500, iterations: Infinity })
+        )
+      JS
+    end
+
+    before do
+      visit_preview(:dialog)
+      wait_for_stimulus
+      click_button "Edit profile"
+      expect(page).to have_css(content)
+    end
+
+    context "when it is the only animation on the element" do
+      it "tears down without waiting at all" do
+        animate_forever(content)
+        press(:escape)
+
+        # No retry, deliberately: the queue's synchronous branch is the claim,
+        # and the driver's own round trip is the only delay it may take.
+        expect(page.evaluate_script("document.querySelector('#{content}').hidden")).to be(true)
+      end
+    end
+
+    context "when a real exit animation is running beside it" do
+      it "still waits that one out" do
+        force_animations(content)
+        animate_forever(content)
+        press(:escape)
+
+        expect(page).to have_css(content)
+        expect(page).to have_no_css(content)
+      end
+    end
+  end
+
   describe "the dialog family" do
     let(:content) { "[data-slot=dialog-content]" }
     let(:overlay) { "[data-slot=dialog-overlay]" }
@@ -150,8 +236,8 @@ RSpec.describe "Exit animations", :js do
 
     # Dialog content is `duration-200` (sheet content `duration-300`); the
     # overlay carries no `duration-*` class and falls back to `animate-out`'s
-    # default of 150ms — forced to 200ms above so it still outlives the
-    # content in this example. One shared wait would hold whichever finishes
+    # default of 150ms — forced to 200ms above so the content still outlives
+    # it in this example. One shared wait would hold whichever finishes
     # first on screen past its own animation, so each element waits on its
     # own.
     it "lets the overlay finish before the content" do

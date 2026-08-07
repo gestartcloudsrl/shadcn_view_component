@@ -13,6 +13,31 @@
 // gem's stylesheet. An empty animation list is unambiguous and needs no
 // fallback.
 
+// The animations worth holding a teardown for: the ones already under way that
+// are also going to end.
+//
+// `playState === "running"` on its own is not that: an
+// `animation-iteration-count: infinite` animation reports `"running"` and has
+// no end to reach. Caller classes concatenate onto a component's own, so a host
+// utility carrying one — `animate-pulse` among them — can land on closing
+// content through supported API, and waiting on its `finished` leaves the layer
+// in the document, painted and `pointer-events: none`, after everything that
+// closes it has already run. Measured before this filter existed: an Escaped
+// dialog still in the document five seconds later, `hidden` never set. An
+// animation that never ends is not the exit either way, so nothing is lost by
+// leaving it out. A timeout was the alternative: an arbitrary constant, and the
+// layer would still be stuck for its length.
+//
+// `endTime` rather than `iterations` because it is the one number that answers
+// "will this ever end" whatever put the animation there. Measured in headless
+// Chrome: `Infinity` for both spellings — CSS `infinite` and
+// `element.animate(…, { iterations: Infinity })` — and not a number at all for
+// an animation on a `scroll()` timeline, which has no end on a clock either.
+// `Number.isFinite` rejects all three.
+const willEnd = (animation) =>
+  animation.playState === "running" &&
+  Number.isFinite(animation.effect?.getComputedTiming()?.endTime)
+
 // Holds teardowns that are waiting on an element's exit animation, one per
 // element.
 export class ExitQueue {
@@ -24,15 +49,16 @@ export class ExitQueue {
 
   // Runs `teardown` once the animations already running on `element` have
   // finished — or immediately and synchronously when there are none. That last
-  // part is the point: a host that never loaded this stylesheet, or a host that
-  // overrode the classes away, keeps exactly today's behaviour.
+  // part is the point: a host that never loaded this stylesheet, a host that
+  // overrode the classes away, and a host whose only animation here is an
+  // endless one all keep exactly today's behaviour.
   //
   // A second call for an element already waiting is ignored, so a `turbo:morph`
   // re-render in the middle of an exit cannot queue the same teardown twice.
   defer(element, teardown) {
     if (this.pending.has(element)) return
 
-    const running = element.getAnimations().filter((a) => a.playState === "running")
+    const running = element.getAnimations().filter(willEnd)
 
     if (!running.length) {
       teardown()
