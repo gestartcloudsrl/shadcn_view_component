@@ -22,13 +22,10 @@ export default class extends Controller {
     this.typeaheadTimer = null
 
     this.contentTarget.hidden = true
-    this.contentTarget.setAttribute("role", "menu")
-    this.contentTarget.setAttribute("tabindex", "-1")
     this.contentTarget.id ||= uniqueId("shadcn-dropdown")
 
-    this.triggerTarget.setAttribute("aria-haspopup", "menu")
+    // The id is generated here, so the server has nothing to point this at.
     this.triggerTarget.setAttribute("aria-controls", this.contentTarget.id)
-    this.triggerTarget.setAttribute("aria-expanded", "false")
     this.triggerTarget.dataset.state = "closed"
 
     this.layer = new FloatingLayer({

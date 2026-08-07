@@ -137,7 +137,7 @@ export default class extends Controller {
 
     this.triggerTarget.dataset.state = state
     this.triggerTarget.setAttribute("aria-expanded", String(this.openValue))
-    this.triggerTarget.setAttribute("aria-haspopup", "dialog")
+    // The id is generated above, so the server has nothing to point this at.
     if (this.hasContentTarget) {
       this.triggerTarget.setAttribute("aria-controls", this.contentTarget.id)
     }

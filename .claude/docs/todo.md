@@ -83,9 +83,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
-- [ ] **ARIA is set twice** — in Ruby at render and again in the controller on
-      connect (`select/trigger` vs `select_controller`, same for popover, dialog,
-      dropdown). Two places to drift.
 - [ ] **`select_controller` and `dropdown_menu_controller` share ~60 near-identical
       lines** (roving focus, typeahead) with *deliberate* divergences that nothing
       marks as intentional — dropdown wraps around, select clamps.

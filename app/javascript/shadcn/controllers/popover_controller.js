@@ -19,13 +19,10 @@ export default class extends Controller {
     if (!this.hasContentTarget || !this.hasTriggerTarget) return
 
     this.contentTarget.hidden = true
-    this.contentTarget.setAttribute("role", "dialog")
-    this.contentTarget.setAttribute("tabindex", "-1")
     this.contentTarget.id ||= uniqueId("shadcn-popover")
 
-    this.triggerTarget.setAttribute("aria-haspopup", "dialog")
+    // The id is generated here, so the server has nothing to point this at.
     this.triggerTarget.setAttribute("aria-controls", this.contentTarget.id)
-    this.triggerTarget.setAttribute("aria-expanded", "false")
     this.triggerTarget.dataset.state = "closed"
 
     this.layer = new FloatingLayer({
