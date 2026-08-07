@@ -99,10 +99,12 @@ were a lookup table wrapped in module nesting. Two constraints shaped it:
 
 Its boundary is narrower than "no behaviour": **`part` declares a slot, classes
 and a tag, and no other attribute.** `ItemGroup` is a `data-slot` and two
-classes — and a `role="list"`, so it gets a `component.rb` for one line of
-`#element_attributes`. That is the macro working as intended rather than a gap
-in it; widening it to take arbitrary attributes would turn a lookup table back
-into a configuration language.
+classes — and a `role="list"`, which `part` cannot express, so it gets its own
+`component.rb` (which has since grown a slot marking its items `listitem`,
+`#element_attributes` staying the one line that adds `role="list"`). That is
+the macro working as intended rather than a gap in it; widening it to take
+arbitrary attributes would turn a lookup table back into a configuration
+language.
 
 **The FormBuilder** exists because porting `field.tsx` character-perfect while
 shipping no `ActiveModel` bridge optimises for fidelity to React over usefulness

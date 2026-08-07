@@ -14,7 +14,7 @@
     <% end %>
   <% end %>
 
-  <% group.with_item(separator: true) %>
+  <% group.with_separator %>
 
   <% group.with_item(variant: :muted, size: :sm) do %>
     <%= render(Shadcn::Item::Header::Component.new) do %>

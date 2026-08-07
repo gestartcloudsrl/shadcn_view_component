@@ -26,7 +26,7 @@ RSpec.describe Shadcn::Item::Group::Component, type: :component do
   it "keeps a separator between items in call order without marking it a list item" do
     render_inline(described_class.new) do |group|
       group.with_item { "One" }
-      group.with_item(separator: true)
+      group.with_separator
       group.with_item { "Two" }
     end
 

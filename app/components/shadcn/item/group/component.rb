@@ -18,15 +18,20 @@ module Shadcn
       # `items` renders before block content (see `Card::Component`), so a
       # separator placed as plain block content between two `with_item` calls
       # would land after both of them instead of between them — the trap
-      # CLAUDE.md warns about. `separator: true` keeps it in the one ordered
-      # collection instead, where call order is preserved.
+      # CLAUDE.md warns about. A polymorphic slot keeps both in the one
+      # ordered collection, where call order is preserved, and gives the
+      # separator its own setter (`with_separator`) rather than a flag that
+      # would otherwise let `Item` attributes reach a `role="none"` element.
       class Component < ApplicationViewComponent
-        renders_many :items, ->(separator: false, **attributes) {
-          if separator
-            Shadcn::Item::Separator::Component.new(**attributes)
-          else
-            Shadcn::Item::Component.new(role: "listitem", **attributes)
-          end
+        renders_many :items, types: {
+          item: {
+            renders: ->(**attributes) { Shadcn::Item::Component.new(role: "listitem", **attributes) },
+            as: :item
+          },
+          separator: {
+            renders: ->(**attributes) { Shadcn::Item::Separator::Component.new(**attributes) },
+            as: :separator
+          }
         }
 
         slot_name :"item-group"
