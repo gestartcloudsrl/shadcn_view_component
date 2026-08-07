@@ -35,6 +35,44 @@ subclass passes to `super` in `#element_attributes` is a *default*, despite
 arriving as a keyword splat. See [bugs-fixed](04-bugs-fixed.md) — this was
 originally backwards.
 
+**`<Foo className={cn(fooClasses, "extra")} />` is a subclass overriding
+`#css_classes`.** When one component renders another with classes layered on
+top — `ButtonGroupSeparator` and `ItemSeparator` on `Separator`,
+`InputGroupInput` and `InputGroupTextarea` on `Input` and `Textarea`,
+`InputGroupButton` on `Button` — inherit from the ported component and pass the
+extras up:
+
+```ruby
+class Component < Shadcn::Separator::Component
+  slot_name :"item-separator"
+
+  def css_classes(extra = nil)
+    super([ "my-0", extra ].compact.join(" "))
+  end
+end
+```
+
+Restating the parent's classes instead would work and then rot. `PaginationLink`
+does the same thing one step further, borrowing `Button`'s compiled variants
+rather than its instance.
+
+### Two things a TSX says that its types do not
+
+Both cost a wrong port before being noticed, and `parity_spec` sees neither —
+it compares class tokens, not elements and not attributes.
+
+**The type annotation is not the element.** `EmptyDescription` is typed
+`React.ComponentProps<"p">` and renders a `<div>`; `ItemDescription` is typed
+the same way and renders a `<p>`. Read the JSX, not the signature, and read it
+per component — two families in the same batch disagreed.
+
+**A prop with no JS default still gets a cva default.** `ButtonGroup`
+destructures `orientation` without one, so `data-orientation` is *absent* until
+a caller passes it, while the classes fall back to `horizontal` through cva's
+`defaultVariants`. Defaulting the Ruby keyword to `:horizontal` would emit an
+attribute upstream does not. The Ruby shape is a nil default for the attribute
+and a resolved value for `#style_variants`.
+
 ## No npm dependency, anywhere
 
 Three things were hand-written rather than pulled in:
@@ -58,6 +96,13 @@ were a lookup table wrapped in module nesting. Two constraints shaped it:
 - The class must be `const_set` **before** `style` is called: StyleVariants
   derives the style set's name from the class name, and an anonymous class has
   none.
+
+Its boundary is narrower than "no behaviour": **`part` declares a slot, classes
+and a tag, and no other attribute.** `ItemGroup` is a `data-slot` and two
+classes — and a `role="list"`, so it gets a `component.rb` for one line of
+`#element_attributes`. That is the macro working as intended rather than a gap
+in it; widening it to take arbitrary attributes would turn a lookup table back
+into a configuration language.
 
 **The FormBuilder** exists because porting `field.tsx` character-perfect while
 shipping no `ActiveModel` bridge optimises for fidelity to React over usefulness
