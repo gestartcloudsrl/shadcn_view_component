@@ -64,11 +64,16 @@ Left unexempted, `inert` would have silently defeated the CSS rule's
 exception rather than agreed with it: measured before `exemptFromInert` was
 added, a button inside a collapsing panel read `pointer-events: auto`, was
 not focusable, and `elementFromPoint` at its centre returned the trigger
-instead of the button. `exemptFromInert` in `animation.js` carries the
+instead of the button. `exemptFromInert` in `animation.js` retypes the
 identical `[data-slot="accordion-content"]` boundary the CSS `:not()` already
-draws, reused rather than redefined so the two selectors cannot drift apart.
-They travel together here because both start when an exit is deferred and end
-when it is flushed or cancelled, not because one implies the other.
+draws — a second literal with the same text, not a shared one, so nothing in
+the code stops the two from drifting apart if one changes and the other
+does not. What catches that today is `exit_animation_spec.rb:426`: it probes
+a real control inside a collapsing panel for focus and hit-testing, which
+fails the same way whether the CSS exception goes missing or this one does.
+`data-exiting` and `inert` travel together here because both start when an
+exit is deferred and end when it is flushed or cancelled, not because one
+implies the other.
 
 **Not `animationend`.** It bubbles from descendants, so it needs filtering by
 target and name, and it never fires when no animation applies — which forces a

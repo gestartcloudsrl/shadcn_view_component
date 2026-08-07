@@ -38,8 +38,14 @@ const willEnd = (animation) =>
   animation.playState === "running" &&
   Number.isFinite(animation.effect?.getComputedTiming()?.endTime)
 
-// The same boundary `[data-slot][data-exiting]:not([data-slot="accordion-content"])`
-// draws in shadcn.css, reused rather than redefined so the two cannot drift apart.
+// A second literal, not a shared one: this selector is retyped to match
+// `[data-slot][data-exiting]:not([data-slot="accordion-content"])` in
+// shadcn.css, not read from it, so nothing in the code stops the two from
+// drifting apart if one changes and the other does not. What actually catches
+// that today is `exit_animation_spec.rb:426` — it probes a real control
+// inside a collapsing panel for focus and hit-testing, which fails the same
+// way whether the CSS exception goes missing or this one does.
+//
 // A collapsing accordion panel sits in the page flow with nothing behind it to
 // protect from a click, which is what that CSS exception is for — and `inert` is
 // a stronger tool than `pointer-events`, not an equivalent one: it drops the
@@ -49,7 +55,7 @@ const willEnd = (animation) =>
 // exception rather than agree with it. Measured with the carve-out missing: a
 // button inside a collapsing panel read `pointer-events: auto`, was not
 // focusable, and `elementFromPoint` at its centre returned the trigger instead.
-const exemptFromInert = (element) => element.matches('[data-slot="accordion-content"]')
+const exemptFromInert = (element) => element.matches("[data-slot='accordion-content']")
 
 // Holds teardowns that are waiting on an element's exit animation, one per
 // element.
@@ -88,10 +94,11 @@ export class ExitQueue {
     // `data-exiting` and `inert` are not two spellings of one thing: the
     // marker above is a CSS hook, deliberately excluded for the accordion so
     // its collapsing panel keeps taking clicks; `inert` takes the element out
-    // of the tab order and the accessibility tree instead, carrying the same
-    // exclusion (`exemptFromInert`, above) rather than a fresh one — `hidden`
-    // used to do both jobs, in the same tick, before either started waiting
-    // on this queue.
+    // of the tab order and the accessibility tree instead, exempting the same
+    // accordion panel via `exemptFromInert` (above, and see its comment for
+    // how that exemption is kept in step with the CSS one) — `hidden` used to
+    // do both jobs, in the same tick, before either started waiting on this
+    // queue.
     if (!exemptFromInert(element)) element.inert = true
 
     // Tags this call's continuation with the generation it belongs to. Without
