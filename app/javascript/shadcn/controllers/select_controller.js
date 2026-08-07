@@ -76,7 +76,9 @@ export default class extends Controller {
 
     switch (event.key) {
       // A listbox has ends: clamp rather than wrap, unlike the dropdown menu's
-      // cycle. Radix's Select does the same.
+      // cycle. Believed to match Radix — its Select.Content takes no `loop`
+      // prop — but not checkable here, since only shadcn's TSX is vendored,
+      // not Radix.
       case "ArrowDown":
         event.preventDefault()
         this.highlight(items[Math.min(current + 1, items.length - 1)])

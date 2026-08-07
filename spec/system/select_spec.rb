@@ -95,6 +95,31 @@ RSpec.describe "Select", :js do
       expect(highlighted).to eq("grapes")
     end
 
+    it "narrows the match as more characters arrive" do
+      press("b")
+      press("l")
+
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("blueberry")
+    end
+
+    # The dropdown menu wraps past the ends of its item list because a menu is
+    # a cycle; a listbox has ends, so ArrowUp on the first item stays put
+    # instead. This is the example that would fail if the two controllers'
+    # roving focus were ever unified.
+    it "does not move past the first item with ArrowUp" do
+      press(:arrow_up)
+
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("apple")
+    end
+
     it "closes on Escape without changing the value" do
       press(:escape)
 
