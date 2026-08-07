@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe "InputGroup", :js do
-  def focused_placeholder
+  # Lazy, so it reads the DOM after the example's click rather than before it.
+  let(:focused_placeholder) do
     page.evaluate_script("document.activeElement.getAttribute('placeholder')")
   end
 
