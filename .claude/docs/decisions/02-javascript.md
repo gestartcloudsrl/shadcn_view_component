@@ -89,18 +89,21 @@ A generation token guards the continuations: `cancel()` followed by a fresh
 `defer()` in one tick would otherwise let the first continuation flush the
 second exit's teardown.
 
-### One thing given up on purpose
+The same window also has to keep behaving like the content is still there, not
+just survive being reopened or torn down early. A floating layer keeps
+following its anchor while it fades: `reposition()` and `applyPosition()`
+guard on `this.mounted`, not `this.open` — the flag stays true from `mount()`
+until `dismount()`, so a scroll or resize during the exit still moves the
+content instead of leaving it stranded over its old anchor. `hide()` still
+flips `this.open` immediately, since that is what interaction (Escape, an
+outside click) has to answer to. Radix keeps the content mounted through its
+exit animation — `menu.tsx:253` wraps `MenuContentImpl` in `<Presence
+present={forceMount || context.open}>` — but whether Popper keeps
+repositioning it while mounted is not checkable, since Radix's Popper
+implementation is not among the vendored files; continuing to reposition here
+is the safer default, not a proven parity claim.
 
-A floating layer keeps following its anchor while it fades: `reposition()` and
-`applyPosition()` guard on `this.mounted`, a flag that stays true from `mount()`
-until `dismount()` — later than `this.open`, which `hide()` still flips
-immediately, since that is what interaction (Escape, an outside click) has to
-answer to. Radix keeps the content mounted through its exit animation —
-`menu.tsx:253` wraps `MenuContentImpl` in `<Presence present={forceMount ||
-context.open}>` — but whether Popper keeps repositioning it while mounted is
-still not checkable, since Radix's Popper implementation is not among the
-vendored files; matching it was taken as the safer default rather than as a
-proven parity claim.
+### One thing given up on purpose
 
 **`prefers-reduced-motion` collapses these animations**, which nothing in the
 vendored upstream does. The utilities themselves come from `tw-animate-css`,
