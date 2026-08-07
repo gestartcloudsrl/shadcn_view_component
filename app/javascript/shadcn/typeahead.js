@@ -8,9 +8,11 @@
 // currently highlighted and wraps, rather than always scanning from the top
 // of the list.
 //
-// The *input* is not identical: Radix matches over an array of label strings
-// and maps the winner back to an item, so two items sharing a label are one
-// candidate to it and two here. See `.claude/docs/todo.md`.
+// The input differs in Radix's *menu*, not in the file above: `getNextMatch`
+// is handed an array of label strings and the winner mapped back to an item
+// (vendor/radix/ui/menu.tsx:451-454), so two items sharing a label are one
+// candidate there and two here. `findNextItem`'s own callers pass items and
+// compare by identity, exactly as this does. See `.claude/docs/todo.md`.
 //
 // Deliberately does not know how the caller moves focus — that stays in each
 // controller, which owns its own item list and highlighting. The current

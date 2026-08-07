@@ -100,9 +100,12 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       button is a labelable element. `checkbox`'s own preview relies on the
       opposite and passes axe. Previews are documentation, so this is a
       falsehood the gem ships.
-- [ ] **`typeahead.js` searches over items where Radix searches over strings.**
-      The algorithm matches `getNextMatch` (vendor/radix/ui/menu.tsx:1336-1347);
-      the input does not. Radix's menu passes `values: string[]` and maps the
+- [ ] **`typeahead.js` searches over items where Radix's *menu* searches over
+      strings.** The algorithm matches `getNextMatch`
+      (vendor/radix/ui/menu.tsx:1336-1347); the input does not — though only in
+      the menu. `findNextItem`, the select's copy this was ported from
+      (select.tsx:1906-1921), is handed items and compares them by identity,
+      which is what the gem does. The menu passes `values: string[]` and maps the
       winner back with `items.find(i => i.textValue === nextMatch)`
       (menu.tsx:451-454), so two items sharing a label are *one* candidate to
       it. With `["Copy", "Copy", "Delete"]` and the second Copy current,
@@ -116,6 +119,21 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       character repeats" in `spec/system/dropdown_menu_spec.rb` now
       claim only that the two Radix *bodies* agree, which is all that was ever
       verified.
+- [ ] **An aliased icon name cannot be registered over.** `icon/component.rb:54`
+      resolves `ALIASES` in the constructor, so `#name` is already `"ellipsis"`
+      or `"loader-circle"` by the time `#path` reads the registry:
+      `register("more-horizontal", …)` and `register("loader-2", …)` are stored
+      under keys nothing ever looks up, and the bundled drawing renders. That
+      is the same shape as the override bug fixed in the same wave — a host
+      instructed the gem and the gem carried on — narrowed to the two aliases.
+      It is not hypothetical from the inside either: the gem itself renders
+      `Icon::Component.new("more-horizontal")` in
+      `pagination/ellipsis/component.rb:21` and
+      `breadcrumb/ellipsis/component.rb:21`, and `Spinner::Component` passes
+      `"loader-2"` to `super`. The fix is to try the unaliased name in the
+      registry before aliasing, or to alias on write in `IconRegistry.register`
+      — the second also makes `registered` reflect what a host asked for, and
+      wants a spec for each alias.
 - [ ] **The typeahead buffer survives a close.** Radix's menu clears its search
       buffer on blur (vendor/radix/ui/menu.tsx:585-590) and Select exposes
       `resetTypeahead` for the same purpose (vendor/radix/ui/select.tsx:1877);

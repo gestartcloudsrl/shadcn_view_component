@@ -172,6 +172,47 @@ RSpec.describe "Select", :js do
     end
   end
 
+  # `onOpen` always highlights, so nothing a user can do reaches the listbox
+  # with the cursor unset — with one exception: `selectedItem` searches every
+  # item and `enabledItems` filters, so a selection that is also *disabled* is
+  # highlighted on open and then not found among the candidates. Radix reverses
+  # the candidates for ArrowUp and slices from an index of -1, which takes
+  # nothing off (vendor/radix/ui/select.tsx:898-904), so focus enters at the
+  # end.
+  #
+  # No preview renders that combination, and the state is set here directly
+  # rather than by adding one — a preview is also a snapshot and an
+  # accessibility fixture, and this is the same move
+  # spec/system/typeahead_spec.rb makes for behaviour no preview reaches.
+  context "when the selected item is disabled" do
+    before do
+      page.execute_script(<<~JS)
+        const root = [...document.querySelectorAll("[data-slot=select]")].pop();
+        root.querySelector("[data-slot=select-item][data-value=apple]").dataset.disabled = "";
+        root.setAttribute("data-shadcn--select-value-value", "apple");
+      JS
+      open_select
+    end
+
+    it "highlights the selection even though it is not a candidate" do
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("apple")
+    end
+
+    it "enters at the last item on ArrowUp, rather than the first candidate" do
+      press(:arrow_up)
+
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("pineapple")
+    end
+  end
+
   # The content is moved into a positioned wrapper while open. It used to come
   # back at the end of its container, which permanently reordered the markup.
   context "when opened and closed repeatedly" do
