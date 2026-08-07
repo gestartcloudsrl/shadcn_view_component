@@ -80,22 +80,34 @@ second exit's teardown.
 ### Two things given up on purpose
 
 **A floating layer no longer follows its anchor while it fades.** `hide()` drops
-the scroll and resize listeners at once. Radix keeps positioning until unmount;
-matching it needs a second flag beside `this.open`, which `reposition()` returns
-early on. See [todo](../todo.md).
+the scroll and resize listeners at once. Radix is understood to keep positioning
+until unmount — not checkable here, since only shadcn's TSX is vendored, not
+Radix. Matching it needs a second flag beside `this.open`, which both
+`reposition()` and `applyPosition()` return early on. See [todo](../todo.md).
 
-**`prefers-reduced-motion` collapses these animations**, which upstream does not
-do — `tw-animate-css` ships no handling for it. Taken because this is a library.
-It lives inside the `@utility` bodies: the components apply these through
-variants, so the emitted class is literally `data-[state=closed]:animate-out`
-and a top-level `.animate-out` rule matches nothing.
+**`prefers-reduced-motion` collapses these animations**, which nothing in the
+vendored upstream does. The utilities themselves come from `tw-animate-css`,
+which is *not* vendored here, so whether it has since grown handling of its own
+has not been checked. Taken because this is a library.
 
-Note what that does *not* change. At `0.01ms` the animation still exists and is
-still play-pending, so reduced-motion users take the **deferred** path, not the
-synchronous one. Only the duration changes, not the machinery — `data-exiting`
+It lives inside the `@utility` bodies rather than in a top-level rule, because
+the two compiled shapes differ. All nine `animate-out` uses are
+variant-prefixed, so the emitted class is literally
+`data-[state=closed]:animate-out` and a `.animate-out` selector would match
+nothing — but `tooltip/content` applies the bare `animate-in`, which
+a `.animate-in` selector *would* have matched. Nesting reaches both without
+having to know which is which.
+
+Note what that does *not* change. At `0.01ms` the animation still exists and
+its `playState` is `"running"` — measured, closing a popover forced to exactly
+that duration — so reduced-motion users take the **deferred** path, not the
+synchronous one. Only the duration changes, not the machinery: `data-exiting`
 is still set and cleared, the Turbo listener still added and removed. A comment
 asserting the opposite was written and had to be corrected; do not reintroduce
-it.
+it. A duration of *zero* is a different case and does take the synchronous
+branch — but zero is what the test harness produces, not what a user with
+reduced motion gets; see
+[testing](03-testing.md#asserting-on-an-animation).
 
 ## Controllers re-sync on `turbo:morph`
 
@@ -130,14 +142,13 @@ short of another layer. See [testing](03-testing.md).
 
 The accordion needs that `!important` because its class name doubles as an
 `--animate-*` theme key, which arms Tailwind's built-in functional `animate-*`
-utility: it contributes a second `animation:` shorthand to the same rule, later,
-resetting the duration the media query set. Dropping the theme key would remove
-the collision, but a host that defines it in their own `@theme` re-creates it in
-their build — so the `!important` stays.
+utility for the same name: it contributes a second `animation:` shorthand to the
+same rule, later, resetting the duration the media query set. Dropping the theme
+key would only move the collision into any host that defines one of their own,
+so the `!important` stays.
 
-Do not expect to *see* the second declaration in the compiled output: it is
-byte-identical to the first, so it collapses, minified or not. What it leaves
-behind is an inverted declaration order — the accordion rule compiles with its
-`@media` block **first** and `animation:` last, while `.animate-in` keeps source
-order with its `@media` last. That inversion is the trace, and chasing the
-duplicate text instead cost one review round.
+The rest of that account — including why the duplicate declaration is *not*
+visible in the compiled output and what to look for instead, which cost one
+review round to work out — lives in the comment above
+`@utility animate-accordion-down` in `shadcn.css`. One copy, because three
+would drift.

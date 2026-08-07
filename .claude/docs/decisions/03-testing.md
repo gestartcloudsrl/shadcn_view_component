@@ -36,6 +36,20 @@ The best coverage-per-line in the repo. Ruby and JS are wired together by bare
 strings, so renaming a controller method breaks every Select in the wild with
 nothing failing. Static analysis of the JS, not execution of it.
 
+## `reduced_motion_spec.rb`
+
+Reads the *compiled* bundle, rebuilding it first rather than trusting whatever
+`tailwindcss:build` last left on disk. It asserts the
+`@media (prefers-reduced-motion: reduce)` block for every `animate-*` class the
+components actually apply — scanned off `app/components`, not typed out — and
+that the accordion pair carries `!important` there. That last part is the point:
+without it Tailwind's own `animate-*` utility resets the duration, and a
+`@media` block missing the flag is indistinguishable by inspection from a
+working one.
+
+Rule text, not behaviour — see
+[what is still unverified](#what-is-still-unverified).
+
 ## System specs
 
 The only place the JavaScript executes. Previews double as fixtures, which is why
@@ -59,22 +73,26 @@ Three things to know before writing one:
 The suite suppresses animations twice over, and both settings are right for
 every other spec: the driver runs Chrome with `--force-prefers-reduced-motion`,
 and `Capybara.disable_animation` makes Capybara's own server inject
-`* { animation-duration: 0s !important }` into every page it serves.
+`*, ::before, ::after { … animation-duration: 0s !important; … }` into every
+page it serves.
 
 `exit_animation_spec.rb` forces a duration back onto the elements under test
 (`force_animations`) rather than registering a second driver. Only the duration
 is overridden; `animation-name` still comes from the component's own class, so
 what the assertions read is the shipped code and not the harness.
 
-**How it wins is the interesting part, and it changed once already.** Beating
-Capybara's rule needs only specificity — that rule is `!important` at
-specificity zero, so any `[data-slot=…]` selector outranks it. Beating the
-*gem's own* `!important` on the accordion utilities needs more, because
+**How it wins is the interesting part, and it changed once already.** Capybara's
+rule is `!important` at specificity zero, so beating it takes an `!important` of
+its own **and** more specificity — neither alone is enough, since no ordinary
+declaration outranks an important one however specific it is. Beating the *gem's
+own* `!important` on the accordion utilities needs more still, because
 [the cascade-layer trap](02-javascript.md#the-one-css-trap-worth-remembering)
 inverts for `!important` declarations: a layered `!important` beats an unlayered
 one at any specificity, so an injected `<style>` cannot touch it. The helper
-therefore sets the property **inline**, which is the only thing that outranks a
-layered `!important` short of another layer.
+therefore sets the property **inline, with `!important`**, which is the only
+thing that outranks a layered `!important` short of another layer. Drop that
+flag from the helper and nothing is forced at all: every element falls back to
+Capybara's `0s`.
 
 That was not theoretical. When the accordion first shipped its `!important`, the
 harness was silently disarmed and two examples became races that passed about
@@ -95,11 +113,28 @@ Three traps, each of which cost a review round:
   not. `have_css` retries for presence, so an example is relying on the forced
   duration outlasting a Selenium round trip. A moment-in-time property read is
   the same shape.
-- **A zero-duration animation is still an animation.** Capybara's injected rule
-  does not touch `animation-name`, so `getAnimations()` still returns a
-  play-pending entry and `ExitQueue.defer` takes its *async* branch throughout
-  the rest of the suite. Those specs prove Capybara's retries absorb a frame of
-  delay; they do not exercise the synchronous branch at all.
+- **A zero-duration animation is no animation at all.** Capybara's rule leaves
+  `animation-name` alone, but zeroing the duration is enough on its own:
+  `getAnimations()` on an element whose only animation resolves to `0s` comes
+  back **empty**, so `ExitQueue.defer` takes its *synchronous* branch and never
+  sets `data-exiting`. Measured in this harness, by patching
+  `Element.prototype.getAnimations` and closing a popover and a dialog under
+  the ordinary suite settings: both reported `animation-name: exit`,
+  `animation-duration: 0s`, and an empty list. So the rest of the suite
+  exercises the synchronous branch, not the deferred one.
+
+  **The accordion is the exception**, for the same reason `force_animations`
+  has to go inline: its reduced-motion override is `!important` inside
+  `@layer utilities`, which outranks Capybara's unlayered `!important`, so the
+  shipped `0.01ms` really applies. At `0.01ms` the animation *is* returned and
+  its `playState` *is* `"running"` — measured the same way — so an accordion
+  collapse takes the deferred branch even in a spec that asked for nothing of
+  the sort, which is what `disclosure_spec.rb`'s collapses do.
+
+  The deferred branch is otherwise reached only where a spec forces a duration:
+  the closes in `exit_animation_spec.rb`, which calls `force_animations` on
+  every element it drives, and `turbo_spec.rb:78` ("flushes a layer's exit
+  before Turbo caches the page"), which forces 2s onto the select.
 
 ## axe
 
@@ -148,9 +183,14 @@ other; see [todo](../todo.md).
 - Parity in the removal direction (above).
 - A screen reader. axe covers names, roles, required parents and contrast; it
   does not say whether the experience makes sense in VoiceOver or NVDA.
-- **The reduced-motion CSS.** No spec exercises it: the suite already forces
-  reduced motion *and* zeroes every duration, so the rules can only be verified
-  by building the bundle and measuring in a browser. They were, once, by hand.
+- **What the reduced-motion CSS does once it renders.**
+  `reduced_motion_spec.rb` covers the compiled rules themselves, `!important`
+  included. What nothing covers is the rendered result. Capybara's own
+  `animation-duration: 0s !important` overrides the `0.01ms` for every one of
+  these utilities except the accordion pair, whose `!important` is layered and
+  survives — so the accordion is the only place the suite even *runs* at a real
+  reduced-motion duration, incidentally rather than because a spec asked, and
+  nothing asserts the duration there either.
 - **`flushAll()` in a controller's `disconnect()`.** There is no JavaScript unit
   harness here, and a system spec cannot tell a synchronous flush from a
   microtask-later one via the promise rejection that DOM removal triggers

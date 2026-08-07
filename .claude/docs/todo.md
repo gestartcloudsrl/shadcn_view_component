@@ -63,8 +63,10 @@ combobox, slider.
 - [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
       drops the scroll and resize listeners immediately, so a layer scrolled
       during its exit animation detaches from the trigger for the length of it.
-      Radix keeps positioning until unmount; matching that needs a second flag
-      beside `this.open`, which `reposition()` returns early on.
+      Radix is understood to keep positioning until unmount — not checkable
+      here, since only shadcn's TSX is vendored, not Radix. Matching that needs
+      a second flag beside `this.open`, which both `reposition()` and
+      `applyPosition()` return early on.
 - [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
       it out of the tab order, and that now waits for the animation.
       `[data-slot][data-exiting]` stops clicks but not Tab, and not a screen

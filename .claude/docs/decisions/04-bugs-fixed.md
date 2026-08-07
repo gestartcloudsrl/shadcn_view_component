@@ -71,8 +71,13 @@ frame.
 ## A closing layer could be cached by Turbo mid-exit
 
 Also introduced while making exit animations play, and also caught in review
-rather than by a spec — `turbo_spec.rb` has an example for exactly this failure,
-and it passed vacuously, because the suite zeroes every animation duration.
+rather than by a spec. `turbo_spec.rb:45` already had an example for exactly
+this failure and passed vacuously: Capybara zeroes the duration, so the teardown
+ran synchronously and there was never an exit in flight to be cached. The
+example added *with* the fix, `turbo_spec.rb:78`, forces a 2s duration onto the
+select and asserts zero popper wrappers at `turbo:before-render` — that one does
+reproduce the bug. Confirmed by commenting out `watchTurbo()`: it fails with
+`expected: 0, got: 1`, and the other eight examples in the file stay green.
 
 Once the DOM teardown waits for the animation, a layer closed by the *same*
 `pointerdown` that starts a Drive navigation is still in the document when
