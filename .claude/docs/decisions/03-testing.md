@@ -54,6 +54,53 @@ Three things to know before writing one:
   preview is a race. `wait_for_turbo` waits for the `data-turbo-preview` marker
   to clear. One spec was flaky 1-in-5 before this.
 
+## Asserting on an animation
+
+The suite suppresses animations twice over, and both settings are right for
+every other spec: the driver runs Chrome with `--force-prefers-reduced-motion`,
+and `Capybara.disable_animation` makes Capybara's own server inject
+`* { animation-duration: 0s !important }` into every page it serves.
+
+`exit_animation_spec.rb` forces a duration back onto the elements under test
+(`force_animations`) rather than registering a second driver. Only the duration
+is overridden; `animation-name` still comes from the component's own class, so
+what the assertions read is the shipped code and not the harness.
+
+**How it wins is the interesting part, and it changed once already.** Beating
+Capybara's rule needs only specificity — that rule is `!important` at
+specificity zero, so any `[data-slot=…]` selector outranks it. Beating the
+*gem's own* `!important` on the accordion utilities needs more, because
+[the cascade-layer trap](02-javascript.md#the-one-css-trap-worth-remembering)
+inverts for `!important` declarations: a layered `!important` beats an unlayered
+one at any specificity, so an injected `<style>` cannot touch it. The helper
+therefore sets the property **inline**, which is the only thing that outranks a
+layered `!important` short of another layer.
+
+That was not theoretical. When the accordion first shipped its `!important`, the
+harness was silently disarmed and two examples became races that passed about
+half the time — and the round that found it first concluded the flakiness was
+pre-existing, having compared against a baseline that already carried the bug.
+
+The assertions themselves read what the browser **scheduled**
+(`getAnimations()`), never what is on screen at a given moment. That is what
+makes them deterministic — either the animation started or it did not.
+
+Three traps, each of which cost a review round:
+
+- **`have_no_css` is a visibility predicate**, so it is unsound as a landing
+  gate for anything that animates a *height* or *width*: the box reaches zero
+  size before the JavaScript teardown runs. Gate on the `hidden` attribute
+  instead.
+- **Assertions on presence do race**, even though assertions on scheduling do
+  not. `have_css` retries for presence, so an example is relying on the forced
+  duration outlasting a Selenium round trip. A moment-in-time property read is
+  the same shape.
+- **A zero-duration animation is still an animation.** Capybara's injected rule
+  does not touch `animation-name`, so `getAnimations()` still returns a
+  play-pending entry and `ExitQueue.defer` takes its *async* branch throughout
+  the rest of the suite. Those specs prove Capybara's retries absorb a frame of
+  delay; they do not exercise the synchronous branch at all.
+
 ## axe
 
 Runs over every family, at rest and with each layer open, plus contrast in dark
@@ -101,3 +148,14 @@ other; see [todo](../todo.md).
 - Parity in the removal direction (above).
 - A screen reader. axe covers names, roles, required parents and contrast; it
   does not say whether the experience makes sense in VoiceOver or NVDA.
+- **The reduced-motion CSS.** No spec exercises it: the suite already forces
+  reduced motion *and* zeroes every duration, so the rules can only be verified
+  by building the bundle and measuring in a browser. They were, once, by hand.
+- **`flushAll()` in a controller's `disconnect()`.** There is no JavaScript unit
+  harness here, and a system spec cannot tell a synchronous flush from a
+  microtask-later one via the promise rejection that DOM removal triggers
+  anyway.
+- **Whether an exit animation looks right.** The specs assert an animation of
+  the expected name was scheduled and that the element eventually leaves. They
+  say nothing about duration, easing, or whether an exit reads as the reverse of
+  its entrance.

@@ -23,12 +23,6 @@ decided is in `decisions/`.
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
       that is the claim least tested.
-- [ ] **Exit animations do not play.** `hidden` is set immediately on close, so
-      every `data-[state=closed]:animate-out` class is inert. The markup matches
-      shadcn; the behaviour does not. Planned in
-      [plans/2026-08-06-exit-animations.md](plans/2026-08-06-exit-animations.md),
-      which waits on `getAnimations()` rather than `animationend`, and finds a
-      third closing path this entry used to miss — the accordion.
 - [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.
@@ -66,7 +60,19 @@ combobox, slider.
       `<label for>` pointing at the trigger; the FormBuilder uses
       `aria-labelledby`. Both pass axe — `<button>` is a labelable element — but
       one of them should probably follow the other.
+- [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
+      drops the scroll and resize listeners immediately, so a layer scrolled
+      during its exit animation detaches from the trigger for the length of it.
+      Radix keeps positioning until unmount; matching that needs a second flag
+      beside `this.open`, which `reposition()` returns early on.
+- [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
+      it out of the tab order, and that now waits for the animation.
+      `[data-slot][data-exiting]` stops clicks but not Tab, and not a screen
+      reader. Radix also removes it from the tab order; `inert` would.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
+- [x] **Exit animations** — every `data-[state=closed]:animate-out` class was
+      inert, on three closing paths rather than the two this list used to name.
+      See [decisions/02-javascript.md](decisions/02-javascript.md).
 
 ## Deliberately not doing
 
