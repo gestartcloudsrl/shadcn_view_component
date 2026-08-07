@@ -124,14 +124,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
       which the rule excludes; either way it never touches Tab or a screen
       reader. Radix also removes it from the tab order; `inert` would.
-- [ ] **`ItemGroup` is `role="list"` and `Item` has no role.** ARIA requires a
-      list's children to be `listitem`s, so a group of bare `Item`s fails axe's
-      `aria-required-children` the moment one contains a button or a link.
-      Caught by the accessibility suite while porting; shadcn has the same gap.
-      The markup is 1:1 and the preview shows the working spelling, but nothing
-      makes a caller use it — unlike Select's accessible name, which the
-      FormBuilder can wire on the caller's behalf. There is no equivalent hook
-      here, which is the actual open question.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 - [x] **Exit animations** — every `data-[state=closed]:animate-out` class was
       inert, on three closing paths rather than the two this list used to name.

@@ -1,5 +1,5 @@
-<%= render(Shadcn::Item::Group::Component.new(class: "w-full max-w-md")) do %>
-  <%= render(Shadcn::Item::Component.new(role: "listitem")) do %>
+<%= render(Shadcn::Item::Group::Component.new(class: "w-full max-w-md")) do |group| %>
+  <% group.with_item do %>
     <%= render(Shadcn::Item::Media::Component.new(variant: :icon)) do %>
       <%= render(Shadcn::Icon::Component.new("circle")) %>
     <% end %>
@@ -14,9 +14,9 @@
     <% end %>
   <% end %>
 
-  <%= render(Shadcn::Item::Separator::Component.new) %>
+  <% group.with_item(separator: true) %>
 
-  <%= render(Shadcn::Item::Component.new(variant: :muted, size: :sm, role: "listitem")) do %>
+  <% group.with_item(variant: :muted, size: :sm) do %>
     <%= render(Shadcn::Item::Header::Component.new) do %>
       <%= render(Shadcn::Item::Title::Component.new) { "Pro plan" } %>
       <%= render(Shadcn::Badge::Component.new) { "Popular" } %>
