@@ -35,6 +35,7 @@ RSpec.describe "shadcn/ui parity" do
     "empty" => "empty",
     "field" => "field",
     "input" => "input",
+    "input-group" => "input_group",
     "kbd" => "kbd",
     "label" => "label",
     "native-select" => "native_select",
@@ -61,7 +62,7 @@ RSpec.describe "shadcn/ui parity" do
   # side it belongs on fails the example below, which is the whole point of it.
   not_yet_ported = %w[
     attachment bubble calendar carousel chart combobox command
-    context-menu direction drawer form hover-card input-group input-otp
+    context-menu direction drawer form hover-card input-otp
     item marker menubar message message-scroller navigation-menu resizable
     scroll-area sidebar slider sonner
   ].freeze

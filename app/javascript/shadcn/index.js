@@ -15,6 +15,7 @@ import CheckboxController from "shadcn/controllers/checkbox_controller"
 import CollapsibleController from "shadcn/controllers/collapsible_controller"
 import DialogController from "shadcn/controllers/dialog_controller"
 import DropdownMenuController from "shadcn/controllers/dropdown_menu_controller"
+import InputGroupController from "shadcn/controllers/input_group_controller"
 import PopoverController from "shadcn/controllers/popover_controller"
 import RadioGroupController from "shadcn/controllers/radio_group_controller"
 import SelectController from "shadcn/controllers/select_controller"
@@ -32,6 +33,7 @@ const CONTROLLERS = {
   collapsible: CollapsibleController,
   dialog: DialogController,
   "dropdown-menu": DropdownMenuController,
+  "input-group": InputGroupController,
   popover: PopoverController,
   "radio-group": RadioGroupController,
   select: SelectController,
