@@ -64,8 +64,13 @@ module Shadcn
 
       attr_reader :name
 
+      # The registry is read first so a host can replace one of the bundled
+      # eleven and not only add a twelfth. The other order ignored
+      # `register("check", …)` in silence — nothing raised, nothing logged, the
+      # gem's own tick still rendering — which leaves a host staring at an icon
+      # that will not change with no way to find out why.
       def path
-        @path ||= PATHS[name] || Shadcn::Icon.registered[name]
+        @path ||= Shadcn::Icon.registered[name] || PATHS[name]
       end
 
       def call

@@ -189,6 +189,10 @@ ShadcnViewComponent::IconRegistry.register("star", %(<path d="M12 2 15 9l7 .5-5 
 <%= render Shadcn::Icon::Component.new("star", class: "size-4") %>
 ```
 
+Registering a name the gem already bundles replaces it — `register("check", …)`
+changes the tick in every checkbox, select and dropdown item — so the eleven are
+defaults, not a fixed set.
+
 `Shadcn::Icon.register` / `.registered` delegate to the same registry and read
 more naturally from a view or another component — anywhere autoloading has
 already run, which is everywhere except an initializer.

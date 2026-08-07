@@ -71,6 +71,8 @@ app/javascript/shadcn/           # 15 controllers + popper, dismiss, focus,
 lib/shadcn_view_component/       # engine, form_builder, generated themes registry
 lib/tasks/themes.rake            # the theme generator
 vendor/shadcn/                   # upstream TSX + themes.json, the parity reference
+vendor/radix/                    # the Radix primitives shadcn wraps — what the
+                                 # controllers are answerable to on behaviour
 ```
 
 A part that is only an element with a `data-slot` and fixed classes is declared

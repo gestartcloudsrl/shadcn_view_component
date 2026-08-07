@@ -93,9 +93,13 @@ export default class extends Controller {
         event.preventDefault()
         this.highlight(items[Math.min(current + 1, items.length - 1)])
         return
+      // With nothing highlighted yet — which is where a click-open leaves the
+      // menu — ArrowUp enters at the *end*: Radix lists it in `LAST_KEYS` and
+      // reverses the candidates before `focusFirst`
+      // (vendor/radix/ui/menu.tsx:576-583).
       case "ArrowUp":
         event.preventDefault()
-        this.highlight(items[Math.max(current - 1, 0)])
+        this.highlight(current === -1 ? items[items.length - 1] : items[Math.max(current - 1, 0)])
         return
       case "Home":
         event.preventDefault()

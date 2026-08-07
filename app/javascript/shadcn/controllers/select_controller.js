@@ -83,9 +83,15 @@ export default class extends Controller {
         event.preventDefault()
         this.highlight(items[Math.min(current + 1, items.length - 1)])
         return
+      // Radix reverses the candidates for ArrowUp before slicing
+      // (vendor/radix/ui/select.tsx:898-904), so an index of -1 slices nothing
+      // off the reversed list and focus enters at the end. `onOpen` always
+      // highlights, which leaves one way to be here with items to move
+      // through: a selected item that is *disabled*, which is what
+      // `selectedItem` finds and what `enabledItems` leaves out.
       case "ArrowUp":
         event.preventDefault()
-        this.highlight(items[Math.max(current - 1, 0)])
+        this.highlight(current === -1 ? items[items.length - 1] : items[Math.max(current - 1, 0)])
         return
       case "Home":
         event.preventDefault()

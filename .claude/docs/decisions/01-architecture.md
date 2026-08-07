@@ -108,8 +108,10 @@ language.
 
 **A host-facing registry lives in `lib/`, never in `app/`.** `Shadcn::Icon` bundles
 the eleven lucide icons the ported components use; a host supplies any of the
-other ~1,500 through `ShadcnViewComponent::IconRegistry.register`. Two Rails
-facts forced that placement, and both cost a review round to learn:
+other ~1,500 through `ShadcnViewComponent::IconRegistry.register`, and a
+registration under a bundled name replaces it rather than losing to it — the
+bundled eleven are defaults, and a host that is ignored has no way to find out.
+Two Rails facts forced that placement, and both cost a review round to learn:
 
 - **`app/components` is reloadable.** A hash held on a module there is discarded
   on every code reload, while `config/initializers/` runs once at boot — so a

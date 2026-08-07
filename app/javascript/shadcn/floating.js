@@ -117,6 +117,11 @@ export class FloatingLayer {
     if (this.frame) cancelAnimationFrame(this.frame)
     this.frame = null
 
+    // Not what keeps a closed layer still — both listeners are gone and the
+    // pending frame is cancelled, so nothing can reach `reposition()` or
+    // `applyPosition()` from here. It is what keeps `mounted` answering "is the
+    // content in the wrapper", which is the only thing either of them asks
+    // before moving it, and the layer is reopened rather than replaced.
     this.mounted = false
 
     this.content.hidden = true

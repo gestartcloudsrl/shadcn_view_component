@@ -55,7 +55,7 @@ RSpec.describe "DropdownMenu", :js do
     end
 
     # The dropdown menu's own upstream, Radix's getNextMatch
-    # (vendor/radix/ui/menu.tsx:1336-1347), is byte-identical to select's
+    # (vendor/radix/ui/menu.tsx:1336-1347), has the same body as select's
     # findNextItem (vendor/radix/ui/select.tsx:1906-1921) that Typeahead#search
     # ports: both collapse a repeated character to one and exclude the
     # currently highlighted item from the search, so holding a letter cycles
@@ -91,6 +91,17 @@ RSpec.describe "DropdownMenu", :js do
       click_outside
 
       expect(page).to have_no_css(content)
+    end
+
+    # A click leaves the cursor unset, so this is the one entry into the menu
+    # where ArrowUp has no previous item to step back from. Radix lists ArrowUp
+    # in `LAST_KEYS` and reverses the candidates before `focusFirst`
+    # (vendor/radix/ui/menu.tsx:576-583), which lands on the last item — the
+    # clamp cases below all press ArrowDown first and so never reach it.
+    it "enters at the last item when ArrowUp is the first key pressed" do
+      press(:arrow_up)
+
+      expect(highlighted).to eq("Log out")
     end
   end
 

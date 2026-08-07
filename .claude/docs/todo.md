@@ -100,10 +100,53 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       button is a labelable element. `checkbox`'s own preview relies on the
       opposite and passes axe. Previews are documentation, so this is a
       falsehood the gem ships.
-- [ ] **`icon.rb`'s two comments disagree with each other.** The header now says
-      no autoloadable constant resolves in an initializer; fifteen lines below,
-      the comment on the delegating `.register` still describes it as what a
-      host calls "once, at boot" — the one context it does not serve.
+- [ ] **`typeahead.js` searches over items where Radix searches over strings.**
+      The algorithm matches `getNextMatch` (vendor/radix/ui/menu.tsx:1336-1347);
+      the input does not. Radix's menu passes `values: string[]` and maps the
+      winner back with `items.find(i => i.textValue === nextMatch)`
+      (menu.tsx:451-454), so two items sharing a label are *one* candidate to
+      it. With `["Copy", "Copy", "Delete"]` and the second Copy current,
+      `values.indexOf(currentMatch)` resolves to index 0, the
+      single-character filter drops both Copies, and Radix does not move; the
+      gem compares element identity and cycles to the first Copy. Arguably the
+      better behaviour — deciding that is the work here, not writing the code.
+      Either match Radix (search over `textContent` strings, then map back) or
+      keep the divergence and say so where it is asserted: the comment in
+      `typeahead.js` and the one above "cycles to the next match when a
+      character repeats" in `spec/system/dropdown_menu_spec.rb` now
+      claim only that the two Radix *bodies* agree, which is all that was ever
+      verified.
+- [ ] **The typeahead buffer survives a close.** Radix's menu clears its search
+      buffer on blur (vendor/radix/ui/menu.tsx:585-590) and Select exposes
+      `resetTypeahead` for the same purpose (vendor/radix/ui/select.tsx:1877);
+      `Typeahead` only clears on its own 1s timer. Open a dropdown, press `s`,
+      Escape, reopen and press `a` inside that second: the gem searches `"sa"`
+      and stays put where Radix searches `"a"` and moves. A `reset()` on
+      `Typeahead` called from each controller's `onClose` closes it; a system
+      spec has to press the two keys inside one second, so it needs the timer
+      controlled rather than waited out. Self-heals after a second, which is
+      why it has gone unnoticed.
+- [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
+      ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the
+      rest at connect; that was deleted once the components were emitting all
+      of it server-side (commit `4e88573`). The components remain correct — but
+      a host who writes their own trigger markup with the target attribute
+      instead of rendering the component now silently gets an element with no
+      role and no `aria-expanded`. Nothing in the README says the attributes
+      are the component's job rather than the controller's. One sentence under
+      the JavaScript section closes it; the alternative, backfilling again,
+      is what that commit deliberately undid.
+- [ ] **Nothing routes a reader to `vendor/radix/`.** Its own README is good and
+      names its staleness risk, but only someone already inside the directory
+      reads it. `CLAUDE.md`'s map now lists it; `.claude/docs/` still does not
+      mention it anywhere, and `decisions/03-testing.md` — which says what each
+      reference is worth — is where the distinction belongs: `vendor/shadcn/`
+      is policed by `parity_spec` on every run, `vendor/radix/` is policed by
+      nobody and can go stale the moment Radix ships past `REVISION`.
+- [x] **`icon.rb`'s two comments disagreed with each other** — the header said no
+      autoloadable constant resolves in an initializer, and the comment on the
+      delegating `.register` fifteen lines below still called it what a host
+      calls "once, at boot". The lower one now names the same constraint.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 - [x] **Exit animations** — every `data-[state=closed]:animate-out` class was
       inert, on three closing paths rather than the two this list used to name.

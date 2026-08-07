@@ -21,7 +21,10 @@ module Shadcn
     end
 
     # The ported components import eleven lucide icons; lucide has about 1,500.
-    # A host that needs another registers its path once, at boot.
+    # A host reaches this pair from a view, a component or anywhere else
+    # autoloading has already run — not from an initializer, which is what
+    # `ShadcnViewComponent::IconRegistry` is for. Registering one of the eleven
+    # replaces it.
     def self.register(name, path)
       ShadcnViewComponent::IconRegistry.register(name, path)
     end

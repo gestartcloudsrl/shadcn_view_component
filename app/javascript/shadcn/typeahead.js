@@ -3,10 +3,14 @@
 // itself after a second of silence, and the caller gets back the item to
 // move the highlight to next, or nothing when there is nowhere new to move —
 // ported from Radix's `findNextItem` (vendor/radix/ui/select.tsx:1906-1921),
-// byte-identical to the dropdown menu's own `getNextMatch`
+// whose body is identical to the dropdown menu's own `getNextMatch`
 // (vendor/radix/ui/menu.tsx:1336-1347), so the search starts at the item
 // currently highlighted and wraps, rather than always scanning from the top
 // of the list.
+//
+// The *input* is not identical: Radix matches over an array of label strings
+// and maps the winner back to an item, so two items sharing a label are one
+// candidate to it and two here. See `.claude/docs/todo.md`.
 //
 // Deliberately does not know how the caller moves focus — that stays in each
 // controller, which owns its own item list and highlighting. The current

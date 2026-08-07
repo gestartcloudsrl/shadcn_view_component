@@ -15,6 +15,18 @@ RSpec.describe Shadcn::Icon::Component, type: :component do
     end
   end
 
+  describe ".register, over a bundled name" do
+    before { Shadcn::Icon.register("check", %(<path d="M4 4h16"/>)) }
+
+    after { Shadcn::Icon.registered.delete("check") }
+
+    it "replaces the bundled drawing rather than being ignored" do
+      render_inline(described_class.new("check"))
+
+      expect(page).to have_css('svg.lucide-check path[d="M4 4h16"]')
+    end
+  end
+
   context "with an unknown name" do
     it "raises, so a typo is loud where it can be fixed" do
       expect { described_class.new("nope") }.to raise_error(ArgumentError)
