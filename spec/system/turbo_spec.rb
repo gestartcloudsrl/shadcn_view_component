@@ -60,6 +60,43 @@ RSpec.describe "Under Turbo", :js do
       end
     end
 
+    # The example above passes even without an exit animation in flight, because
+    # closing set `hidden` in the same tick as `data-state=closed`. Forcing a
+    # duration here is what actually puts the layer mid-exit at the moment the
+    # link's own pointerdown closes it — `dismiss.js`'s capture-phase listener
+    # runs before Turbo's navigation even starts.
+    #
+    # This checks the cause rather than the eventual, harder-to-pin-down effect:
+    # `cacheSnapshot()` clones whatever is in the document once every
+    # `turbo:before-cache` listener has run, so what matters is that the wrapper
+    # is already gone by then — not what a later restore does with the clone,
+    # which this app's own background refetch on a plain link visit overwrites
+    # anyway before it can be observed from here. The check itself waits for
+    # `turbo:before-render`, which fires only once that dispatch — this queue's
+    # own listener included, in whatever order the browser ran it — is done,
+    # rather than racing it from inside a same-named listener of its own.
+    it "flushes a layer's exit before Turbo caches the page, not after" do
+      page.execute_script(<<~JS)
+        document.addEventListener("turbo:before-render", () => {
+          window.__wrappersAtRender = document.querySelectorAll("[data-radix-popper-content-wrapper]").length
+        })
+      JS
+
+      within(all("[data-slot=select]").last) do
+        force_animations("[data-slot=select-content]", duration: "2s")
+        find("[data-slot=select-trigger]").click
+      end
+      expect(page).to have_css("[data-radix-popper-content-wrapper]", visible: :all)
+
+      # The link click is itself the pointerdown that starts the exit:
+      # `dismiss.js` closes the select before Turbo's navigation handling
+      # even begins.
+      click_link "Go to page two"
+      expect(page).to have_css("[data-testid=page-two]")
+
+      expect(page.evaluate_script("window.__wrappersAtRender")).to eq(0)
+    end
+
     it "restores a working page from the Turbo cache" do
       click_link "Go to page two"
       expect(page).to have_css("[data-testid=page-two]")

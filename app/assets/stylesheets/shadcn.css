@@ -134,8 +134,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
 }
 
@@ -159,6 +157,32 @@
      styles. */
   [data-slot][hidden] {
     display: none !important;
+  }
+
+  /* Content on its way out stays painted but stops intercepting clicks, as
+     Radix does. The marker is written by `ExitQueue` and lives only for the
+     length of the animation.
+
+     Keyed on the marker rather than on `[data-state="closed"]`, which is also
+     written to *triggers* — `floating.js` sets it on the trigger,
+     `accordion_controller` on the trigger and its header — and every one of
+     those carries a `data-slot`. Keying on state would make each closed select,
+     dropdown and accordion permanently unclickable.
+
+     `!important`, as on `[data-slot][hidden]` above: this is here to stop a bug
+     rather than to style anything, so an ordinary utility landing on the same
+     element should not be able to switch it off by accident. It costs a host
+     the ordinary way of switching it off on purpose too: a layered `!important`
+     beats an unlayered one, so what is left is an inline style or a layer of
+     their own declared ahead of this file's.
+
+     The accordion is where the rule stops. What it is for is a layer sitting
+     over the page — an overlay swallowing the click aimed at what is behind
+     it. A collapsing panel sits in the flow with nothing behind it to reach,
+     so the rule buys nothing there and only takes away the panel's own links
+     and buttons for the length of the collapse. */
+  [data-slot][data-exiting]:not([data-slot="accordion-content"]) {
+    pointer-events: none !important;
   }
 
   /* Floating layers are promoted to the top layer with the Popover API, so a
@@ -251,6 +275,20 @@
   }
 }
 
+/* A declared departure from upstream: tw-animate-css ships no reduced-motion
+   handling. Nested inside each utility rather than a top-level `.animate-in`/
+   `.animate-out` rule, because most components apply these through variants
+   such as `data-[state=open]:animate-in` — a single, bracket-containing class
+   token a hand-written `.animate-in` selector would not match, even though
+   `tooltip/content` applies the bare `animate-in` form the same selector
+   would have matched. Nesting reaches both compiled shapes uniformly.
+
+   Unlike the accordion pair below, neither utility needs `!important` here:
+   that requirement comes from `--animate-accordion-*` also existing as a
+   theme key, which arms Tailwind's own built-in `animate-*` utility for the
+   same class name. No `--animate-in` or `--animate-out` key exists today,
+   here or upstream; if one is ever added, this pair would need `!important`
+   too. */
 @utility animate-in {
   animation-name: enter;
   animation-duration: var(--tw-duration, 150ms);
@@ -259,6 +297,10 @@
   --tw-enter-rotate: initial;
   --tw-enter-translate-x: initial;
   --tw-enter-translate-y: initial;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms;
+  }
 }
 
 @utility animate-out {
@@ -269,6 +311,57 @@
   --tw-exit-rotate: initial;
   --tw-exit-translate-x: initial;
   --tw-exit-translate-y: initial;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms;
+  }
+}
+
+/* Not `@theme inline`, unlike the tokens above: `inline` substitutes the
+   literal value at every place a theme variable is used, so a host could only
+   retune the accordion by rebuilding with an overridden token. A plain
+   `@theme` block keeps `var(--animate-accordion-down)` below as a live
+   reference, so a host's own `:root { --animate-accordion-up: … }` — written
+   after this stylesheet loads, no rebuild required — still reaches it. */
+@theme {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+/* Defined as utilities rather than staying `@theme`-only entries, because a
+   utility body is the only place a media query can reach them.
+
+   `animate-accordion-down`/`animate-accordion-up` are both a utility name
+   here *and* an `--animate-*` theme key above, so Tailwind's own built-in
+   `animate-*` utility — which is driven by matching theme keys, not by
+   anything written here — also matches them: it contributes a second
+   `animation:` declaration to the same compiled rule, after this one,
+   resetting `animation-duration` regardless of `prefers-reduced-motion`.
+   Both resolve to the same text here, so the bundle carries one `animation:`
+   line rather than two and what the appended declaration leaves visible is
+   the order: this rule compiles `@media` first and `animation:` last, the
+   reverse of the source and of `animate-in` above. Removing the theme key
+   restores the source order. That collision exists in any build where the
+   token is defined, including a host's own if they retune the accordion by
+   writing their own `--animate-accordion-up` — dropping the token to avoid
+   the collision was rejected for exactly that reason, since it would just
+   move the collision into every host that defines one. `!important` on the
+   override is what survives it either way; confirmed in headless Chrome with
+   `--force-prefers-reduced-motion`. */
+@utility animate-accordion-down {
+  animation: var(--animate-accordion-down);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@utility animate-accordion-up {
+  animation: var(--animate-accordion-up);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms !important;
+  }
 }
 
 @utility fade-in-* {

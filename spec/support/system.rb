@@ -49,6 +49,57 @@ module SystemHelpers
     page.find(selector, visible: :all)["data-state"]
   end
 
+  # The driver runs with `--force-prefers-reduced-motion`, and
+  # `Capybara.disable_animation` injects `* { animation-duration: 0s !important }`
+  # into every page it serves. Both are right for the rest of the suite —
+  # elsewhere an animation is only something to wait out — and both make an exit
+  # animation impossible to observe.
+  #
+  # Rather than run this file under a second driver, give the elements under test
+  # a duration that outlives an assertion. Only the duration is forced:
+  # `animation-name` still comes from the component's own
+  # `data-[state=closed]:animate-out`, so what the assertions read is the shipped
+  # class and not the harness.
+  #
+  # An injected `<style>` beats Capybara's own rule — `!important` at
+  # specificity zero — but not the accordion utilities' `!important`, which
+  # lives inside Tailwind's `@layer utilities`. Cascade layers invert the usual
+  # rule for `!important`: a *layered* `!important` beats an unlayered one at
+  # any specificity, so the injected stylesheet could not touch it — see
+  # [the cascade-layer trap](../../.claude/docs/decisions/02-javascript.md#the-one-css-trap-worth-remembering).
+  # Setting the property inline is the only thing that outranks a layered
+  # `!important` short of another layer, so that is what this does instead.
+  #
+  # The elements are resolved through Capybara rather than
+  # `document.querySelectorAll`, so `within(…)` scopes this the way it scopes
+  # every other lookup beside it. The gallery layout carries a ThemeSelector and
+  # a ModeToggle of its own, so a bare `[data-slot=select-content]` is never
+  # only the preview's, and a caller that wrote `within` to say which one it
+  # meant was silently getting both.
+  #
+  # Inline styles only reach elements that exist when this runs, unlike the
+  # stylesheet rule it replaces, which would have matched anything appearing
+  # later too. `minimum: 1` at least makes a selector that matches nothing yet
+  # wait, and then fail by name instead of passing silently.
+  def force_animations(selector, duration: "400ms")
+    page.all(selector, visible: :all, minimum: 1).each do |element|
+      page.execute_script(<<~JS, element, duration)
+        arguments[0].style.setProperty("animation-duration", arguments[1], "important")
+      JS
+    end
+  end
+
+  # The names of the CSS animations the browser has scheduled on an element.
+  # `animate-in` sets `animation-name: enter`, `animate-out` sets `exit`.
+  #
+  # This is what makes an animation spec deterministic: it reads what the browser
+  # decided to run, rather than trying to catch a frame while it runs.
+  def animations_on(selector)
+    page.evaluate_script(
+      "document.querySelector('#{selector}').getAnimations().map((a) => a.animationName)"
+    )
+  end
+
   # Clicking an overlay by its element does not work: Selenium aims at the
   # centre, which is exactly where the dialog sits. Aim at a viewport corner
   # instead, which is what "outside" means to the dismiss layer.

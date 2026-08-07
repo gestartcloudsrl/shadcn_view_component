@@ -68,6 +68,58 @@ on `scroll` with capture. Coalesced into one `requestAnimationFrame` — with th
 opening placement kept synchronous, or the layer flashes at the top-left for a
 frame.
 
+## A closing layer could be cached by Turbo mid-exit
+
+Also introduced while making exit animations play, and also caught in review
+rather than by a spec. `turbo_spec.rb:45` already had an example for exactly
+this failure and passed vacuously: Capybara zeroes the duration, so the teardown
+ran synchronously and there was never an exit in flight to be cached. The
+example added *with* the fix, `turbo_spec.rb:78`, forces a 2s duration onto the
+select and asserts zero popper wrappers at `turbo:before-render` — that one does
+reproduce the bug. Confirmed by commenting out `watchTurbo()`: it fails with
+`expected: 0, got: 1`, and the other eight examples in the file stay green.
+
+Once the DOM teardown waits for the animation, a layer closed by the *same*
+`pointerdown` that starts a Drive navigation is still in the document when
+`cacheSnapshot()` clones the body one tick later. The snapshot then contains the
+popper wrapper, the placeholder comment and `data-exiting`. Restoring it gives
+you an orphan wrapper, a second one nested inside it the next time the layer
+opens, and content stuck at `pointer-events: none`.
+
+`ExitQueue` keeps a `turbo:before-cache` listener for as long as anything is
+pending, and drops it when nothing is. One listener per queue rather than one at
+module load: most pages never have an exit in flight when they navigate away.
+
+## The backdrop could re-enter the top layer above its own dialog
+
+Introduced while making exit animations play, and caught in review rather than
+by a spec — the worst of that batch, because of where it leaves the user.
+
+The overlay carries no `duration-*` class at all: 150ms is the `animate-out`
+default. Dialog content is `duration-200`, sheet content `duration-300`. So once
+the DOM teardown waits for the animation, the overlay's teardown always runs
+*first*, and `hidePopover()` takes it out of the top layer while the content is
+still in it.
+
+Reopen inside that window and the overlay's `showPopover()` appends it to the
+**top**, while the content's throws `InvalidStateError` — it never stopped
+showing — and is swallowed by the `catch` in `top_layer.js`, leaving it in its
+older, lower slot. The `bg-black/50` now paints over the dialog and eats its
+clicks. Dialog and Sheet let you out on the next click. **AlertDialog does not:
+Radix keeps it dismiss-proof on outside clicks on purpose, so the user is left
+with a dimmed, unclickable dialog and no way out.**
+
+Fixed by restacking on reopen — `topLayer.hide(element)` before `show()`, but
+only for an element that had an exit pending, so a cold open is untouched.
+Waiting for both elements together would also have removed the cause, and was
+rejected: it holds the overlay painted 150ms past its own animation, which is
+the thing separate waits exist to avoid.
+
+The general shape is worth more than the instance. Making a synchronous teardown
+asynchronous opens a window in which the DOM is half torn down, and every such
+window needs its interruptions enumerated — reopen, `disconnect`, and a Turbo
+snapshot each found a different bug in the same change.
+
 ## `bin/setup` raised a `TypeError`
 
 `chdir:` was not a keyword in the `system!` signature, so it reached `system` as

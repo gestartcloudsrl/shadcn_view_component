@@ -23,12 +23,6 @@ decided is in `decisions/`.
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
       that is the claim least tested.
-- [ ] **Exit animations do not play.** `hidden` is set immediately on close, so
-      every `data-[state=closed]:animate-out` class is inert. The markup matches
-      shadcn; the behaviour does not. Designed in
-      [decisions/05-exit-animations.md](decisions/05-exit-animations.md), which
-      waits on `getAnimations()` rather than `animationend`, and finds a third
-      closing path the line above missed — the accordion.
 - [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.
@@ -66,7 +60,55 @@ combobox, slider.
       `<label for>` pointing at the trigger; the FormBuilder uses
       `aria-labelledby`. Both pass axe — `<button>` is a labelable element — but
       one of them should probably follow the other.
+- [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
+      drops the scroll and resize listeners immediately, so a layer scrolled
+      during its exit animation detaches from the trigger for the length of it.
+      Radix is understood to keep positioning until unmount — not checkable
+      here, since only shadcn's TSX is vendored, not Radix. Matching that needs
+      a second flag beside `this.open`, which both `reposition()` and
+      `applyPosition()` return early on.
+- [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
+      the only `infinite` animation in `shadcn.css` and so the strongest
+      candidate of the lot, and it got neither of the two things the others
+      did: it is still in the `@theme inline` block rather than the plain
+      `@theme` a host can retune at runtime, and no `@media
+      (prefers-reduced-motion: reduce)` collapses it. `reduced_motion_spec`
+      cannot see the gap either — its scan looks for `animate-in`/`animate-out`/
+      `animate-accordion-*` in `app/components`, and nothing there uses this
+      one. Nothing consumes it today: InputOTP, the component it exists for, is
+      unported.
+- [ ] **The gem's `!important` rules cannot be overridden the ordinary way.**
+      `[data-slot][hidden]`, `[data-slot][data-exiting]` and the two
+      `animate-accordion-*` overrides all carry `!important` from inside a
+      cascade layer, and a layered `!important` beats an unlayered one at any
+      specificity — so a host cannot switch one off with an `!important` of
+      their own either, only inline or from a layer declared earlier. Each rule
+      says in place why it is `!important`; nothing says anywhere that this is
+      the constraint the set of them adds up to. `02-javascript.md` records it
+      only from the side that bit the test harness.
+- [ ] **`exit_animation_spec.rb` overlaps itself.** The AlertDialog
+      `elementFromPoint` example is largely subsumed by the click example
+      beneath it — a click that reaches the content proves the content is on
+      top — and a `have_no_css(overlay)` line is repeated across two examples in
+      the dialog group.
+- [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
+      it out of the tab order, and that now waits for the animation.
+      `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
+      which the rule excludes; either way it never touches Tab or a screen
+      reader. Radix also removes it from the tab order; `inert` would.
+- [ ] **A local run can assert against a stale Tailwind bundle.**
+      `reduced_motion_spec` builds it, but in a `before` hook — so only before
+      its own examples, and `config.order = :random`. On a seed that puts it
+      after `exit_animation_spec`, an example there can pass against whatever
+      the last build left on disk. CI is safe because `bin/setup` builds first.
+      The hook is still the right place: the build used to run while specs were
+      *loading*, where a broken build killed all 546 examples before any of
+      them could say why. What is missing is a decision about where a suite-wide
+      build belongs, not a revert.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
+- [x] **Exit animations** — every `data-[state=closed]:animate-out` class was
+      inert, on three closing paths rather than the two this list used to name.
+      See [decisions/02-javascript.md](decisions/02-javascript.md).
 
 ## Deliberately not doing
 

@@ -3,6 +3,7 @@ import { uniqueId } from "shadcn/id"
 import { pushLayer, removeLayer } from "shadcn/dismiss"
 import { trapFocus, focusFirst, lockScroll, unlockScroll } from "shadcn/focus"
 import * as topLayer from "shadcn/top_layer"
+import { ExitQueue } from "shadcn/animation"
 
 // Radix's Dialog, shared by Dialog, AlertDialog and Sheet: focus is trapped in
 // the content, body scrolling is locked, and Escape closes it — except for
@@ -26,9 +27,7 @@ export default class extends Controller {
   connect() {
     this.releaseFocus = null
     this.layer = null
-
-    if (this.hasContentTarget) this.contentTarget.hidden = !this.openValue
-    if (this.hasOverlayTarget) this.overlayTarget.hidden = !this.openValue
+    this.exits = new ExitQueue()
 
     this.render()
     if (this.openValue) this.show()
@@ -36,6 +35,9 @@ export default class extends Controller {
 
   disconnect() {
     this.teardown()
+    // Turbo may be detaching the element; a continuation would then be
+    // operating on a subtree that has left the document.
+    this.exits.flushAll()
   }
 
   open() {
@@ -96,21 +98,40 @@ export default class extends Controller {
   render() {
     const state = this.openValue ? "open" : "closed"
 
-    if (this.hasContentTarget) {
-      this.contentTarget.id ||= uniqueId("shadcn-dialog")
-      this.contentTarget.dataset.state = state
-      this.contentTarget.hidden = !this.openValue
-    }
+    if (this.hasContentTarget) this.contentTarget.id ||= uniqueId("shadcn-dialog")
 
-    if (this.hasOverlayTarget) {
-      this.overlayTarget.dataset.state = state
-      this.overlayTarget.hidden = !this.openValue
-    }
+    for (const element of this.layers) {
+      element.dataset.state = state
 
-    // Overlay first, content second: the top layer stacks in the order things
-    // are shown, so the dialog ends up above its own backdrop.
-    this.promote(this.hasOverlayTarget && this.overlayTarget)
-    this.promote(this.hasContentTarget && this.contentTarget)
+      // A modal inside a `sticky z-40` header or an `isolate` card would
+      // otherwise be buried by whatever sits above that stacking context.
+      topLayer.enable(element)
+
+      if (this.openValue) {
+        // The overlay is faster than the content, so it can already have left
+        // the top layer while the content is still in it. Showing it again
+        // without taking the content out too would stack the backdrop *above*
+        // the dialog.
+        if (this.exits.has(element)) topLayer.hide(element)
+        this.exits.cancel(element)
+        element.hidden = false
+        topLayer.show(element)
+      } else if (element.hidden) {
+        // A morph can rewrite `hidden` back to true without going through an
+        // exit — `hidePopover()` on a never-shown popover costs nothing, so
+        // there is no reason to skip it just because nothing is animating.
+        topLayer.hide(element)
+      } else {
+        // Each element waits on its own animations: dialog content is
+        // `duration-200` (sheet content `duration-300`), while the overlay
+        // carries no `duration-*` class and falls back to `animate-out`'s
+        // default of 150ms.
+        this.exits.defer(element, () => {
+          element.hidden = true
+          topLayer.hide(element)
+        })
+      }
+    }
 
     if (!this.hasTriggerTarget) return
 
@@ -122,12 +143,12 @@ export default class extends Controller {
     }
   }
 
-  // A modal inside a `sticky z-40` header or an `isolate` card would otherwise
-  // be buried by whatever sits above that stacking context.
-  promote(element) {
-    if (!element) return
-
-    topLayer.enable(element)
-    this.openValue ? topLayer.show(element) : topLayer.hide(element)
+  // Overlay first, content second: the top layer stacks in the order things are
+  // shown, so the dialog ends up above its own backdrop.
+  get layers() {
+    return [
+      this.hasOverlayTarget && this.overlayTarget,
+      this.hasContentTarget && this.contentTarget
+    ].filter(Boolean)
   }
 }

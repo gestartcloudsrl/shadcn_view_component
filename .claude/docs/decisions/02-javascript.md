@@ -30,9 +30,96 @@ A `<dialog>.showModal()` rewrite was considered and dropped: the Popover API
 fixed the same problem with far less change.
 
 **The blocker I had feared did not exist.** Exit animations were the reason to
-hesitate — and they never play today anyway, because closing sets `hidden`
-immediately, so every `data-[state=closed]:animate-out` class is inert. The
-design that makes them play is [exit animations](05-exit-animations.md).
+hesitate — and it then turned out they had never played at all, for an unrelated
+reason. See below.
+
+## Closing waits for the animation; everything else does not
+
+Closing used to set `hidden` in the same tick as `data-state="closed"`, and
+`[data-slot][hidden]` removes the element outright, so no exit keyframe ever got
+a frame. Three paths had it: `floating.js#hide`, `dialog_controller#render`, and
+`accordion_controller#render` — the third one the todo had missed, because
+`animate-accordion-up` is inert for exactly the same reason.
+
+`ExitQueue` in `animation.js` now holds the DOM half of a close until
+`element.getAnimations()` settles. The wait covers only presence in the DOM:
+`hidden`, unwrapping the content back to its placeholder, `hidePopover()`,
+removing the wrapper. Interaction releases at once — the dismiss layer, aria,
+focus, the scroll lock — because a layer on its way out must not answer Escape.
+
+**Not `animationend`.** It bubbles from descendants, so it needs filtering by
+target and name, and it never fires when no animation applies — which forces a
+timeout, and that timeout then becomes the *normal* path in a host that has not
+loaded this stylesheet. An empty `getAnimations()` list is unambiguous: the
+teardown runs synchronously and behaviour is exactly what it was.
+
+**Not every running animation counts.** An `animation-iteration-count: infinite`
+animation reports `"running"` and has no end to reach, and caller classes
+concatenate onto a component's own, so a host utility carrying one —
+`animate-pulse` among them — reaches closing content through supported API.
+Measured: an Escaped dialog still in the document five seconds later, `hidden`
+never set, `pointer-events: none`, with everything that closes it already run.
+The queue filters on the effect's `endTime` being finite rather than on
+`playState` alone; if that empties the list the teardown takes the synchronous
+branch above, which is right for an element whose only animation is not an exit.
+A timeout was rejected as the fix: the constant would be arbitrary, and the layer
+would still be stuck for its length.
+
+### The interruptions are the whole problem
+
+Making a synchronous teardown asynchronous opens a window in which the DOM is
+half torn down, and each way of interrupting that window was a separate bug. All
+three were found in review rather than by a spec, which is the part worth
+remembering: the nominal path was right every time.
+
+- **Reopen mid-exit.** The wrapper and placeholder are still in place, so
+  `show()` reuses them instead of mounting again — a second `mount()` strands
+  the old placeholder and leaves two wrappers. `cancel()` also has to drop the
+  pending teardown, or a stale continuation dismounts a layer that is
+  legitimately open again. Tooltip makes this the common path, not an edge case.
+- **`disconnect()`.** Cannot wait. Turbo may be detaching the element, and a
+  continuation would then operate on a subtree that has left the document.
+- **A Turbo snapshot.** `cacheSnapshot()` clones the document while handling
+  `turbo:before-cache`, well inside an exit's duration, so a layer closed by the
+  same `pointerdown` that starts a Drive navigation would be cached mid-exit —
+  wrapper, placeholder and `data-exiting` all cloned in. The queue keeps a
+  `turbo:before-cache` listener for as long as anything is pending.
+
+A generation token guards the continuations: `cancel()` followed by a fresh
+`defer()` in one tick would otherwise let the first continuation flush the
+second exit's teardown.
+
+### Two things given up on purpose
+
+**A floating layer no longer follows its anchor while it fades.** `hide()` drops
+the scroll and resize listeners at once. Radix is understood to keep positioning
+until unmount — not checkable here, since only shadcn's TSX is vendored, not
+Radix. Matching it needs a second flag beside `this.open`, which both
+`reposition()` and `applyPosition()` return early on. See [todo](../todo.md).
+
+**`prefers-reduced-motion` collapses these animations**, which nothing in the
+vendored upstream does. The utilities themselves come from `tw-animate-css`,
+which is *not* vendored here, so whether it has since grown handling of its own
+has not been checked. Taken because this is a library.
+
+It lives inside the `@utility` bodies rather than in a top-level rule, because
+the two compiled shapes differ. All nine `animate-out` uses are
+variant-prefixed, so the emitted class is literally
+`data-[state=closed]:animate-out` and a `.animate-out` selector would match
+nothing — but `tooltip/content` applies the bare `animate-in`, which
+a `.animate-in` selector *would* have matched. Nesting reaches both without
+having to know which is which.
+
+Note what that does *not* change. At `0.01ms` the animation still exists and
+its `playState` is `"running"` — measured, closing a popover forced to exactly
+that duration — so reduced-motion users take the **deferred** path, not the
+synchronous one. Only the duration changes, not the machinery: `data-exiting`
+is still set and cleared, the Turbo listener still added and removed. A comment
+asserting the opposite was written and had to be corrected; do not reintroduce
+it. A duration of *zero* is a different case and does take the synchronous
+branch — but zero is what the test harness produces, not what a user with
+reduced motion gets; see
+[testing](03-testing.md#asserting-on-an-animation).
 
 ## Controllers re-sync on `turbo:morph`
 
@@ -56,3 +143,24 @@ Radix exactly.
 Popover API's UA styles was first written unlayered, so it beat every Tailwind
 utility no matter how specific and collapsed the dialog overlay to 0×0.
 Unlayered author styles outrank layered ones — it belongs in `@layer base`.
+
+**And for `!important`, that order reverses.** A *layered* `!important` beats an
+unlayered one, at any specificity. This bit a second time, in the test harness:
+the accordion utilities carry `!important` inside `@layer utilities`, so the
+`<style>` block `force_animations` injects to make an animation observable could
+not touch them. Two examples quietly became coin flips. The helper now sets the
+property inline, which is the only thing that outranks a layered `!important`
+short of another layer. See [testing](03-testing.md).
+
+The accordion needs that `!important` because its class name doubles as an
+`--animate-*` theme key, which arms Tailwind's built-in functional `animate-*`
+utility for the same name: it contributes a second `animation:` shorthand to the
+same rule, later, resetting the duration the media query set. Dropping the theme
+key would only move the collision into any host that defines one of their own,
+so the `!important` stays.
+
+The rest of that account — including why the duplicate declaration is *not*
+visible in the compiled output and what to look for instead, which cost one
+review round to work out — lives in the comment above
+`@utility animate-accordion-down` in `shadcn.css`. One copy, because three
+would drift.

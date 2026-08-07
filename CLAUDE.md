@@ -113,6 +113,7 @@ These bite while editing, so they are here rather than in the docs.
 | `parity_spec.rb` | did a class upstream emits get dropped or mistyped |
 | `snapshot_spec.rb` | did the rendered HTML change at all |
 | `stimulus_contract_spec.rb` | does every `shadcn--x#action`, target and value exist in the JS |
+| `reduced_motion_spec.rb` | does the *compiled* bundle still collapse each animation under `prefers-reduced-motion` (rebuilds it first) |
 | `system/` | does it behave, in headless Chrome |
 | `system/accessibility_spec.rb` | axe, every family, at rest and with each layer open |
 
@@ -135,8 +136,5 @@ what gets it covered by the snapshot, preview and accessibility specs.
   reverse-parity check and the system-spec pitfalls
 - [Bugs fixed](.claude/docs/decisions/04-bugs-fixed.md) — things not to
   reintroduce
-- [Exit animations](.claude/docs/decisions/05-exit-animations.md) — why every
-  `animate-out` class is inert, and the design that fixes it; a spec for work
-  not yet done, unlike the four above
 - [TODO](.claude/docs/todo.md) — open work, the 27 unported components, and what
   is deliberately not being done
