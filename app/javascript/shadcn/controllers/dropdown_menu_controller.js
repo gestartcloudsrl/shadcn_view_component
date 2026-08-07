@@ -84,19 +84,16 @@ export default class extends Controller {
     const current = items.indexOf(this.highlighted)
 
     switch (event.key) {
-      // A menu is a cycle: wrap past the ends rather than clamp, unlike the
-      // select listbox. This is a deliberate divergence from Radix, not
-      // parity — DropdownMenu.Content's `loop` prop defaults to false and
-      // vendor/shadcn/ui/dropdown-menu.tsx never sets it. Not checkable here
-      // beyond that, since only shadcn's TSX is vendored, not Radix. See
-      // todo.md.
+      // Clamp rather than wrap: Radix's MenuContentImpl destructures
+      // `loop = false` (vendor/radix/ui/menu.tsx:387) and shadcn never passes
+      // `loop`, so upstream clamps here too.
       case "ArrowDown":
         event.preventDefault()
-        this.highlight(items[(current + 1) % items.length])
+        this.highlight(items[Math.min(current + 1, items.length - 1)])
         return
       case "ArrowUp":
         event.preventDefault()
-        this.highlight(items[(current - 1 + items.length) % items.length])
+        this.highlight(items[Math.max(current - 1, 0)])
         return
       case "Home":
         event.preventDefault()

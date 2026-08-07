@@ -88,7 +88,7 @@ RSpec.describe "DropdownMenu", :js do
       expect(highlighted).to start_with("Profile")
     end
 
-    it "moves the highlight with the arrow keys, wrapping around" do
+    it "moves the highlight with the arrow keys, clamping at the first item" do
       press(:arrow_down)
       expect(highlighted).to eq("Billing")
 
@@ -96,7 +96,7 @@ RSpec.describe "DropdownMenu", :js do
       expect(highlighted).to start_with("Profile")
 
       press(:arrow_up)
-      expect(highlighted).to eq("Log out")
+      expect(highlighted).to start_with("Profile")
     end
   end
 

@@ -83,16 +83,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
-- [ ] **`dropdown_menu_controller` wraps roving focus where Radix clamps.**
-      `contentKeydown`'s ArrowDown/ArrowUp wrap past the ends of the item
-      list; Radix's `DropdownMenu.Content` has a `loop` prop that defaults to
-      false, and `vendor/shadcn/ui/dropdown-menu.tsx` never sets it — not
-      checkable beyond that, since only shadcn's TSX is vendored, not Radix.
-      The wrap is deliberate (it follows the ARIA menu convention, which does
-      call for wrapping) and is now named as a divergence in the controller's
-      comment, but was previously unrecorded anywhere — a maintainer auditing
-      for 1:1 parity would have had no way to find it. Whether to clamp
-      instead, to match upstream, is not decided here.
 - [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
       drops the scroll and resize listeners immediately, so a layer scrolled
       during its exit animation detaches from the trigger for the length of it.
