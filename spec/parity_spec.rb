@@ -31,6 +31,7 @@ RSpec.describe "shadcn/ui parity" do
     "collapsible" => "collapsible",
     "dialog" => "dialog",
     "dropdown-menu" => "dropdown_menu",
+    "empty" => "empty",
     "field" => "field",
     "input" => "input",
     "kbd" => "kbd",
@@ -59,7 +60,7 @@ RSpec.describe "shadcn/ui parity" do
   # side it belongs on fails the example below, which is the whole point of it.
   not_yet_ported = %w[
     attachment bubble button-group calendar carousel chart combobox command
-    context-menu direction drawer empty form hover-card input-group input-otp
+    context-menu direction drawer form hover-card input-group input-otp
     item marker menubar message message-scroller navigation-menu resizable
     scroll-area sidebar slider sonner
   ].freeze
