@@ -99,9 +99,9 @@ These bite while editing, so they are here rather than in the docs.
   items in the block.
 - **Select, Checkbox and Switch are `<button>`s with an ARIA role**, so they need
   a name pointed at them — the FormBuilder wires `aria-labelledby`, a bare
-  component has nothing. (`<label for>` *does* name a button, which is what
-  `ThemeSelector` relies on; `role="combobox"` is the case that cannot take its
-  name from content.)
+  component has nothing; `ThemeSelector` names its trigger the same way. (`<label
+  for>` *does* name a button, but `role="combobox"` is the case that cannot take
+  its name from content, so the gem does not rely on it.)
 - **The gallery layout carries its own ModeToggle and ThemeSelector**, so in
   system specs a preview's dropdown or select is not the only one on the page —
   scope lookups (`all("[data-slot=select]").last`).

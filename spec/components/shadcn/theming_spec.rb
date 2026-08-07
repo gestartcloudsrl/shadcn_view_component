@@ -148,12 +148,10 @@ RSpec.describe "theming" do
       end
 
       # A `role="combobox"` may not take its name from its content, so the name
-      # has to come from the label — which means the `for` and the trigger's id
-      # have to stay in step. Note this is *not* how the FormBuilder names its
-      # select; that one uses `aria-labelledby`.
-      it "names the trigger with a label pointing at it", :aggregate_failures do
-        expect(slot("select-trigger")["id"]).to be_present
-        expect(slot("label")["for"]).to eq(slot("select-trigger")["id"])
+      # has to come from the label — the same way the FormBuilder names its
+      # selects, with `aria-labelledby` rather than `<label for>`.
+      it "names the trigger with aria-labelledby pointing at the label" do
+        expect(slot("select-trigger")["aria-labelledby"]).to eq(slot("label")["id"])
       end
     end
 

@@ -56,8 +56,9 @@ neutral palette the docs claimed. Now generated from the same JSON by
 Found by axe, and true **even through the FormBuilder**. They are `<button>`s
 carrying an ARIA role, and `role="combobox"` forbids taking the name from
 content. (The original note here said `<label for>` cannot name a button. It
-can — button is a labelable element — and `ThemeSelector` names its trigger that
-way; see [testing](03-testing.md).)
+can — button is a labelable element — though `ThemeSelector` also names its
+trigger with `aria-labelledby` now, to match the FormBuilder; see
+[testing](03-testing.md).)
 shadcn/Radix have the same gap. The FormBuilder now wires `aria-labelledby`, and
 the previews demonstrate it.
 

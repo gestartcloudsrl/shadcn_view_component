@@ -33,6 +33,10 @@ module Shadcn
         @label || shadcn_t("theme.label")
       end
 
+      def label_id
+        @label_id ||= "shadcn-theme-selector-#{SecureRandom.hex(4)}"
+      end
+
       def element_attributes(**defaults)
         super(**{ "data-controller" => "shadcn--theme" }.merge(defaults))
       end
@@ -44,13 +48,13 @@ module Shadcn
       private
 
       def hidden_label
-        render(Label::Component.new(for: "theme-selector", class: "sr-only")) { label }
+        render(Label::Component.new(id: label_id, class: "sr-only")) { label }
       end
 
       def select
         render(Select::Component.new(value:, placeholder: "Select a theme")) do |component|
           component.with_trigger(
-            id: "theme-selector",
+            "aria-labelledby" => label_id,
             class: "w-36",
             placeholder: current_title.nil?
           ) do |trigger|

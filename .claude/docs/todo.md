@@ -89,10 +89,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 - [ ] **`select_controller` and `dropdown_menu_controller` share ~60 near-identical
       lines** (roving focus, typeahead) with *deliberate* divergences that nothing
       marks as intentional — dropdown wraps around, select clamps.
-- [ ] **Two components name their trigger differently.** `ThemeSelector` uses
-      `<label for>` pointing at the trigger; the FormBuilder uses
-      `aria-labelledby`. Both pass axe — `<button>` is a labelable element — but
-      one of them should probably follow the other.
 - [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
       drops the scroll and resize listeners immediately, so a layer scrolled
       during its exit animation detaches from the trigger for the length of it.

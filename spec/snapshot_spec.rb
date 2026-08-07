@@ -34,7 +34,7 @@ RSpec.describe "rendered output snapshots" do
   # of at one enormous line. Generated ids differ per render and say nothing
   # about parity, so they are flattened first.
   def self.normalize(html)
-    html.gsub(/\b(shadcn-(?:checkbox|switch)-)[0-9a-f]{8}\b/, '\1x')
+    html.gsub(/\b(shadcn-(?:checkbox|switch|theme-selector)-)[0-9a-f]{8}\b/, '\1x')
         .gsub(/\s+/, " ")
         .gsub(/\s*</, "\n<")
         .strip + "\n"

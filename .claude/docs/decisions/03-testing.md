@@ -205,10 +205,10 @@ preview families off disk (which added `aspect_ratio`, and covers anything added
 later), and the smoke spec derives its families from the controllers directory.
 
 One correction while doing it: **`<label for>` does name a `<button>`** — button
-is a labelable element. `ThemeSelector` relies on exactly that and axe accepts
-it. The FormBuilder's `aria-labelledby` is still right for `role="combobox"`,
-which may not take its name from content, but the two are inconsistent with each
-other; see [todo](../todo.md).
+is a labelable element, so `ThemeSelector`'s original id-and-`for` trigger
+worked and axe accepted it. It has since been switched to `aria-labelledby` to
+match the FormBuilder — the label was `sr-only`, so `<label for>`'s only
+advantage, click-to-focus, was not buying anything.
 
 ## What is still unverified
 
