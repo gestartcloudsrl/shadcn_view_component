@@ -56,16 +56,31 @@ module SystemHelpers
   # animation impossible to observe.
   #
   # Rather than run this file under a second driver, give the elements under test
-  # a duration that outlives an assertion. A class selector with `!important`
-  # beats Capybara's rule, which is `!important` at specificity zero. Only the
-  # duration is forced: `animation-name` still comes from the component's own
+  # a duration that outlives an assertion. Only the duration is forced:
+  # `animation-name` still comes from the component's own
   # `data-[state=closed]:animate-out`, so what the assertions read is the shipped
   # class and not the harness.
+  #
+  # An injected `<style>` beats Capybara's own rule — `!important` at
+  # specificity zero — but not the accordion utilities' `!important`, which
+  # lives inside Tailwind's `@layer utilities`. Cascade layers invert the usual
+  # rule for `!important`: a *layered* `!important` beats an unlayered one at
+  # any specificity, so the injected stylesheet could not touch it — see
+  # [the cascade-layer trap](../../.claude/docs/decisions/02-javascript.md#the-one-css-trap-worth-remembering).
+  # Setting the property inline is the only thing that outranks a layered
+  # `!important` short of another layer, so that is what this does instead.
+  #
+  # Inline styles only reach elements that exist when this runs, unlike the
+  # stylesheet rule it replaces, which would have matched anything appearing
+  # later too. Every current caller visits its preview and waits for Stimulus
+  # before calling this, and the components render their closed/hidden state
+  # rather than omitting it — `hidden: true` is a default attribute, not a
+  # conditional — so the target elements already exist at that point.
   def force_animations(selector, duration: "400ms")
     page.execute_script(<<~JS)
-      const style = document.createElement("style")
-      style.textContent = "#{selector} { animation-duration: #{duration} !important; }"
-      document.head.appendChild(style)
+      document.querySelectorAll("#{selector}").forEach((el) =>
+        el.style.setProperty("animation-duration", "#{duration}", "important")
+      )
     JS
   end
 

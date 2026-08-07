@@ -321,16 +321,18 @@
    `animate-accordion-down`/`animate-accordion-up` are both a utility name
    here *and* an `--animate-*` theme key above, so Tailwind's own built-in
    `animate-*` utility — which is driven by matching theme keys, not by
-   anything written here — also matches them: it emits a second, unconditional
-   rule for the same compiled selector, later in the bundle, whose `animation`
-   shorthand resets `animation-duration` regardless of `prefers-reduced-motion`.
-   That collision exists in any build where the token is defined, including a
+   anything written here — also matches them: it contributes a second
+   `animation:` declaration to the same compiled rule, after this one,
+   resetting `animation-duration` regardless of `prefers-reduced-motion`.
+   Invisible in a minified build once both declarations resolve to the same
+   text — build with `bin/rails tailwindcss:build[debug]` to see both. That
+   collision exists in any build where the token is defined, including a
    host's own if they retune the accordion by writing their own
    `--animate-accordion-up` — dropping the token to avoid the collision was
    rejected for exactly that reason, since it would just move the collision
    into every host that defines one. `!important` on the override is what
    survives it either way; confirmed in headless Chrome with
-   `--force-prefers-reduced-motion`, with and without `!important` present. */
+   `--force-prefers-reduced-motion`. */
 @utility animate-accordion-down {
   animation: var(--animate-accordion-down);
 

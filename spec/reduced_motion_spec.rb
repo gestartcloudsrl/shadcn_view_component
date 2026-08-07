@@ -4,8 +4,8 @@ require "spec_helper"
 
 # Guards the reduced-motion override in the *compiled* Tailwind bundle, not the
 # CSS source. `exit_animation_spec.rb` runs under `--force-prefers-reduced-motion`,
-# but its own `force_animations` helper immediately overrides the duration with a
-# higher-specificity `!important` rule so the animation can be observed for the
+# but its own `force_animations` helper immediately overrides the duration by
+# setting it inline on the element, so the animation can be observed for the
 # rest of that file's assertions — so it cannot see whether the shipped CSS
 # collapses duration under reduced motion at all. This spec reads the build
 # output directly instead.
@@ -13,14 +13,14 @@ require "spec_helper"
 # `animate-accordion-down`/`animate-accordion-up` are both `@utility` names in
 # shadcn.css *and* `--animate-*` theme keys (the keys have to exist — see the
 # comment in shadcn.css for why). That means Tailwind's own built-in `animate-*`
-# utility also matches them and emits a second, unconditional rule for the same
-# selector, later in the bundle, whose `animation` shorthand resets
-# `animation-duration` regardless of `prefers-reduced-motion`. `!important` on
-# the override is what survives that collision. So this spec asserts the
-# `!important` is present on those two, not merely that a `@media` block with
-# the right selector exists — a `@media` block missing `!important` looks
-# identical to a working one by inspection; only the rendered duration tells
-# them apart, which is exactly how this shipped broken once already.
+# utility also matches them and contributes a second `animation:` declaration
+# to the same compiled rule, after this one, resetting `animation-duration`
+# regardless of `prefers-reduced-motion`. `!important` on the override is what
+# survives that collision. So this spec asserts the `!important` is present on
+# those two, not merely that a `@media` block with the right selector exists —
+# a `@media` block missing `!important` looks identical to a working one by
+# inspection; only the rendered duration tells them apart, which is exactly
+# how this shipped broken once already.
 #
 # File reading, not a browser — but it rebuilds the bundle itself first rather
 # than trusting whatever `tailwindcss:build` last left on disk. The first
@@ -59,6 +59,14 @@ RSpec.describe "reduced motion in the compiled bundle" do
   classes = Dir[root.join("app/components/**/*.rb")].flat_map do |file|
     File.read(file).scan(/[\w\[\]=:-]*animate-(?:in|out|accordion-up|accordion-down)/)
   end.uniq.sort
+
+  # Without this, a broken scan pattern makes every example below vacuously
+  # green — `parity_spec.rb` and `stimulus_contract_spec.rb` both went green
+  # this way once, see `.claude/docs/decisions/03-testing.md`.
+  it "found classes to check" do
+    expect(classes).not_to be_empty, "no animate-in/animate-out/animate-accordion-* " \
+                                      "classes found under app/components"
+  end
 
   # This repo only ever pairs these utilities with a bare class or a
   # `data-[state=X]:` variant (confirmed by the scan above) — it does not
