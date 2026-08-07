@@ -121,6 +121,21 @@ RSpec.describe "Select", :js do
       expect(highlighted).to eq("blueberry")
     end
 
+    # Radix compares the raw characters to decide whether they repeat
+    # (vendor/radix/ui/select.tsx:1911) and only lowercases for the match
+    # itself (:1918) — "Bb" is not a repeat of "b", so it searches for the
+    # literal two-character string, finds nothing, and does not move.
+    it "does not treat a shifted letter as a repeat of the same letter" do
+      press("B")
+      press("b")
+
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("banana")
+    end
+
     # Radix has no wrap-around at either end of the listbox
     # (vendor/radix/ui/select.tsx:904). These two guard both ends.
     it "does not move past the first item with ArrowUp" do

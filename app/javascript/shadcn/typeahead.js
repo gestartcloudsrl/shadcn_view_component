@@ -1,8 +1,10 @@
 // A one-second character buffer shared by any roving-focus list (menu items,
 // select options): each keystroke is appended to the buffer, which clears
-// itself after a second of silence, and the caller gets back whichever item
-// matches — ported from Radix's `findNextItem`
-// (vendor/radix/ui/select.tsx:1906-1921), so the search starts at the item
+// itself after a second of silence, and the caller gets back the item to
+// move the highlight to next, or nothing when there is nowhere new to move —
+// ported from Radix's `findNextItem` (vendor/radix/ui/select.tsx:1906-1921),
+// byte-identical to the dropdown menu's own `getNextMatch`
+// (vendor/radix/ui/menu.tsx:1336-1347), so the search starts at the item
 // currently highlighted and wraps, rather than always scanning from the top
 // of the list.
 //
@@ -17,16 +19,19 @@ export class Typeahead {
 
   search(character, items, currentItem) {
     clearTimeout(this.timer)
-    this.buffer += character.toLowerCase()
+    // Raw case, not lowercased: Radix compares the raw characters to decide
+    // whether they repeat (select.tsx:1911) and only lowercases for the
+    // `startsWith` match (select.tsx:1918) — "Bb" is not a repeat of "b".
+    this.buffer += character
     this.timer = setTimeout(() => (this.buffer = ""), 1000)
 
     return findNextItem(items, this.buffer, currentItem)
   }
 }
 
-// This is the "meat" of the typeahead matching logic (vendor/radix/ui/select.tsx:1906-1921).
-// It takes a list of items, the search and the current item, and returns the
-// next item (or `undefined`).
+// This is the "meat" of the typeahead matching logic (vendor/radix/ui/select.tsx:1906-1921,
+// vendor/radix/ui/menu.tsx:1336-1347). It takes a list of items, the search
+// and the current item, and returns the next item (or `undefined`).
 //
 // The search is normalized because if a user has repeatedly pressed a
 // character, we want the exact same behavior as if we only had that one
@@ -50,7 +55,7 @@ function findNextItem(items, search, currentItem) {
   if (normalizedSearch.length === 1) wrapped = wrapped.filter((item) => item !== currentItem)
 
   const nextItem = wrapped.find((item) =>
-    item.textContent.trim().toLowerCase().startsWith(normalizedSearch)
+    item.textContent.trim().toLowerCase().startsWith(normalizedSearch.toLowerCase())
   )
 
   return nextItem !== currentItem ? nextItem : undefined
