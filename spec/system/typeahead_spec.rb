@@ -33,8 +33,9 @@ RSpec.describe "Typeahead#search", :js do
   end
 
   it "wraps the search around the current item rather than starting at the top" do
-    # Apple and Banana both match "b" ahead of the wrap point, but only
-    # Banana does if the search wraps around Grapes as it should.
+    # Banana and Blueberry both start with "b"; searching from the top of the
+    # list would find Banana, but wrapping from the current item, Grapes,
+    # reaches Blueberry first — which is the behaviour under test.
     result = run_against_typeahead(<<~JS)
       const items = [
         { textContent: "Apple" },
@@ -59,8 +60,8 @@ RSpec.describe "Typeahead#search", :js do
       ]
       const typeahead = new Typeahead()
       typeahead.search("b", items, items[1])
-      // The buffer is now "ba", which matches Banana itself — the current
-      // item passed on both calls.
+      // Appending "a" makes the buffer "ba", which matches Banana itself —
+      // the current item passed on both calls.
       const match = typeahead.search("a", items, items[1])
       callback(match && match.textContent)
     JS
