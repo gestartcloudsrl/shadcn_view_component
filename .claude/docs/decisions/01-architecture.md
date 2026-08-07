@@ -106,6 +106,42 @@ the macro working as intended rather than a gap in it; widening it to take
 arbitrary attributes would turn a lookup table back into a configuration
 language.
 
+**A host-facing registry lives in `lib/`, never in `app/`.** `Shadcn::Icon` bundles
+the eleven lucide icons the ported components use; a host supplies any of the
+other ~1,500 through `ShadcnViewComponent::IconRegistry.register`. Two Rails
+facts forced that placement, and both cost a review round to learn:
+
+- **`app/components` is reloadable.** A hash held on a module there is discarded
+  on every code reload, while `config/initializers/` runs once at boot — so a
+  registration made at boot vanishes the first time the developer saves a file.
+- **No autoloadable constant resolves in an initializer at all.** Railties runs
+  `:setup_main_autoloader` *after* `:load_config_initializers`, so `Shadcn::Icon`
+  there raises `NameError` — as would `ApplicationController`. A `lib/` constant
+  required before the engine does resolve.
+
+`Shadcn::Icon.register` remains as a delegating convenience for anywhere
+autoloading works. It is simply not what the README tells a host to call.
+
+The general rule this instance is an example of: **a library must not be able to
+take down a page it has never seen.** An unknown icon name raises where
+`Rails.env.local?` — development and test, where someone can fix it — and
+renders nothing everywhere else, staging included. That is the trade Rails makes
+with a missing translation.
+
+**Ordered heterogeneous children are a polymorphic slot, not a flag.**
+`ItemGroup` renders items and separators in one ordered collection through
+`renders_many :items, types: { item: {…, as: :item}, separator: {…, as: :separator} }`,
+which gives `with_item` and `with_separator`. A single `with_item(separator: true)`
+was tried and rejected: one setter with two disjoint argument sets accepts
+`with_item(separator: true, variant: :muted)` and emits `variant="muted"` as a
+raw attribute on a separator, silently.
+
+Note what forces a slot here at all: `role="list"` obliges `listitem` children,
+`Item` carries no role upstream, and adding one to the component would deviate
+on markup. A slot is API, which is the layer that may add what markup may not —
+the same place the FormBuilder supplies the accessible name Select cannot give
+itself.
+
 **The FormBuilder** exists because porting `field.tsx` character-perfect while
 shipping no `ActiveModel` bridge optimises for fidelity to React over usefulness
 in Rails. `shadcn_native_select` is recommended over `shadcn_select`: it is the

@@ -121,6 +121,28 @@ asynchronous opens a window in which the DOM is half torn down, and every such
 window needs its interruptions enumerated — reopen, `disconnect`, and a Turbo
 snapshot each found a different bug in the same change.
 
+## The icon registry relocated its own bug twice before it was fixed
+
+Worth keeping as a shape rather than an incident, because each fix looked like a
+fix and moved the failure somewhere rarer and worse.
+
+`Icon` raised on an unknown name, so a typo in a host's template was a 500 on a
+decorative element. The registry was added to remove that.
+
+1. **Registry in `app/components`.** That path is reloadable, so the hash was
+   discarded on every code reload while the host's initializer ran once at boot.
+   The 500 stopped being a typo and became *correct usage, a few minutes in*.
+2. **Registry moved to `lib/`.** Reload fixed — but the README still told hosts
+   to call `Shadcn::Icon.register` from `config/initializers/`, where no
+   autoloadable constant resolves at all. Now the application did not boot.
+3. **Documented entry point moved to `ShadcnViewComponent::IconRegistry`**, a
+   `lib/` constant required before the engine. Verified by writing the README's
+   own snippet into a real initializer, booting, rendering, and reloading.
+
+Both earlier probes used `bin/rails runner`, which runs *after* boot — which is
+exactly why neither could see a boot failure. **A check that presupposes the
+thing it is checking cannot fail.**
+
 ## `bin/setup` raised a `TypeError`
 
 `chdir:` was not a keyword in the `system!` signature, so it reached `system` as

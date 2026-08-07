@@ -117,6 +117,17 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
       which the rule excludes; either way it never touches Tab or a screen
       reader. Radix also removes it from the tab order; `inert` would.
+- [ ] **Two previews claim `<label for>` cannot name a `<button>`.**
+      `switch/previews/default.html.erb` and `field/previews/default.html.erb`
+      both say so, and it is exactly the misconception
+      [04-bugs-fixed.md](decisions/04-bugs-fixed.md) exists to correct — a
+      button is a labelable element. `checkbox`'s own preview relies on the
+      opposite and passes axe. Previews are documentation, so this is a
+      falsehood the gem ships.
+- [ ] **`icon.rb`'s two comments disagree with each other.** The header now says
+      no autoloadable constant resolves in an initializer; fifteen lines below,
+      the comment on the delegating `.register` still describes it as what a
+      host calls "once, at boot" — the one context it does not serve.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 - [x] **Exit animations** — every `data-[state=closed]:animate-out` class was
       inert, on three closing paths rather than the two this list used to name.

@@ -75,6 +75,31 @@ working one.
 Rule text, not behaviour — see
 [what is still unverified](#what-is-still-unverified).
 
+## Two ways the snapshot suite can stop asserting
+
+Both are silent, which is what makes them worth writing down.
+
+**`SNAPSHOTS=overwrite` turns the suite into a writer.** In that mode
+`snapshot_spec` regenerates the goldens instead of comparing against them, so
+every example passes while checking nothing. That was harmless while
+`previews_spec` existed, since it had no such mode and would still have caught a
+preview that raised; deleting it made the exposure real. `snapshot_spec` now
+carries an `if: ENV["CI"]` context that fails when the variable is set on CI.
+Local use stays working, because reading the regenerated diff before committing
+it is the point of the flag.
+
+Note the shape: the guard is an *example*, not a `raise` in the describe body. A
+raise there kills the run during loading, before anything can report why — the
+mistake `reduced_motion_spec` had already made once.
+
+**A new generated id makes every snapshot containing it differ per run**, unless
+the normaliser is widened with it. Generated ids follow
+`shadcn-<thing>-#{SecureRandom.hex(4)}`; the regex that flattens them lives in
+`snapshot_spec` and has to name each prefix. Miss one and the failure is
+*nondeterministic*, so the first person to see it re-runs and gets a different
+answer. Two consecutive plain runs is the check — one cannot tell a working
+normaliser from a lucky hex.
+
 ## System specs
 
 The only place the JavaScript executes. Previews double as fixtures, which is why
