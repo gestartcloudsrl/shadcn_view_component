@@ -70,18 +70,23 @@ module SystemHelpers
   # Setting the property inline is the only thing that outranks a layered
   # `!important` short of another layer, so that is what this does instead.
   #
+  # The elements are resolved through Capybara rather than
+  # `document.querySelectorAll`, so `within(…)` scopes this the way it scopes
+  # every other lookup beside it. The gallery layout carries a ThemeSelector and
+  # a ModeToggle of its own, so a bare `[data-slot=select-content]` is never
+  # only the preview's, and a caller that wrote `within` to say which one it
+  # meant was silently getting both.
+  #
   # Inline styles only reach elements that exist when this runs, unlike the
   # stylesheet rule it replaces, which would have matched anything appearing
-  # later too. Every current caller visits its preview and waits for Stimulus
-  # before calling this, and the components render their closed/hidden state
-  # rather than omitting it — `hidden: true` is a default attribute, not a
-  # conditional — so the target elements already exist at that point.
+  # later too. `minimum: 1` at least makes a selector that matches nothing yet
+  # wait, and then fail by name instead of passing silently.
   def force_animations(selector, duration: "400ms")
-    page.execute_script(<<~JS)
-      document.querySelectorAll("#{selector}").forEach((el) =>
-        el.style.setProperty("animation-duration", "#{duration}", "important")
-      )
-    JS
+    page.all(selector, visible: :all, minimum: 1).each do |element|
+      page.execute_script(<<~JS, element, duration)
+        arguments[0].style.setProperty("animation-duration", arguments[1], "important")
+      JS
+    end
   end
 
   # The names of the CSS animations the browser has scheduled on an element.
