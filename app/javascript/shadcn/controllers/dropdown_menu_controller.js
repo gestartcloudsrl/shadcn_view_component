@@ -86,7 +86,9 @@ export default class extends Controller {
     switch (event.key) {
       // Clamp rather than wrap: Radix's MenuContentImpl destructures
       // `loop = false` (vendor/radix/ui/menu.tsx:387) and shadcn never passes
-      // `loop`, so upstream clamps here too.
+      // `loop`, and RovingFocusGroup only wraps when that flag is set
+      // (vendor/radix/ui/roving-focus-group.tsx:324's
+      // `context.loop ? wrapArray(...) : candidateNodes.slice(...)`).
       case "ArrowDown":
         event.preventDefault()
         this.highlight(items[Math.min(current + 1, items.length - 1)])

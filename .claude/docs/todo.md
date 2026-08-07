@@ -83,13 +83,28 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
+- [ ] **`typeahead.js` always searches from the start of the list, where Radix
+      searches from the current item.** `Typeahead#search`
+      (`app/javascript/shadcn/typeahead.js:24`) runs `items.find(...)` over
+      the list in its original order every time. Radix's `findNextItem`
+      (`vendor/radix/ui/select.tsx:1917`) instead wraps the list around the
+      currently highlighted item before searching, and treats a repeated
+      single character as cycling through every match rather than always
+      landing on the first — so typing "b" "b" "b" moves through every item
+      starting with "b" in Radix, and stays on the first one here. Same
+      species of divergence as the roving-focus wrap this round removed,
+      newly checkable now that Radix is vendored. Whether to match it is not
+      decided here.
 - [ ] **A layer stops following its anchor while it fades.** `floating.js#hide`
       drops the scroll and resize listeners immediately, so a layer scrolled
       during its exit animation detaches from the trigger for the length of it.
-      Radix is understood to keep positioning until unmount — not checkable
-      here, since only shadcn's TSX is vendored, not Radix. Matching that needs
-      a second flag beside `this.open`, which both `reposition()` and
-      `applyPosition()` return early on.
+      Radix keeps the content mounted through its exit animation
+      (`vendor/radix/ui/menu.tsx:253`'s `<Presence present={forceMount ||
+      context.open}>`), but whether Popper keeps repositioning it while
+      mounted is not checkable, since Radix's Popper implementation is not
+      among the vendored files. Matching that needs a second flag beside
+      `this.open`, which both `reposition()` and `applyPosition()` return
+      early on.
 - [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
       the only `infinite` animation in `shadcn.css` and so the strongest
       candidate of the lot, and it got neither of the two things the others

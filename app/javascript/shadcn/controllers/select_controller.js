@@ -75,8 +75,10 @@ export default class extends Controller {
     const current = items.indexOf(this.highlighted)
 
     switch (event.key) {
-      // Clamp rather than wrap: `loop` appears nowhere in
-      // vendor/radix/ui/select.tsx, so Radix has no wrap-around here either.
+      // Clamp rather than wrap: Radix's own keydown handler slices the
+      // candidate list from the current index and never wraps it back around
+      // (vendor/radix/ui/select.tsx:904's
+      // `candidateNodes = candidateNodes.slice(currentIndex + 1)`).
       case "ArrowDown":
         event.preventDefault()
         this.highlight(items[Math.min(current + 1, items.length - 1)])

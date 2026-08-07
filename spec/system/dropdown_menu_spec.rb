@@ -98,6 +98,15 @@ RSpec.describe "DropdownMenu", :js do
       press(:arrow_up)
       expect(highlighted).to start_with("Profile")
     end
+
+    # Radix has no wrap-around at either end of the menu
+    # (vendor/radix/ui/roving-focus-group.tsx:324). The counterpart above
+    # guards the top; this guards the bottom.
+    it "does not move past the last item with ArrowDown" do
+      4.times { press(:arrow_down) }
+
+      expect(highlighted).to eq("Log out")
+    end
   end
 
   context "when opened with ArrowUp" do

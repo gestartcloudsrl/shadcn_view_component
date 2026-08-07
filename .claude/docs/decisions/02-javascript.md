@@ -92,10 +92,13 @@ second exit's teardown.
 ### Two things given up on purpose
 
 **A floating layer no longer follows its anchor while it fades.** `hide()` drops
-the scroll and resize listeners at once. Radix is understood to keep positioning
-until unmount — not checkable here, since only shadcn's TSX is vendored, not
-Radix. Matching it needs a second flag beside `this.open`, which both
-`reposition()` and `applyPosition()` return early on. See [todo](../todo.md).
+the scroll and resize listeners at once. Radix keeps the content mounted
+through its exit animation — `menu.tsx:253` wraps `MenuContentImpl` in
+`<Presence present={forceMount || context.open}>` — but whether Popper keeps
+repositioning it while it is mounted is not checkable, since Radix's Popper
+implementation is not among the vendored files. Matching it needs a second
+flag beside `this.open`, which both `reposition()` and `applyPosition()`
+return early on. See [todo](../todo.md).
 
 **`prefers-reduced-motion` collapses these animations**, which nothing in the
 vendored upstream does. The utilities themselves come from `tw-animate-css`,

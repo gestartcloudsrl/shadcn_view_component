@@ -6,7 +6,7 @@ at the revision recorded in `REVISION`:
 | Path | Upstream |
 |---|---|
 | `ui/menu.tsx` | `packages/react/menu/src/menu.tsx` |
-| `ui/roving-focus-group.tsx` | `packages/react/roving-focus-group/src/roving-focus-group.tsx` |
+| `ui/roving-focus-group.tsx` | `packages/react/roving-focus/src/roving-focus-group.tsx` |
 | `ui/select.tsx` | `packages/react/select/src/select.tsx` |
 
 None of it is loaded at runtime, and unlike `vendor/shadcn/`, **no spec reads
@@ -29,7 +29,7 @@ To refresh:
 ```sh
 git clone --depth 1 https://github.com/radix-ui/primitives /tmp/radix-primitives
 cp /tmp/radix-primitives/packages/react/menu/src/menu.tsx vendor/radix/ui/
-cp /tmp/radix-primitives/packages/react/roving-focus-group/src/roving-focus-group.tsx vendor/radix/ui/
+cp /tmp/radix-primitives/packages/react/roving-focus/src/roving-focus-group.tsx vendor/radix/ui/
 cp /tmp/radix-primitives/packages/react/select/src/select.tsx vendor/radix/ui/
 (cd /tmp/radix-primitives && git rev-parse HEAD) > vendor/radix/REVISION
 ```

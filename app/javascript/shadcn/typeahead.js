@@ -3,9 +3,13 @@
 // itself after a second of silence, and the caller gets back whichever item's
 // text starts with the buffer so far.
 //
-// Deliberately does not know how the caller moves focus — wrapping at the
-// ends versus clamping is a roving-focus decision, not a typeahead one, and
-// stays in each controller.
+// Deliberately does not know how the caller moves focus — that stays in each
+// controller, which owns its own item list and highlighting.
+//
+// Always searches from the start of the list, unlike Radix's findNextItem
+// (vendor/radix/ui/select.tsx:1917), which searches forward from the
+// currently highlighted item and cycles on a repeated character. See
+// todo.md.
 export class Typeahead {
   constructor() {
     this.buffer = ""
