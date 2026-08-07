@@ -35,6 +35,10 @@ RSpec.configure do |config|
   # Deliberately paid on every invocation, including one that runs a single
   # component spec: about 1.5s, in exchange for no tag to remember and no
   # ordering to reason about. Do not move it back into a per-file hook.
+  #
+  # A hook, not code that runs while specs are still loading: a build there
+  # once failed and took down all 546 examples with "0 examples, 0 failures,
+  # 1 error occurred outside of examples" — none of them able to say why.
   config.before(:suite) do
     dummy = Pathname(__dir__).join("../test/dummy")
     system(dummy.join("bin/rails").to_s, "tailwindcss:build", chdir: dummy.to_s, exception: true)

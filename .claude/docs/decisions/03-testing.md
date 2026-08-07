@@ -56,10 +56,14 @@ nothing failing. Static analysis of the JS, not execution of it.
 
 ## `reduced_motion_spec.rb`
 
-Reads the *compiled* bundle, rebuilding it first rather than trusting whatever
-`tailwindcss:build` last left on disk. It asserts the
-`@media (prefers-reduced-motion: reduce)` block for every `animate-*` class the
-components actually apply — scanned off `app/components`, not typed out — and
+Reads the *compiled* bundle. What it reads is always fresh rather than
+whatever a previous run left on disk, but the freshness comes from
+`spec_helper.rb`'s suite-wide `before(:suite)` hook, not from this spec — it
+used to rebuild the bundle itself, but that duplicated the same build every
+other spec that reads the bundle also needed, so it moved up a level. It
+asserts the `@media (prefers-reduced-motion: reduce)` block for every
+`animate-*` class the components actually apply — scanned off
+`app/components`, not typed out — and
 that the accordion pair carries `!important` there. That last part is the point:
 without it Tailwind's own `animate-*` utility resets the duration, and a
 `@media` block missing the flag is indistinguishable by inspection from a
