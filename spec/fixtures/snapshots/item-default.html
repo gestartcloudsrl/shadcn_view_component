@@ -1,0 +1,41 @@
+<div data-slot="item-group" role="list" class="group/item-group flex flex-col w-full max-w-md">
+<div data-slot="item" data-variant="default" data-size="default" role="listitem" class="group/item flex flex-wrap items-center rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-4 p-4">
+<div data-slot="item-media" data-variant="icon" class="flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&amp;_svg]:pointer-events-none size-8 rounded-sm border bg-muted [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</div>
+<div data-slot="item-content" class="flex flex-1 flex-col gap-1 [&amp;+[data-slot=item-content]]:flex-none">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug font-medium">Basic plan
+</div>
+<p data-slot="item-description" class="line-clamp-2 text-sm leading-normal font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary"> Everything you need to get started, with
+<a href="#">no card required
+</a>.
+</p>
+</div>
+<div data-slot="item-actions" class="flex items-center gap-2">
+<button data-slot="button" data-variant="outline" data-size="sm" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">Choose
+</button>
+</div>
+</div>
+<div data-slot="item-separator" data-orientation="horizontal" role="none" class="shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px my-0">
+</div>
+<div data-slot="item" data-variant="muted" data-size="sm" role="listitem" class="group/item flex flex-wrap items-center rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-muted/50 gap-2.5 px-4 py-3">
+<div data-slot="item-header" class="flex basis-full items-center justify-between gap-2">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug font-medium">Pro plan
+</div>
+<span data-slot="badge" data-variant="default" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 bg-primary text-primary-foreground [a&amp;]:hover:bg-primary/90">Popular
+</span>
+</div>
+<div data-slot="item-content" class="flex flex-1 flex-col gap-1 [&amp;+[data-slot=item-content]]:flex-none">
+<p data-slot="item-description" class="line-clamp-2 text-sm leading-normal font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary">For teams shipping every day.
+</p>
+</div>
+<div data-slot="item-footer" class="flex basis-full items-center justify-between gap-2">
+<p data-slot="item-description" class="line-clamp-2 text-sm leading-normal font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary">$20 per seat
+</p>
+<button data-slot="button" data-variant="default" data-size="sm" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">Upgrade
+</button>
+</div>
+</div>
+</div>

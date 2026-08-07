@@ -1,0 +1,32 @@
+<%= render(Shadcn::Item::Group::Component.new(class: "w-full max-w-md")) do %>
+  <%= render(Shadcn::Item::Component.new(role: "listitem")) do %>
+    <%= render(Shadcn::Item::Media::Component.new(variant: :icon)) do %>
+      <%= render(Shadcn::Icon::Component.new("circle")) %>
+    <% end %>
+    <%= render(Shadcn::Item::Content::Component.new) do %>
+      <%= render(Shadcn::Item::Title::Component.new) { "Basic plan" } %>
+      <%= render(Shadcn::Item::Description::Component.new) do %>
+        Everything you need to get started, with <a href="#">no card required</a>.
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::Item::Actions::Component.new) do %>
+      <%= render(Shadcn::Button::Component.new(variant: :outline, size: :sm)) { "Choose" } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Item::Separator::Component.new) %>
+
+  <%= render(Shadcn::Item::Component.new(variant: :muted, size: :sm, role: "listitem")) do %>
+    <%= render(Shadcn::Item::Header::Component.new) do %>
+      <%= render(Shadcn::Item::Title::Component.new) { "Pro plan" } %>
+      <%= render(Shadcn::Badge::Component.new) { "Popular" } %>
+    <% end %>
+    <%= render(Shadcn::Item::Content::Component.new) do %>
+      <%= render(Shadcn::Item::Description::Component.new) { "For teams shipping every day." } %>
+    <% end %>
+    <%= render(Shadcn::Item::Footer::Component.new) do %>
+      <%= render(Shadcn::Item::Description::Component.new) { "$20 per seat" } %>
+      <%= render(Shadcn::Button::Component.new(size: :sm)) { "Upgrade" } %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -125,6 +125,14 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
       which the rule excludes; either way it never touches Tab or a screen
       reader. Radix also removes it from the tab order; `inert` would.
+- [ ] **`ItemGroup` is `role="list"` and `Item` has no role.** ARIA requires a
+      list's children to be `listitem`s, so a group of bare `Item`s fails axe's
+      `aria-required-children` the moment one contains a button or a link.
+      Caught by the accessibility suite while porting; shadcn has the same gap.
+      The markup is 1:1 and the preview shows the working spelling, but nothing
+      makes a caller use it — unlike Select's accessible name, which the
+      FormBuilder can wire on the caller's behalf. There is no equivalent hook
+      here, which is the actual open question.
 - [ ] **A local run can assert against a stale Tailwind bundle.**
       `reduced_motion_spec` builds it, but in a `before` hook — so only before
       its own examples, and `config.order = :random`. On a seed that puts it
