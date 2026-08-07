@@ -108,6 +108,16 @@ These bite while editing, so they are here rather than in the docs.
   system specs a preview's dropdown or select is not the only one on the page —
   scope lookups (`all("[data-slot=select]").last`).
 
+- **A comment written one scope wider than the line you checked.** Twelve
+  findings across one branch were all this shape: "Radix" written after reading
+  `menu.tsx`, "byte-identical" after comparing two function bodies, "at boot"
+  after trying one initializer. Each was true of the case examined and false of
+  the case named — and several were introduced by the round fixing the previous
+  one. The check that catches it is not *is this true?* but **which file did I
+  open, and does the sentence stay inside it?** Where the answer is "one file of
+  several", name the file. Where a claim cannot be checked from what is vendored
+  here, say that instead of asserting it.
+
 ## Which spec to reach for
 
 | | |
