@@ -56,11 +56,19 @@ that gap, set alongside `data-exiting` in `defer` and cleared alongside it in
 `[data-slot][data-exiting]` in `shadcn.css` is a CSS hook that stops most
 exiting elements from intercepting clicks, with a deliberate exception for the
 accordion's collapsing panel, which stays clickable while it collapses;
-`inert` removes an element from the tab order and the accessibility tree, on
-every element this queue defers, accordion included, and has no such
-exception. They travel together here because both start when an exit is
-deferred and end when it is flushed or cancelled, not because one implies the
-other.
+`inert` removes an element from the tab order and the accessibility tree,
+which is a stronger tool than `pointer-events` rather than an equivalent one —
+it drops a subtree out of hit-testing itself, so a control inside is neither
+focusable nor clickable no matter what its own `pointer-events` computes to.
+Left unexempted, `inert` would have silently defeated the CSS rule's
+exception rather than agreed with it: measured before `exemptFromInert` was
+added, a button inside a collapsing panel read `pointer-events: auto`, was
+not focusable, and `elementFromPoint` at its centre returned the trigger
+instead of the button. `exemptFromInert` in `animation.js` carries the
+identical `[data-slot="accordion-content"]` boundary the CSS `:not()` already
+draws, reused rather than redefined so the two selectors cannot drift apart.
+They travel together here because both start when an exit is deferred and end
+when it is flushed or cancelled, not because one implies the other.
 
 **Not `animationend`.** It bubbles from descendants, so it needs filtering by
 target and name, and it never fires when no animation applies — which forces a

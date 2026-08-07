@@ -253,7 +253,7 @@ RSpec.describe "Exit animations", :js do
   # closes the window that opens: without `inert`, a dismissed dialog stays
   # reachable by keyboard and by a screen reader for the length of the fade,
   # even though `[data-slot][data-exiting]` already stops a mouse from
-  # reaching it (the dialog overlay is not the accordion's exception).
+  # reaching it (the dialog content is not the accordion's exception).
   describe "a layer starting to close" do
     let(:content) { "[data-slot=dialog-content]" }
 
@@ -332,6 +332,39 @@ RSpec.describe "Exit animations", :js do
     end
   end
 
+  # `cancel()` clearing `inert` (see the reopen-mid-exit example below) only
+  # covers a reopen that interrupts a *pending* exit. Once an exit lands on
+  # its own, `flush` has already deleted the pending entry, so `cancel()`'s
+  # own guard — `if (!this.pending.delete(element)) return` — makes it a
+  # no-op on the very next reopen. Clearing `inert` in `flush` is what a
+  # reopen after a completed exit depends on instead; miss it there and
+  # nothing else in this path ever clears it again, so the dialog would stay
+  # keyboard-dead and invisible to a screen reader for as long as the page
+  # lives, not just for the length of the fade the `cancel` case leaves it
+  # broken for.
+  describe "reopening a layer whose exit has already finished, not one still pending" do
+    let(:content) { "[data-slot=dialog-content]" }
+
+    before do
+      visit_preview(:dialog)
+      wait_for_stimulus
+      force_animations(content)
+      click_button "Edit profile"
+      expect(page).to have_css(content)
+      press(:escape)
+      expect(page).to have_no_css(content) # the exit has landed and flushed, not just started
+
+      click_button "Edit profile"
+      expect(page).to have_css(content)
+    end
+
+    it "clears the inert a completed exit left behind" do
+      expect(page.evaluate_script(
+        "document.querySelector('#{content}').matches('[inert]')"
+      )).to be(false)
+    end
+  end
+
   describe "the accordion" do
     # The preview is `collapsible: true` with `item-1` already open, so the
     # animated transition is its trigger being clicked once.
@@ -357,6 +390,17 @@ RSpec.describe "Exit animations", :js do
     context "when a panel is collapsed" do
       before do
         expect(page).to have_css(content)
+
+        # A plain-text panel has nothing to focus or hit-test, so a control is
+        # added for "stays interactive" below. Inserted before the collapse
+        # starts, not conjured for that example alone, so what it measures is
+        # the same panel the other examples in this context exercise.
+        page.execute_script(<<~JS)
+          document.querySelector('#{content}').insertAdjacentHTML(
+            "beforeend", "<button id='panel-control'>Learn more</button>"
+          )
+        JS
+
         click_button "Is it accessible?"
       end
 
@@ -368,13 +412,32 @@ RSpec.describe "Exit animations", :js do
       # collapsing accordion panel sits in the page flow with nothing behind
       # it to protect from a click, which is why `shadcn.css` excludes
       # `[data-slot="accordion-content"]` from the rule that makes exiting
-      # content non-interactive. The marker is still set — this is the CSS
-      # exclusion holding, not the marker going missing.
-      it "stays interactive while it collapses, unlike a floating layer's overlay" do
+      # content non-interactive, and why `animation.js`'s `exemptFromInert`
+      # carries the identical exclusion. The marker is still set — this is
+      # the CSS exclusion holding, not the marker going missing.
+      #
+      # `pointerEvents == "auto"` alone does not prove any of that: `inert`
+      # drops a subtree out of hit-testing regardless of its own
+      # `pointer-events`, so a control inside would fail a focus-and-click
+      # probe the same way whether the CSS exception held or `inert` had
+      # silently defeated it. Measured that exact way with the exemption
+      # missing: `pointerEvents` still read `auto`, the control was not
+      # focusable, and a click aimed at its centre landed on the trigger.
+      it "keeps a control inside the panel focusable and reachable by a click while it collapses" do
         expect(page).to have_css("#{content}[data-exiting]", visible: :all)
 
-        expect(page.evaluate_script("getComputedStyle(document.querySelector('#{content}')).pointerEvents"))
-          .to eq("auto")
+        result = page.evaluate_script(<<~JS)
+          (() => {
+            const control = document.getElementById("panel-control")
+            control.focus()
+            const focusable = document.activeElement === control
+            const rect = control.getBoundingClientRect()
+            const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+            return [ focusable, hit === control ]
+          })()
+        JS
+
+        expect(result).to eq([ true, true ])
       end
 
       # `--radix-accordion-content-height` is what the keyframes interpolate

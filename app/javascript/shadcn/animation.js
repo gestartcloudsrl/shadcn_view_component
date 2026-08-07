@@ -38,6 +38,19 @@ const willEnd = (animation) =>
   animation.playState === "running" &&
   Number.isFinite(animation.effect?.getComputedTiming()?.endTime)
 
+// The same boundary `[data-slot][data-exiting]:not([data-slot="accordion-content"])`
+// draws in shadcn.css, reused rather than redefined so the two cannot drift apart.
+// A collapsing accordion panel sits in the page flow with nothing behind it to
+// protect from a click, which is what that CSS exception is for — and `inert` is
+// a stronger tool than `pointer-events`, not an equivalent one: it drops the
+// subtree out of hit-testing itself, so a control inside would neither focus nor
+// receive a click no matter what its own `pointer-events` computed to. Applying
+// `inert` here without the same carve-out would silently defeat the CSS rule's
+// exception rather than agree with it. Measured with the carve-out missing: a
+// button inside a collapsing panel read `pointer-events: auto`, was not
+// focusable, and `elementFromPoint` at its centre returned the trigger instead.
+const exemptFromInert = (element) => element.matches('[data-slot="accordion-content"]')
+
 // Holds teardowns that are waiting on an element's exit animation, one per
 // element.
 export class ExitQueue {
@@ -75,10 +88,11 @@ export class ExitQueue {
     // `data-exiting` and `inert` are not two spellings of one thing: the
     // marker above is a CSS hook, deliberately excluded for the accordion so
     // its collapsing panel keeps taking clicks; `inert` takes the element out
-    // of the tab order and the accessibility tree, with no such exception —
-    // `hidden` used to do both, in the same tick, before it started waiting
+    // of the tab order and the accessibility tree instead, carrying the same
+    // exclusion (`exemptFromInert`, above) rather than a fresh one — `hidden`
+    // used to do both jobs, in the same tick, before either started waiting
     // on this queue.
-    element.inert = true
+    if (!exemptFromInert(element)) element.inert = true
 
     // Tags this call's continuation with the generation it belongs to. Without
     // it, cancel() followed by a fresh defer() in the same tick — reopen then
@@ -109,7 +123,7 @@ export class ExitQueue {
 
     this.pending.delete(element)
     delete element.dataset.exiting
-    element.inert = false
+    if (!exemptFromInert(element)) element.inert = false
     this.unwatchTurbo()
     entry.teardown()
   }
@@ -120,7 +134,7 @@ export class ExitQueue {
     if (!this.pending.delete(element)) return
 
     delete element.dataset.exiting
-    element.inert = false
+    if (!exemptFromInert(element)) element.inert = false
     this.unwatchTurbo()
   }
 
