@@ -248,6 +248,35 @@ RSpec.describe "Exit animations", :js do
     end
   end
 
+  # `hidden` is what takes exiting content out of the tab order and the
+  # accessibility tree, and that now waits for the animation — this is what
+  # closes the window that opens: without `inert`, a dismissed dialog stays
+  # reachable by keyboard and by a screen reader for the length of the fade,
+  # even though `[data-slot][data-exiting]` already stops a mouse from
+  # reaching it (the dialog overlay is not the accordion's exception).
+  describe "a layer starting to close" do
+    let(:content) { "[data-slot=dialog-content]" }
+
+    def trigger = find("[data-slot=dialog-trigger]")
+
+    before do
+      visit_preview(:dialog)
+      wait_for_stimulus
+    end
+
+    it "leaves the tab order as soon as it starts closing" do
+      force_animations(content, duration: "3s")
+      trigger.click
+      expect(page).to have_css(content)
+
+      press(:escape)
+
+      expect(page.evaluate_script(
+        "document.querySelector('#{content}').matches('[inert]')"
+      )).to be(true)
+    end
+  end
+
   describe "the dialog family" do
     let(:content) { "[data-slot=dialog-content]" }
     let(:overlay) { "[data-slot=dialog-overlay]" }
@@ -430,11 +459,17 @@ RSpec.describe "Exit animations", :js do
     # Without `cancel()`, the exit's own continuation — settled by the state
     # flip cancelling the running animation, not by this call — still
     # resolves and flushes the stale teardown once it does, dismounting the
-    # dialog that just reopened.
+    # dialog that just reopened. `cancel()` clearing `inert` is the other half
+    # of the same call: leaving it set would strand the reopened dialog
+    # visible but unreachable by keyboard or a screen reader, which a mouse
+    # user reopening it would never notice.
     it "keeps the reopened content on screen once the original exit would otherwise have finished" do
       sleep 0.5
 
       expect(page).to have_css(content)
+      expect(page.evaluate_script(
+        "document.querySelector('#{content}').matches('[inert]')"
+      )).to be(false)
     end
   end
 end

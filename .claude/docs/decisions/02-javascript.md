@@ -47,6 +47,21 @@ a frame. Three paths had it: `floating.js#hide`, `dialog_controller#render`, and
 removing the wrapper. Interaction releases at once — the dismiss layer, aria,
 focus, the scroll lock — because a layer on its way out must not answer Escape.
 
+`hidden` used to be what took closing content out of the tab order and the
+accessibility tree too, in the same tick, and now it does not reach either
+until the wait above is over — for the length of a fade, a dismissed dialog
+stayed reachable by keyboard and by a screen reader. `element.inert` closes
+that gap, set alongside `data-exiting` in `defer` and cleared alongside it in
+`flush` and `cancel`. The two are not two spellings of one thing:
+`[data-slot][data-exiting]` in `shadcn.css` is a CSS hook that stops most
+exiting elements from intercepting clicks, with a deliberate exception for the
+accordion's collapsing panel, which stays clickable while it collapses;
+`inert` removes an element from the tab order and the accessibility tree, on
+every element this queue defers, accordion included, and has no such
+exception. They travel together here because both start when an exit is
+deferred and end when it is flushed or cancelled, not because one implies the
+other.
+
 **Not `animationend`.** It bubbles from descendants, so it needs filtering by
 target and name, and it never fires when no animation applies — which forces a
 timeout, and that timeout then becomes the *normal* path in a host that has not

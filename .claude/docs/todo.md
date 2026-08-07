@@ -114,11 +114,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
       says in place why it is `!important`; nothing says anywhere that this is
       the constraint the set of them adds up to. `02-javascript.md` records it
       only from the side that bit the test harness.
-- [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
-      it out of the tab order, and that now waits for the animation.
-      `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
-      which the rule excludes; either way it never touches Tab or a screen
-      reader. Radix also removes it from the tab order; `inert` would.
 - [ ] **Two previews claim `<label for>` cannot name a `<button>`.**
       `switch/previews/default.html.erb` and `field/previews/default.html.erb`
       both say so, and it is exactly the misconception

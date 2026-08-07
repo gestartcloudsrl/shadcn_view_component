@@ -72,6 +72,14 @@ export class ExitQueue {
     // exception.
     element.dataset.exiting = ""
 
+    // `data-exiting` and `inert` are not two spellings of one thing: the
+    // marker above is a CSS hook, deliberately excluded for the accordion so
+    // its collapsing panel keeps taking clicks; `inert` takes the element out
+    // of the tab order and the accessibility tree, with no such exception —
+    // `hidden` used to do both, in the same tick, before it started waiting
+    // on this queue.
+    element.inert = true
+
     // Tags this call's continuation with the generation it belongs to. Without
     // it, cancel() followed by a fresh defer() in the same tick — reopen then
     // close again before the first exit's promise has settled — would let the
@@ -101,6 +109,7 @@ export class ExitQueue {
 
     this.pending.delete(element)
     delete element.dataset.exiting
+    element.inert = false
     this.unwatchTurbo()
     entry.teardown()
   }
@@ -111,6 +120,7 @@ export class ExitQueue {
     if (!this.pending.delete(element)) return
 
     delete element.dataset.exiting
+    element.inert = false
     this.unwatchTurbo()
   }
 
