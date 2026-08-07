@@ -67,6 +67,30 @@ combobox, slider.
       here, since only shadcn's TSX is vendored, not Radix. Matching that needs
       a second flag beside `this.open`, which both `reposition()` and
       `applyPosition()` return early on.
+- [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
+      the only `infinite` animation in `shadcn.css` and so the strongest
+      candidate of the lot, and it got neither of the two things the others
+      did: it is still in the `@theme inline` block rather than the plain
+      `@theme` a host can retune at runtime, and no `@media
+      (prefers-reduced-motion: reduce)` collapses it. `reduced_motion_spec`
+      cannot see the gap either — its scan looks for `animate-in`/`animate-out`/
+      `animate-accordion-*` in `app/components`, and nothing there uses this
+      one. Nothing consumes it today: InputOTP, the component it exists for, is
+      unported.
+- [ ] **The gem's `!important` rules cannot be overridden the ordinary way.**
+      `[data-slot][hidden]`, `[data-slot][data-exiting]` and the two
+      `animate-accordion-*` overrides all carry `!important` from inside a
+      cascade layer, and a layered `!important` beats an unlayered one at any
+      specificity — so a host cannot switch one off with an `!important` of
+      their own either, only inline or from a layer declared earlier. Each rule
+      says in place why it is `!important`; nothing says anywhere that this is
+      the constraint the set of them adds up to. `02-javascript.md` records it
+      only from the side that bit the test harness.
+- [ ] **`exit_animation_spec.rb` overlaps itself.** The AlertDialog
+      `elementFromPoint` example is largely subsumed by the click example
+      beneath it — a click that reaches the content proves the content is on
+      top — and a `have_no_css(overlay)` line is repeated across two examples in
+      the dialog group.
 - [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
       it out of the tab order, and that now waits for the animation.
       `[data-slot][data-exiting]` stops clicks but not Tab, and not a screen

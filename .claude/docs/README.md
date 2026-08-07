@@ -1,7 +1,8 @@
 # Working notes
 
-`CLAUDE.md` at the repo root says *how* to work here. These say *why*, and what
-is left.
+`CLAUDE.md` at the repo root says *how* to work here. `decisions/` says *why*,
+`todo.md` says what is left, and `plans/` holds the plan a branch was worked out
+from before any of it was written.
 
 | | |
 |---|---|
@@ -10,6 +11,10 @@ is left.
 | [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the rejected reverse-parity check, system-spec pitfalls |
 | [decisions/04-bugs-fixed.md](decisions/04-bugs-fixed.md) | the council's findings and their fixes — a list of things not to reintroduce |
 | [todo.md](todo.md) | open work, ordered by what blocks a release, plus what is deliberately not being done |
+| [plans/2026-08-06-exit-animations.md](plans/2026-08-06-exit-animations.md) | the plan the exit-animation work was executed from: the three closing paths, what each way of interrupting a half-finished close does, the reduced-motion collapse |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
 measured is marked as measured; anything assumed says so.
+
+A plan is what was intended going into a branch, not a record of what came out
+of it. Where one and `decisions/` disagree, `decisions/` is what shipped.
