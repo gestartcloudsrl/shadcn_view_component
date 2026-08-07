@@ -54,6 +54,16 @@ RSpec.describe "shadcn/ui parity" do
     "tooltip" => "tooltip"
   }.freeze
 
+  # Vendored for reference but not ported yet. Kept here rather than in a
+  # document so the two lists cannot drift: adding a TSX without deciding which
+  # side it belongs on fails the example below, which is the whole point of it.
+  not_yet_ported = %w[
+    attachment bubble button-group calendar carousel chart combobox command
+    context-menu direction drawer empty form hover-card input-group input-otp
+    item marker menubar message message-scroller navigation-menu resizable
+    scroll-area sidebar slider sonner
+  ].freeze
+
   # Families that reuse parts of another rather than restating their classes.
   inherits = { "sheet" => %w[dialog], "alert_dialog" => %w[dialog] }.freeze
 
@@ -61,8 +71,8 @@ RSpec.describe "shadcn/ui parity" do
   # the tokenizer picks out of an inline style, not a utility.
   allowed_missing = { "toggle-group" => %w[--gap] }.freeze
 
-  it "ports every component vendored for comparison" do
-    expect(ports.keys.sort).to eq(ShadcnSource.vendored_components)
+  it "accounts for every component vendored for comparison" do
+    expect((ports.keys + not_yet_ported).sort).to eq(ShadcnSource.vendored_components)
   end
 
   ports.each do |tsx, directory|

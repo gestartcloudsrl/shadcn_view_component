@@ -29,19 +29,48 @@ decided is in `decisions/`.
 
 ## Components not ported (27)
 
-Needs a decision before any work: reimplement in Stimulus, or accept an npm
-dependency for the four that are effectively a library each.
+All 27 are now vendored, so this list is derived from what the sources actually
+import rather than from memory. `spec/parity_spec.rb` holds the same list as
+`not_yet_ported` and fails if the two drift.
 
-- **Heavy JS**: chart (recharts), calendar (react-day-picker), carousel (embla),
-  command/combobox (cmdk), sonner (toast), input-otp, resizable
-- **Plain ports, no blocker**: sidebar, menubar, navigation-menu, context-menu,
-  hover-card, scroll-area, slider, item, empty, input-group, button-group,
-  drawer, form
-- **AI chat set**: message, message-scroller, bubble, attachment, marker,
-  direction
+The grouping this replaced was wrong in four ways, each recorded below.
+
+- **Markup only** (8) — no library, `radix-ui` only for `Slot`, no React state
+  at all: `empty`, `input-group`, `button-group`, `item`, `message`, `bubble`,
+  `attachment`, `marker`.
+  *Four of these were filed under "AI chat set", which implied a difficulty they
+  do not have — `message` imports nothing whatsoever.*
+
+- **Radix behaviour to reimplement in Stimulus** (7): `hover-card` (44 lines),
+  `scroll-area` (58), `slider` (63), `navigation-menu` (168), `context-menu`
+  (252), `menubar` (276), `direction` (22).
+  *Six of these were filed as "plain ports, no blocker". They are the same class
+  of work as `dropdown_menu` and `select` — roving focus, typeahead, submenus,
+  drag — not the same class as `badge`.*
+
+- **Blocked by a third-party npm package** (10): `drawer` (vaul), `chart`
+  (recharts), `command` (cmdk), `carousel` (embla-carousel-react), `input-otp`,
+  `sonner` (+ next-themes), `resizable` (react-resizable-panels), `calendar`
+  (react-day-picker), `combobox` (**@base-ui/react**), `message-scroller`
+  (**@shadcn/react/message-scroller**).
+  *Two of these were not recorded as blocked at all. `combobox` has moved off
+  Radix to Base UI, so reimplementing it means tracking a second headless API
+  rather than the one already understood; `message-scroller` depends on a
+  package shadcn publishes itself. `drawer` was filed as a plain port and is
+  vaul.*
+
+- **Cases of their own** (2): `form` is react-hook-form, and the Rails answer is
+  the FormBuilder that already exists plus `field`, already ported — so it may
+  be a question already answered rather than a port. `sidebar` is 726 lines
+  composing sheet, tooltip, button, input, separator and skeleton, with a
+  `use-mobile` hook; it was filed as a plain port and is the largest component
+  in shadcn.
+
+The old list said "command/combobox" on one line. They are two files upstream,
+which is why the total was 27 and not 26.
 
 Most wanted in a real Rails app, roughly: command, calendar, sonner, sidebar,
-combobox, slider.
+combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
