@@ -93,7 +93,8 @@ combobox, slider.
       the dialog group.
 - [ ] **Closing content stays focusable while it fades.** `hidden` is what takes
       it out of the tab order, and that now waits for the animation.
-      `[data-slot][data-exiting]` stops clicks but not Tab, and not a screen
+      `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
+      which the rule excludes; either way it never touches Tab or a screen
       reader. Radix also removes it from the tab order; `inert` would.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 - [x] **Exit animations** — every `data-[state=closed]:animate-out` class was

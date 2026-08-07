@@ -65,10 +65,11 @@ export class ExitQueue {
       return
     }
 
-    // Read by `[data-slot][data-exiting]`, which stops the element intercepting
-    // clicks while it fades. Radix does the same; without it a dialog overlay
-    // swallows clicks for the 200ms it takes to disappear. The attribute exists
-    // only for the length of the animation — it is never rendered markup.
+    // Marks the element as exiting for the length of the animation only — it
+    // is never rendered markup. Read by `[data-slot][data-exiting]` in
+    // shadcn.css, which stops most exiting elements intercepting clicks, as
+    // Radix does; that rule, not this marker, is what carries the accordion's
+    // exception.
     element.dataset.exiting = ""
 
     // Tags this call's continuation with the generation it belongs to. Without

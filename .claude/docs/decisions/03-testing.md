@@ -132,9 +132,16 @@ Three traps, each of which cost a review round:
   the sort, which is what `disclosure_spec.rb`'s collapses do.
 
   The deferred branch is otherwise reached only where a spec forces a duration:
-  the closes in `exit_animation_spec.rb`, which calls `force_animations` on
-  every element it drives, and `turbo_spec.rb:78` ("flushes a layer's exit
-  before Turbo caches the page"), which forces 2s onto the select.
+  most of the closes in `exit_animation_spec.rb` call `force_animations` on the
+  element they drive, plus `turbo_spec.rb:78` ("flushes a layer's exit before
+  Turbo caches the page"), which forces 2s onto the select.
+
+  The one close in `exit_animation_spec.rb` that does not is "tears down
+  without waiting at all", under "a layer carrying an animation that never
+  ends" — deliberately: it exists to show the *synchronous* branch still runs
+  with no forced duration in play. Its added animation is infinite, so
+  `willEnd` filters it out the same as it would the shipped `animate-out`'s
+  own 0s, and `ExitQueue.defer` never sets `data-exiting` at all.
 
 ## axe
 

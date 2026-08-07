@@ -304,6 +304,19 @@ RSpec.describe "Exit animations", :js do
         expect(animations_on(content)).to include("accordion-up")
       end
 
+      # Unlike a floating layer's overlay (see the dialog family below), a
+      # collapsing accordion panel sits in the page flow with nothing behind
+      # it to protect from a click, which is why `shadcn.css` excludes
+      # `[data-slot="accordion-content"]` from the rule that makes exiting
+      # content non-interactive. The marker is still set — this is the CSS
+      # exclusion holding, not the marker going missing.
+      it "stays interactive while it collapses, unlike a floating layer's overlay" do
+        expect(page).to have_css("#{content}[data-exiting]", visible: :all)
+
+        expect(page.evaluate_script("getComputedStyle(document.querySelector('#{content}')).pointerEvents"))
+          .to eq("auto")
+      end
+
       # `--radix-accordion-content-height` is what the keyframes interpolate
       # towards. Clearing it early leaves the animation collapsing to a height
       # that no longer exists; leaving it published after landing is an
