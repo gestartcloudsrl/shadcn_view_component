@@ -52,15 +52,26 @@ module Shadcn
 
       def initialize(name, **attributes)
         @name = ALIASES.fetch(name.to_s, name.to_s)
-        raise ArgumentError, "unknown lucide icon: #{name}" unless PATHS.key?(@name)
+
+        # Loud where it can be fixed, silent where it cannot. An icon is
+        # decorative, and a gem should not be able to take down a page in an
+        # application it has never seen — the same trade Rails makes with a
+        # missing translation.
+        raise ArgumentError, "unknown lucide icon: #{name}" if path.nil? && Rails.env.local?
 
         super(**attributes)
       end
 
       attr_reader :name
 
+      def path
+        @path ||= PATHS[name] || Shadcn::Icon.registered[name]
+      end
+
       def call
-        render_element(body: PATHS.fetch(name).html_safe)
+        return "".html_safe if path.nil?
+
+        render_element(body: path.html_safe)
       end
 
       def element_attributes(**defaults)

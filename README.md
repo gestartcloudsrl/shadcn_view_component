@@ -174,6 +174,23 @@ if you would rather be explicit, and works with `fields_for` too.
 | Radix primitives | Stimulus controllers under `shadcn--*` emitting the same `data-state`, `role`, `aria-*` and `--radix-*` custom properties |
 | `lucide-react` icons | `Shadcn::Icon::Component`, with the lucide SVGs inlined |
 
+Eleven lucide icons are bundled — the ones the ported components themselves
+use, out of lucide's ~1,500. Register another at boot to make it available the
+same way:
+
+```ruby
+# config/initializers/shadcn_view_component.rb
+Shadcn::Icon.register("star", %(<path d="M12 2 15 9l7 .5-5 4 1 7-6-3z"/>))
+```
+
+```erb
+<%= render Shadcn::Icon::Component.new("star", class: "size-4") %>
+```
+
+An unknown name raises in development and test, where a typo can still be
+fixed, and renders nothing in production — the gem cannot know every icon a
+host will ever pass it, and a missing one is not worth a 500.
+
 Components live in sidecar directories following the
 [Evil Martians layout](https://evilmartians.com/chronicles/viewcomponent-in-the-wild-building-modern-rails-frontends):
 `app/components/shadcn/<family>/[<part>/]{component.rb,preview.rb,previews/*.html.erb}`.

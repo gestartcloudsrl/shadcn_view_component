@@ -83,9 +83,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
-- [ ] **`Icon::Component` raises on an unknown name**, which turns a typo into a
-      production 500, and bundles only the 11 lucide icons the ported components
-      use. No escape hatch for the other ~1,500.
 - [ ] **ARIA is set twice** — in Ruby at render and again in the controller on
       connect (`select/trigger` vs `select_controller`, same for popover, dialog,
       dropdown). Two places to drift.
