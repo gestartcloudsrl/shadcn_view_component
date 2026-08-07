@@ -167,9 +167,22 @@
      written to *triggers* — `floating.js` sets it on the trigger,
      `accordion_controller` on the trigger and its header — and every one of
      those carries a `data-slot`. Keying on state would make each closed select,
-     dropdown and accordion permanently unclickable. */
-  [data-slot][data-exiting] {
-    pointer-events: none;
+     dropdown and accordion permanently unclickable.
+
+     `!important`, as on `[data-slot][hidden]` above: this is here to stop a bug
+     rather than to style anything, so an ordinary utility landing on the same
+     element should not be able to switch it off by accident. It costs a host
+     the ordinary way of switching it off on purpose too: a layered `!important`
+     beats an unlayered one, so what is left is an inline style or a layer of
+     their own declared ahead of this file's.
+
+     The accordion is where the rule stops. What it is for is a layer sitting
+     over the page — an overlay swallowing the click aimed at what is behind
+     it. A collapsing panel sits in the flow with nothing behind it to reach,
+     so the rule buys nothing there and only takes away the panel's own links
+     and buttons for the length of the collapse. */
+  [data-slot][data-exiting]:not([data-slot="accordion-content"]) {
+    pointer-events: none !important;
   }
 
   /* Floating layers are promoted to the top layer with the Popover API, so a
