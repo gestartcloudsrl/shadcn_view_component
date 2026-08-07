@@ -106,6 +106,21 @@ RSpec.describe "Select", :js do
       expect(highlighted).to eq("blueberry")
     end
 
+    # Radix's findNextItem collapses a repeated character to one and excludes
+    # the currently highlighted item from the search (vendor/radix/ui/select.tsx:1906-1921),
+    # so holding a letter cycles through every item starting with it rather than
+    # staying on the first match.
+    it "cycles to the next match when a character repeats" do
+      press("b")
+      press("b")
+
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("blueberry")
+    end
+
     # Radix has no wrap-around at either end of the listbox
     # (vendor/radix/ui/select.tsx:904). These two guard both ends.
     it "does not move past the first item with ArrowUp" do

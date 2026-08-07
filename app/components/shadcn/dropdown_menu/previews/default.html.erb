@@ -11,7 +11,11 @@
         <%= render(Shadcn::DropdownMenu::Shortcut::Component.new) { "⌘P" } %>
       <% end %>
       <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Billing" } %>
+      <%# "Settings" and "Support" share an initial on purpose: without two
+          entries starting with the same letter, a browser spec cannot tell
+          typeahead's repeat-cycling from always landing on the first match. %>
       <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Settings" } %>
+      <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Support" } %>
     <% end %>
     <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
     <%= render(Shadcn::DropdownMenu::Item::Component.new(variant: :destructive)) { "Log out" } %>

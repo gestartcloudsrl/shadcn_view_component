@@ -54,6 +54,17 @@ RSpec.describe "DropdownMenu", :js do
       expect(highlighted).to eq("Billing")
     end
 
+    # Radix's findNextItem collapses a repeated character to one and excludes
+    # the currently highlighted item from the search (vendor/radix/ui/select.tsx:1906-1921),
+    # so holding a letter cycles through every item starting with it rather than
+    # staying on the first match.
+    it "cycles to the next match when a character repeats" do
+      press("s")
+      press("s")
+
+      expect(highlighted).to eq("Support")
+    end
+
     it "highlights on hover" do
       find("[data-slot=dropdown-menu-item]", text: "Settings").hover
 

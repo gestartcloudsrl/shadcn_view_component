@@ -117,7 +117,7 @@ export default class extends Controller {
     }
 
     if (event.key.length === 1 && !event.metaKey && !event.ctrlKey) {
-      const match = this.typeahead.search(event.key, this.enabledItems)
+      const match = this.typeahead.search(event.key, this.enabledItems, this.highlighted)
       if (match) this.highlight(match)
     }
   }

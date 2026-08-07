@@ -83,18 +83,6 @@ combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
-- [ ] **`typeahead.js` always searches from the start of the list, where Radix
-      searches from the current item.** `Typeahead#search`
-      (`app/javascript/shadcn/typeahead.js:24`) runs `items.find(...)` over
-      the list in its original order every time. Radix's `findNextItem`
-      (`vendor/radix/ui/select.tsx:1917`) instead wraps the list around the
-      currently highlighted item before searching, and treats a repeated
-      single character as cycling through every match rather than always
-      landing on the first — so typing "b" "b" "b" moves through every item
-      starting with "b" in Radix, and stays on the first one here. Same
-      species of divergence as the roving-focus wrap this round removed,
-      newly checkable now that Radix is vendored. Whether to match it is not
-      decided here.
 - [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
       the only `infinite` animation in `shadcn.css` and so the strongest
       candidate of the lot, and it got neither of the two things the others

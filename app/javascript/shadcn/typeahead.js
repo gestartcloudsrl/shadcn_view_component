@@ -1,28 +1,64 @@
 // A one-second character buffer shared by any roving-focus list (menu items,
 // select options): each keystroke is appended to the buffer, which clears
-// itself after a second of silence, and the caller gets back whichever item's
-// text starts with the buffer so far.
+// itself after a second of silence, and the caller gets back whichever item
+// matches — ported from Radix's `findNextItem`
+// (vendor/radix/ui/select.tsx:1906-1921), so the search starts at the item
+// currently highlighted and wraps, rather than always scanning from the top
+// of the list.
 //
 // Deliberately does not know how the caller moves focus — that stays in each
-// controller, which owns its own item list and highlighting.
-//
-// Always searches from the start of the list, unlike Radix's findNextItem
-// (vendor/radix/ui/select.tsx:1917), which searches forward from the
-// currently highlighted item and cycles on a repeated character. See
-// todo.md.
+// controller, which owns its own item list and highlighting. The current
+// item is a parameter rather than something read off the DOM here.
 export class Typeahead {
   constructor() {
     this.buffer = ""
     this.timer = null
   }
 
-  search(character, items) {
+  search(character, items, currentItem) {
     clearTimeout(this.timer)
     this.buffer += character.toLowerCase()
     this.timer = setTimeout(() => (this.buffer = ""), 1000)
 
-    return items.find((item) =>
-      item.textContent.trim().toLowerCase().startsWith(this.buffer)
-    )
+    return findNextItem(items, this.buffer, currentItem)
   }
+}
+
+// This is the "meat" of the typeahead matching logic (vendor/radix/ui/select.tsx:1906-1921).
+// It takes a list of items, the search and the current item, and returns the
+// next item (or `undefined`).
+//
+// The search is normalized because if a user has repeatedly pressed a
+// character, we want the exact same behavior as if we only had that one
+// character (ie. cycle through items starting with that character).
+//
+// The items are also reordered by wrapping the array around the current
+// item, so we always look forward from the current item and picking the
+// first match is always the correct one.
+//
+// Finally, if the normalized search is exactly one character, the current
+// item is excluded from the candidates, because otherwise it would always be
+// the first to match and focus would never move. This is as opposed to the
+// regular case, where focus should stay put if the current item still
+// matches.
+function findNextItem(items, search, currentItem) {
+  const isRepeated = search.length > 1 && Array.from(search).every((char) => char === search[0])
+  const normalizedSearch = isRepeated ? search[0] : search
+  const currentItemIndex = currentItem ? items.indexOf(currentItem) : -1
+  let wrapped = wrapArray(items, Math.max(currentItemIndex, 0))
+
+  if (normalizedSearch.length === 1) wrapped = wrapped.filter((item) => item !== currentItem)
+
+  const nextItem = wrapped.find((item) =>
+    item.textContent.trim().toLowerCase().startsWith(normalizedSearch)
+  )
+
+  return nextItem !== currentItem ? nextItem : undefined
+}
+
+// Wraps an array around itself at a given start index
+// (vendor/radix/ui/select.tsx:1923-1929).
+// Example: `wrapArray([ "a", "b", "c", "d" ], 2)` is `[ "c", "d", "a", "b" ]`.
+function wrapArray(array, startIndex) {
+  return array.map((_, index) => array[(startIndex + index) % array.length])
 }
