@@ -96,6 +96,15 @@ combobox, slider.
       `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
       which the rule excludes; either way it never touches Tab or a screen
       reader. Radix also removes it from the tab order; `inert` would.
+- [ ] **A local run can assert against a stale Tailwind bundle.**
+      `reduced_motion_spec` builds it, but in a `before` hook — so only before
+      its own examples, and `config.order = :random`. On a seed that puts it
+      after `exit_animation_spec`, an example there can pass against whatever
+      the last build left on disk. CI is safe because `bin/setup` builds first.
+      The hook is still the right place: the build used to run while specs were
+      *loading*, where a broken build killed all 546 examples before any of
+      them could say why. What is missing is a decision about where a suite-wide
+      build belongs, not a revert.
 - [x] **`bin/console`** — boots the dummy so components can be rendered by hand.
 - [x] **Exit animations** — every `data-[state=closed]:animate-out` class was
       inert, on three closing paths rather than the two this list used to name.
