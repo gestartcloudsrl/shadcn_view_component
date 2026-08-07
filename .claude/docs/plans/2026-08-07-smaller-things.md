@@ -625,46 +625,39 @@ that survives anyway.
   at `this.contentTarget.id`), because the server does not know it;
 - every write inside an open/close handler, which is state, not initial markup.
 
-- [ ] **Step 1: Find the true duplicates**
+- [ ] **Step 1: Delete every candidate, then let the suite tell you**
 
-For each of the four controllers, list every `setAttribute` in `connect()` and
-check whether the corresponding Ruby component already emits it with the same
-value. Put the table in your report — this is the whole task, and doing it by
-eye per controller is the point.
-
-- [ ] **Step 2: Write the guard spec first**
-
-`stimulus_contract_spec` will not catch a removed `setAttribute`. Add to
-`spec/components/shadcn/` a spec asserting the *server-rendered* markup already
-carries what you are about to delete, for each attribute you delete. For the
-select trigger:
-
-```ruby
-it "renders the ARIA the controller used to set on connect" do
-  render_inline(Shadcn::Select::Trigger::Component.new)
-
-  expect(page).to have_css("[data-slot=select-trigger][aria-expanded=false][aria-autocomplete=none]")
-end
-```
-
-Run it before touching the JS: it must pass, because it describes what the Ruby
-already does. That is the evidence the deletion is safe.
-
-- [ ] **Step 3: Delete the duplicates**
-
-Only the ones your table marks. Leave a comment where a write stays for a
-reason that is not obvious — `aria-controls` in particular.
-
-- [ ] **Step 4: Run the behaviour specs**
+Delete all the `setAttribute` calls in the four `connect()` methods except
+those inside open/close handlers. Do not reason first — delete, then measure.
 
 ```bash
 bundle exec rspec spec/system spec/stimulus_contract_spec.rb
 ```
 
-Expected: PASS. The system specs assert `aria-expanded` flipping on open and
-close; if one fails, you deleted a state write rather than an initial one.
+What fails was load-bearing. Restore exactly those, and record in your report
+which ones failed and which spec caught them.
 
-- [ ] **Step 5: Suite, rubocop, todo, commit**
+- [ ] **Step 2: Justify every deletion that survived**
+
+The suite passing is *not* sufficient evidence, and this step is the one that
+makes the inversion safe. A write can be both non-redundant and uncovered — no
+spec fails, and the attribute is simply gone.
+
+So for each `setAttribute` you left deleted, **cite the Ruby that emits the
+same attribute with the same value**, as `file.rb:line`. Put the citations in
+your report as a table: controller, attribute, Ruby source.
+
+Any attribute you cannot cite is a real gap, not a redundancy. Restore it, and
+say so in your report — that is a finding about the port, not a failure of this
+task.
+
+- [ ] **Step 3: Comment what stays and why**
+
+Where a write survives for a reason that is not obvious from reading it, say
+so. `aria-controls` in particular: it points at an id the JS generates, so the
+server cannot emit it.
+
+- [ ] **Step 4: Suite, rubocop, todo, commit**
 
 ```bash
 bundle exec rake && bin/rubocop
@@ -735,7 +728,7 @@ bundle exec rspec spec/system/select_spec.rb spec/system/dropdown_menu_spec.rb s
 Expected: PASS. Both suites exercise typeahead and arrow keys, including the
 wrap and the clamp.
 
-- [ ] **Step 5: Suite, rubocop, todo, commit**
+- [ ] **Step 4: Suite, rubocop, todo, commit**
 
 ```bash
 bundle exec rake && bin/rubocop
@@ -819,7 +812,7 @@ bundle exec rspec spec/system/exit_animation_spec.rb spec/system/overlays_spec.r
 Expected: PASS. A failure in `turbo_spec` means the listeners now outlive the
 element — check `destroy()` still reaches `dismount()`.
 
-- [ ] **Step 5: Suite, rubocop, todo, commit**
+- [ ] **Step 4: Suite, rubocop, todo, commit**
 
 ```bash
 bundle exec rake && bin/rubocop
