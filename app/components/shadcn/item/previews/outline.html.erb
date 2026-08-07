@@ -1,0 +1,8 @@
+<%= render(Shadcn::Item::Component.new(variant: :outline, class: "w-full max-w-md")) do %>
+  <%= render(Shadcn::Item::Media::Component.new(variant: :image)) do %>
+    <img src="https://placehold.co/40" alt="">
+  <% end %>
+  <%= render(Shadcn::Item::Content::Component.new) do %>
+    <%= render(Shadcn::Item::Title::Component.new) { "Outline, with an image" } %>
+  <% end %>
+<% end %>

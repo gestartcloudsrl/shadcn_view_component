@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-6">
+  <%= render(Shadcn::ButtonGroup::Component.new) do %>
+    <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Copy" } %>
+    <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Paste" } %>
+    <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Cut" } %>
+  <% end %>
+
+  <%= render(Shadcn::ButtonGroup::Component.new) do %>
+    <%= render(Shadcn::ButtonGroup::Text::Component.new) { "https://" } %>
+    <%= render(Shadcn::Input::Component.new(placeholder: "example.com")) %>
+  <% end %>
+
+  <%= render(Shadcn::ButtonGroup::Component.new) do %>
+    <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Undo" } %>
+    <%= render(Shadcn::ButtonGroup::Separator::Component.new) %>
+    <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Redo" } %>
+  <% end %>
+</div>

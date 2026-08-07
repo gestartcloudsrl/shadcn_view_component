@@ -22,6 +22,24 @@ Three responses, in order of value:
 Parity still runs **one way**: when upstream removes a class the port keeps it
 and nothing fails.
 
+## What the parity list assertion proves, now that sources arrive early
+
+All 27 unported components are vendored, so `vendor/shadcn/ui` no longer holds
+only what has been ported. The example that used to assert the two lists were
+*equal* now asserts that `ports` and `not_yet_ported` account for the vendored
+set between them.
+
+That keeps the signal worth having — vendoring a TSX without deciding which side
+it belongs on still fails — and it was verified by adding a stray file and
+watching it fail by name. What it gives up is the reason the equality existed:
+nothing now stops a component sitting vendored and unported indefinitely, which
+is the state 23 of them are in on purpose.
+
+The list also has to be *maintained in two places by hand* — here and in
+[todo](../todo.md) — and only the spec's copy is enforced. The prose copy can
+drift, and did, within one working day: `input-group` was filed as markup-only
+after a grep for React hooks missed its inline `onClick`.
+
 ## The reverse parity check was rejected
 
 Classes-the-port-has-that-upstream-doesn't was measured first: 12 of 13 families

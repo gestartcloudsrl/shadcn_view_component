@@ -27,21 +27,59 @@ decided is in `decisions/`.
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.
 
-## Components not ported (27)
+## Components not ported (23)
 
-Needs a decision before any work: reimplement in Stimulus, or accept an npm
-dependency for the four that are effectively a library each.
+All 27 unported sources were vendored, so this list is derived from what they
+actually import rather than from memory, and `spec/parity_spec.rb` holds it as
+`not_yet_ported` and fails if the two drift. Four have since been ported —
+`empty`, `button-group`, `input-group`, `item` — leaving 23.
 
-- **Heavy JS**: chart (recharts), calendar (react-day-picker), carousel (embla),
-  command/combobox (cmdk), sonner (toast), input-otp, resizable
-- **Plain ports, no blocker**: sidebar, menubar, navigation-menu, context-menu,
-  hover-card, scroll-area, slider, item, empty, input-group, button-group,
-  drawer, form
-- **AI chat set**: message, message-scroller, bubble, attachment, marker,
-  direction
+The grouping this replaced was wrong in four ways, each recorded below. A fifth
+error was mine, and is recorded with the group it belongs to.
+
+- **Markup only** (4 left): `message`, `bubble`, `attachment`, `marker` — no
+  library, `radix-ui` only for `Slot`, no state and no event handlers.
+  *All four were filed under "AI chat set", which implied a difficulty they do
+  not have — `message` imports nothing whatsoever. They are now the easiest
+  things left in the backlog.*
+
+  *`input-group` was in this group and should not have been.* It has an
+  `onClick` on its addon — clicking the addon focuses the group's control — so
+  it needed a Stimulus controller and a system spec. The classification missed
+  it because it was reached by grepping for React hooks and not for inline
+  event handlers. All eight candidates were re-checked with the right
+  instrument afterwards; `input-group` was the only one affected.
+
+- **Radix behaviour to reimplement in Stimulus** (7): `hover-card` (44 lines),
+  `scroll-area` (58), `slider` (63), `navigation-menu` (168), `context-menu`
+  (252), `menubar` (276), `direction` (22).
+  *Six of these were filed as "plain ports, no blocker". They are the same class
+  of work as `dropdown_menu` and `select` — roving focus, typeahead, submenus,
+  drag — not the same class as `badge`.*
+
+- **Blocked by a third-party npm package** (10): `drawer` (vaul), `chart`
+  (recharts), `command` (cmdk), `carousel` (embla-carousel-react), `input-otp`,
+  `sonner` (+ next-themes), `resizable` (react-resizable-panels), `calendar`
+  (react-day-picker), `combobox` (**@base-ui/react**), `message-scroller`
+  (**@shadcn/react/message-scroller**).
+  *Two of these were not recorded as blocked at all. `combobox` has moved off
+  Radix to Base UI, so reimplementing it means tracking a second headless API
+  rather than the one already understood; `message-scroller` depends on a
+  package shadcn publishes itself. `drawer` was filed as a plain port and is
+  vaul.*
+
+- **Cases of their own** (2): `form` is react-hook-form, and the Rails answer is
+  the FormBuilder that already exists plus `field`, already ported — so it may
+  be a question already answered rather than a port. `sidebar` is 726 lines
+  composing sheet, tooltip, button, input, separator and skeleton, with a
+  `use-mobile` hook; it was filed as a plain port and is the largest component
+  in shadcn.
+
+The old list said "command/combobox" on one line. They are two files upstream,
+which is why the total was 27 and not 26.
 
 Most wanted in a real Rails app, roughly: command, calendar, sonner, sidebar,
-combobox, slider.
+combobox, slider — which is, awkwardly, five of the twelve hardest.
 
 ## Smaller things
 
@@ -96,6 +134,14 @@ combobox, slider.
       `[data-slot][data-exiting]` stops clicks everywhere except the accordion,
       which the rule excludes; either way it never touches Tab or a screen
       reader. Radix also removes it from the tab order; `inert` would.
+- [ ] **`ItemGroup` is `role="list"` and `Item` has no role.** ARIA requires a
+      list's children to be `listitem`s, so a group of bare `Item`s fails axe's
+      `aria-required-children` the moment one contains a button or a link.
+      Caught by the accessibility suite while porting; shadcn has the same gap.
+      The markup is 1:1 and the preview shows the working spelling, but nothing
+      makes a caller use it — unlike Select's accessible name, which the
+      FormBuilder can wire on the caller's behalf. There is no equivalent hook
+      here, which is the actual open question.
 - [ ] **A local run can assert against a stale Tailwind bundle.**
       `reduced_motion_spec` builds it, but in a `before` hook — so only before
       its own examples, and `config.order = :random`. On a seed that puts it

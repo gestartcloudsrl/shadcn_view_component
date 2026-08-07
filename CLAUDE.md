@@ -136,5 +136,5 @@ what gets it covered by the snapshot, preview and accessibility specs.
   reverse-parity check and the system-spec pitfalls
 - [Bugs fixed](.claude/docs/decisions/04-bugs-fixed.md) — things not to
   reintroduce
-- [TODO](.claude/docs/todo.md) — open work, the 27 unported components, and what
-  is deliberately not being done
+- [TODO](.claude/docs/todo.md) — open work, the 23 unported components grouped
+  by what actually blocks them, and what is deliberately not being done

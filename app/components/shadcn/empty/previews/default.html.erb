@@ -1,0 +1,15 @@
+<%= render(Shadcn::Empty::Component.new(class: "w-full max-w-md border")) do %>
+  <%= render(Shadcn::Empty::Header::Component.new) do %>
+    <%= render(Shadcn::Empty::Media::Component.new(variant: :icon)) do %>
+      <%= render(Shadcn::Icon::Component.new("circle")) %>
+    <% end %>
+    <%= render(Shadcn::Empty::Title::Component.new) { "No projects yet" } %>
+    <%= render(Shadcn::Empty::Description::Component.new) do %>
+      Create your first project to get started, or
+      <a href="#">read the guide</a>.
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Empty::Content::Component.new) do %>
+    <%= render(Shadcn::Button::Component.new) { "New project" } %>
+  <% end %>
+<% end %>

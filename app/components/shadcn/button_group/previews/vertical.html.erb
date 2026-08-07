@@ -1,0 +1,5 @@
+<%= render(Shadcn::ButtonGroup::Component.new(orientation: :vertical)) do %>
+  <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Top" } %>
+  <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Middle" } %>
+  <%= render(Shadcn::Button::Component.new(variant: :outline)) { "Bottom" } %>
+<% end %>

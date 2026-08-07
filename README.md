@@ -273,17 +273,17 @@ Palettes also scope, so you can theme one region of a page:
 
 **Presentational** — button, badge, card, alert, avatar, separator, skeleton,
 spinner, kbd, aspect-ratio, progress, table, breadcrumb, pagination, label,
-input, textarea, native-select, field
+input, textarea, native-select, field, empty, item, button-group
 
-**Form controls** — checkbox, radio-group, switch, toggle, toggle-group
+**Form controls** — checkbox, radio-group, switch, toggle, toggle-group,
+input-group
 
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
 dropdown-menu (including submenus), popover, tooltip, select
 
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
 combobox, sidebar, menubar, navigation-menu, context-menu, hover-card,
-scroll-area, slider, form, item, empty, input-group, button-group, drawer, and
-the AI chat components.
+scroll-area, slider, form, drawer, and the AI chat components.
 
 ## What is and is not verified
 

@@ -53,6 +53,18 @@ with one.
 - **`let` over instance variables.** `let` is lazy and memoised per example;
   `@ivar` in a `before` is eager and easy to leave dangling. `let!` when the
   thing must exist whether or not an example names it.
+- **`let` over `def` for anything that is a value.** A reader like
+  `def trigger = find("[data-slot=x]")` is a `let` written the long way round.
+  `def` in an example group is reserved for helpers that **take arguments**,
+  which `let` cannot express — `def token(name)`, `def audit(within: nil)`. If
+  it takes no arguments, it is a `let`.
+- **But do not convert a reader that is called across a state change.** `let`
+  memoises for the whole example, so a helper read *before and after* a click —
+  `states`, `value`, `selected` — returns its first answer the second time and
+  the assertion silently stops testing anything. Those stay methods, or become
+  a `let` holding a lambda. This is the one case where `def` is not the lazy
+  option but the correct one, and it is why the rule above is about values
+  rather than about `def`.
 - **Don't wrap trivial primitives in `let`.** `let(:name) { "x" }` used once is
   indirection, not DRY.
 - **Name the subject when you refer to it** — `subject(:article)`. Leave it

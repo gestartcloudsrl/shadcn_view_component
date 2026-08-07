@@ -1,0 +1,25 @@
+<div class="flex w-full max-w-md flex-col gap-6">
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new) do %>
+      <%= render(Shadcn::InputGroup::Text::Component.new) { "https://" } %>
+    <% end %>
+    <%= render(Shadcn::InputGroup::Input::Component.new(placeholder: "example.com")) %>
+  <% end %>
+
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Input::Component.new(placeholder: "Search")) %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new(align: :"inline-end")) do %>
+      <%= render(Shadcn::InputGroup::Button::Component.new) { "Go" } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new(align: :"block-start")) do %>
+      <%= render(Shadcn::InputGroup::Text::Component.new) { "Describe the issue" } %>
+    <% end %>
+    <%= render(Shadcn::InputGroup::Textarea::Component.new(placeholder: "What happened?")) %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new(align: :"block-end")) do %>
+      <%= render(Shadcn::InputGroup::Button::Component.new(size: :sm)) { "Submit" } %>
+    <% end %>
+  <% end %>
+</div>
