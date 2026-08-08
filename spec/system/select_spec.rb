@@ -286,6 +286,27 @@ RSpec.describe "Select", :js do
     # upstream's is not — axe calls an unnamed one a critical `label` violation.
     # And it keeps `input-group-control` rather than upstream's `select-input`,
     # because this port's group raises its focus ring off that exact slot name.
+    # The highlight cannot move DOM focus here: it would leave the search field
+    # on the first arrow key and typing would stop. It becomes virtual instead —
+    # `aria-activedescendant` on the field, pointing at the item that carries
+    # `data-highlighted`.
+    #
+    # `banana` rather than `apple` because opening already highlights the first
+    # item, so the first ArrowDown is a move off it.
+    it "moves the highlight with the arrows while focus stays in the search field" do
+      press(:arrow_down)
+
+      expect(highlighted).to eq("banana")
+      expect(page.evaluate_script("document.activeElement.dataset.slot")).to eq("input-group-control")
+      expect(page.evaluate_script(<<~JS)).to be(true)
+        (() => {
+          const field = document.querySelector("[data-slot=select-input-wrapper] input")
+          const id = field.getAttribute("aria-activedescendant")
+          return !!id && document.getElementById(id).dataset.value === "banana"
+        })()
+      JS
+    end
+
     it "names the search field and leaves the input-group's own hook intact" do
       within(preview) do
         field = find("[data-slot=select-input-wrapper] input")

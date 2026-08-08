@@ -9,14 +9,17 @@ import { Typeahead } from "shadcn/typeahead"
 // value is mirrored onto a hidden input so the control submits with the form,
 // exactly like Radix's BubbleSelect.
 export default class extends Controller {
-  static targets = [ "trigger", "content", "item", "value", "input" ]
+  // `input` is the hidden field that submits with the form, which is why the
+  // search box is `search`.
+  static targets = [ "trigger", "content", "item", "value", "input", "search", "list", "empty" ]
   static values = {
     open: Boolean,
     value: String,
     placeholder: String,
     side: { type: String, default: "bottom" },
     align: { type: String, default: "center" },
-    sideOffset: { type: Number, default: 4 }
+    sideOffset: { type: Number, default: 4 },
+    searchable: Boolean
   }
 
   connect() {
@@ -30,6 +33,16 @@ export default class extends Controller {
     // The id is generated here, so the server has nothing to point this at.
     this.triggerTarget.setAttribute("aria-controls", this.contentTarget.id)
     this.triggerTarget.dataset.state = "closed"
+
+    // `aria-activedescendant` needs something to point at, and the server
+    // cannot know these ids. Generated here for the same reason the content's
+    // is, and with the same helper: `crypto.randomUUID()` is secure-context
+    // only, so it is `undefined` over plain HTTP.
+    if (this.searchableValue && this.hasSearchTarget && this.hasListTarget) {
+      this.listTarget.id ||= uniqueId("shadcn-select-list")
+      this.searchTarget.setAttribute("aria-controls", this.listTarget.id)
+      this.itemTargets.forEach((item) => (item.id ||= uniqueId("shadcn-select-item")))
+    }
 
     this.layer = new FloatingLayer({
       trigger: this.triggerTarget,
@@ -45,7 +58,13 @@ export default class extends Controller {
         // so characters typed before this panel was last dismissed cannot join
         // the next search.
         this.typeahead.reset()
-        this.contentTarget.focus({ preventScroll: true })
+        // Focus goes to the search field, not the popover: a searchable select
+        // is typed into the moment it opens.
+        if (this.searchableValue && this.hasSearchTarget) {
+          this.searchTarget.focus({ preventScroll: true })
+        } else {
+          this.contentTarget.focus({ preventScroll: true })
+        }
         this.highlight(this.selectedItem || this.enabledItems[0])
       },
       onClose: () => {
@@ -159,12 +178,23 @@ export default class extends Controller {
     if (!item) return
 
     item.dataset.highlighted = ""
-    item.focus({ preventScroll: true })
+
+    // Moving DOM focus would take it out of the search field and typing would
+    // stop, so a searchable select points at the item instead of focusing it.
+    if (this.searchableValue) {
+      this.searchTarget.setAttribute("aria-activedescendant", item.id)
+    } else {
+      item.focus({ preventScroll: true })
+    }
+
     item.scrollIntoView({ block: "nearest" })
   }
 
   clearHighlight() {
     this.itemTargets.forEach((item) => delete item.dataset.highlighted)
+    if (this.searchableValue && this.hasSearchTarget) {
+      this.searchTarget.removeAttribute("aria-activedescendant")
+    }
   }
 
   render() {
