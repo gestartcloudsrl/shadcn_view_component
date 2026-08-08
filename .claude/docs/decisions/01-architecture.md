@@ -146,6 +146,61 @@ whether upstream lets a caller turn it on. Such options ride on the family root
 next to `side` and `align` — one Stimulus controller owns the family, and the
 root is where it attaches — even where Radix declares them on Content.
 
+## A component that is ours, not a port
+
+The searchable select — `Select::Component.new(searchable: true)` — is the first
+component here that is **not** a transcription of upstream, and it is that way
+because there is nothing to transcribe.
+
+shadcn now authors its registry as *bases* crossed with *styles*.
+`grep -rl "select-input" apps/v4/registry/bases/*/ui/select.tsx` returns exactly
+one file, `bases/aria/ui/select.tsx`. Neither `bases/radix` nor `bases/base` has
+a searchable select. This gem ports `new-york-v4`, so the rule that upstream wins
+on markup has no upstream to point at, and the component is built rather than
+copied.
+
+`new-york-v4` is what shadcn's own `apps/v4/registry/README.md:16` calls "the
+legacy source registry", and that sounds worse than it measured: it and
+`bases/radix` hold 61 components apiece, differing by one each way
+(`questionnaire` there, `form` here), and `select.tsx`, `dropdown-menu.tsx`,
+`button.tsx` and `card.tsx` are byte-identical to the copies vendored here. The
+changelog says "Radix is not being deprecated. We still support it, and every
+update and new component will ship for both libraries." Frozen, not abandoned —
+and this component was never withheld from it, since Radix has no such component
+at all. Whether to follow the new architecture is an open question in
+[todo.md](../todo.md); it would not have produced this component either way.
+
+**What was taken** from the aria variant: its shape — a `role="dialog"` popover
+holding a search field and a *separate* `role="listbox"` — its `data-slot` names,
+and the plain Tailwind utilities on `select-list`, `select-input-wrapper` and
+`select-input`. It also composes `InputGroup`, already ported here, stamping
+`data-slot="select-input"` onto an `InputGroupInput`, which is the same
+inherit-and-restamp idiom `ButtonGroupSeparator` uses on `Separator`.
+
+**What could not be taken**: `select-empty` carries only
+`cn-select-empty-aria`, and the `cn-*` classes are defined in
+`registry/styles/style-*.css` — six-plus themed sheets this gem does not ship.
+That part's look is ours.
+
+Three deviations, each measured rather than reasoned:
+
+- **The search input gets an accessible name.** Upstream's has none — no
+  `aria-label`, no `aria-labelledby`, no `placeholder` — and axe reports a
+  *critical* `label` violation for it.
+- **The empty state sits outside the listbox.** Upstream nests it inside with
+  `role="option"`, an option that cannot be chosen. A non-option inside a listbox
+  is the shape axe rejected outright: putting the search field inside our
+  `role="listbox"` content raised `aria-required-children`, critical, "Element
+  has children which are not allowed: input[aria-controls]".
+- **`select-list` carries `p-1` where upstream has `p-0`**, because this port's
+  padding moved off the viewport that upstream keeps.
+
+`parity_spec`'s `ours_alone` is the machine-readable half of this section. Parity
+is one-way, so slots only this port has are invisible to it — but `todo.md` still
+wants a reverse-parity check keyed on `data-slot`, and that list is what it must
+not flag. An example there fails if a component stops emitting a declared slot,
+so the list cannot rot into a lie.
+
 **Ordered heterogeneous children are a polymorphic slot, not a flag.**
 `ItemGroup` renders items and separators in one ordered collection through
 `renders_many :items, types: { item: {…, as: :item}, separator: {…, as: :separator} }`,

@@ -75,6 +75,28 @@ RSpec.describe "shadcn/ui parity" do
   # the tokenizer picks out of an inline style, not a utility.
   allowed_missing = { "toggle-group" => %w[--gap] }.freeze
 
+  # `data-slot`s this port carries that no vendored TSX does. Parity is one-way —
+  # it asserts upstream's classes are present, never that ours are upstream's —
+  # so these are invisible to it. They are declared anyway: `todo.md` still wants
+  # a reverse-parity check keyed on `data-slot`, and this list is what such a
+  # check must not flag. The searchable select is deliberate divergence, not
+  # drift; the reasoning is in `decisions/01-architecture.md`.
+  ours_alone = {
+    "select" => %w[select-input select-input-wrapper select-list select-empty]
+  }.freeze
+
+  it "declares the slots this port adds beyond upstream" do
+    ours_alone.each do |family, slots|
+      source = Dir[Pathname(__dir__).join("../app/components/shadcn", family, "**/*.rb")]
+               .map { |path| File.read(path) }.join
+
+      slots.each do |slot|
+        expect(source).to include(slot),
+                          "#{family} declares #{slot} in parity_spec but no component emits it"
+      end
+    end
+  end
+
   it "accounts for every component vendored for comparison" do
     expect((ports.keys + not_yet_ported).sort).to eq(ShadcnSource.vendored_components)
   end
