@@ -1,9 +1,10 @@
 # Working notes
 
 `CLAUDE.md` at the repo root says *how* to work here. `decisions/` says *why*,
-`todo.md` says what is left, `specs/` holds a design agreed before a plan was
-written, and `plans/` holds the plan a branch was worked out from before any of
-it was written.
+`todo.md` says what is left, `features/` says per component what is upstream's
+and what is ours, `specs/` holds a design agreed before a plan was written, and
+`plans/` holds the plan a branch was worked out from before any of it was
+written.
 
 | | |
 |---|---|
@@ -11,6 +12,7 @@ it was written.
 | [decisions/02-javascript.md](decisions/02-javascript.md) | how Radix was reimplemented: `display: contents` roots, why nothing is portalled, the Popover API top layer, `turbo:morph` |
 | [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the rejected reverse-parity check, system-spec pitfalls, what the two `vendor/` references are worth and why a control measurement is not optional |
 | [decisions/04-bugs-fixed.md](decisions/04-bugs-fixed.md) | the council's findings and their fixes — a list of things not to reintroduce |
+| [features/README.md](features/README.md) | per component: 1:1, adapted, extended or ours — the answer a host wants, written to be lifted into the public README |
 | [todo.md](todo.md) | open work, ordered by what blocks a release, plus what is deliberately not being done |
 | [plans/2026-08-06-exit-animations.md](plans/2026-08-06-exit-animations.md) | the plan the exit-animation work was executed from: the three closing paths, what each way of interrupting a half-finished close does, the reduced-motion collapse |
 | [plans/2026-08-07-plain-ports-group-a.md](plans/2026-08-07-plain-ports-group-a.md) | vendoring the 27 unported sources, and porting the four that are markup only |
