@@ -27,6 +27,17 @@ RSpec.describe Shadcn::Icon::Component, type: :component do
     end
   end
 
+  describe "the bundled set" do
+    # The searchable select's addon renders this one. An icon that is not
+    # bundled raises rather than rendering a gap, so a missing entry here does
+    # not degrade — it takes the whole page down in development.
+    it "includes the magnifier the searchable select needs" do
+      render_inline(described_class.new("search"))
+
+      expect(page).to have_css('svg.lucide-search path[d="m21 21-4.3-4.3"]')
+    end
+  end
+
   context "with an unknown name" do
     it "raises, so a typo is loud where it can be fixed" do
       expect { described_class.new("nope") }.to raise_error(ArgumentError)
