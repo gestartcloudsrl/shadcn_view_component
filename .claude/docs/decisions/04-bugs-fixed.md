@@ -149,6 +149,32 @@ thing it is checking cannot fail.**
 a positional Hash. It survived because nothing ever ran the script — CI did the
 steps individually. CI now runs `bin/setup`.
 
+## A cursor moved for a week without colouring anything
+
+Reported as "nothing moves". The cursor moved the whole time — one ArrowDown
+took the searchable select from `apple` to `banana`, with `aria-activedescendant`
+following it. What never moved was a pixel: the highlighted item's computed
+background was `rgba(0, 0, 0, 0)`.
+
+The plain select colours its cursor with `focus:bg-accent`, which works because
+the item really *is* focused. Moving to virtual focus so the search field could
+keep the caret left the cursor as `data-highlighted` alone — and nothing in this
+gem styled that attribute. The whole select family had no `data-[highlighted]`
+rule at all. The highlight mechanism was replaced with one that had no styling
+behind it.
+
+Fixed by adding `data-[highlighted]:bg-accent` and
+`data-[highlighted]:text-accent-foreground` beside the `focus:` pair, so both
+modes colour.
+
+**The part worth keeping** is that every instrument agreed it was fine. The
+specs asserted `data-highlighted`, the snapshots compared HTML, axe read roles,
+and mutation checks proved the attribute moved when it should. All four are
+blind to a colour. When a change swaps *how* something is indicated rather than
+*whether*, none of them notice — the example that guards it now reads
+`getComputedStyle(...).backgroundColor`, which is the only one of these that
+could have failed.
+
 ## The select's scroll buttons scrolled away with the options
 
 They were markup only for most of this port's life — reproduced because shadcn

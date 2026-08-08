@@ -283,6 +283,37 @@ case that must succeed. `bl` reaching blueberry proves the keys land, so a
 following `ab` that does nothing means something. Assert the precondition too —
 that the panel is open — rather than inferring it from the result.
 
+The same trap has a written form, and it is worse because it survives review:
+**the driver produces the result the example is looking for.** Three attempts at
+covering the select's scroll-button auto-scroll passed with the feature
+neutralised, because Selenium moves an element into view before pointing at it
+and the button was then the last child of the scrolling element — reaching the
+end of the list proved only that Selenium had scrolled. An example that passes
+under mutation is worse than no example: it is a claim of coverage that is not
+there. Mutate every new system spec before trusting it.
+
+### `be_visible` does not wait; `have_css` does
+
+`expect(element).to be_visible` reads the state once and never retries, so any
+example asserting a state some event is about to change is racing it. Two
+scroll-button examples did, passed every local run and two full suites, then
+failed during a merge verification. `have_css(selector, visible: :visible)` and
+`visible: :hidden` wait, and cannot race.
+
+Repeated green runs are not the argument for the fix — the racing version was
+green repeatedly too. The argument is structural: a waiting matcher cannot lose
+the race, and the other form can.
+
+### What a system spec cannot see
+
+It reads the DOM, so it sees attributes, text and structure. It does not see
+**appearance**. A change that swaps how something is indicated — DOM focus for
+`aria-activedescendant`, say — leaves every attribute assertion green while the
+component goes blank on screen; that is [a bug this repo
+shipped](04-bugs-fixed.md). `getComputedStyle` is available through
+`evaluate_script` and is the only instrument here that would have caught it.
+Reach for it whenever the thing under test is *shown* rather than *recorded*.
+
 ## What is still unverified
 
 - Parity in the removal direction (above).
@@ -304,3 +335,12 @@ that the panel is open — rather than inferring it from the result.
   the expected name was scheduled and that the element eventually leaves. They
   say nothing about duration, easing, or whether an exit reads as the reverse of
   its entrance.
+- **The select's scroll-button auto-scroll.** Which chevron is offered, and that
+  they stay pinned while the options move, are covered. The 50ms interval behind
+  them is not: Selenium's pointer does not reach those buttons by any route
+  tried — neither `move_to` nor `click_and_hold` moves the list a pixel — while
+  a `PointerEvent` dispatched from the page scrolls it at once, so the handler
+  is right and the driver is the obstacle. Verified by hand instead, in a real
+  browser: `scrollTop` 88 → 120 over 300ms. Dispatching that event from
+  `execute_script` would go green and prove almost nothing, so it was left
+  undone rather than faked.

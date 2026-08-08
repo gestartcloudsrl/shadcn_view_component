@@ -23,6 +23,17 @@ decided is in `decisions/`.
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
       that is the claim least tested.
+- [ ] **The select's scroll-button auto-scroll.** Which chevron is offered, and
+      that both stay pinned while the options move, are covered. The 50ms
+      interval is not: Selenium's pointer reaches those buttons by no route
+      tried — neither `move_to` nor `click_and_hold` moves the list a pixel —
+      while a `PointerEvent` dispatched from the page scrolls it at once, so the
+      handler is right and the driver is the obstacle. Pinning the buttons was
+      expected to fix it and did not, which leaves the panel's top layer as the
+      likeliest reason. Verified by hand instead (`scrollTop` 88 → 120 over
+      300ms). Dispatching that event from `execute_script` would go green and
+      prove almost nothing, so it was left undone rather than faked. See
+      [decisions/03-testing.md](decisions/03-testing.md).
 - [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
       paints over* a floating layer; an ancestor that becomes the containing
       block still affects *where it is positioned*. Not reproduced yet.
@@ -151,26 +162,6 @@ sheets that define them, which is a different gem from this one — every class
 string here is a Tailwind utility, and `parity_spec` compares utilities. Worth
 noting that it would not have delivered the component that raised the question:
 `bases/radix` has no searchable select either.
-
-## The select's auto-scroll has no spec
-
-The scroll buttons work now — pinned, hiding per direction, auto-scrolling on
-pointer — and three examples cover all of that. The **interval itself** has none,
-after four attempts across two mechanisms.
-
-Selenium's pointer never reaches those buttons: neither `move_to` nor
-`click_and_hold` moves the list a pixel, while a `PointerEvent` dispatched from
-the page scrolls it immediately. So the handler is right and the driver is the
-obstacle. Pinning the buttons was expected to fix it — the earlier theory was
-that Selenium scrolled the button into view before pointing at it — and it did
-not, which leaves the panel living in the browser's top layer as the likeliest
-reason.
-
-Verified by hand instead: a pointermove on the down button took scrollTop from 88
-to 120 over 300ms in a real browser. Weaker than everything else in that file,
-and worth closing if anyone finds the trick — a `dispatchEvent` from
-`execute_script` would go green immediately and prove almost nothing, so it was
-left undone rather than faked.
 
 ## Smaller things
 
