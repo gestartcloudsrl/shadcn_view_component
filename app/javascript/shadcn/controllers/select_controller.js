@@ -12,7 +12,7 @@ export default class extends Controller {
   // `input` is the hidden field that submits with the form, which is why the
   // search box is `search`.
   static targets = [ "trigger", "content", "item", "value", "input", "search", "list", "empty",
-                     "scrollUpButton", "scrollDownButton" ]
+                     "scrollUpButton", "scrollDownButton", "viewport" ]
   static values = {
     open: Boolean,
     value: String,
@@ -239,12 +239,14 @@ export default class extends Controller {
   // `!item.hidden` is what keeps the arrows, Home, End and `selectedItem` out
   // of rows the filter has taken away. Nothing hides items unless `searchable`,
   // so the plain select is unaffected.
-  // Radix scrolls its viewport, which carries `overflow: hidden auto` inline
-  // (vendor/radix/ui/select.tsx:1247). This port's viewport carries no
-  // overflow: the content scrolls, and in a searchable select the list does,
-  // because the search field has to stay put while the options move.
+  // The viewport scrolls, as Radix's does (vendor/radix/ui/select.tsx:1247) —
+  // which is what keeps the scroll buttons pinned outside it. A searchable
+  // panel moves the scrolling one level further in, onto the list, so the
+  // search field stays put while the options move.
   get scrollContainer() {
-    return this.searchableValue && this.hasListTarget ? this.listTarget : this.contentTarget
+    if (this.searchableValue && this.hasListTarget) return this.listTarget
+
+    return this.hasViewportTarget ? this.viewportTarget : this.contentTarget
   }
 
   get enabledItems() {

@@ -6,13 +6,13 @@
 <path d="m6 9 6 6 6-6"/>
 </svg>
 </button>
-<div data-slot="select-content" role="listbox" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--select-target="content" data-action="keydown-&gt;shadcn--select#contentKeydown scroll-&gt;shadcn--select#syncScrollButtons" class="relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
-<div data-slot="select-scroll-up-button" aria-hidden="true" hidden="hidden" data-shadcn--select-target="scrollUpButton" data-action="pointerdown-&gt;shadcn--select#startAutoScroll pointermove-&gt;shadcn--select#startAutoScroll pointerleave-&gt;shadcn--select#stopAutoScroll" class="flex cursor-default items-center justify-center py-1">
+<div data-slot="select-content" role="listbox" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--select-target="content" data-action="keydown-&gt;shadcn--select#contentKeydown" class="relative z-50 flex flex-col max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+<div data-slot="select-scroll-up-button" aria-hidden="true" hidden="hidden" data-shadcn--select-target="scrollUpButton" data-action="pointerdown-&gt;shadcn--select#startAutoScroll pointermove-&gt;shadcn--select#startAutoScroll pointerleave-&gt;shadcn--select#stopAutoScroll" class="flex shrink-0 cursor-default items-center justify-center py-1">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up size-4">
 <path d="m18 15-6-6-6 6"/>
 </svg>
 </div>
-<div class="p-1">
+<div class="relative flex-1 overflow-x-hidden overflow-y-auto p-1" data-shadcn--select-target="viewport" data-action="scroll-&gt;shadcn--select#syncScrollButtons">
 <div data-slot="select-group" role="group">
 <div data-slot="select-label" class="px-2 py-1.5 text-xs text-muted-foreground">Fruits
 </div>
@@ -73,7 +73,7 @@
 </div>
 </div>
 </div>
-<div data-slot="select-scroll-down-button" aria-hidden="true" hidden="hidden" data-shadcn--select-target="scrollDownButton" data-action="pointerdown-&gt;shadcn--select#startAutoScroll pointermove-&gt;shadcn--select#startAutoScroll pointerleave-&gt;shadcn--select#stopAutoScroll" class="flex cursor-default items-center justify-center py-1">
+<div data-slot="select-scroll-down-button" aria-hidden="true" hidden="hidden" data-shadcn--select-target="scrollDownButton" data-action="pointerdown-&gt;shadcn--select#startAutoScroll pointermove-&gt;shadcn--select#startAutoScroll pointerleave-&gt;shadcn--select#stopAutoScroll" class="flex shrink-0 cursor-default items-center justify-center py-1">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4">
 <path d="m6 9 6 6 6-6"/>
 </svg>

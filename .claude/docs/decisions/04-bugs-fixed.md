@@ -148,3 +148,31 @@ thing it is checking cannot fail.**
 `chdir:` was not a keyword in the `system!` signature, so it reached `system` as
 a positional Hash. It survived because nothing ever ran the script — CI did the
 steps individually. CI now runs `bin/setup`.
+
+## The select's scroll buttons scrolled away with the options
+
+They were markup only for most of this port's life — reproduced because shadcn
+emits them, wired to nothing. Connecting them showed why nobody had noticed:
+they were also in the wrong element.
+
+Radix scrolls its **viewport**, which carries `position: relative; flex: 1;
+overflow: hidden auto` inline (vendor/radix/ui/select.tsx:1240-1247), inside a
+content that is `display: flex; flexDirection: column` (:1127-1128), with the
+buttons as the viewport's siblings at `flexShrink: 0` (:1691). That is what pins
+them to the panel's edges.
+
+This port had no overflow on the viewport at all. The **content** scrolled, and
+the buttons rode along inside it: measured on the `scrollable` preview, with the
+panel's bottom edge at 387px the down button's bottom sat at 993px — six hundred
+pixels past anything visible. It came into view only once the list had reached
+its end, which is the one moment it has nothing left to offer.
+
+Fixed by adopting Radix's arrangement: `flex flex-col` on the content, the
+overflow and `flex-1` on the viewport, `shrink-0` on the buttons. A searchable
+panel moves the scrolling one level further in, onto the list, so its search
+field stays put.
+
+Not to reintroduce: no class token moved out of the family, so `parity_spec` had
+nothing to say about any of it — the content still carries every class upstream
+emits, including the `overflow-y-auto` that is now inert on it, exactly as it is
+inert on shadcn's.

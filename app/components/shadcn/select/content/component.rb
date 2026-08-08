@@ -6,7 +6,10 @@ module Shadcn
       # SelectContent — the viewport and the two scroll buttons are part of the
       # markup shadcn emits, so they are reproduced here.
       class Component < ApplicationViewComponent
-        SCROLL_BUTTON_CLASSES = "flex cursor-default items-center justify-center py-1"
+        # `shrink-0` mirrors the `flexShrink: 0` Radix sets inline
+        # (vendor/radix/ui/select.tsx:1691): the buttons keep their height while
+        # the viewport takes the rest, which is what pins them to the edges.
+        SCROLL_BUTTON_CLASSES = "flex shrink-0 cursor-default items-center justify-center py-1"
 
         renders_many :items, "Shadcn::Select::Item::Component"
 
@@ -14,7 +17,7 @@ module Shadcn
 
         style do
           base {
-            "relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] " \
+            "relative z-50 flex flex-col max-h-(--radix-select-content-available-height) min-w-[8rem] " \
             "origin-(--radix-select-content-transform-origin) overflow-x-hidden " \
             "overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md " \
             "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 " \
@@ -65,8 +68,7 @@ module Shadcn
             # `scroll` does not bubble, but Stimulus binds the action to this
             # element itself, so it fires. Which element actually scrolls
             # differs by mode — see the controller's `scrollContainer`.
-            "data-action" => "keydown->shadcn--select#contentKeydown " \
-                             "scroll->shadcn--select#syncScrollButtons"
+            "data-action" => "keydown->shadcn--select#contentKeydown"
           }.merge(defaults))
         end
 
@@ -81,7 +83,15 @@ module Shadcn
         private
 
         def viewport
-          tag.div(searchable ? searchable_body : options, class: viewport_classes)
+          tag.div(
+            searchable ? searchable_body : options,
+            class: viewport_classes,
+            "data-shadcn--select-target": "viewport",
+            # `scroll` does not bubble, but Stimulus binds to this element
+            # itself, so it fires. In a searchable panel the list scrolls
+            # instead and carries its own copy of this action.
+            "data-action": "scroll->shadcn--select#syncScrollButtons"
+          )
         end
 
         # The field is pinned and the list scrolls under it, rather than the
@@ -98,8 +108,18 @@ module Shadcn
           safe_join([ items, content ].flatten.compact)
         end
 
+        # Radix puts the scrolling here, not on the content: `position: relative`
+        # so an item's offsetTop is measured against the viewport rather than
+        # the scroll-up button, `flex: 1` to take the space the buttons leave,
+        # and `overflow: hidden auto` (vendor/radix/ui/select.tsx:1240-1247).
+        # Without it the content scrolled and carried the buttons out of sight
+        # with the options — see decisions/04-bugs-fixed.md.
+        VIEWPORT_CLASSES = "relative flex-1 overflow-x-hidden overflow-y-auto"
+
         def viewport_classes
-          return ShadcnViewComponent.cn("flex flex-col overflow-hidden") if searchable
+          # A searchable panel pins its search field, so the scrolling moves one
+          # level further in, onto the list.
+          return ShadcnViewComponent.cn("relative flex-1 flex flex-col overflow-hidden") if searchable
 
           extra =
             if position == :popper
@@ -107,7 +127,7 @@ module Shadcn
               "min-w-[var(--radix-select-trigger-width)] scroll-my-1"
             end
 
-          ShadcnViewComponent.cn("p-1", extra)
+          ShadcnViewComponent.cn(VIEWPORT_CLASSES, "p-1", extra)
         end
 
         # Radix mounts these only while there is somewhere to scroll and

@@ -246,8 +246,16 @@ RSpec.describe "Select", :js do
       within(preview) { find("[data-slot=select-scroll-#{direction}-button]", visible: :all) }
     end
 
+    # The viewport scrolls now, not the content — that move is the point of the
+    # example below.
+    def viewport
+      "[data-slot=select-content] > div:not([data-slot])"
+    end
+
     def scroll_top
-      page.evaluate_script("[...document.querySelectorAll('[data-slot=select-content]')].pop().scrollTop")
+      page.evaluate_script(
+        "[...document.querySelectorAll(\"#{viewport}\")].pop().scrollTop"
+      )
     end
 
     it "offers to scroll down, but not up, at the top of the list" do
@@ -259,7 +267,7 @@ RSpec.describe "Select", :js do
     # example is about.
     it "swaps them at the bottom" do
       page.execute_script(
-        "const b = [...document.querySelectorAll('[data-slot=select-content]')].pop();" \
+        "const b = [...document.querySelectorAll(\"#{'[data-slot=select-content] > div:not([data-slot])'}\")].pop();" \
         "b.scrollTop = b.scrollHeight"
       )
 
@@ -267,18 +275,41 @@ RSpec.describe "Select", :js do
       expect(scroll_button("down")).not_to be_visible
     end
 
-    # The auto-scroll itself has no example here, deliberately. Every way of
-    # putting a pointer on the button from Capybara scrolls the panel as a side
-    # effect — Selenium moves an element into view before pointing at it, and
-    # this button is the last child of the element that scrolls — so the list
-    # reaches its end whether or not the interval ever runs. Two attempts
-    # passed with `startAutoScroll` neutralised, which is a spec that proves
-    # nothing.
+    # Pinned, not carried away with the options. The whole reason the two
+    # chevrons went unseen was that they lived inside the element that scrolled;
+    # Radix keeps them outside its viewport (vendor/radix/ui/select.tsx:1240-1247).
+    it "keeps the buttons inside the panel while the options move" do
+      bottom = -> { page.evaluate_script(<<~JS) }
+        (() => {
+          const root = [...document.querySelectorAll("[data-slot=select]")].pop()
+          const panel = root.querySelector("[data-slot=select-content]")
+          const button = root.querySelector("[data-slot=select-scroll-down-button]")
+          return Math.round(button.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom)
+        })()
+      JS
+
+      expect(bottom.call).to be_within(2).of(0)
+
+      page.execute_script(
+        "const b = [...document.querySelectorAll(\"[data-slot=select-content] > div:not([data-slot])\")].pop();" \
+        "b.scrollTop = Math.round((b.scrollHeight - b.clientHeight) / 2)"
+      )
+
+      expect(bottom.call).to be_within(2).of(0)
+    end
+
+    # The auto-scroll interval has no example, after four attempts across two
+    # mechanisms. Selenium's pointer never reaches this element — neither
+    # `move_to` nor `click_and_hold` moves the list a pixel — while a
+    # `PointerEvent` dispatched from the page scrolls it immediately, so the
+    # handler is fine and the driver is the obstacle. Pinning the buttons was
+    # expected to fix it and did not; the panel living in the browser's top
+    # layer is the likeliest reason.
     #
-    # Verified by hand instead, in a real browser: a `pointermove` on the down
-    # button took scrollTop from 88 to 120 over 300ms. That is a weaker
-    # guarantee than the rest of this file carries, and it is written down
-    # rather than papered over. See todo.md.
+    # Verified by hand instead, in a real browser: a pointermove on the down
+    # button took scrollTop from 88 to 120 over 300ms. That is weaker than
+    # everything else in this file, and it is written down rather than covered
+    # by an example that passes with the feature removed — two did. See todo.md.
   end
 
   # `onOpen` always highlights, so nothing a user can do reaches the listbox
