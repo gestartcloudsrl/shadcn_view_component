@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Upstream's own name and lifetime (vendor/shadcn/ui/sidebar.tsx:28-29).
 const COOKIE = "sidebar_state"
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+const SHORTCUT = "b"
 
 // Radix has no Sidebar — shadcn builds it on its own React context
 // (vendor/shadcn/ui/sidebar.tsx:56), so this controller has no Radix source to
@@ -15,7 +16,27 @@ export default class extends Controller {
   static values = { open: Boolean }
 
   connect() {
+    // Bound on `window` rather than on the element, so it fires wherever focus
+    // happens to be — which is what upstream does (sidebar.tsx:96-111), and the
+    // point of a shortcut. Removed again in `disconnect()`: Turbo tears
+    // controllers down on every navigation, and a listener left behind would
+    // accumulate one per visit.
+    this.onKeydown = (event) => {
+      if (event.key !== SHORTCUT) return
+      // A bare "b" is a character somebody may be typing.
+      if (!event.metaKey && !event.ctrlKey) return
+
+      event.preventDefault()
+      this.toggle()
+    }
+
+    window.addEventListener("keydown", this.onKeydown)
+
     this.render()
+  }
+
+  disconnect() {
+    window.removeEventListener("keydown", this.onKeydown)
   }
 
   toggle() {

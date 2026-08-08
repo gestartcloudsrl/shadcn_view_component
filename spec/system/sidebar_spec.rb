@@ -9,6 +9,13 @@ RSpec.describe "Sidebar", :js do
   let(:sidebar) { "[data-slot=sidebar]" }
   let(:trigger) { "[data-slot=sidebar-trigger]" }
 
+  # `press` sends its arguments in sequence, not as a chord: measured, an array
+  # arrives as Meta down-and-up followed by a bare "b" with `metaKey: false`.
+  # A modifier combination has to be held open explicitly.
+  def press_with_meta(key)
+    page.driver.browser.action.key_down(:meta).send_keys(key).key_up(:meta).perform
+  end
+
   before do
     visit "/sidebar"
     wait_for_stimulus
@@ -51,5 +58,20 @@ RSpec.describe "Sidebar", :js do
     expect(page).to have_css("#{sidebar}[data-state=expanded]")
 
     expect(page.evaluate_script("document.cookie")).to include("sidebar_state=true")
+  end
+
+  # Bound on `window`, so it works from anywhere on the page rather than only
+  # while the trigger has focus (sidebar.tsx:96-111). The last assertion is the
+  # one that earns the example: a bare "b" is a character somebody may be
+  # typing, and a shortcut that swallows it would be worse than none.
+  it "toggles from anywhere with the shortcut, and leaves a plain b alone" do
+    press_with_meta("b")
+    expect(page).to have_css("#{sidebar}[data-state=collapsed]")
+
+    press_with_meta("b")
+    expect(page).to have_css("#{sidebar}[data-state=expanded]")
+
+    press("b")
+    expect(page).to have_css("#{sidebar}[data-state=expanded]")
   end
 end
