@@ -91,7 +91,16 @@ of the 61 files in `vendor/shadcn/ui/` import `radix-ui`).
 
 They are not the same component. Driven from the keyboard, ArrowDown on the last
 item wraps to the first in the Base UI demo and does not move in the Radix one —
-the divergence that started this entry.
+the divergence that started this entry. That is a default, not a behaviour:
+Base UI's `Menu.Root` takes `loopFocus`, `boolean`, **defaulting to `true`**,
+where Radix's `loop` defaults to `false`. Same knob, opposite ends. Read from
+base-ui.com's API reference, not from Base UI's source.
+
+Base UI documents no prop for typeahead, its buffer or its timeout, on either
+Menu or Select — but its release notes list "Reset typeahead on external blur"
+as behaviour, which Radix also does (vendor/radix/ui/menu.tsx:585-590) and this
+port still does not. That is the open "typeahead buffer survives a close" entry
+below, now wanted by two upstreams rather than one.
 
 What is *not* established: whether shadcn considers the Radix variant legacy,
 deprecated, or simply one of three supported choices. Tab order and a redirect
