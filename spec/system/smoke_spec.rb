@@ -28,9 +28,15 @@ RSpec.describe "the gallery boots" do
   # The list is derived rather than typed out, so a new controller is covered the
   # day it lands. `theme` is the one controller with no family of its own; the
   # families that borrow another's are listed below it.
+  #
+  # `sidebar` is exempt for a different and temporary reason: its behaviour
+  # shipped before its 24 components, so there is no preview to load. Visiting
+  # the one that does not exist also 404s into the browser's console log, which
+  # Capybara reuses — so the failure lands on whichever *other* example checks
+  # the log next, and appears to wander. Delete this line with the components.
   controllers = Dir[Pathname(__dir__).join("../../app/javascript/shadcn/controllers/*_controller.js")]
                 .map { |path| File.basename(path, "_controller.js") }
-                .reject { |name| name == "theme" }
+                .reject { |name| [ "theme", "sidebar" ].include?(name) }
                 .to_h { |name| [ name, "shadcn--#{name.tr('_', '-')}" ] }
                 .merge(
                   "alert_dialog" => "shadcn--dialog",
