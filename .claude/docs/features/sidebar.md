@@ -43,6 +43,13 @@ gem already made: nothing is portalled, because moving content out of a
 controller's element unbinds the Stimulus actions inside it — and a sidebar is
 made of links and buttons.
 
+**One consequence to know if you write your own markup:** upstream's desktop
+tree carries `hidden … md:block`, which is why it is invisible below the
+breakpoint — React never renders it there, so upstream never has to undo it. This
+port does, with an inline `display` set while the mobile sheet is open and
+removed when it closes. If you override that element's `display` yourself, that
+is the interaction to watch.
+
 **What it costs you:** on a phone, before JavaScript runs, there is no sidebar.
 The gem already requires Stimulus for every floating layer, so this adds no new
 dependency, but it is a real difference: upstream's server sends the Sheet
@@ -92,6 +99,8 @@ the controller reads them rather than inventing any.
 | the four state attributes, and `data-collapsible` empty while expanded | `spec/system/sidebar_spec.rb`, mutation-verified |
 | the cookie, its name and its values | same file, mutation-verified |
 | `cmd/ctrl+b`, and a bare `b` left alone | same file, mutation-verified |
+| the mobile sheet opening, and Escape dismissing it | same file, mutation-verified |
+| a phone never writing the desktop cookie | same file, mutation-verified |
 | every class string matching upstream's | `spec/parity_spec.rb` once the components exist |
 | no class rendered that upstream has dropped | `spec/reverse_parity_spec.rb`, same condition |
 

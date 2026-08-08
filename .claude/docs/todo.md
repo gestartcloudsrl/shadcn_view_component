@@ -110,6 +110,12 @@ error was mine, and is recorded with the group it belongs to.
   composing sheet, tooltip, button, input, separator and skeleton, with a
   `use-mobile` hook; it was filed as a plain port and is the largest component
   in shadcn.
+  *Its **behaviour** ships now — open state, the cookie, `cmd/ctrl+b`, and the
+  mobile branch — driven by a hand-written contract page at `/sidebar` in the
+  dummy. None of its 24 components exist yet: eight structural ones next, then
+  sixteen leaves that are markup and classes. See
+  [features/sidebar.md](features/sidebar.md) and
+  [decisions/02-javascript.md](decisions/02-javascript.md).*
 
 The old list said "command/combobox" on one line. They are two files upstream,
 which is why the total was 27 and not 26.

@@ -197,6 +197,40 @@ Worth noting how the first draft of that spec read: it compared the content's
 `align` defaults to `:center`, so centres are what to compare. An assertion
 built on the wrong assumption fails just as loudly as a real bug.
 
+## The Sidebar keeps one tree and changes its behaviour
+
+shadcn's `Sidebar` renders three different DOM trees and picks between them while
+rendering, with a `matchMedia` hook (`vendor/shadcn/ui/sidebar.tsx:154`): a plain
+`<div>` when `collapsible="none"`, a `Sheet` on a phone, the desktop tree
+otherwise. A server cannot do that, so the branch had to be replaced rather than
+translated.
+
+The server renders the desktop tree. Below `md` the controller gives that same
+DOM the behaviour of a Sheet — top layer, dismiss, focus trap, scroll lock — from
+the same three modules `dialog_controller.js` composes, **without moving it**.
+Building a Sheet in JavaScript and relocating the content into it is closer to
+React and was rejected for the reason above: moving content out of a controller's
+element unbinds the Stimulus actions inside, and a sidebar is made of links and
+buttons. Rendering both trees and hiding one was rejected too — a navigation tree
+in the DOM twice, on every page, for every visitor.
+
+The accepted cost: **on a phone, before JavaScript runs, there is no sidebar.**
+Upstream's server sends the Sheet markup; this one does not. Every floating layer
+here already requires Stimulus, so it adds no dependency, but it is a real
+difference and the [feature record](../features/sidebar.md) says so to a host.
+
+Two details worth keeping:
+
+- **The breakpoint needed nothing vendored.** `hooks/use-mobile` is not among the
+  vendored sources, but upstream's desktop tree carries `md:block`
+  (`sidebar.tsx:210`), and `md` is 768px in Tailwind's default scale. The value
+  was read rather than invented or made configurable.
+- **`hidden … md:block` is undone with an inline `display`.** That class is why
+  the desktop tree is invisible below the breakpoint — React never renders it
+  there, so upstream never has to undo it. Inline beats the utility without
+  having to out-specify `md:block` at every other width, and removing the
+  property restores the class exactly, which a toggled class would not.
+
 ## Controllers re-sync on `turbo:morph`
 
 Idiomorph rewrites attributes without disconnecting, so `connect()` never runs
