@@ -392,6 +392,27 @@ RSpec.describe "Select", :js do
       expect(visible_item_values).to eq(%w[apple banana blueberry grapes pineapple])
     end
 
+    # The plain select colours its cursor with `focus:bg-accent`, which works
+    # because the item really is focused. A searchable one keeps focus in the
+    # field, so the cursor is only `data-highlighted` — and nothing styled that,
+    # so the arrows moved and the panel looked frozen.
+    #
+    # Asserted on the computed colour rather than the attribute, because the
+    # attribute was correct for the whole time this was broken. Every other
+    # instrument here agreed: the specs checked `data-highlighted`, the
+    # snapshots compared HTML, axe read roles. None of them can see a colour.
+    it "shows which option the cursor is on" do
+      background = page.evaluate_script(<<~JS)
+        (() => {
+          const root = [...document.querySelectorAll("[data-slot=select]")].pop()
+          const item = root.querySelector("[data-slot=select-item][data-highlighted]")
+          return getComputedStyle(item).backgroundColor
+        })()
+      JS
+
+      expect(background).not_to eq("rgba(0, 0, 0, 0)")
+    end
+
     it "names the search field and leaves the input-group's own hook intact" do
       within(preview) do
         field = find("[data-slot=select-input-wrapper] input")
