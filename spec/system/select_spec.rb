@@ -246,6 +246,20 @@ RSpec.describe "Select", :js do
       within(preview) { find("[data-slot=select-scroll-#{direction}-button]", visible: :all) }
     end
 
+    # `expect(element).to be_visible` reads the state once and never retries, so
+    # it races the scroll event that flips these. These wait.
+    def expect_offered(direction)
+      within(preview) do
+        expect(page).to have_css("[data-slot=select-scroll-#{direction}-button]", visible: :visible)
+      end
+    end
+
+    def expect_not_offered(direction)
+      within(preview) do
+        expect(page).to have_css("[data-slot=select-scroll-#{direction}-button]", visible: :hidden)
+      end
+    end
+
     # The viewport scrolls now, not the content — that move is the point of the
     # example below.
     def viewport
@@ -259,8 +273,8 @@ RSpec.describe "Select", :js do
     end
 
     it "offers to scroll down, but not up, at the top of the list" do
-      expect(scroll_button("down")).to be_visible
-      expect(scroll_button("up")).not_to be_visible
+      expect_offered("down")
+      expect_not_offered("up")
     end
 
     # Assigning scrollTop fires a real scroll event, which is the listener this
@@ -271,8 +285,8 @@ RSpec.describe "Select", :js do
         "b.scrollTop = b.scrollHeight"
       )
 
-      expect(scroll_button("up")).to be_visible
-      expect(scroll_button("down")).not_to be_visible
+      expect_offered("up")
+      expect_not_offered("down")
     end
 
     # Pinned, not carried away with the options. The whole reason the two
