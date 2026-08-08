@@ -162,6 +162,37 @@ it is the one control here that a browser understands.
 `form_with(..., builder: ShadcnViewComponent::FormBuilder)` does the same thing
 if you would rather be explicit, and works with `fields_for` too.
 
+### A select you can filter
+
+`searchable: true` puts a search field at the top of the open panel and narrows
+the options as you type — case-insensitively, on a substring, so `err` finds
+*Blueberry*. It works on the component and through the form builder:
+
+```erb
+<%= render(Shadcn::Select::Component.new(name: "country", searchable: true)) do |s| %>
+  <% s.with_trigger { |t| t.with_value(placeholder: "Select a country") } %>
+  <% s.with_select_content do %>
+    <%= render(Shadcn::Select::Item::Component.new(value: "it")) { "Italy" } %>
+  <% end %>
+<% end %>
+
+<%= f.shadcn_select :country, choices, searchable: true %>
+```
+
+Two things to know before reaching for it.
+
+**The filter is client-side**, over the options already on the page. For a list
+long enough that you would not render it all, listen for `input` on
+`[data-slot=select-input-wrapper] input` and swap the options through a Turbo
+Frame — the gem takes no position on that and ships no server mode.
+
+**This one is not a port.** Every other component here reproduces a shadcn
+component; no Radix-based shadcn select has a filter, so this one takes its
+shape from the React Aria variant and is otherwise the gem's own. What that
+means for you: its look is not guaranteed to match a future upstream, and
+[`.claude/docs/decisions/01-architecture.md`](.claude/docs/decisions/01-architecture.md)
+records where it deliberately differs.
+
 ## How the mapping works
 
 | shadcn (React) | this gem |

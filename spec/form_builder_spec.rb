@@ -137,6 +137,16 @@ RSpec.describe ShadcnViewComponent::FormBuilder do
     it "labels the trigger, which is a button no <label for> is aimed at" do
       expect(doc.at_css("[data-slot=select-trigger]")["aria-labelledby"]).to eq("signup_plan_label")
     end
+
+    # `shadcn_select` forwards `**options` to the component, so `searchable:`
+    # should already arrive without the builder knowing about it. That is a
+    # claim about code, so it gets an example rather than a sentence.
+    it "passes searchable through to the select" do
+      doc = render_form(valid, "<%= f.shadcn_select :plan, [['Free', 'free']], searchable: true %>")
+
+      expect(doc.at_css("[data-slot=select]")["data-shadcn--select-searchable-value"]).to eq("true")
+      expect(doc.at_css("[data-slot=select-list]")).to be_present
+    end
   end
 
   describe "#shadcn_switch" do

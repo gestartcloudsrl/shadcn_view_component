@@ -81,6 +81,12 @@ which is why the total was 27 and not 26.
 Most wanted in a real Rails app, roughly: command, calendar, sonner, sidebar,
 combobox, slider — which is, awkwardly, five of the twelve hardest.
 
+Filtering is no longer wholly behind them: `Select::Component.new(searchable: true)`
+ships a filterable select, built rather than ported since no Radix-based shadcn
+select has one. `command`'s palette and `combobox`'s free-text entry are still
+unported and still blocked on npm — a filter over options already rendered is a
+smaller thing than either.
+
 ## Upstream has three variants now, and Radix is not the one it shows first
 
 Observed on 2026-08-08 by opening the docs:
@@ -119,6 +125,32 @@ expires reaches pineapple — now covered by "stays put when the accumulated sea
 matches nothing" in `spec/system/select_spec.rb`. **What Base UI does instead was
 not measured**: the docs demo's panel closed on every click attempt, by mouse and
 by keyboard, and driving it was abandoned rather than guessed at.
+
+## The registry moved, and this gem ports the older one
+
+Found while looking for the searchable select's source, 2026-08-08.
+
+shadcn now authors components as **bases** (`base`, `radix`, `aria`) crossed with
+**style token sheets** (`nova`, `sera`, `vega`, …), and the generated components
+carry semantic `cn-*` classes whose rules live in those sheets.
+`apps/v4/registry/README.md:16` calls `new-york-v4` — the registry this gem ports
+— "the legacy source registry".
+
+Measured rather than inferred: `new-york-v4` and `bases/radix` hold 61 components
+each, differing by one in each direction (`questionnaire` there, `form` here),
+and `select.tsx`, `dropdown-menu.tsx`, `button.tsx` and `card.tsx` are
+byte-identical to the copies in `vendor/shadcn/ui/`. The changelog says "Radix is
+not being deprecated. We still support it, and every update and new component
+will ship for both libraries." So: **frozen, not abandoned.**
+
+Not established: whether `new-york-v4` will keep pace. That is the open question,
+and it is not answerable from the repository.
+
+What following the new architecture would cost: adopting `cn-*` plus the style
+sheets that define them, which is a different gem from this one — every class
+string here is a Tailwind utility, and `parity_spec` compares utilities. Worth
+noting that it would not have delivered the component that raised the question:
+`bases/radix` has no searchable select either.
 
 ## Smaller things
 
