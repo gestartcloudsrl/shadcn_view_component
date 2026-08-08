@@ -312,18 +312,34 @@ RSpec.describe "Select", :js do
       expect(bottom.call).to be_within(2).of(0)
     end
 
-    # The auto-scroll interval has no example, after four attempts across two
-    # mechanisms. Selenium's pointer never reaches this element — neither
-    # `move_to` nor `click_and_hold` moves the list a pixel — while a
-    # `PointerEvent` dispatched from the page scrolls it immediately, so the
-    # handler is fine and the driver is the obstacle. Pinning the buttons was
-    # expected to fix it and did not; the panel living in the browser's top
-    # layer is the likeliest reason.
+    # Driven through Chrome's own input pipeline rather than WebDriver's
+    # Actions API. `move_to` and `click_and_hold` both leave this button
+    # untouched — four attempts, no movement — while a `PointerEvent` dispatched
+    # from the page scrolls it at once, which said the handler was fine and the
+    # driver was not. `Input.dispatchMouseEvent` is a real browser input event,
+    # so it exercises the same path a hand does.
     #
-    # Verified by hand instead, in a real browser: a pointermove on the down
-    # button took scrollTop from 88 to 120 over 300ms. That is weaker than
-    # everything else in this file, and it is written down rather than covered
-    # by an example that passes with the feature removed — two did. See todo.md.
+    # Measured twice after the pointer lands, never against the position before
+    # it: putting a pointer on an element can scroll it into view, and comparing
+    # across that would pass with no timer running at all.
+    it "keeps scrolling while the pointer rests on the button" do
+      box = page.evaluate_script(<<~JS)
+        (() => {
+          const root = [...document.querySelectorAll("[data-slot=select]")].pop()
+          const r = root.querySelector("[data-slot=select-scroll-down-button]").getBoundingClientRect()
+          return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }
+        })()
+      JS
+
+      page.driver.browser.execute_cdp(
+        "Input.dispatchMouseEvent", type: "mouseMoved", x: box["x"], y: box["y"], button: "none"
+      )
+
+      settled = scroll_top
+      sleep 0.3
+
+      expect(scroll_top).to be > settled
+    end
   end
 
   # `onOpen` always highlights, so nothing a user can do reaches the listbox

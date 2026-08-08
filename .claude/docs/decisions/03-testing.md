@@ -315,6 +315,9 @@ end of the list proved only that Selenium had scrolled. An example that passes
 under mutation is worse than no example: it is a claim of coverage that is not
 there. Mutate every new system spec before trusting it.
 
+That one is covered now, by a route that avoids the driver entirely — see
+[CDP](#when-seleniums-pointer-will-not-land-use-cdp) below.
+
 ### `be_visible` does not wait; `have_css` does
 
 `expect(element).to be_visible` reads the state once and never retries, so any
@@ -326,6 +329,23 @@ failed during a merge verification. `have_css(selector, visible: :visible)` and
 Repeated green runs are not the argument for the fix — the racing version was
 green repeatedly too. The argument is structural: a waiting matcher cannot lose
 the race, and the other form can.
+
+### When Selenium's pointer will not land, use CDP
+
+`move_to` and `click_and_hold` both left the select's scroll buttons untouched —
+four attempts, the list never moved a pixel — while a `PointerEvent` dispatched
+from the page scrolled it at once. That combination says the handler is fine and
+the driver is the obstacle, and it is a trap: dispatching the synthetic event
+from `execute_script` would have gone green while proving almost nothing.
+
+`page.driver.browser.execute_cdp("Input.dispatchMouseEvent", type: "mouseMoved",
+x:, y:, button: "none")` is a real browser input event, so it exercises the same
+path a hand does. It also does *not* scroll the target into view first, which is
+what made the earlier attempts pass with the feature removed — the driver was
+producing the result the example was looking for.
+
+The example fails with `startAutoScroll` neutralised, which the three attempts
+before it did not.
 
 ### What a system spec cannot see
 
@@ -358,12 +378,3 @@ Reach for it whenever the thing under test is *shown* rather than *recorded*.
   the expected name was scheduled and that the element eventually leaves. They
   say nothing about duration, easing, or whether an exit reads as the reverse of
   its entrance.
-- **The select's scroll-button auto-scroll.** Which chevron is offered, and that
-  they stay pinned while the options move, are covered. The 50ms interval behind
-  them is not: Selenium's pointer does not reach those buttons by any route
-  tried — neither `move_to` nor `click_and_hold` moves the list a pixel — while
-  a `PointerEvent` dispatched from the page scrolls it at once, so the handler
-  is right and the driver is the obstacle. Verified by hand instead, in a real
-  browser: `scrollTop` 88 → 120 over 300ms. Dispatching that event from
-  `execute_script` would go green and prove almost nothing, so it was left
-  undone rather than faked.

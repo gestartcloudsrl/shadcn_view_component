@@ -24,17 +24,9 @@ decided is in `decisions/`.
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
       that is the claim least tested.
-- [ ] **The select's scroll-button auto-scroll.** Which chevron is offered, and
-      that both stay pinned while the options move, are covered. The 50ms
-      interval is not: Selenium's pointer reaches those buttons by no route
-      tried — neither `move_to` nor `click_and_hold` moves the list a pixel —
-      while a `PointerEvent` dispatched from the page scrolls it at once, so the
-      handler is right and the driver is the obstacle. Pinning the buttons was
-      expected to fix it and did not, which leaves the panel's top layer as the
-      likeliest reason. Verified by hand instead (`scrollTop` 88 → 120 over
-      300ms). Dispatching that event from `execute_script` would go green and
-      prove almost nothing, so it was left undone rather than faked. See
-      [decisions/03-testing.md](decisions/03-testing.md).
+- [x] **The select's scroll-button auto-scroll.** Covered, once the pointer was
+      driven through Chrome's own input pipeline rather than WebDriver's Actions
+      API — see [decisions/03-testing.md](decisions/03-testing.md).
 - [x] **`transform`/`filter`/`contain` ancestors.** Reproduced and measured:
       `spec/system/containing_block_spec.rb` opens a popover inside each of the
       three and asserts it still lands centred under its trigger. It does — the
