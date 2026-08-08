@@ -106,6 +106,24 @@ RSpec.describe "Select", :js do
       expect(highlighted).to eq("blueberry")
     end
 
+    # The counterpart to the example above: there, the second character narrows
+    # to a real match; here it narrows to none. `findNextItem` returns
+    # `undefined` and the caller leaves the highlight alone
+    # (vendor/radix/ui/select.tsx:1920), so a mistyped second character parks
+    # the search for the rest of the second rather than falling back to
+    # matching on it alone. Waiting out the buffer and pressing "p" again does
+    # reach pineapple — that half is the 1s timer in typeahead.js:32.
+    it "stays put when the accumulated search matches nothing" do
+      press("g")
+      press("p")
+
+      highlighted = page.evaluate_script(
+        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+      )
+
+      expect(highlighted).to eq("grapes")
+    end
+
     # Radix's findNextItem collapses a repeated character to one and excludes
     # the currently highlighted item from the search (vendor/radix/ui/select.tsx:1906-1921),
     # so holding a letter cycles through every item starting with it rather than

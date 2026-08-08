@@ -13,7 +13,8 @@ export default class extends Controller {
     side: { type: String, default: "bottom" },
     align: { type: String, default: "start" },
     sideOffset: { type: Number, default: 4 },
-    alignOffset: { type: Number, default: 0 }
+    alignOffset: { type: Number, default: 0 },
+    loop: Boolean
   }
 
   connect() {
@@ -84,14 +85,16 @@ export default class extends Controller {
     const current = items.indexOf(this.highlighted)
 
     switch (event.key) {
-      // Clamp rather than wrap: Radix's MenuContentImpl destructures
-      // `loop = false` (vendor/radix/ui/menu.tsx:387) and shadcn never passes
-      // `loop`, and RovingFocusGroup only wraps when that flag is set
-      // (vendor/radix/ui/roving-focus-group.tsx:324's
-      // `context.loop ? wrapArray(...) : candidateNodes.slice(...)`).
+      // Clamp unless asked to wrap, which is how RovingFocusGroup branches:
+      // `context.loop ? wrapArray(...) : candidateNodes.slice(currentIndex + 1)`
+      // (vendor/radix/ui/roving-focus-group.tsx:324-326) — the slice is empty
+      // at the end, so focus stays put. `loop` is opt-in in Radix's menu too
+      // (vendor/radix/ui/menu.tsx:387), and vendor/shadcn/ui/dropdown-menu.tsx
+      // never passes it, so `false` is the shadcn default rather than a choice
+      // made here.
       case "ArrowDown":
         event.preventDefault()
-        this.highlight(items[Math.min(current + 1, items.length - 1)])
+        this.highlight(this.step(items, current, 1))
         return
       // With nothing highlighted yet — which is where a click-open leaves the
       // menu — ArrowUp enters at the *end*: Radix lists it in `LAST_KEYS` and
@@ -99,7 +102,7 @@ export default class extends Controller {
       // (vendor/radix/ui/menu.tsx:576-583).
       case "ArrowUp":
         event.preventDefault()
-        this.highlight(current === -1 ? items[items.length - 1] : items[Math.max(current - 1, 0)])
+        this.highlight(current === -1 ? items[items.length - 1] : this.step(items, current, -1))
         return
       case "Home":
         event.preventDefault()
@@ -152,6 +155,16 @@ export default class extends Controller {
 
   get enabledItems() {
     return this.itemTargets.filter((item) => item.dataset.disabled === undefined)
+  }
+
+  // One step along `items` from `current`, wrapping only when `loop` is set.
+  // With nothing highlighted `current` is -1, so a forward step lands on the
+  // first item either way.
+  step(items, current, delta) {
+    const next = current + delta
+    return this.loopValue
+      ? items[(next + items.length) % items.length]
+      : items[Math.min(Math.max(next, 0), items.length - 1)]
   }
 
   get highlighted() {

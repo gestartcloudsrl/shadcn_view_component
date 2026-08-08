@@ -9,15 +9,21 @@ module Shadcn
 
       slot_name :"dropdown-menu"
 
-      attr_reader :open, :side, :align, :side_offset, :align_offset
+      attr_reader :open, :side, :align, :side_offset, :align_offset, :loop
 
+      # `loop` is Radix's own prop, declared on MenuContentImpl and documented
+      # `@defaultValue false` (vendor/radix/ui/menu.tsx:363-368). It rides here
+      # rather than on Content for the same reason `side` and `align` do: one
+      # Stimulus controller owns the whole family, and the root is where it is
+      # attached.
       def initialize(open: false, side: :bottom, align: :start, side_offset: 4,
-                     align_offset: 0, **attributes)
+                     align_offset: 0, loop: false, **attributes)
         @open = open
         @side = side&.to_sym || :bottom
         @align = align&.to_sym || :start
         @side_offset = side_offset
         @align_offset = align_offset
+        @loop = loop
         super(**attributes)
       end
 
@@ -29,7 +35,8 @@ module Shadcn
           "data-shadcn--dropdown-menu-side-value" => side,
           "data-shadcn--dropdown-menu-align-value" => align,
           "data-shadcn--dropdown-menu-side-offset-value" => side_offset,
-          "data-shadcn--dropdown-menu-align-offset-value" => align_offset
+          "data-shadcn--dropdown-menu-align-offset-value" => align_offset,
+          "data-shadcn--dropdown-menu-loop-value" => loop
         }.merge(defaults))
       end
 

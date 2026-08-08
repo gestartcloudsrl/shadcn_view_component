@@ -124,11 +124,42 @@ RSpec.describe "DropdownMenu", :js do
       expect(highlighted).to start_with("Profile")
     end
 
-    # Radix has no wrap-around at either end of the menu
-    # (vendor/radix/ui/roving-focus-group.tsx:324). The counterpart above
-    # guards the top; this guards the bottom.
+    # Radix wraps at neither end *unless asked to*: `loop` defaults to false
+    # (vendor/radix/ui/menu.tsx:387) and decides the branch at
+    # vendor/radix/ui/roving-focus-group.tsx:324-326. The counterpart above
+    # guards the top; this guards the bottom. `with loop enabled` below is the
+    # other half of the same flag.
     it "does not move past the last item with ArrowDown" do
       4.times { press(:arrow_down) }
+
+      expect(highlighted).to eq("Log out")
+    end
+  end
+
+  # The preview does not pass `loop`, so the flag is set on the element rather
+  # than through a second preview: Stimulus reads a value off its attribute, so
+  # a menu opened after the attribute lands sees it. Nothing else about the
+  # preview changes, which is what makes this the same menu as the context
+  # above rather than a lookalike.
+  context "with loop enabled" do
+    before do
+      page.execute_script(<<~JS)
+        [...document.querySelectorAll("[data-slot=dropdown-menu]")].pop()
+          .setAttribute("data-shadcn--dropdown-menu-loop-value", "true")
+      JS
+      within(preview) { find(trigger).send_keys(:arrow_down) }
+    end
+
+    it "wraps past the last item back to the first" do
+      4.times { press(:arrow_down) }
+      expect(highlighted).to eq("Log out")
+
+      press(:arrow_down)
+      expect(highlighted).to start_with("Profile")
+    end
+
+    it "wraps past the first item back to the last" do
+      press(:arrow_up)
 
       expect(highlighted).to eq("Log out")
     end

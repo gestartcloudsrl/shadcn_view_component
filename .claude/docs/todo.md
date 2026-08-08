@@ -81,6 +81,36 @@ which is why the total was 27 and not 26.
 Most wanted in a real Rails app, roughly: command, calendar, sonner, sidebar,
 combobox, slider — which is, awkwardly, five of the twelve hardest.
 
+## Upstream has three variants now, and Radix is not the one it shows first
+
+Observed on 2026-08-08 by opening the docs:
+`ui.shadcn.com/docs/components/dropdown-menu` **redirects to
+`/docs/components/base/dropdown-menu`**, and the page offers three tabs — Base
+UI, React Aria, Radix UI — in that order. This gem ports the Radix variant (37
+of the 61 files in `vendor/shadcn/ui/` import `radix-ui`).
+
+They are not the same component. Driven from the keyboard, ArrowDown on the last
+item wraps to the first in the Base UI demo and does not move in the Radix one —
+the divergence that started this entry.
+
+What is *not* established: whether shadcn considers the Radix variant legacy,
+deprecated, or simply one of three supported choices. Tab order and a redirect
+are not a statement of intent, and no such statement was read. Answering that is
+the first step here, not picking a variant.
+
+The immediate practical cost is a trap: **checking the port against the docs site
+now compares it to a different library by default.** Anyone reaching for
+"upstream says…" has to select the Radix tab first.
+
+Select is reported to differ between the two variants as well. What was checked
+here is only the Radix side, and the port matches it: with `apple, banana,
+blueberry, grapes, pineapple`, pressing `g` then `p` inside one second searches
+`"gp"`, matches nothing and stays on grapes, while `p` after the 1s buffer
+expires reaches pineapple — now covered by "stays put when the accumulated search
+matches nothing" in `spec/system/select_spec.rb`. **What Base UI does instead was
+not measured**: the docs demo's panel closed on every click attempt, by mouse and
+by keyboard, and driving it was abandoned rather than guessed at.
+
 ## Smaller things
 
 - [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
