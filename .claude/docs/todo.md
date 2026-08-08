@@ -36,9 +36,13 @@ decided is in `decisions/`.
          and whether filtering to nothing says anything at all: there is no
          `aria-live` region, deliberately, and upstream has none either.
       2. **Select, Checkbox and Switch**, which are `<button>`s carrying an ARIA
-         role. The FormBuilder points a name at each; a bare component has
-         nothing. Confirm the name is heard, and that `role="combobox"` on a
-         non-editable trigger reads sensibly.
+         role — `default_tag :button` plus `role: "checkbox"` and
+         `role: "switch"` respectively. The FormBuilder points a name at each;
+         a bare component has nothing. Confirm the name is heard. On the
+         **plain** select (`previews/default.html.erb`) the trigger is
+         `role="combobox"`, and whether that reads sensibly on something not
+         editable is the question; the searchable one's trigger carries no role
+         at all, so listen to both.
       3. **The dialog and sheet**, for focus return and whether the exit
          animation's window leaks anything — `inert` is set while an exit is
          deferred, and the reasoning is in
