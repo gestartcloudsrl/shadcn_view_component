@@ -234,6 +234,16 @@ by keyboard, and driving it was abandoned rather than guessed at.
   Honeycrisp, Granny Smith, Pink Lady) lands on **Gala** for a fast `gp` — the
   `g` moves, the `p` is swallowed. `gr` reaching Granny Smith on both was the
   control, so this is "the key is ignored", not "the keys never arrived".
-  Two independent libraries agreeing makes this the typeahead contract rather
-  than an oversight of Radix's to correct. The 1s window itself is hardcoded
+  The objection worth taking seriously is that matching upstream does not make
+  it good — a swallowed keystroke reads as a bug to someone who does not know a
+  buffer exists. That argument stands or falls on the *native* `<select>`, which
+  is where a user's expectation actually comes from, so it was measured too: on
+  the gem's own `native_select` preview (Apple, Banana, Blueberry), `bl` reaches
+  blueberry and a fast `ab` **stays on apple**. Chrome on macOS; other engines
+  not checked.
+  Three independent references agreeing — including the platform control — makes
+  this the typeahead contract rather than an oversight to correct. And the
+  clincher is local: this gem ships `shadcn_select` *and* `shadcn_native_select`
+  and recommends the latter, so adding the fallback would make two selects in
+  one form answer the same keystrokes differently. The 1s window is hardcoded
   upstream too (vendor/radix/ui/select.tsx:1871) and exposed as no prop.
