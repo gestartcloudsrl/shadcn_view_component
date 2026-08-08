@@ -12,6 +12,12 @@ module Shadcn
       def inside_stacking_context
         render_with_template
       end
+
+      # The other ancestor hazard: `transform`, `filter` and `contain` each
+      # become the containing block for a fixed descendant.
+      def inside_containing_block
+        render_with_template
+      end
     end
   end
 end

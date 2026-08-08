@@ -178,6 +178,25 @@ wired the select to the wrong event — working for the reported case and wrong
 elsewhere. Two components of one library sharing a helper is not evidence they
 share its lifecycle.
 
+### It covers position as well as paint
+
+The top layer was adopted for *what paints over* a floating layer. It also
+settles a second ancestor hazard that was assumed rather than measured for a
+while: `transform`, `filter` and `contain: paint` each make an element the
+containing block for its `position: fixed` descendants, which would position a
+layer against that box instead of the viewport.
+
+Measured in `spec/system/containing_block_spec.rb`, one example per property: a
+popover inside each still lands centred under its trigger. Take the promotion
+away and the same panel drops 82, 176 and 270 pixels — a different figure per
+ancestor, because each sits at a different offset down the page. That difference
+is the signature of the bug, and its absence is the evidence.
+
+Worth noting how the first draft of that spec read: it compared the content's
+*left edge* to the trigger's and called a correctly centred panel 80px out.
+`align` defaults to `:center`, so centres are what to compare. An assertion
+built on the wrong assumption fails just as loudly as a real bug.
+
 ## Controllers re-sync on `turbo:morph`
 
 Idiomorph rewrites attributes without disconnecting, so `connect()` never runs

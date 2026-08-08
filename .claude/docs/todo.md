@@ -35,9 +35,12 @@ decided is in `decisions/`.
       300ms). Dispatching that event from `execute_script` would go green and
       prove almost nothing, so it was left undone rather than faked. See
       [decisions/03-testing.md](decisions/03-testing.md).
-- [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
-      paints over* a floating layer; an ancestor that becomes the containing
-      block still affects *where it is positioned*. Not reproduced yet.
+- [x] **`transform`/`filter`/`contain` ancestors.** Reproduced and measured:
+      `spec/system/containing_block_spec.rb` opens a popover inside each of the
+      three and asserts it still lands centred under its trigger. It does — the
+      top layer covers this too, not only what paints over. Removing the
+      promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
+      which is what a containing-block failure looks like.
 
 ## Components not ported (23)
 
