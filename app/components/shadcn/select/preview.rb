@@ -20,6 +20,14 @@ module Shadcn
       def spike_c_inner_list_plain_trigger
         render_with_template
       end
+
+      def spike_d_upstream_shape
+        render_with_template
+      end
+
+      def spike_e_upstream_shape_named_input
+        render_with_template
+      end
     end
   end
 end

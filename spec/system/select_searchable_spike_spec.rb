@@ -43,4 +43,24 @@ RSpec.describe "Searchable select — ARIA shapes", :js do
 
     audit
   end
+
+  # D: what upstream actually emits, read off ui.shadcn.com rather than
+  # designed here — the popover is `role="dialog"`, which is the part none of
+  # A/B/C guessed. Reproduced faithfully down to upstream leaving its search
+  # input with no accessible name, because whether *that* survives this
+  # project's own audit is the question worth asking.
+  it "D: upstream's shape — dialog popover, unnamed search input" do
+    visit_preview(:select, :spike_d_upstream_shape)
+
+    audit
+  end
+
+  # E: shape D with the one attribute upstream omits. If this is clean, the
+  # whole divergence a shipped searchable select would owe upstream is an
+  # accessible name on the search field.
+  it "E: upstream's shape with the search input named" do
+    visit_preview(:select, :spike_e_upstream_shape_named_input)
+
+    audit
+  end
 end
