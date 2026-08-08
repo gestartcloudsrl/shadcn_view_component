@@ -21,6 +21,15 @@ RSpec.describe "Select", :js do
     within(preview) { find("input[name=fruit]", visible: :all).value }
   end
 
+  # A method rather than a `let`: every caller reads it after a keystroke has
+  # moved the highlight, and a memoised value would answer with the state
+  # before the key was pressed.
+  def highlighted
+    page.evaluate_script(
+      "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
+    )
+  end
+
   before do
     visit_preview(:select)
     wait_for_stimulus
@@ -88,20 +97,12 @@ RSpec.describe "Select", :js do
     it "jumps to an option by typing" do
       press("g")
 
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
-
       expect(highlighted).to eq("grapes")
     end
 
     it "narrows the match as more characters arrive" do
       press("b")
       press("l")
-
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
 
       expect(highlighted).to eq("blueberry")
     end
@@ -117,11 +118,35 @@ RSpec.describe "Select", :js do
       press("g")
       press("p")
 
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
-
       expect(highlighted).to eq("grapes")
+    end
+
+    # Radix resets the buffer when the panel opens — "reset typeahead when we
+    # open" (vendor/radix/ui/select.tsx:331-336) — so a character typed before
+    # the last dismissal cannot join the next search.
+    #
+    # The buffer also empties itself one second after the last keystroke, which
+    # would hide a missing reset and turn this into a race against however long
+    # Capybara takes to reopen the panel. Disabling exactly the 1s timeout that
+    # `typeahead.js:32` schedules leaves the reset as the only thing that can
+    # explain an empty buffer.
+    it "starts a fresh search when reopened, rather than continuing the last one" do
+      page.execute_script(<<~JS)
+        window.realSetTimeout ||= window.setTimeout
+        window.setTimeout = (fn, delay, ...rest) =>
+          delay === 1000 ? 0 : window.realSetTimeout(fn, delay, ...rest)
+      JS
+
+      press("g")
+      expect(highlighted).to eq("grapes")
+
+      press(:escape)
+      expect(page).to have_no_css(content)
+      open_select
+
+      press("p")
+
+      expect(highlighted).to eq("pineapple")
     end
 
     # Radix's findNextItem collapses a repeated character to one and excludes
@@ -131,10 +156,6 @@ RSpec.describe "Select", :js do
     it "cycles to the next match when a character repeats" do
       press("b")
       press("b")
-
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
 
       expect(highlighted).to eq("blueberry")
     end
@@ -147,10 +168,6 @@ RSpec.describe "Select", :js do
       press("B")
       press("b")
 
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
-
       expect(highlighted).to eq("banana")
     end
 
@@ -159,19 +176,11 @@ RSpec.describe "Select", :js do
     it "does not move past the first item with ArrowUp" do
       press(:arrow_up)
 
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
-
       expect(highlighted).to eq("apple")
     end
 
     it "does not move past the last item with ArrowDown" do
       5.times { press(:arrow_down) }
-
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
 
       expect(highlighted).to eq("pineapple")
     end
@@ -213,19 +222,11 @@ RSpec.describe "Select", :js do
     end
 
     it "highlights the selection even though it is not a candidate" do
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
-
       expect(highlighted).to eq("apple")
     end
 
     it "enters at the last item on ArrowUp, rather than the first candidate" do
       press(:arrow_up)
-
-      highlighted = page.evaluate_script(
-        "document.querySelector('[data-slot=select-item][data-highlighted]')?.dataset.value"
-      )
 
       expect(highlighted).to eq("pineapple")
     end

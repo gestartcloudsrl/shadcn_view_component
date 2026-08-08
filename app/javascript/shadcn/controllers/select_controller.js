@@ -41,6 +41,10 @@ export default class extends Controller {
       matchAnchorWidth: true,
       onOpen: () => {
         this.triggerTarget.setAttribute("aria-expanded", "true")
+        // Radix resets here rather than on close (vendor/radix/ui/select.tsx:331-336),
+        // so characters typed before this panel was last dismissed cannot join
+        // the next search.
+        this.typeahead.reset()
         this.contentTarget.focus({ preventScroll: true })
         this.highlight(this.selectedItem || this.enabledItems[0])
       },

@@ -44,6 +44,13 @@ export default class extends Controller {
       onClose: () => {
         this.triggerTarget.setAttribute("aria-expanded", "false")
         this.clearHighlight()
+        // Radix's menu clears the buffer on blur rather than on close
+        // (vendor/radix/ui/menu.tsx:585-590). Closing is where the focus this
+        // layer owns actually leaves — nothing here listens for focusout, so a
+        // menu that lost focus *without* closing would keep its buffer, which
+        // Radix's would not. No path in this gem does that: Tab, Escape and an
+        // outside click all close first.
+        this.typeahead.reset()
         this.triggerTarget.focus({ preventScroll: true })
       }
     })

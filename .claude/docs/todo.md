@@ -98,9 +98,9 @@ base-ui.com's API reference, not from Base UI's source.
 
 Base UI documents no prop for typeahead, its buffer or its timeout, on either
 Menu or Select — but its release notes list "Reset typeahead on external blur"
-as behaviour, which Radix also does (vendor/radix/ui/menu.tsx:585-590) and this
-port still does not. That is the open "typeahead buffer survives a close" entry
-below, now wanted by two upstreams rather than one.
+as behaviour, which Radix also does (vendor/radix/ui/menu.tsx:585-590). Two
+independent upstreams agreeing is what moved that from a curiosity to a gap;
+it is the now-closed "typeahead buffer survived a close" entry below.
 
 What is *not* established: whether shadcn considers the Radix variant legacy,
 deprecated, or simply one of three supported choices. Tab order and a redirect
@@ -173,16 +173,22 @@ by keyboard, and driving it was abandoned rather than guessed at.
       registry before aliasing, or to alias on write in `IconRegistry.register`
       — the second also makes `registered` reflect what a host asked for, and
       wants a spec for each alias.
-- [ ] **The typeahead buffer survives a close.** Radix's menu clears its search
-      buffer on blur (vendor/radix/ui/menu.tsx:585-590) and Select exposes
-      `resetTypeahead` for the same purpose (vendor/radix/ui/select.tsx:1877);
-      `Typeahead` only clears on its own 1s timer. Open a dropdown, press `s`,
-      Escape, reopen and press `a` inside that second: the gem searches `"sa"`
-      and stays put where Radix searches `"a"` and moves. A `reset()` on
-      `Typeahead` called from each controller's `onClose` closes it; a system
-      spec has to press the two keys inside one second, so it needs the timer
-      controlled rather than waited out. Self-heals after a second, which is
-      why it has gone unnoticed.
+- [x] **The typeahead buffer survived a close.** `Typeahead#reset` now exists and
+      each controller calls it at *its own* moment, because Radix does not use
+      one: the select resets **on open** — its own comment reads "reset typeahead
+      when we open" (vendor/radix/ui/select.tsx:331-336) — while the menu clears
+      **on blur**, when focus leaves the content
+      (vendor/radix/ui/menu.tsx:585-590). This entry used to claim
+      `resetTypeahead` existed "for the same purpose" as the menu's blur; it did
+      not, and following that would have put the select's call on the wrong
+      event. `handleOpen` is its only caller.
+      The gem's menu resets in `onClose`, which is where the focus it owns
+      actually leaves — nothing listens for `focusout`, so a menu losing focus
+      *without* closing would keep its buffer where Radix's would not. No path
+      in the gem does that: Tab, Escape and an outside click all close first.
+      Both specs disable the 1s expiry that `typeahead.js:32` schedules, so the
+      reset is the only thing that can explain an empty buffer rather than the
+      example racing Capybara.
 - [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
       ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the
       rest at connect; that was deleted once the components were emitting all

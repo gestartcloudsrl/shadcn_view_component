@@ -68,6 +68,34 @@ RSpec.describe "DropdownMenu", :js do
       expect(highlighted).to eq("Support")
     end
 
+    # Radix's menu drops the buffer when focus leaves the content
+    # (vendor/radix/ui/menu.tsx:585-590), which for this gem is the moment the
+    # layer closes and hands focus back to the trigger.
+    #
+    # Without it, "s" and then "b" across a close search "sb", match nothing and
+    # leave the highlight empty. The buffer's own one-second expiry would cover
+    # that up and make this a race against how fast Capybara can reopen the
+    # menu, so the 1s timeout `typeahead.js:32` schedules is disabled for the
+    # duration — leaving the reset as the only thing that can empty the buffer.
+    it "starts a fresh search after closing, rather than continuing the last one" do
+      page.execute_script(<<~JS)
+        window.realSetTimeout ||= window.setTimeout
+        window.setTimeout = (fn, delay, ...rest) =>
+          delay === 1000 ? 0 : window.realSetTimeout(fn, delay, ...rest)
+      JS
+
+      press("s")
+      expect(highlighted).to eq("Settings")
+
+      press(:escape)
+      expect(page).to have_no_css(content)
+      open_menu
+
+      press("b")
+
+      expect(highlighted).to eq("Billing")
+    end
+
     it "highlights on hover" do
       find("[data-slot=dropdown-menu-item]", text: "Settings").hover
 

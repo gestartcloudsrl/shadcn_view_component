@@ -33,6 +33,17 @@ export class Typeahead {
 
     return findNextItem(items, this.buffer, currentItem)
   }
+
+  // Drops the buffer without waiting for its second to elapse. Radix does this
+  // at a *different moment* in each of the two components this class serves:
+  // the select on open — "reset typeahead when we open",
+  // vendor/radix/ui/select.tsx:331-336 — and the menu whenever focus leaves the
+  // content, vendor/radix/ui/menu.tsx:585-590. So the moment is each
+  // controller's to choose, and neither is hardcoded here.
+  reset() {
+    clearTimeout(this.timer)
+    this.buffer = ""
+  }
 }
 
 // This is the "meat" of the typeahead matching logic (vendor/radix/ui/select.tsx:1906-1921,
