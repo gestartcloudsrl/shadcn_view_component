@@ -40,13 +40,36 @@ The list also has to be *maintained in two places by hand* — here and in
 drift, and did, within one working day: `input-group` was filed as markup-only
 after a grep for React hooks missed its inline `onClick`.
 
-## The reverse parity check was rejected
+## Reverse parity took three designs
 
-Classes-the-port-has-that-upstream-doesn't was measured first: 12 of 13 families
-came back dirty with false positives — Ruby constant names, icon names, slot
-names, legitimate composition where one family reuses another's parts. It would
-have needed exactly the exception tables that were being criticised in the first
-place. Snapshots cover the same ground properly.
+`reverse_parity_spec.rb` exists now. Two earlier attempts do not, and why they
+failed is what shaped the one that shipped.
+
+**Per-family token sets from Ruby string literals** — 12 of 13 families dirty.
+`select-item`, `chevron-down` and `more-horizontal` are all shaped like Tailwind
+utilities, so slot names, icon names and constants counted as classes.
+
+**Per-slot, against the slot's own TSX file** — 56 of 145 slots dirty, every one
+the same shape: upstream writes `<DialogTrigger asChild><Button …>`, so Button's
+classes land on `dialog-trigger` while living in `button.tsx`. Untangling that
+needs a table of which component wraps which — the exception table whose absence
+was the point of the criticism.
+
+**What shipped** compares the classes rendered on each `data-slot` against the
+*whole* vendored corpus, `examples/` included. Composition stops being a false
+positive, because Button's classes are in the corpus wherever they land. 15
+slots came back with extras and every one had a reason, in three groups: sizing
+a preview passes as a caller, the searchable select's own classes, and the
+`lucide lucide-*` pair `Icon::Component` stamps where upstream mounts a React
+component. They are listed in `OURS`, with the reasons.
+
+The trade, stated plainly: it catches a class only when it survives **nowhere**
+upstream, which is narrower than per-slot would have been. It does catch the
+thing it was built for — deleting `group/alert-dialog-content` from
+`alert-dialog.tsx` fails it by name. Reading the snapshots is also what makes
+`OURS` carry preview classes: a preview is a caller, and callers may add
+classes, so a new preview with a width in it will fail this spec until the width
+is listed.
 
 ## `stimulus_contract_spec.rb`
 

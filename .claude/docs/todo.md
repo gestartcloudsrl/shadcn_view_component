@@ -16,9 +16,10 @@ decided is in `decisions/`.
 
 ## Coverage gaps worth closing
 
-- [ ] **Reverse parity.** When upstream *removes* a class the port keeps it and
-      nothing fails. A naive check was measured and rejected (see `decisions/`);
-      the workable version keys on `data-slot` rather than on the directory.
+- [x] **Reverse parity.** `spec/reverse_parity_spec.rb` compares the classes
+      rendered on each `data-slot` against the whole vendored corpus. Took three
+      designs; the two that failed and the trade the third makes are in
+      [decisions/03-testing.md](decisions/03-testing.md).
 - [ ] **A screen-reader pass.** axe covers names, roles, required parents and
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
