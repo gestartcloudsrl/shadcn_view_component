@@ -1,0 +1,26 @@
+<%# SPIKE — not a shipped preview. Shape B: `role="listbox"` moves off the
+    content onto an inner list, the way upstream's aria variant nests
+    `select-list` inside the popover, so the input is a *sibling* of the listbox
+    rather than a child. The trigger still carries `role="combobox"`, as our
+    Radix port emits it — so this shape has two combobox-ish elements. %>
+<div data-slot="select" style="display:contents">
+  <%= render(Shadcn::Select::Trigger::Component.new(
+        "aria-label": "Favourite country", "aria-expanded": "true", "aria-controls": "spike-b-list", class: "w-[220px]")) do |t| %>
+    <% t.with_value { "Select country" } %>
+  <% end %>
+
+  <%= render(Shadcn::Select::Content::Component.new(
+        hidden: false, role: nil, tabindex: nil, class: "w-[220px]")) do %>
+    <input data-slot="select-input"
+           type="text"
+           aria-label="Search countries"
+           aria-autocomplete="list"
+           aria-controls="spike-b-list"
+           aria-activedescendant="spike-b-opt-1"
+           class="mb-1 w-full rounded-sm border border-input bg-transparent px-2 py-1.5 text-sm outline-none">
+    <div id="spike-b-list" role="listbox" data-slot="select-list" aria-label="Countries">
+      <%= render(Shadcn::Select::Item::Component.new(value: "ar", id: "spike-b-opt-1")) { "Argentina" } %>
+      <%= render(Shadcn::Select::Item::Component.new(value: "it", id: "spike-b-opt-2")) { "Italy" } %>
+    </div>
+  <% end %>
+</div>
