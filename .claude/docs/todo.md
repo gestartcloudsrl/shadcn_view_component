@@ -16,27 +16,52 @@ decided is in `decisions/`.
 
 ## Coverage gaps worth closing
 
-- [ ] **Reverse parity.** When upstream *removes* a class the port keeps it and
-      nothing fails. A naive check was measured and rejected (see `decisions/`);
-      the workable version keys on `data-slot` rather than on the directory.
+- [x] **Reverse parity.** `spec/reverse_parity_spec.rb` compares the classes
+      rendered on each `data-slot` against the whole vendored corpus. Took three
+      designs; the two that failed and the trade the third makes are in
+      [decisions/03-testing.md](decisions/03-testing.md).
 - [ ] **A screen-reader pass.** axe covers names, roles, required parents and
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
-      that is the claim least tested.
-- [ ] **The select's scroll-button auto-scroll.** Which chevron is offered, and
-      that both stay pinned while the options move, are covered. The 50ms
-      interval is not: Selenium's pointer reaches those buttons by no route
-      tried — neither `move_to` nor `click_and_hold` moves the list a pixel —
-      while a `PointerEvent` dispatched from the page scrolls it at once, so the
-      handler is right and the driver is the obstacle. Pinning the buttons was
-      expected to fix it and did not, which leaves the panel's top layer as the
-      likeliest reason. Verified by hand instead (`scrollTop` 88 → 120 over
-      300ms). Dispatching that event from `execute_script` would go green and
-      prove almost nothing, so it was left undone rather than faked. See
-      [decisions/03-testing.md](decisions/03-testing.md).
-- [ ] **`transform`/`filter`/`contain` ancestors.** The top layer solved *what
-      paints over* a floating layer; an ancestor that becomes the containing
-      block still affects *where it is positioned*. Not reproduced yet.
+      that is the claim least tested, and it cannot be automated: it needs a
+      person and assistive technology.
+
+      Where to spend the hour, in descending order of how likely each is to be
+      wrong:
+
+      1. **The searchable select** (`select/previews/searchable.html.erb`). The
+         newest pattern in the gem and the only one using virtual focus —
+         `aria-activedescendant` on the field while DOM focus never moves.
+         Listen for whether the active option is announced as the arrows move,
+         and whether filtering to nothing says anything at all: there is no
+         `aria-live` region, deliberately, and upstream has none either.
+      2. **Select, Checkbox and Switch**, which are `<button>`s carrying an ARIA
+         role — `default_tag :button` plus `role: "checkbox"` and
+         `role: "switch"` respectively. The FormBuilder points a name at each;
+         a bare component has nothing. Confirm the name is heard. On the
+         **plain** select (`previews/default.html.erb`) the trigger is
+         `role="combobox"`, and whether that reads sensibly on something not
+         editable is the question; the searchable one's trigger carries no role
+         at all, so listen to both.
+      3. **The dialog and sheet**, for focus return and whether the exit
+         animation's window leaks anything — `inert` is set while an exit is
+         deferred, and the reasoning is in
+         [decisions/02-javascript.md](decisions/02-javascript.md).
+      4. **The accordion**, whose collapsing panel is deliberately exempt from
+         `inert` and stays interactive while it closes.
+
+      Anything found here is worth more than another automated check: axe has
+      been run over every family, at rest and with each layer open, and it is
+      green.
+- [x] **The select's scroll-button auto-scroll.** Covered, once the pointer was
+      driven through Chrome's own input pipeline rather than WebDriver's Actions
+      API — see [decisions/03-testing.md](decisions/03-testing.md).
+- [x] **`transform`/`filter`/`contain` ancestors.** Reproduced and measured:
+      `spec/system/containing_block_spec.rb` opens a popover inside each of the
+      three and asserts it still lands centred under its trigger. It does — the
+      top layer covers this too, not only what paints over. Removing the
+      promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
+      which is what a containing-block failure looks like.
 
 ## Components not ported (23)
 

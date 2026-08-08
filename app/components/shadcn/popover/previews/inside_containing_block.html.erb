@@ -1,0 +1,41 @@
+<%# The other ancestor hazard, and a different one from
+    `inside_stacking_context`: that preview is about what *paints over* the
+    layer, this is about *where the layer lands*.
+
+    `transform`, `filter` and `contain: paint` each make an element the
+    containing block for `position: fixed` descendants, so a fixed layer inside
+    one is positioned against that box rather than the viewport. The Popover API
+    is supposed to lift the content into the top layer and out of reach of all
+    three; whether it does is what the spec measures rather than assumes.
+
+    Three ancestors rather than one because the three properties reach the same
+    result by different routes in the spec, and browsers have shipped them at
+    different times. %>
+
+<div class="flex flex-col gap-6">
+  <% {
+       "transform" => "[transform:translateZ(0)]",
+       "filter" => "[filter:blur(0px)]",
+       "contain" => "[contain:paint]"
+     }.each do |name, ancestor| %>
+    <div class="<%= ancestor %> rounded-lg border p-4" data-testid="ancestor-<%= name %>">
+      <span class="mr-3 text-sm text-muted-foreground">Inside <%= name %></span>
+
+      <%= render(Shadcn::Popover::Component.new) do |popover| %>
+        <% popover.with_trigger(
+             class: Shadcn::Button::Component.variant_classes(variant: :outline),
+             "data-testid": "trigger-#{name}"
+           ) { "Open popover" } %>
+        <% popover.with_popover_content("data-testid": "content-#{name}") do |content| %>
+          <% content.with_header do %>
+            <%= render(Shadcn::Popover::Title::Component.new) { "Where am I?" } %>
+            <%= render(Shadcn::Popover::Description::Component.new) do %>
+              If this is not under its trigger, the ancestor became the
+              containing block.
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
