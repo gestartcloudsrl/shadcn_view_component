@@ -93,6 +93,21 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
+  # The loop above audits each family's `default` preview, so it never reaches
+  # this one — and this is the shape worth auditing, because it was chosen by
+  # audit: a search field inside the element carrying `role="listbox"` raises
+  # `aria-required-children`, critical. See decisions/01-architecture.md.
+  context "with a searchable select open" do
+    it "has no violations" do
+      visit_preview(:select, :searchable)
+      wait_for_stimulus
+      within(all("[data-slot=select]").last) { find("[data-slot=select-trigger]").click }
+      expect(page).to have_css("[data-slot=select-content]")
+
+      audit
+    end
+  end
+
   context "with the popover open" do
     it "has no violations" do
       visit_preview(:popover)

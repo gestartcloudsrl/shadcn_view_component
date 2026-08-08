@@ -30,22 +30,30 @@ module Shadcn
           }
         end
 
-        attr_reader :size, :placeholder, :disabled
+        attr_reader :size, :placeholder, :disabled, :searchable
 
-        def initialize(size: :default, placeholder: true, disabled: false, **attributes)
+        def initialize(size: :default, placeholder: true, disabled: false,
+                       searchable: false, **attributes)
           @size = size&.to_sym || :default
           @placeholder = placeholder
           @disabled = disabled
+          @searchable = searchable
           super(**attributes)
         end
 
         def element_attributes(**defaults)
           super(**{
             type: "button",
-            role: "combobox",
+            # A searchable select's trigger is a plain button announcing a
+            # listbox popup: the typing happens in the field inside the popover,
+            # not here. shadcn's aria variant emits it that way, and it has the
+            # side benefit that a role-less button can take its accessible name
+            # from its own text, which `role="combobox"` cannot.
+            role: ("combobox" unless searchable),
             disabled: (true if disabled),
             "aria-expanded" => "false",
-            "aria-autocomplete" => "none",
+            "aria-haspopup" => ("listbox" if searchable),
+            "aria-autocomplete" => ("none" unless searchable),
             "data-size" => size,
             "data-state" => "closed",
             "data-placeholder" => (true if placeholder),

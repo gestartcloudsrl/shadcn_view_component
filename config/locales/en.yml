@@ -15,6 +15,11 @@ en:
       go_to_previous: Go to previous page
       go_to_next: Go to next page
       more: More pages
+    select:
+      search_label: Search options
+      empty: No results found.
+      dialog_label: Select an option
+      list_label: Options
     spinner:
       loading: Loading
     theme:

@@ -8,15 +8,24 @@ module Shadcn
     # is given a hidden input mirrors the selection, the way Radix's BubbleSelect
     # does, so the control submits with the form.
     class Component < ApplicationViewComponent
-      renders_one :trigger, "Shadcn::Select::Trigger::Component"
-      renders_one :select_content, "Shadcn::Select::Content::Component"
+      # Lambda slots so `searchable` reaches the two parts that change shape
+      # because of it — the same way ToggleGroup feeds variant and size to its
+      # items, and for the same reason React would use context.
+      renders_one :trigger, ->(**kwargs, &block) {
+        Trigger::Component.new(searchable:, **kwargs, &block)
+      }
+      renders_one :select_content, ->(**kwargs, &block) {
+        Content::Component.new(searchable:, **kwargs, &block)
+      }
 
       slot_name :select
 
-      attr_reader :open, :value, :name, :placeholder, :side, :align, :side_offset
+      attr_reader :open, :value, :name, :placeholder, :side, :align, :side_offset, :searchable
 
       def initialize(value: nil, name: nil, placeholder: nil, open: false,
-                     side: :bottom, align: :center, side_offset: 4, **attributes)
+                     side: :bottom, align: :center, side_offset: 4, searchable: false,
+                     **attributes)
+        @searchable = searchable
         @value = value.to_s
         @name = name
         @placeholder = placeholder.to_s
@@ -36,7 +45,8 @@ module Shadcn
           "data-shadcn--select-placeholder-value" => placeholder,
           "data-shadcn--select-side-value" => side,
           "data-shadcn--select-align-value" => align,
-          "data-shadcn--select-side-offset-value" => side_offset
+          "data-shadcn--select-side-offset-value" => side_offset,
+          "data-shadcn--select-searchable-value" => searchable
         }.merge(defaults))
       end
 

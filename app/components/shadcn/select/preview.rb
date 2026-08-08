@@ -7,25 +7,7 @@ module Shadcn
         render_with_template
       end
 
-      # SPIKE — three ARIA shapes for a searchable select, kept only long enough
-      # for axe to judge them. Delete with the rest of the spike.
-      def spike_a_input_inside_listbox
-        render_with_template
-      end
-
-      def spike_b_inner_list_combobox_trigger
-        render_with_template
-      end
-
-      def spike_c_inner_list_plain_trigger
-        render_with_template
-      end
-
-      def spike_d_upstream_shape
-        render_with_template
-      end
-
-      def spike_e_upstream_shape_named_input
+      def searchable
         render_with_template
       end
     end

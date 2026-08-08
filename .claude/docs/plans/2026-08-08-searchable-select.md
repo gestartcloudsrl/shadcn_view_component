@@ -54,15 +54,20 @@ Its slots carry a mix. These are plain Tailwind and are taken verbatim:
 |---|---|
 | `select-list` | `group/select-list max-h-[inherit] overflow-x-hidden overflow-y-auto p-0 outline-hidden` |
 | `select-input-wrapper` | `p-1 pb-0` |
-| `select-input` | `[&::-webkit-search-cancel-button]:hidden` |
 
 `select-empty` carries only `cn-select-empty-aria`, whose definition lives in
 `registry/styles/style-*.css` — six-plus themed sheets of ~1700 lines each. That
 one is designed here.
 
-Upstream also composes `InputGroup` / `InputGroupInput` / `InputGroupAddon`,
-all three of which this gem already ports, and stamps `data-slot="select-input"`
-onto the `InputGroupInput`. Task 3 does the same thing with a subclass.
+Upstream also composes `InputGroup` / `InputGroupInput` / `InputGroupAddon`, all
+three of which this gem already ports, and stamps `data-slot="select-input"` onto
+the `InputGroupInput`. **This port must not**: its own input-group raises the
+focus ring with `has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]`,
+while the aria variant's `input-group.tsx` has no `has-[[data-slot=…]]` selector
+at all and styles focus through `cn-*`. Restamping the control here switches the
+ring off, visibly, with nothing to catch it. The control keeps
+`input-group-control`, and `select-input` is not among the slots this component
+adds.
 
 ### The ARIA shape was chosen by measurement, not argument
 
@@ -106,7 +111,6 @@ Four shapes were audited on this branch (commits `3e5722f`, `c224353`):
 |---|---|
 | `app/components/shadcn/select/list/component.rb` | `data-slot="select-list"`, `role="listbox"` — where the options live once a search field shares the popover |
 | `app/components/shadcn/select/search/component.rb` | `data-slot="select-input-wrapper"` around the ported `InputGroup` |
-| `app/components/shadcn/select/search/input/component.rb` | `InputGroup::Input::Component` restamped as `data-slot="select-input"` |
 | `app/components/shadcn/select/empty/component.rb` | `data-slot="select-empty"` — the one part whose look is ours |
 | `app/components/shadcn/select/previews/searchable.html.erb` | the preview that puts this under the snapshot, preview and accessibility specs |
 
@@ -122,7 +126,7 @@ Four shapes were audited on this branch (commits `3e5722f`, `c224353`):
 | `app/javascript/shadcn/controllers/select_controller.js` | virtual focus, filtering, key handling, close behaviour |
 | `app/components/shadcn/select/preview.rb` | registers `searchable`, drops the five spike previews |
 | `spec/system/select_spec.rb`, `spec/system/accessibility_spec.rb` | a `when searchable` context, and one axe example |
-| `config/locales/en.yml` | three strings |
+| `config/locales/en.yml` | four strings |
 | `README.md`, `.claude/docs/todo.md`, `.claude/docs/decisions/01-architecture.md` | Tasks 1 and 7 |
 
 **Deleted** (Task 3): the five `spike_*.html.erb` previews, their `preview.rb`
@@ -158,7 +162,7 @@ In `spec/parity_spec.rb`, after the `allowed_missing` constant:
 # flag. The searchable select is deliberate divergence, not drift; the reasoning
 # is in `decisions/01-architecture.md`.
 ours_alone = {
-  "select" => %w[select-input select-input-wrapper select-list select-empty]
+  "select" => %w[select-input-wrapper select-list select-empty]
 }.freeze
 
 it "declares the slots this port adds beyond upstream" do
@@ -177,7 +181,7 @@ end
 - [ ] **Step 2: Run it and watch it fail**
 
 Run: `bundle exec rspec spec/parity_spec.rb -e "declares the slots"`
-Expected: FAIL on `select-input` — nothing emits it yet. That failure is the
+Expected: FAIL on `select-input-wrapper` — nothing emits it yet. That failure is the
 point: the list cannot be written ahead of the components and then quietly rot.
 
 Leave it failing. Tasks 2 and 3 are what make it pass; do not comment it out.
@@ -277,7 +281,7 @@ git commit -m "Bundle lucide's search icon"
 ### Task 3: The markup
 
 **Files:**
-- Create: `app/components/shadcn/select/list/component.rb`, `app/components/shadcn/select/search/component.rb`, `app/components/shadcn/select/search/input/component.rb`, `app/components/shadcn/select/empty/component.rb`, `app/components/shadcn/select/previews/searchable.html.erb`
+- Create: `app/components/shadcn/select/list/component.rb`, `app/components/shadcn/select/search/component.rb`, `app/components/shadcn/select/empty/component.rb`, `app/components/shadcn/select/previews/searchable.html.erb`
 - Modify: `app/components/shadcn/select/component.rb`, `app/components/shadcn/select/content/component.rb`, `app/components/shadcn/select/trigger/component.rb`, `app/components/shadcn/select/preview.rb`, `config/locales/en.yml`, `spec/system/accessibility_spec.rb`
 - Delete: `app/components/shadcn/select/previews/spike_*.html.erb`, `spec/system/select_searchable_spike_spec.rb`
 - Test: `spec/system/select_spec.rb`
@@ -361,6 +365,7 @@ module Shadcn
         def element_attributes(**defaults)
           super(**{
             role: "listbox",
+            "aria-label" => shadcn_t("select.list_label"),
             "data-shadcn--select-target" => "list"
           }.merge(defaults))
         end
@@ -370,45 +375,13 @@ module Shadcn
 end
 ```
 
-- [ ] **Step 4: Create the search field, in two files**
+- [ ] **Step 4: Create `Select::Search::Component`**
 
-`app/components/shadcn/select/search/input/component.rb` — upstream stamps
-`data-slot="select-input"` onto an `InputGroupInput`, and this is the gem's
-existing idiom for that: inherit the ported component and restamp it, as
-`ButtonGroupSeparator` does to `Separator`.
-
-```ruby
-# frozen_string_literal: true
-
-module Shadcn
-  module Select
-    module Search
-      module Input
-        # `InputGroupInput` under another `data-slot`, which is exactly what
-        # upstream's aria select does with it.
-        class Component < Shadcn::InputGroup::Input::Component
-          slot_name :"select-input"
-
-          def css_classes(extra = nil)
-            super([ "[&::-webkit-search-cancel-button]:hidden", extra ].compact.join(" "))
-          end
-
-          def element_attributes(**defaults)
-            super(**{
-              type: "text",
-              "aria-autocomplete" => "list",
-              "data-shadcn--select-target" => "search",
-              "data-action" => "input->shadcn--select#search"
-            }.merge(defaults))
-          end
-        end
-      end
-    end
-  end
-end
-```
-
-`app/components/shadcn/select/search/component.rb`:
+One file, not two. Upstream restamps its `InputGroupInput` as
+`data-slot="select-input"`; this port renders the ported component unchanged and
+passes it attributes, because that slot name is load-bearing here — the group
+raises its focus ring off `has-[[data-slot=input-group-control]:focus-visible]`,
+and the aria variant has no such selector to break.
 
 ```ruby
 # frozen_string_literal: true
@@ -416,12 +389,9 @@ end
 module Shadcn
   module Select
     module Search
-      # The filter field. Composes the already-ported InputGroup, as upstream
-      # does — its popover renders `data-slot="input-group"` around the field.
-      #
-      # `aria-label` is a deliberate addition: upstream's input carries no
-      # accessible name at all, which axe reports as a critical `label`
-      # violation.
+      # The filter field, composing the already-ported InputGroup the way
+      # shadcn's aria variant does — its popover renders `data-slot="input-group"`
+      # around the control, with the magnifier as an addon.
       class Component < ApplicationViewComponent
         slot_name :"select-input-wrapper"
 
@@ -437,15 +407,18 @@ module Shadcn
         end
 
         def call
-          render_element(body: render(InputGroup::Component.new) do
-            safe_join([ field, addon ])
-          end)
+          render_element(body: render(InputGroup::Component.new) { safe_join([ field, addon ]) })
         end
 
         private
 
         def field
-          render(Input::Component.new("aria-label": label || shadcn_t("select.search_label")))
+          render(InputGroup::Input::Component.new(
+                   "aria-label": label || shadcn_t("select.search_label"),
+                   "aria-autocomplete": "list",
+                   "data-shadcn--select-target": "search",
+                   "data-action": "input->shadcn--select#search"
+                 ))
         end
 
         def addon
@@ -505,7 +478,7 @@ module Shadcn
 end
 ```
 
-- [ ] **Step 6: Add the three strings**
+- [ ] **Step 6: Add the four strings**
 
 In `config/locales/en.yml`, under the existing `shadcn_view_component:` tree
 (the helper is `shadcn_t`, defined at `application_view_component.rb:117`, which
@@ -515,8 +488,14 @@ prefixes `shadcn_view_component.`):
     select:
       search_label: Search options
       empty: No results found.
-      dialog_label: Options
+      dialog_label: Select an option
+      list_label: Options
 ```
+
+`list_label` is not decoration: an unnamed `role="listbox"` is an
+`aria-input-field-name` violation — serious, and WCAG rather than best-practice —
+which is how it was found. The dialog is named separately so a screen reader
+announces the popover and then the list rather than the same words twice.
 
 - [ ] **Step 7: Thread `searchable` through the root**
 
@@ -672,13 +651,23 @@ Expected: PASS. A `label` violation means the search field lost its
 `aria-label`; `aria-required-children` means items ended up outside
 `select-list`.
 
-- [ ] **Step 13: Commit**
+- [ ] **Step 13: Commit, with four known failures**
+
+`stimulus_contract_spec` couples the two sides: the markup written here names a
+`searchable` value, `list` and `empty` targets and a `search` action that the
+controller does not have until Tasks 4 and 5. Expect exactly four failures there
+and nowhere else, and say so in the commit body. Do not silence them by writing
+controller code ahead of the specs that drive it.
 
 ```sh
-bundle exec rake && bin/rubocop
+bundle exec rspec spec/stimulus_contract_spec.rb   # expect 4 failures, all shadcn--select
+bin/rubocop
 git add -A app/components/shadcn/select config/locales spec
 git commit -m "Render the searchable select's markup"
 ```
+
+Task 4 closes the `searchable` value and the `list`/`empty` targets; Task 5
+closes the `search` action.
 
 ---
 
@@ -804,6 +793,10 @@ if (this.searchableValue && this.hasSearchTarget) {
 Run: `bundle exec rspec spec/system/select_spec.rb`
 Expected: PASS, every pre-existing example included — the plain path must be
 untouched.
+
+Run: `bundle exec rspec spec/stimulus_contract_spec.rb`
+Expected: down from four failures to one — only the `search` action is left, and
+Task 5 writes it.
 
 Then break it: change the test in `highlight` to `false && this.searchableValue`,
 re-run the new example, confirm it fails on the `activeElement` assertion,

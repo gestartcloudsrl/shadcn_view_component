@@ -1,0 +1,18 @@
+<%# The trigger is a plain button here rather than a combobox, so it could take
+    its name from its own text — but naming it explicitly is what the FormBuilder
+    does for every select, and a preview is documentation. %>
+<%= render(Shadcn::Select::Component.new(name: "fruit", placeholder: "Select a fruit", searchable: true)) do |s| %>
+  <% s.with_trigger(class: "w-[220px]", "aria-label": "Favourite fruit") do |tr| %>
+    <% tr.with_value(placeholder: "Select a fruit") %>
+  <% end %>
+  <%# Items go in the block rather than through the `item` slot, so anything
+      rendered beside them keeps its place — the same reason default.html.erb
+      does it. %>
+  <% s.with_select_content do %>
+    <%= render(Shadcn::Select::Item::Component.new(value: "apple")) { "Apple" } %>
+    <%= render(Shadcn::Select::Item::Component.new(value: "banana")) { "Banana" } %>
+    <%= render(Shadcn::Select::Item::Component.new(value: "blueberry")) { "Blueberry" } %>
+    <%= render(Shadcn::Select::Item::Component.new(value: "grapes")) { "Grapes" } %>
+    <%= render(Shadcn::Select::Item::Component.new(value: "pineapple")) { "Pineapple" } %>
+  <% end %>
+<% end %>

@@ -253,4 +253,46 @@ RSpec.describe "Select", :js do
       expect(order.call).to eq(original)
     end
   end
+
+  # The searchable select is this gem's own component rather than a port — no
+  # Radix base has one. What it takes from shadcn's React Aria variant is the
+  # shape, and the shape is the thing worth asserting: a text field and a
+  # listbox cannot share an element, so the popover is a dialog holding both.
+  # See decisions/01-architecture.md.
+  context "when searchable" do
+    before do
+      visit_preview(:select, :searchable)
+      wait_for_stimulus
+      within(preview) { find(trigger).click }
+      expect(page).to have_css(content)
+    end
+
+    it "opens a dialog holding a search field and a separate listbox" do
+      within(preview) do
+        expect(find(content)["role"]).to eq("dialog")
+        expect(find("[data-slot=select-list]")["role"]).to eq("listbox")
+        expect(page).to have_css("[data-slot=select-input-wrapper] [data-slot=input-group-control]")
+      end
+    end
+
+    it "gives the trigger a popup button's semantics rather than a combobox's" do
+      within(preview) do
+        expect(find(trigger)["role"]).to be_nil
+        expect(find(trigger)["aria-haspopup"]).to eq("listbox")
+      end
+    end
+
+    # Two deviations from upstream in one example. The field is named, which
+    # upstream's is not — axe calls an unnamed one a critical `label` violation.
+    # And it keeps `input-group-control` rather than upstream's `select-input`,
+    # because this port's group raises its focus ring off that exact slot name.
+    it "names the search field and leaves the input-group's own hook intact" do
+      within(preview) do
+        field = find("[data-slot=select-input-wrapper] input")
+
+        expect(field["aria-label"]).to be_present
+        expect(field["data-slot"]).to eq("input-group-control")
+      end
+    end
+  end
 end

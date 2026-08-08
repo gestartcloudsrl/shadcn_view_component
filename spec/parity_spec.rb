@@ -81,8 +81,13 @@ RSpec.describe "shadcn/ui parity" do
   # a reverse-parity check keyed on `data-slot`, and this list is what such a
   # check must not flag. The searchable select is deliberate divergence, not
   # drift; the reasoning is in `decisions/01-architecture.md`.
+  # Not `select-input`, which upstream's aria variant stamps onto its
+  # InputGroupInput. This port's input-group keys its focus ring on
+  # `has-[[data-slot=input-group-control]:focus-visible]`, where the aria one
+  # styles focus through `cn-*` and has no such selector — so restamping the
+  # control here would silently switch the ring off.
   ours_alone = {
-    "select" => %w[select-input select-input-wrapper select-list select-empty]
+    "select" => %w[select-input-wrapper select-list select-empty]
   }.freeze
 
   it "declares the slots this port adds beyond upstream" do

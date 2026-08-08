@@ -194,6 +194,13 @@ Three deviations, each measured rather than reasoned:
   has children which are not allowed: input[aria-controls]".
 - **`select-list` carries `p-1` where upstream has `p-0`**, because this port's
   padding moved off the viewport that upstream keeps.
+- **The search field keeps `data-slot="input-group-control"`**, where upstream
+  restamps its own as `select-input`. That name is load-bearing here and not
+  there: this port's `InputGroup` raises its focus ring with
+  `has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]`, while the
+  aria variant's `input-group.tsx` carries no `has-[[data-slot=…]]` selector at
+  all and styles focus through `cn-*`. Renaming the control to match upstream
+  would switch the ring off, and nothing but an eye would notice.
 
 `parity_spec`'s `ours_alone` is the machine-readable half of this section. Parity
 is one-way, so slots only this port has are invisible to it — but `todo.md` still

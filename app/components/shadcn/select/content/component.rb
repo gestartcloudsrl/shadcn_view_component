@@ -37,10 +37,11 @@ module Shadcn
           defaults { { position: :"item-aligned" } }
         end
 
-        attr_reader :position
+        attr_reader :position, :searchable
 
-        def initialize(position: :"item-aligned", **attributes)
+        def initialize(position: :"item-aligned", searchable: false, **attributes)
           @position = position&.to_sym || :"item-aligned"
+          @searchable = searchable
           super(**attributes)
         end
 
@@ -50,7 +51,13 @@ module Shadcn
 
         def element_attributes(**defaults)
           super(**{
-            role: "listbox",
+            # A searchable popover holds a text field *and* a list, so it
+            # cannot be the list: a textbox is not an allowed child of a
+            # listbox. The role moves to Select::List and this becomes the
+            # dialog that contains both, which is what axe accepts and what
+            # shadcn's aria variant emits.
+            role: (searchable ? "dialog" : "listbox"),
+            "aria-label" => (shadcn_t("select.dialog_label") if searchable),
             tabindex: "-1",
             "data-state" => "closed",
             hidden: true,
@@ -70,10 +77,26 @@ module Shadcn
         private
 
         def viewport
-          tag.div(safe_join([ items, content ].flatten.compact), class: viewport_classes)
+          tag.div(searchable ? searchable_body : options, class: viewport_classes)
+        end
+
+        # The field is pinned and the list scrolls under it, rather than the
+        # whole popover scrolling and taking the field with it.
+        def searchable_body
+          safe_join([
+            render(Search::Component.new),
+            render(List::Component.new) { options },
+            render(Empty::Component.new)
+          ])
+        end
+
+        def options
+          safe_join([ items, content ].flatten.compact)
         end
 
         def viewport_classes
+          return ShadcnViewComponent.cn("flex flex-col overflow-hidden") if searchable
+
           extra =
             if position == :popper
               "h-[var(--radix-select-trigger-height)] w-full " \
