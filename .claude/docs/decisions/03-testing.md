@@ -261,6 +261,15 @@ So: a claim about **what this port must match** is settled by reading
 `vendor/`. A claim about **what upstream does** is settled by opening it. When
 they are the same sentence, they are still two claims.
 
+And a third case, which is neither: **choosing a shape is not a claim to check
+but a decision to make, and the example decides it.** The searchable select was
+argued between two candidate structures worked out here from the parts already
+measured — input, listbox, options. Upstream's answer was neither: a
+`role="dialog"` popover holding a separate listbox, which dissolves the argument
+rather than settling it. The deciding element was simply one nobody had looked
+at. `CLAUDE.md` carries this as a working rule; it is recorded here because the
+failure looks like diligence — every measured part was measured correctly.
+
 ### Run a control, every time
 
 Driving a real page, "the component ignored my keystroke" and "the keystrokes

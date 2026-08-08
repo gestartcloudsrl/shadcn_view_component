@@ -27,6 +27,26 @@ cache sized for a real page rather than the library's own defaults, and
 Ambiguity resolves toward "has to hold up in an app I will never see", not
 toward "good enough here".
 
+**Before deciding *how* to build something, open upstream's own example and read
+what it renders.** Not the vendored copy — the live component on
+[ui.shadcn.com](https://ui.shadcn.com), in the right variant tab. The vendored
+sources say what was true when they were copied and answer "what does this
+version do"; they never answer "what does upstream do today", and neither
+question is "what shape did upstream choose". Inspect the rendered DOM: roles,
+`data-slot` names, which element owns which ARIA attribute.
+
+The searchable select is the worked example. Two candidate shapes were designed
+here and argued between, and upstream's answer was neither: its popover is
+`role="dialog"` holding a *separate* listbox, which dissolves the question
+instead of answering it. Both candidates had been derived, correctly, from the
+parts already measured — and the part never looked at was the one that decided
+it. The dropdown's wrap-around went the same way: three vendored files agreed
+and the conclusion was still wrong, because the docs now show a different
+variant first.
+
+Reading the source is how a claim gets *checked*. Looking at the example is how
+a decision gets *made*.
+
 **Read [`.claude/docs/`](.claude/docs/README.md) before changing anything
 structural** — it holds why the port is shaped the way it is, and which
 alternatives were already measured and rejected.
