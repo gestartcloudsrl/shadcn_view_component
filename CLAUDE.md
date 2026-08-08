@@ -145,7 +145,8 @@ what gets it covered by the snapshot, preview and accessibility specs.
 - [JavaScript](.claude/docs/decisions/02-javascript.md) — why nothing is
   portalled, the Popover API top layer, `turbo:morph`, and the cascade-layer trap
 - [Testing](.claude/docs/decisions/03-testing.md) — including the rejected
-  reverse-parity check and the system-spec pitfalls
+  reverse-parity check, the system-spec pitfalls, what each `vendor/` reference
+  is and is not evidence for, and why a control measurement comes first
 - [Bugs fixed](.claude/docs/decisions/04-bugs-fixed.md) — things not to
   reintroduce
 - [TODO](.claude/docs/todo.md) — open work, the 23 unported components grouped

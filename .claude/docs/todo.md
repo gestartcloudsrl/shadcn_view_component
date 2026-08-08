@@ -199,13 +199,13 @@ by keyboard, and driving it was abandoned rather than guessed at.
       are the component's job rather than the controller's. One sentence under
       the JavaScript section closes it; the alternative, backfilling again,
       is what that commit deliberately undid.
-- [ ] **Nothing routes a reader to `vendor/radix/`.** Its own README is good and
-      names its staleness risk, but only someone already inside the directory
-      reads it. `CLAUDE.md`'s map now lists it; `.claude/docs/` still does not
-      mention it anywhere, and `decisions/03-testing.md` — which says what each
-      reference is worth — is where the distinction belongs: `vendor/shadcn/`
-      is policed by `parity_spec` on every run, `vendor/radix/` is policed by
-      nobody and can go stale the moment Radix ships past `REVISION`.
+- [x] **Nothing routed a reader to `vendor/radix/`.**
+      `decisions/03-testing.md` now carries "What the two vendored references
+      are worth": `vendor/shadcn/` is policed by `parity_spec` on every run,
+      `vendor/radix/` by nobody. It also records the sharper point that came out
+      of using them — reading either one correctly still answers "what does the
+      vendored version do", never "what does upstream do today" — and the
+      control-measurement rule that two void readings this session earned.
 - [x] **`icon.rb`'s two comments disagreed with each other** — the header said no
       autoloadable constant resolves in an initializer, and the comment on the
       delegating `.register` fifteen lines below still called it what a host

@@ -157,6 +157,27 @@ branch — but zero is what the test harness produces, not what a user with
 reduced motion gets; see
 [testing](03-testing.md#asserting-on-an-animation).
 
+## One library, two answers — check the component, not the library
+
+`Typeahead` is shared by the select and the dropdown menu, so "when does Radix
+clear the search buffer" reads like one question. It is two, and they have
+different answers: the **select resets on open** — its own comment says "reset
+typeahead when we open", `vendor/radix/ui/select.tsx:331-336`, and `handleOpen`
+is `resetTypeahead`'s only caller — while the **menu clears on blur**, when
+focus leaves the content, `vendor/radix/ui/menu.tsx:585-590`.
+
+So `reset()` picks no moment; each controller calls it at its own. The gem's
+menu resets in `onClose`, which is where the focus it owns actually leaves —
+nothing here listens for `focusout`, so a menu losing focus *without* closing
+would keep its buffer where Radix's would not. No path in the gem reaches that:
+Tab, Escape and an outside click all close first.
+
+`todo.md` had recorded `resetTypeahead` as existing "for the same purpose" as
+the menu's blur handler. It does not, and following that sentence would have
+wired the select to the wrong event — working for the reported case and wrong
+elsewhere. Two components of one library sharing a helper is not evidence they
+share its lifecycle.
+
 ## Controllers re-sync on `turbo:morph`
 
 Idiomorph rewrites attributes without disconnecting, so `connect()` never runs

@@ -130,6 +130,22 @@ take down a page it has never seen.** An unknown icon name raises where
 renders nothing everywhere else, staging included. That is the trade Rails makes
 with a missing translation.
 
+**A behaviour upstream lets you ask for is a keyword here, not a decision made
+for the host.** The dropdown once wrapped around at the ends of the list; that
+was removed as a divergence, correctly — Radix's `loop` defaults to `false` and
+shadcn never passes it. What the removal missed is that `loop` *is a prop*
+(`vendor/radix/ui/menu.tsx:363-368`, documented `@defaultValue false`) and
+shadcn spreads `...props` onto the content, so a React caller who wants a
+cycling menu can have one. Deleting the behaviour without exposing the knob left
+the port **poorer than the thing it ports**, which is a worse failure than the
+divergence it fixed.
+
+The rule that falls out: matching upstream's *default* is the job; matching its
+*range* is also the job. Before removing a behaviour as non-upstream, check
+whether upstream lets a caller turn it on. Such options ride on the family root
+next to `side` and `align` — one Stimulus controller owns the family, and the
+root is where it attaches — even where Radix declares them on Content.
+
 **Ordered heterogeneous children are a polymorphic slot, not a flag.**
 `ItemGroup` renders items and separators in one ordered collection through
 `renders_many :items, types: { item: {…, as: :item}, separator: {…, as: :separator} }`,

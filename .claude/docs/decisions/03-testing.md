@@ -235,6 +235,45 @@ worked and axe accepted it. It has since been switched to `aria-labelledby` to
 match the FormBuilder — the label was `sr-only`, so `<label for>`'s only
 advantage, click-to-focus, was not buying anything.
 
+## What the two vendored references are worth
+
+`vendor/shadcn/` is checked on every run: `parity_spec` reads it, so a drifted
+copy fails the suite. **`vendor/radix/` is policed by nobody.** No spec reads it
+— its own README says so — and it can go stale the moment Radix ships past the
+commit in `REVISION`. It is a citation source, not a fixture.
+
+Neither answers the question people actually ask of them. Both are a snapshot of
+*what was vendored*, and the interesting question is usually *what upstream does
+today*, which is a different one.
+
+That distinction cost a real regression. The dropdown's wrap-around was removed
+citing three files that all agreed — `menu.tsx:387` and
+`roving-focus-group.tsx:117` both destructure `loop = false`,
+`roving-focus-group.tsx:324-326` is the branch that acts on it, and
+`vendor/shadcn/ui/dropdown-menu.tsx` never passes it. Every citation was
+accurate, and the conclusion was still wrong in practice, because
+`ui.shadcn.com/docs/components/dropdown-menu` now **redirects to a Base UI
+variant** whose menu wraps by default. No amount of re-reading the vendored
+files could have surfaced that: they answer "what does the Radix version do",
+and the question was "what does a person see when they check".
+
+So: a claim about **what this port must match** is settled by reading
+`vendor/`. A claim about **what upstream does** is settled by opening it. When
+they are the same sentence, they are still two claims.
+
+### Run a control, every time
+
+Driving a real page, "the component ignored my keystroke" and "the keystrokes
+never arrived" produce identical readings. Two measurements in one session were
+void for exactly that: keys typed at a select whose panel had silently stayed
+closed, and keys typed at an element focused *inside* an iframe while the
+top-level document held focus. Both looked like a confirmed no-op.
+
+The fix is cheap and non-optional: before measuring the case in doubt, measure a
+case that must succeed. `bl` reaching blueberry proves the keys land, so a
+following `ab` that does nothing means something. Assert the precondition too —
+that the panel is open — rather than inferring it from the result.
+
 ## What is still unverified
 
 - Parity in the removal direction (above).
