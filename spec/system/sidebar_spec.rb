@@ -19,4 +19,20 @@ RSpec.describe "Sidebar", :js do
     expect(find(sidebar)["data-side"]).to eq("left")
     expect(find(sidebar)["data-variant"]).to eq("sidebar")
   end
+
+  # `data-collapsible` is the attribute every collapsed-state class matches on,
+  # and upstream leaves it *empty* while expanded (sidebar.tsx:212). Filling it
+  # unconditionally would style an open sidebar as a closed one, which is why
+  # this asserts the empty string rather than just the state.
+  it "collapses and expands, and fills data-collapsible only while collapsed" do
+    expect(find(sidebar)["data-collapsible"]).to eq("")
+
+    find(trigger).click
+    expect(page).to have_css("#{sidebar}[data-state=collapsed]")
+    expect(find(sidebar)["data-collapsible"]).to eq("offcanvas")
+
+    find(trigger).click
+    expect(page).to have_css("#{sidebar}[data-state=expanded]")
+    expect(find(sidebar)["data-collapsible"]).to eq("")
+  end
 end
