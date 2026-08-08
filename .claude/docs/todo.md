@@ -223,3 +223,17 @@ by keyboard, and driving it was abandoned rather than guessed at.
   content. The Popover API solved the problem it was meant to solve.
 - **A `<dialog>.showModal()` rewrite** — the Popover API already fixed the
   stacking-context issue with far less change.
+
+- **Falling back to the last character when the typeahead buffer matches
+  nothing.** Type `g` then `p` inside a second and the search is `"gp"`, which
+  matches nothing, so the keystroke is discarded — it *feels* like having to
+  wait a second between letters. Retrying with just `"p"` would fix it and
+  could only affect a branch that currently does nothing at all.
+  Measured on both upstreams before deciding, in the same list and the same
+  way: shadcn's Radix select stays put, and Base UI's own demo (Gala, Fuji,
+  Honeycrisp, Granny Smith, Pink Lady) lands on **Gala** for a fast `gp` — the
+  `g` moves, the `p` is swallowed. `gr` reaching Granny Smith on both was the
+  control, so this is "the key is ignored", not "the keys never arrived".
+  Two independent libraries agreeing makes this the typeahead contract rather
+  than an oversight of Radix's to correct. The 1s window itself is hardcoded
+  upstream too (vendor/radix/ui/select.tsx:1871) and exposed as no prop.
