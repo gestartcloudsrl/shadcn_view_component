@@ -373,7 +373,7 @@ module Shadcn
           tag.input(
             type: "text",
             "data-slot": "select-input",
-            "aria-label": label || t("shadcn.select.search_label"),
+            "aria-label": label || shadcn_t("select.search_label"),
             "aria-autocomplete": "list",
             "data-shadcn--select-target": "search",
             "data-action": "input->shadcn--select#search",
@@ -392,7 +392,7 @@ module Shadcn
 end
 ```
 
-Add the default string to `config/locales/en.yml` under the existing `shadcn:`
+Add the default string to `config/locales/en.yml` under the existing `shadcn_view_component:`
 tree, following whatever key style the file already uses:
 
 ```yaml
@@ -432,7 +432,7 @@ module Shadcn
         end
 
         def call
-          render_element(body: content.presence || t("shadcn.select.empty"))
+          render_element(body: content.presence || shadcn_t("select.empty"))
         end
       end
     end
@@ -503,7 +503,7 @@ parts:
 def element_attributes(**defaults)
   super(**{
     role: (searchable ? "dialog" : "listbox"),
-    "aria-label" => (t("shadcn.select.dialog_label") if searchable),
+    "aria-label" => (shadcn_t("select.dialog_label") if searchable),
     tabindex: "-1",
     # …the rest unchanged…
   }.merge(defaults))
