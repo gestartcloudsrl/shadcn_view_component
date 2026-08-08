@@ -30,6 +30,24 @@ RSpec.describe "Select", :js do
     )
   end
 
+  # Both are methods rather than `let` for the reason above: each is read after
+  # a keystroke has changed the DOM, and a memoised value would answer with the
+  # state before it.
+  def fill_in_search(query)
+    within(preview) { find("[data-slot=select-input-wrapper] input").set(query) }
+  end
+
+  # Scoped to the preview's own select: the gallery's ThemeSelector is one too,
+  # and its options would otherwise be counted among these.
+  def visible_item_values
+    page.evaluate_script(<<~JS)
+      [...[...document.querySelectorAll("[data-slot=select]")].pop()
+        .querySelectorAll("[data-slot=select-item]")]
+        .filter((item) => !item.hidden)
+        .map((item) => item.dataset.value)
+    JS
+  end
+
   before do
     visit_preview(:select)
     wait_for_stimulus
@@ -305,6 +323,35 @@ RSpec.describe "Select", :js do
           return !!id && document.getElementById(id).dataset.value === "banana"
         })()
       JS
+    end
+
+    # Substring, not prefix — which is what shadcn's aria variant does, and what
+    # makes a filter worth having over the typeahead the plain select already
+    # has. "err" is in the middle of Blueberry.
+    it "narrows the list to substring matches, not just prefixes" do
+      fill_in_search("err")
+
+      expect(visible_item_values).to eq(%w[blueberry])
+    end
+
+    it "shows the empty state when nothing matches, and hides the list" do
+      fill_in_search("zzz")
+
+      within(preview) do
+        expect(page).to have_css("[data-slot=select-empty]")
+        expect(page).to have_no_css("[data-slot=select-list]")
+      end
+    end
+
+    # The filtered-away rows are still in the DOM, so every consumer of
+    # `enabledItems` has to skip them or the arrows walk into nothing.
+    it "keeps the arrow keys inside what is left after filtering" do
+      fill_in_search("p")
+      press(:arrow_down)
+
+      # apple, grapes and pineapple survive "p"; the highlight lands on the
+      # first of them, so one ArrowDown reaches the second.
+      expect(highlighted).to eq("grapes")
     end
 
     it "names the search field and leaves the input-group's own hook intact" do

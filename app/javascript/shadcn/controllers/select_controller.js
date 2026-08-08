@@ -141,6 +141,24 @@ export default class extends Controller {
     }
   }
 
+  // shadcn's aria variant filters on substring rather than prefix — "err"
+  // reaches Blueberry — and drops non-matching options from the DOM. Here they
+  // are hidden instead: the options are server-rendered ERB, and one removed
+  // cannot be put back.
+  search() {
+    const query = this.searchTarget.value.trim().toLowerCase()
+
+    this.itemTargets.forEach((item) => {
+      item.hidden = query !== "" && !item.textContent.trim().toLowerCase().includes(query)
+    })
+
+    const matches = this.enabledItems
+    if (this.hasListTarget) this.listTarget.hidden = matches.length === 0
+    if (this.hasEmptyTarget) this.emptyTarget.hidden = matches.length > 0
+
+    this.highlight(matches[0])
+  }
+
   pointerenter(event) {
     this.highlight(event.currentTarget)
   }
@@ -161,8 +179,11 @@ export default class extends Controller {
 
   // --- helpers -------------------------------------------------------------
 
+  // `!item.hidden` is what keeps the arrows, Home, End and `selectedItem` out
+  // of rows the filter has taken away. Nothing hides items unless `searchable`,
+  // so the plain select is unaffected.
   get enabledItems() {
-    return this.itemTargets.filter((item) => item.dataset.disabled === undefined)
+    return this.itemTargets.filter((item) => item.dataset.disabled === undefined && !item.hidden)
   }
 
   get selectedItem() {
