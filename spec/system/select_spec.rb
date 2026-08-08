@@ -354,6 +354,44 @@ RSpec.describe "Select", :js do
       expect(highlighted).to eq("grapes")
     end
 
+    # `contentKeydown` is bound on the content and keystrokes from the field
+    # bubble up to it, so three of its cases have to stand down: Space selects
+    # there and is a character here, Home and End jump the highlight there and
+    # move the caret here. The assertion that the panel is still open is the one
+    # that matters — Space used to select, and selecting closes.
+    it "lets the search field keep the keys that belong to a text field" do
+      fill_in_search("g")
+      press(:space)
+      press(:home)
+
+      within(preview) do
+        expect(find("[data-slot=select-input-wrapper] input").value).to eq("g ")
+        expect(page).to have_css(content)
+      end
+    end
+
+    it "chooses the highlighted option with Enter" do
+      fill_in_search("pine")
+      press(:enter)
+
+      within(preview) { expect(page).to have_no_css(content) }
+      expect(value).to eq("pineapple")
+    end
+
+    it "starts from a clean query the next time it opens" do
+      fill_in_search("pine")
+      press(:escape)
+      expect(page).to have_no_css(content)
+
+      within(preview) { find(trigger).click }
+      expect(page).to have_css(content)
+
+      within(preview) do
+        expect(find("[data-slot=select-input-wrapper] input").value).to eq("")
+      end
+      expect(visible_item_values).to eq(%w[apple banana blueberry grapes pineapple])
+    end
+
     it "names the search field and leaves the input-group's own hook intact" do
       within(preview) do
         field = find("[data-slot=select-input-wrapper] input")

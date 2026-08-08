@@ -70,6 +70,13 @@ export default class extends Controller {
       onClose: () => {
         this.triggerTarget.setAttribute("aria-expanded", "false")
         this.clearHighlight()
+        // Clearing through `search()` rather than by hand keeps one definition
+        // of what the list looks like for a given query — the empty state and
+        // the list's own `hidden` included.
+        if (this.searchableValue && this.hasSearchTarget) {
+          this.searchTarget.value = ""
+          this.search()
+        }
         this.triggerTarget.focus({ preventScroll: true })
       }
     })
@@ -116,16 +123,23 @@ export default class extends Controller {
         event.preventDefault()
         this.highlight(current === -1 ? items[items.length - 1] : items[Math.max(current - 1, 0)])
         return
+      // Home and End move the caret when a search field has focus. Jumping the
+      // highlight instead would make the field uneditable at either end.
       case "Home":
+        if (this.searchableValue) return
         event.preventDefault()
         this.highlight(items[0])
         return
       case "End":
+        if (this.searchableValue) return
         event.preventDefault()
         this.highlight(items[items.length - 1])
         return
       case "Enter":
       case " ":
+        // A space is a character while the search field has focus; Enter still
+        // chooses. Without this, typing a space picks an option and closes.
+        if (event.key === " " && this.searchableValue) return
         if (!this.highlighted) return
         event.preventDefault()
         this.highlighted.click()
@@ -135,7 +149,9 @@ export default class extends Controller {
         return
     }
 
-    if (event.key.length === 1 && !event.metaKey && !event.ctrlKey) {
+    // The search field owns the characters when there is one; running the
+    // typeahead too would accumulate a second, invisible query alongside it.
+    if (!this.searchableValue && event.key.length === 1 && !event.metaKey && !event.ctrlKey) {
       const match = this.typeahead.search(event.key, this.enabledItems, this.highlighted)
       if (match) this.highlight(match)
     }
