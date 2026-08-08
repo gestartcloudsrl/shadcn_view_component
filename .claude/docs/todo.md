@@ -23,7 +23,32 @@ decided is in `decisions/`.
 - [ ] **A screen-reader pass.** axe covers names, roles, required parents and
       contrast. It does not tell you whether the experience makes sense in
       VoiceOver or NVDA — for a library whose pitch is Radix's accessibility,
-      that is the claim least tested.
+      that is the claim least tested, and it cannot be automated: it needs a
+      person and assistive technology.
+
+      Where to spend the hour, in descending order of how likely each is to be
+      wrong:
+
+      1. **The searchable select** (`select/previews/searchable.html.erb`). The
+         newest pattern in the gem and the only one using virtual focus —
+         `aria-activedescendant` on the field while DOM focus never moves.
+         Listen for whether the active option is announced as the arrows move,
+         and whether filtering to nothing says anything at all: there is no
+         `aria-live` region, deliberately, and upstream has none either.
+      2. **Select, Checkbox and Switch**, which are `<button>`s carrying an ARIA
+         role. The FormBuilder points a name at each; a bare component has
+         nothing. Confirm the name is heard, and that `role="combobox"` on a
+         non-editable trigger reads sensibly.
+      3. **The dialog and sheet**, for focus return and whether the exit
+         animation's window leaks anything — `inert` is set while an exit is
+         deferred, and the reasoning is in
+         [decisions/02-javascript.md](decisions/02-javascript.md).
+      4. **The accordion**, whose collapsing panel is deliberately exempt from
+         `inert` and stays interactive while it closes.
+
+      Anything found here is worth more than another automated check: axe has
+      been run over every family, at rest and with each layer open, and it is
+      green.
 - [x] **The select's scroll-button auto-scroll.** Covered, once the pointer was
       driven through Chrome's own input pipeline rather than WebDriver's Actions
       API — see [decisions/03-testing.md](decisions/03-testing.md).
