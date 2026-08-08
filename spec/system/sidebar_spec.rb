@@ -35,4 +35,21 @@ RSpec.describe "Sidebar", :js do
     expect(page).to have_css("#{sidebar}[data-state=expanded]")
     expect(find(sidebar)["data-collapsible"]).to eq("")
   end
+
+  # Written so a Rails layout can render the sidebar already collapsed. Without
+  # it the server always sends the default and the client corrects it after
+  # Stimulus boots, which on this component is a full-width layout shift rather
+  # than a repaint. The component never reads it back — that is the host's job,
+  # exactly as upstream leaves it (sidebar.tsx:86).
+  it "remembers the collapsed state in a cookie the server can read" do
+    find(trigger).click
+    expect(page).to have_css("#{sidebar}[data-state=collapsed]")
+
+    expect(page.evaluate_script("document.cookie")).to include("sidebar_state=false")
+
+    find(trigger).click
+    expect(page).to have_css("#{sidebar}[data-state=expanded]")
+
+    expect(page.evaluate_script("document.cookie")).to include("sidebar_state=true")
+  end
 end
