@@ -74,4 +74,43 @@ RSpec.describe "Sidebar", :js do
     press("b")
     expect(page).to have_css("#{sidebar}[data-state=expanded]")
   end
+
+  # `matchMedia` observes the real viewport, so the window is really resized.
+  # 375×667 is an iPhone SE; the breakpoint is `md`, which upstream's own
+  # desktop tree names in its `md:block` (sidebar.tsx:210).
+  #
+  # Assertions use `have_css(..., visible:)` rather than `be_visible`, which
+  # reads once and races whatever is about to change it.
+  context "when the viewport is below the md breakpoint" do
+    before do
+      page.driver.browser.manage.window.resize_to(375, 667)
+      visit "/sidebar"
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.manage.window.resize_to(1400, 900) }
+
+    it "opens as a sheet over the page, and Escape dismisses it" do
+      expect(page).to have_css(sidebar, visible: :hidden)
+
+      find(trigger).click
+
+      expect(page).to have_css(sidebar, visible: :visible)
+      expect(find(sidebar)["data-mobile"]).to eq("true")
+
+      press(:escape)
+
+      expect(page).to have_css(sidebar, visible: :hidden)
+    end
+
+    # The one that matters most. Upstream's toggleSidebar moves `openMobile` on
+    # mobile and `open` on desktop (sidebar.tsx:92-95), so opening the sheet on
+    # a phone must not overwrite what the desktop remembered.
+    it "does not write the desktop cookie" do
+      find(trigger).click
+      expect(page).to have_css(sidebar, visible: :visible)
+
+      expect(page.evaluate_script("document.cookie")).not_to include("sidebar_state")
+    end
+  end
 end
