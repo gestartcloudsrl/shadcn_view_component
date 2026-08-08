@@ -1,0 +1,19 @@
+<%# Long enough to overflow the popover, which is what puts the two scroll
+    buttons to work: they stay hidden while there is nowhere to scroll and
+    appear per direction, as Radix's do. %>
+<%= render(Shadcn::Select::Component.new(name: "timezone", placeholder: "Select a timezone")) do |s| %>
+  <% s.with_trigger(class: "w-[240px]", "aria-label": "Timezone") do |tr| %>
+    <% tr.with_value(placeholder: "Select a timezone") %>
+  <% end %>
+  <% s.with_select_content do %>
+    <% [
+         "Auckland", "Bangkok", "Berlin", "Cairo", "Chicago", "Denver",
+         "Dublin", "Helsinki", "Istanbul", "Jakarta", "Karachi", "Lagos",
+         "Lima", "Lisbon", "London", "Madrid", "Manila", "Melbourne",
+         "Mexico City", "Moscow", "Nairobi", "New York", "Oslo", "Paris",
+         "Rome", "Seoul", "Singapore", "Sydney", "Tokyo", "Toronto"
+       ].each do |city| %>
+      <%= render(Shadcn::Select::Item::Component.new(value: city.parameterize)) { city } %>
+    <% end %>
+  <% end %>
+<% end %>

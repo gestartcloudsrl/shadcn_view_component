@@ -6,8 +6,8 @@
 <path d="m6 9 6 6 6-6"/>
 </svg>
 </button>
-<div data-slot="select-content" role="dialog" aria-label="Select an option" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--select-target="content" data-action="keydown-&gt;shadcn--select#contentKeydown" class="relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
-<div data-slot="select-scroll-up-button" class="flex cursor-default items-center justify-center py-1">
+<div data-slot="select-content" role="dialog" aria-label="Select an option" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--select-target="content" data-action="keydown-&gt;shadcn--select#contentKeydown scroll-&gt;shadcn--select#syncScrollButtons" class="relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+<div data-slot="select-scroll-up-button" aria-hidden="true" hidden="hidden" data-shadcn--select-target="scrollUpButton" data-action="pointerdown-&gt;shadcn--select#startAutoScroll pointermove-&gt;shadcn--select#startAutoScroll pointerleave-&gt;shadcn--select#stopAutoScroll" class="flex cursor-default items-center justify-center py-1">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up size-4">
 <path d="m18 15-6-6-6 6"/>
 </svg>
@@ -24,7 +24,7 @@
 </div>
 </div>
 </div>
-<div data-slot="select-list" role="listbox" aria-label="Options" data-shadcn--select-target="list" class="group/select-list max-h-[inherit] overflow-x-hidden overflow-y-auto p-1 outline-hidden">
+<div data-slot="select-list" role="listbox" data-action="scroll-&gt;shadcn--select#syncScrollButtons" aria-label="Options" data-shadcn--select-target="list" class="group/select-list max-h-[inherit] overflow-x-hidden overflow-y-auto p-1 outline-hidden">
 <div data-slot="select-item" role="option" tabindex="-1" aria-selected="false" data-value="apple" data-state="unchecked" data-shadcn--select-target="item" data-action="click-&gt;shadcn--select#select pointerenter-&gt;shadcn--select#pointerenter" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2">
 <span data-slot="select-item-indicator" class="absolute right-2 flex size-3.5 items-center justify-center">
 <span hidden="hidden">
@@ -84,7 +84,7 @@
 <div data-slot="select-empty" hidden="hidden" data-shadcn--select-target="empty" class="py-6 text-center text-sm text-muted-foreground">No results found.
 </div>
 </div>
-<div data-slot="select-scroll-down-button" class="flex cursor-default items-center justify-center py-1">
+<div data-slot="select-scroll-down-button" aria-hidden="true" hidden="hidden" data-shadcn--select-target="scrollDownButton" data-action="pointerdown-&gt;shadcn--select#startAutoScroll pointermove-&gt;shadcn--select#startAutoScroll pointerleave-&gt;shadcn--select#stopAutoScroll" class="flex cursor-default items-center justify-center py-1">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4">
 <path d="m6 9 6 6 6-6"/>
 </svg>

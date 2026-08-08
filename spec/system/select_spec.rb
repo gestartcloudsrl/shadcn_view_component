@@ -217,6 +217,70 @@ RSpec.describe "Select", :js do
     end
   end
 
+  # The two chevrons were markup only: reproduced because shadcn emits them,
+  # wired to nothing, so a list too long to fit showed a scroll affordance that
+  # did not scroll. Radix mounts each one only while the viewport can scroll
+  # that way (vendor/radix/ui/select.tsx:1585, :1630-1634) and auto-scrolls on
+  # pointer (:1697-1706).
+  #
+  # The preview's five fruits fit, so the container is shrunk here rather than
+  # by adding a preview whose only purpose is to overflow — a preview is also a
+  # snapshot and an axe fixture, and this needs neither.
+  # The two chevrons were markup only: reproduced because shadcn emits them,
+  # wired to nothing, so a list too long to fit showed a scroll affordance that
+  # did not scroll. Radix mounts each one only while the viewport can scroll
+  # that way (vendor/radix/ui/select.tsx:1585, :1630-1634) and auto-scrolls on
+  # pointer at 50ms intervals (:1697-1706).
+  #
+  # Driven from a preview that really overflows rather than by shrinking the
+  # panel from JavaScript: the floating layer rewrites the inline style when it
+  # positions, so a height set beforehand does not survive the open.
+  context "when the options overflow" do
+    before do
+      visit_preview(:select, :scrollable)
+      wait_for_stimulus
+      open_select
+    end
+
+    def scroll_button(direction)
+      within(preview) { find("[data-slot=select-scroll-#{direction}-button]", visible: :all) }
+    end
+
+    def scroll_top
+      page.evaluate_script("[...document.querySelectorAll('[data-slot=select-content]')].pop().scrollTop")
+    end
+
+    it "offers to scroll down, but not up, at the top of the list" do
+      expect(scroll_button("down")).to be_visible
+      expect(scroll_button("up")).not_to be_visible
+    end
+
+    # Assigning scrollTop fires a real scroll event, which is the listener this
+    # example is about.
+    it "swaps them at the bottom" do
+      page.execute_script(
+        "const b = [...document.querySelectorAll('[data-slot=select-content]')].pop();" \
+        "b.scrollTop = b.scrollHeight"
+      )
+
+      expect(scroll_button("up")).to be_visible
+      expect(scroll_button("down")).not_to be_visible
+    end
+
+    # The auto-scroll itself has no example here, deliberately. Every way of
+    # putting a pointer on the button from Capybara scrolls the panel as a side
+    # effect — Selenium moves an element into view before pointing at it, and
+    # this button is the last child of the element that scrolls — so the list
+    # reaches its end whether or not the interval ever runs. Two attempts
+    # passed with `startAutoScroll` neutralised, which is a spec that proves
+    # nothing.
+    #
+    # Verified by hand instead, in a real browser: a `pointermove` on the down
+    # button took scrollTop from 88 to 120 over 300ms. That is a weaker
+    # guarantee than the rest of this file carries, and it is written down
+    # rather than papered over. See todo.md.
+  end
+
   # `onOpen` always highlights, so nothing a user can do reaches the listbox
   # with the cursor unset — with one exception: `selectedItem` searches every
   # item and `enabledItems` filters, so a selection that is also *disabled* is

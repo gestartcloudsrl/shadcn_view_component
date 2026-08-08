@@ -62,15 +62,19 @@ module Shadcn
             "data-state" => "closed",
             hidden: true,
             "data-shadcn--select-target" => "content",
-            "data-action" => "keydown->shadcn--select#contentKeydown"
+            # `scroll` does not bubble, but Stimulus binds the action to this
+            # element itself, so it fires. Which element actually scrolls
+            # differs by mode — see the controller's `scrollContainer`.
+            "data-action" => "keydown->shadcn--select#contentKeydown " \
+                             "scroll->shadcn--select#syncScrollButtons"
           }.merge(defaults))
         end
 
         def call
           render_element(body: safe_join([
-            scroll_button("select-scroll-up-button", "chevron-up"),
+            scroll_button("select-scroll-up-button", "chevron-up", "scrollUpButton"),
             viewport,
-            scroll_button("select-scroll-down-button", "chevron-down")
+            scroll_button("select-scroll-down-button", "chevron-down", "scrollDownButton")
           ]))
         end
 
@@ -106,10 +110,24 @@ module Shadcn
           ShadcnViewComponent.cn("p-1", extra)
         end
 
-        def scroll_button(slot, icon)
+        # Radix mounts these only while there is somewhere to scroll and
+        # unmounts them otherwise (vendor/radix/ui/select.tsx:1594, :1642).
+        # Rendered hidden here instead, which is this gem's convention for the
+        # same thing — see decisions/02-javascript.md, "Indicators are rendered
+        # hidden, not omitted" — so the controller only toggles a flag.
+        #
+        # `aria-hidden` because they are a pointer affordance: the keyboard
+        # scrolls by moving the highlight (vendor/radix/ui/select.tsx:1691).
+        def scroll_button(slot, icon, target)
           tag.div(
             render(Icon::Component.new(icon, class: "size-4")),
             "data-slot": slot,
+            "aria-hidden": true,
+            hidden: true,
+            "data-shadcn--select-target": target,
+            "data-action": "pointerdown->shadcn--select#startAutoScroll " \
+                           "pointermove->shadcn--select#startAutoScroll " \
+                           "pointerleave->shadcn--select#stopAutoScroll",
             class: SCROLL_BUTTON_CLASSES
           )
         end

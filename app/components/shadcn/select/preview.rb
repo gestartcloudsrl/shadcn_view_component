@@ -10,6 +10,10 @@ module Shadcn
       def searchable
         render_with_template
       end
+
+      def scrollable
+        render_with_template
+      end
     end
   end
 end

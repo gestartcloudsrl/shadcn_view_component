@@ -152,6 +152,36 @@ string here is a Tailwind utility, and `parity_spec` compares utilities. Worth
 noting that it would not have delivered the component that raised the question:
 `bases/radix` has no searchable select either.
 
+## The select's scroll buttons are in the wrong element
+
+The two chevrons are wired now — they hide per direction and auto-scroll on
+pointer, as Radix's do — but they sit in the wrong place, and wiring them is
+what made that visible.
+
+Radix scrolls its **viewport**, which carries `overflow: 'hidden auto'` inline
+(vendor/radix/ui/select.tsx:1247); the buttons are the viewport's siblings
+inside the content, so they stay pinned to the panel's edges. This port has no
+overflow on the viewport at all: the **content** scrolls, and the buttons are
+inside it, so they scroll away with the options.
+
+Measured on the `scrollable` preview: with the panel's bottom edge at 387px, the
+down button's bottom is at 993px — six hundred pixels below anything visible. It
+comes into view only once the list is already at its end, which is the one
+moment it has nothing to offer.
+
+The fix is to move the scrolling off the content and onto the viewport, and make
+the content a flex column so the buttons pin. That changes how the **plain**
+select renders, not just the searchable one, so it wants its own branch and a
+fresh look at the snapshots rather than being folded into this work.
+
+Also unproven: the auto-scroll interval itself. Every way of putting a pointer
+on the button from Capybara scrolls the panel as a side effect — Selenium moves
+an element into view before pointing at it — so two attempted examples passed
+with `startAutoScroll` neutralised. Verified by hand in a browser instead
+(pointermove took scrollTop 88 → 120 over 300ms), which is weaker than the rest
+of this suite. Pinning the buttons would likely make it testable, since a pinned
+button needs no scrolling to reach.
+
 ## Smaller things
 
 - [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is

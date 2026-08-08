@@ -11,7 +11,8 @@ import { Typeahead } from "shadcn/typeahead"
 export default class extends Controller {
   // `input` is the hidden field that submits with the form, which is why the
   // search box is `search`.
-  static targets = [ "trigger", "content", "item", "value", "input", "search", "list", "empty" ]
+  static targets = [ "trigger", "content", "item", "value", "input", "search", "list", "empty",
+                     "scrollUpButton", "scrollDownButton" ]
   static values = {
     open: Boolean,
     value: String,
@@ -66,6 +67,7 @@ export default class extends Controller {
           this.contentTarget.focus({ preventScroll: true })
         }
         this.highlight(this.selectedItem || this.enabledItems[0])
+        this.syncScrollButtons()
       },
       onClose: () => {
         this.triggerTarget.setAttribute("aria-expanded", "false")
@@ -86,6 +88,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.stopAutoScroll()
     if (this.layer) this.layer.destroy()
   }
 
@@ -175,6 +178,44 @@ export default class extends Controller {
     this.highlight(matches[0])
   }
 
+  // Radix mounts each button only while the viewport can scroll that way and
+  // recomputes on every scroll (vendor/radix/ui/select.tsx:1585, :1630-1634).
+  // `Math.ceil` is theirs too: zoomed in, `scrollTop` is not always an integer.
+  syncScrollButtons() {
+    if (!this.hasScrollUpButtonTarget || !this.hasScrollDownButtonTarget) return
+
+    const box = this.scrollContainer
+    const maxScroll = box.scrollHeight - box.clientHeight
+
+    this.scrollUpButtonTarget.hidden = box.scrollTop <= 0
+    this.scrollDownButtonTarget.hidden = Math.ceil(box.scrollTop) >= maxScroll
+  }
+
+  // Pointer only. Radix starts the same 50ms interval on pointerdown and on
+  // pointermove (vendor/radix/ui/select.tsx:1697-1706) — move as well as down,
+  // so hovering scrolls without pressing.
+  startAutoScroll(event) {
+    if (this.autoScrollTimer) return
+
+    const up = event.currentTarget === this.scrollUpButtonTarget
+    this.autoScrollTimer = setInterval(() => this.autoScroll(up ? -1 : 1), 50)
+  }
+
+  stopAutoScroll() {
+    clearInterval(this.autoScrollTimer)
+    this.autoScrollTimer = null
+  }
+
+  autoScroll(direction) {
+    // One item per tick, as Radix does: it steps by the selected item's
+    // offsetHeight (vendor/radix/ui/select.tsx:1601, :1647). With nothing
+    // selected there is still a list to measure.
+    const step = (this.selectedItem || this.itemTargets[0])?.offsetHeight || 0
+
+    this.scrollContainer.scrollTop += direction * step
+    this.syncScrollButtons()
+  }
+
   pointerenter(event) {
     this.highlight(event.currentTarget)
   }
@@ -198,6 +239,14 @@ export default class extends Controller {
   // `!item.hidden` is what keeps the arrows, Home, End and `selectedItem` out
   // of rows the filter has taken away. Nothing hides items unless `searchable`,
   // so the plain select is unaffected.
+  // Radix scrolls its viewport, which carries `overflow: hidden auto` inline
+  // (vendor/radix/ui/select.tsx:1247). This port's viewport carries no
+  // overflow: the content scrolls, and in a searchable select the list does,
+  // because the search field has to stay put while the options move.
+  get scrollContainer() {
+    return this.searchableValue && this.hasListTarget ? this.listTarget : this.contentTarget
+  }
+
   get enabledItems() {
     return this.itemTargets.filter((item) => item.dataset.disabled === undefined && !item.hidden)
   }

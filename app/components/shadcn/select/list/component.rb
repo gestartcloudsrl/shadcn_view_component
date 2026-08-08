@@ -30,6 +30,7 @@ module Shadcn
           # the same words twice. shadcn's aria variant names both too.
           super(**{
             role: "listbox",
+            "data-action" => "scroll->shadcn--select#syncScrollButtons",
             "aria-label" => shadcn_t("select.list_label"),
             "data-shadcn--select-target" => "list"
           }.merge(defaults))
