@@ -451,3 +451,140 @@
 @utility slide-out-to-right {
   --tw-exit-translate-x: 100%;
 }
+
+/* --------------------------------------------------------------------------
+ * Three utilities that are shadcn's own CSS, not Tailwind's
+ *
+ * `attachment.tsx` reaches for `shimmer`, `scroll-fade-x` and `scrollbar-none`
+ * the way it reaches for `truncate`, but none of the three is a Tailwind
+ * utility: they are defined in shadcn's stylesheet, which is **not vendored
+ * here** — `vendor/shadcn/` holds the TSX, the examples and `themes.json` and
+ * no CSS at all. Without these declarations Tailwind emits nothing for the
+ * three class names and the attachment ships them inert, which `parity_spec`
+ * would not notice: it compares class *text*, not generated CSS.
+ *
+ * So, unlike every other rule in this file, these were read from the
+ * stylesheet ui.shadcn.com serves rather than from a vendored source, on
+ * 2026-08-09. That means there is nothing in this repository to diff them
+ * against, and no spec can tell you when upstream changes them. Treat the
+ * values as measured-once rather than as tracked.
+ *
+ * One deliberate omission: upstream also ships a second `.shimmer`
+ * `background-image` built with `color-mix`, which softens the gradient's
+ * midpoints. It appeared as a bare override in the served CSS with no
+ * `@supports` around it that could be recovered from the CSSOM, and applying
+ * it unconditionally would change the gradient rather than progressively
+ * enhance it, so only the base definition is reproduced.
+ * ------------------------------------------------------------------------ */
+
+@property --shimmer-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 20deg;
+}
+
+@property --scroll-fade-s {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --scroll-fade-e {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --scroll-fade-mask {
+  syntax: "*";
+  inherits: false;
+}
+
+@keyframes tw-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes scroll-fade-reveal-s {
+  0% {
+    --scroll-fade-s: 0px;
+  }
+
+  to {
+    --scroll-fade-s: var(--_scroll-fade-size-s);
+  }
+}
+
+@keyframes scroll-fade-reveal-e {
+  0% {
+    --scroll-fade-e: var(--_scroll-fade-size-e);
+  }
+
+  to {
+    --scroll-fade-e: 0px;
+  }
+}
+
+/* A gradient clipped to the text, swept across it. The reduced-motion block is
+   upstream's own and does more than stop the sweep: with `background-clip:
+   text` and a transparent fill, freezing the animation would leave the text
+   painted by whatever slice of the gradient it stopped on, so the fill colour
+   has to come back too. */
+@utility shimmer {
+  --_spread: var(--shimmer-spread, calc(3ch + 40px));
+  --_base: currentColor;
+  --_highlight: var(--shimmer-color, oklch(from currentColor l c h / calc(alpha * 0.2)));
+  background-image: var(
+    --shimmer-image,
+    linear-gradient(
+      calc(90deg + var(--shimmer-angle)),
+      var(--_base) calc(50% - var(--_spread)),
+      var(--_highlight) calc(50% - var(--_spread) * 0.5),
+      var(--_highlight) 50%,
+      var(--_highlight) calc(50% + var(--_spread) * 0.5),
+      var(--_base) calc(50% + var(--_spread))
+    )
+  );
+  background-repeat: no-repeat;
+  background-size: calc(200% + var(--_spread) * 2) 100%;
+  background-position: 0 0;
+  background-clip: text;
+  -webkit-text-fill-color: var(--shimmer-text-fill, transparent);
+  animation: tw-shimmer var(--shimmer-duration, 2s) linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+    animation: none !important;
+  }
+}
+
+/* Fades the edges of a horizontal scroller, driven by a scroll timeline rather
+   than by script: the two 1ms animations exist only to interpolate the two
+   mask offsets across the first and last stretch of the scroll. */
+@utility scroll-fade-x {
+  --_scroll-fade-size-s: var(--scroll-fade-s-size, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+  --_scroll-fade-size-e: var(--scroll-fade-e-size, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+  --scroll-fade-inline: linear-gradient(to right, transparent 0, #000 var(--scroll-fade-s, 0px), #000 calc(100% - var(--scroll-fade-e, 0px)), transparent 100%);
+  --scroll-fade-s: var(--_scroll-fade-size-s);
+  --scroll-fade-e: var(--_scroll-fade-size-e);
+  -webkit-mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+  mask-image: var(--scroll-fade-mask, var(--scroll-fade-inline));
+  animation: 1ms ease-in-out scroll-fade-reveal-s, 1ms ease-in-out scroll-fade-reveal-e;
+  animation-timeline: scroll(self inline), scroll(self inline);
+  animation-range: 0 var(--scroll-fade-reveal, calc(var(--spacing) * 24)), calc(100% - var(--scroll-fade-reveal, calc(var(--spacing) * 24))) 100%;
+  animation-fill-mode: both;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -459,3 +459,23 @@ Reach for it whenever the thing under test is *shown* rather than *recorded*.
   the expected name was scheduled and that the element eventually leaves. They
   say nothing about duration, easing, or whether an exit reads as the reverse of
   its entrance.
+
+### The harness zeroes animation durations, and one utility needs them
+
+`Capybara.disable_animation` injects `* { animation-duration: 0s !important }`
+into every page, and the driver runs with `--force-prefers-reduced-motion`.
+Elsewhere that is right — an animation is only something to wait out — but it is
+not neutral for anything whose *value* is interpolated rather than merely
+tweened over time.
+
+`scroll-fade-x`, ported for the attachment, fades a scroller's edges from a
+scroll timeline: two 1ms animations exist only to interpolate two mask offsets
+against `scroll(self inline)`. Forced to `0s` they land on their end value, so
+the leading edge is masked at rest and a screenshot taken through this suite
+shows a fade that a real browser does not. Measured both ways —
+`--scroll-fade-s` is the full fade size under the harness and `0` at
+`scrollLeft: 0` once `force_animations` hands the duration back.
+
+The general form: **a screenshot from this suite is not evidence about anything
+animated**, and `force_animations` is the instrument that makes it one. That
+helper was written for exit animations; this is the second thing it is for.

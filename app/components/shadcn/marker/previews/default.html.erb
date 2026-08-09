@@ -1,0 +1,18 @@
+<%# The three variants, which is all this family has: a row of muted text with
+    an optional icon, ruled off in one of three ways. %>
+<div class="flex w-[420px] flex-col gap-4">
+  <%= render(Shadcn::Marker::Component.new) do %>
+    <%= render(Shadcn::Marker::Icon::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("check")) %>
+    <% end %>
+    <%= render(Shadcn::Marker::Content::Component.new) { "Delivered · 9:41 AM" } %>
+  <% end %>
+
+  <%= render(Shadcn::Marker::Component.new(variant: :separator)) do %>
+    <%= render(Shadcn::Marker::Content::Component.new) { "Today" } %>
+  <% end %>
+
+  <%= render(Shadcn::Marker::Component.new(variant: :border)) do %>
+    <%= render(Shadcn::Marker::Content::Component.new) { "Unread messages" } %>
+  <% end %>
+</div>

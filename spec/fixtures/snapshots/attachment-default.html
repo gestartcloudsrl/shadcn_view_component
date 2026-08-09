@@ -1,0 +1,120 @@
+<div class="flex w-[420px] flex-col gap-6">
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="horizontal" class="group/attachment relative flex w-fit max-w-full shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 min-w-40 items-center">
+<div data-slot="attachment-media" data-variant="icon" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5">
+<span class="text-[10px] font-medium">PDF
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">quarterly-report.pdf
+</span>
+<span data-slot="attachment-description" class="mt-0.5 block min-w-0 truncate text-xs text-muted-foreground group-data-[state=error]/attachment:text-destructive/80 max-w-full">PDF · 2.4 MB
+</span>
+</div>
+<div data-slot="attachment-actions" class="relative z-20 flex shrink-0 items-center group-data-[orientation=vertical]/attachment:absolute group-data-[orientation=vertical]/attachment:top-3 group-data-[orientation=vertical]/attachment:right-3 group-data-[orientation=vertical]/attachment:gap-1">
+<button data-slot="attachment-action" data-variant="ghost" data-size="icon-xs" aria-label="Remove" class="inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-6 rounded-md [&amp;_svg:not([class*=&#39;size-&#39;])]:size-3">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+<path d="M18 6 6 18"/>
+<path d="m6 6 12 12"/>
+</svg>
+</button>
+</div>
+</div>
+<div data-slot="attachment" data-state="uploading" data-size="sm" data-orientation="horizontal" class="group/attachment relative flex w-fit max-w-full shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2.5 text-xs has-data-[slot=attachment-content]:px-2 has-data-[slot=attachment-content]:py-1.5 has-data-[slot=attachment-media]:p-1.5 min-w-40 items-center">
+<div data-slot="attachment-media" data-variant="icon" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5">
+<span class="text-[10px] font-medium">TXT
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">notes.txt
+</span>
+<span data-slot="attachment-description" class="mt-0.5 block min-w-0 truncate text-xs text-muted-foreground group-data-[state=error]/attachment:text-destructive/80 max-w-full">Uploading…
+</span>
+</div>
+</div>
+<div data-slot="attachment" data-state="error" data-size="sm" data-orientation="horizontal" class="group/attachment relative flex w-fit max-w-full shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2.5 text-xs has-data-[slot=attachment-content]:px-2 has-data-[slot=attachment-content]:py-1.5 has-data-[slot=attachment-media]:p-1.5 min-w-40 items-center">
+<div data-slot="attachment-media" data-variant="icon" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5">
+<span class="text-[10px] font-medium">ZIP
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">archive.zip
+</span>
+<span data-slot="attachment-description" class="mt-0.5 block min-w-0 truncate text-xs text-muted-foreground group-data-[state=error]/attachment:text-destructive/80 max-w-full">Upload failed
+</span>
+</div>
+</div>
+<div data-slot="attachment-group" class="flex min-w-0 scroll-fade-x snap-x snap-mandatory scroll-px-1 scrollbar-none gap-3 overflow-x-auto overscroll-x-contain py-1 *:data-[slot=attachment]:flex-none *:data-[slot=attachment]:snap-start">
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="vertical" class="group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 w-24 flex-col has-data-[slot=attachment-content]:w-30">
+<div data-slot="attachment-media" data-variant="image" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5 opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover">
+<span class="text-[10px] font-medium">IMG
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">workspace.png
+</span>
+</div>
+<button data-slot="attachment-trigger" type="button" aria-label="Open workspace.png" class="absolute inset-0 z-10 outline-none">
+</button>
+</div>
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="vertical" class="group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 w-24 flex-col has-data-[slot=attachment-content]:w-30">
+<div data-slot="attachment-media" data-variant="image" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5 opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover">
+<span class="text-[10px] font-medium">IMG
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">desk-reference.jpg
+</span>
+</div>
+<button data-slot="attachment-trigger" type="button" aria-label="Open desk-reference.jpg" class="absolute inset-0 z-10 outline-none">
+</button>
+</div>
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="vertical" class="group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 w-24 flex-col has-data-[slot=attachment-content]:w-30">
+<div data-slot="attachment-media" data-variant="image" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5 opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover">
+<span class="text-[10px] font-medium">IMG
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">office-reference.jpg
+</span>
+</div>
+<button data-slot="attachment-trigger" type="button" aria-label="Open office-reference.jpg" class="absolute inset-0 z-10 outline-none">
+</button>
+</div>
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="vertical" class="group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 w-24 flex-col has-data-[slot=attachment-content]:w-30">
+<div data-slot="attachment-media" data-variant="image" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5 opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover">
+<span class="text-[10px] font-medium">IMG
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">whiteboard.png
+</span>
+</div>
+<button data-slot="attachment-trigger" type="button" aria-label="Open whiteboard.png" class="absolute inset-0 z-10 outline-none">
+</button>
+</div>
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="vertical" class="group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 w-24 flex-col has-data-[slot=attachment-content]:w-30">
+<div data-slot="attachment-media" data-variant="image" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5 opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover">
+<span class="text-[10px] font-medium">IMG
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">sketch-01.jpg
+</span>
+</div>
+<button data-slot="attachment-trigger" type="button" aria-label="Open sketch-01.jpg" class="absolute inset-0 z-10 outline-none">
+</button>
+</div>
+<div data-slot="attachment" data-state="done" data-size="default" data-orientation="vertical" class="group/attachment relative flex max-w-full min-w-0 shrink-0 flex-wrap rounded-xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/50 has-[&gt;a,&gt;button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed gap-2 text-sm has-data-[slot=attachment-content]:px-2.5 has-data-[slot=attachment-content]:py-2 has-data-[slot=attachment-media]:p-2 w-24 flex-col has-data-[slot=attachment-content]:w-30">
+<div data-slot="attachment-media" data-variant="image" class="relative flex aspect-square w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-foreground group-data-[orientation=vertical]/attachment:w-full group-data-[size=sm]/attachment:w-8 group-data-[size=xs]/attachment:w-7 group-data-[size=xs]/attachment:rounded-md group-data-[state=error]/attachment:bg-destructive/10 group-data-[state=error]/attachment:text-destructive group-data-[orientation=vertical]/attachment:*:data-[slot=spinner]:size-6! [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-data-[orientation=vertical]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-6 group-data-[size=xs]/attachment:[&amp;_svg:not([class*=&#39;size-&#39;])]:size-3.5 opacity-60 group-data-[state=done]/attachment:opacity-100 group-data-[state=idle]/attachment:opacity-100 *:[img]:aspect-square *:[img]:w-full *:[img]:object-cover">
+<span class="text-[10px] font-medium">IMG
+</span>
+</div>
+<div data-slot="attachment-content" class="max-w-full min-w-0 flex-1 leading-tight group-data-[orientation=vertical]/attachment:px-1">
+<span data-slot="attachment-title" class="block max-w-full min-w-0 truncate font-medium group-data-[state=processing]/attachment:shimmer group-data-[state=uploading]/attachment:shimmer">sketch-02.jpg
+</span>
+</div>
+<button data-slot="attachment-trigger" type="button" aria-label="Open sketch-02.jpg" class="absolute inset-0 z-10 outline-none">
+</button>
+</div>
+</div>
+</div>

@@ -22,9 +22,11 @@ RSpec.describe "shadcn/ui parity" do
     "alert" => "alert",
     "alert-dialog" => "alert_dialog",
     "aspect-ratio" => "aspect_ratio",
+    "attachment" => "attachment",
     "avatar" => "avatar",
     "badge" => "badge",
     "breadcrumb" => "breadcrumb",
+    "bubble" => "bubble",
     "button" => "button",
     "button-group" => "button_group",
     "card" => "card",
@@ -39,6 +41,8 @@ RSpec.describe "shadcn/ui parity" do
     "item" => "item",
     "kbd" => "kbd",
     "label" => "label",
+    "marker" => "marker",
+    "message" => "message",
     "native-select" => "native_select",
     "pagination" => "pagination",
     "popover" => "popover",
@@ -63,9 +67,9 @@ RSpec.describe "shadcn/ui parity" do
   # document so the two lists cannot drift: adding a TSX without deciding which
   # side it belongs on fails the example below, which is the whole point of it.
   not_yet_ported = %w[
-    attachment bubble calendar carousel chart combobox command
+    calendar carousel chart combobox command
     context-menu direction drawer form hover-card input-otp
-    marker menubar message message-scroller navigation-menu resizable
+    menubar message-scroller navigation-menu resizable
     scroll-area slider sonner
   ].freeze
 

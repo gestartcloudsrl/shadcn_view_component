@@ -1,0 +1,19 @@
+<div class="flex w-[420px] flex-col gap-4">
+<div data-slot="marker" data-variant="default" class="group/marker relative flex min-h-4 w-full items-center gap-2 text-left text-sm text-muted-foreground [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [a]:underline [a]:underline-offset-3 [a]:hover:text-foreground">
+<span data-slot="marker-icon" aria-hidden="true" class="size-4 shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+<span data-slot="marker-content" class="min-w-0 wrap-break-word group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">Delivered · 9:41 AM
+</span>
+</div>
+<div data-slot="marker" data-variant="separator" class="group/marker relative flex min-h-4 w-full items-center gap-2 text-left text-sm text-muted-foreground [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [a]:underline [a]:underline-offset-3 [a]:hover:text-foreground before:mr-1 before:h-px before:min-w-0 before:flex-1 before:bg-border after:ml-1 after:h-px after:min-w-0 after:flex-1 after:bg-border">
+<span data-slot="marker-content" class="min-w-0 wrap-break-word group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">Today
+</span>
+</div>
+<div data-slot="marker" data-variant="border" class="group/marker relative flex min-h-4 w-full items-center gap-2 text-left text-sm text-muted-foreground [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [a]:underline [a]:underline-offset-3 [a]:hover:text-foreground border-b border-border pb-2">
+<span data-slot="marker-content" class="min-w-0 wrap-break-word group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">Unread messages
+</span>
+</div>
+</div>
