@@ -14,11 +14,11 @@
     eight of them into a library's payload for one preview is the wrong trade.
     Their paths were read from upstream's rendered demo rather than recalled.
 
-    A gap this makes visible: `tooltip:` on the menu button is not ported, so a
-    collapsed rail would show unlabelled icons where upstream shows a styled
-    label on hover. The `title:` on each button here is a stopgap — the
-    browser's native tooltip, which labels the icons but looks nothing like
-    upstream's and cannot be styled. See features/sidebar.md. %>
+    The Projects rows carry `tooltip:`, which is what labels their icons once
+    the sidebar collapses. The Platform rows cannot: each is a Collapsible
+    trigger wearing the menu button's classes rather than a MenuButton, so it
+    takes a plain `title:` — the browser's own tooltip — instead. That
+    difference is upstream's too, and the reason is the same on both sides. %>
 <%
   icons = {
     "gallery-vertical-end" => %(<path d="M7 2h10"/><path d="M5 6h14"/><rect width="18" height="12" x="3" y="10" rx="2"/>),
@@ -87,11 +87,21 @@
         <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
           <% platform.each_with_index do |(section, (name, pages)), index| %>
             <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
-              <%= render(Shadcn::Collapsible::Component.new(open: index.zero?, class: "group/collapsible")) do |collapsible| %>
-                <% collapsible.with_trigger(
-                     class: Shadcn::Sidebar::MenuButton::Component.new.css_classes,
-                     title: section
-                   ) do %>
+              <%= render(Shadcn::Collapsible::Component.new(open: index.zero?, class: "group/collapsible")) do %>
+                <%# Neither slot is used, and that is deliberate. Slot content
+                    renders before block content, so `with_panel` would put the
+                    submenu above its own trigger; and the trigger has to *be*
+                    the MenuButton, not a plain trigger wearing its classes,
+                    because that is where `tooltip:` lives and a collapsed rail
+                    of icons has nothing else to label it. Upstream composes it
+                    the same way: `<CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={…}>`. %>
+                <%= render(Shadcn::Sidebar::MenuButton::Component.new(
+                      tooltip: section,
+                      "data-shadcn--collapsible-target": "trigger",
+                      "data-action": "shadcn--collapsible#toggle",
+                      "aria-expanded": index.zero?.to_s
+                    )) do %>
                   <%= glyph.call(name) %>
                   <span><%= section %></span>
                   <%= render(Shadcn::Icon::Component.new(
@@ -99,7 +109,8 @@
                         class: "ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
                       )) %>
                 <% end %>
-                <% collapsible.with_panel do %>
+
+                <%= render(Shadcn::Collapsible::Content::Component.new) do %>
                   <%= render(Shadcn::Sidebar::MenuSub::Component.new) do %>
                     <% pages.each do |page| %>
                       <%= render(Shadcn::Sidebar::MenuSubItem::Component.new) do %>
@@ -121,7 +132,7 @@
         <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
           <% projects.each do |(project, name)| %>
             <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
-              <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#", title: project)) do %>
+              <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#", tooltip: project)) do %>
                 <%= glyph.call(name) %>
                 <span><%= project %></span>
               <% end %>

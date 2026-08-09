@@ -124,6 +124,30 @@ RSpec.describe Shadcn::Sidebar, type: :component do
       expect(button[:class]).to include("h-12")
     end
 
+    # Upstream wraps the button in a Tooltip and decides visibility with a
+    # runtime prop (sidebar.tsx:534-542). Here the two conditions are CSS on the
+    # panel's own group, so the element still has to come out as a
+    # sidebar-menu-button rather than a tooltip-trigger.
+    it "wraps the button in a tooltip without losing its own slot" do
+      render_inline(described_class::MenuButton::Component.new(tooltip: "Playground")) { "Playground" }
+
+      button = page.find("[data-slot='sidebar-menu-button']")
+      expect(button["data-sidebar"]).to eq("menu-button")
+      expect(button["data-shadcn--tooltip-target"]).to eq("trigger")
+
+      label = page.find("[data-slot='tooltip-content']", visible: :all)
+      expect(label).to have_text("Playground")
+      expect(label[:class]).to include("group-data-[state=expanded]:hidden")
+      expect(label[:class]).to include("group-data-[mobile=true]:hidden")
+    end
+
+    it "renders no tooltip when none is asked for" do
+      render_inline(described_class::MenuButton::Component.new) { "Playground" }
+
+      expect(page).to have_no_css("[data-slot='tooltip-content']", visible: :all)
+      expect(page.find("[data-slot='sidebar-menu-button']")["data-shadcn--tooltip-target"]).to be_nil
+    end
+
     it "adds the hover-reveal classes to a menu action only when asked" do
       render_inline(described_class::MenuAction::Component.new)
       expect(page.find("[data-slot='sidebar-menu-action']")[:class]).not_to include("md:opacity-0")

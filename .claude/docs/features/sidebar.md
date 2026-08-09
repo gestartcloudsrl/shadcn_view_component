@@ -2,10 +2,9 @@
 
 **Verdict: ours, and adapted where it touches upstream.**
 
-**Status: complete, with one named gap.** All 23 renderable parts ship. The
+**Status: complete.** All 23 renderable parts ship, `tooltip:` included. The
 twenty-fourth export upstream is `useSidebar`, a React hook whose job here is
-the Stimulus controller. `tooltip:` on the menu button is not ported — see
-below.
+the Stimulus controller.
 
 **Upstream:** `vendor/shadcn/ui/sidebar.tsx` — 726 lines, 24 parts, the largest
 component shadcn publishes. It composes sheet, tooltip, button, input, separator
@@ -77,6 +76,29 @@ where upstream's line has none. `theme.js` in this gem already writes its own
 cookie that way, so matching upstream character for character would have left one
 library disagreeing with itself.
 
+### The menu-button tooltip hides in CSS, not at render
+
+**Upstream** wraps the button in a Tooltip and hides the content with a prop:
+`hidden={state !== "collapsed" || isMobile}` (`sidebar.tsx:534-542`). Both halves
+are React state, re-read on every render.
+
+**Here** the same two conditions are classes on the panel's own group —
+`group-data-[state=expanded]:hidden group-data-[mobile=true]:hidden` — because
+neither is knowable when the server renders, and both are already written onto
+the panel as attributes for the rest of the family's classes to read. The
+component's own element still comes out as `sidebar-menu-button`: the tooltip
+trigger's attributes are merged onto it rather than wrapping it, so `data-slot`,
+`data-sidebar` and the caller's own attributes all survive.
+
+**What that cost.** Upstream's version is positioned by floating-ui, whose
+`autoUpdate` watches the reference element for resizes. Ours positioned once, on
+open — and this is the one component where the anchor changes width underneath
+an open layer: focus a menu row, press ⌘B, and the button goes from the panel's
+width to the icon's while the tooltip is showing. The label stayed where the wide
+button used to end, 207px out from the icon it names. `FloatingLayer` now
+observes its anchor, which fixes it for every popper-based component rather than
+this one. The measurement is in `spec/system/sidebar_spec.rb`.
+
 ## Added
 
 Nothing. `collapsible`, `variant`, `side`, `size`, `variant` on the menu button
@@ -86,12 +108,6 @@ only where Ruby conventions demand it — `isActive` becomes `active:`,
 
 ## Not reproduced
 
-- **`tooltip:` on the menu button.** Upstream wraps the button in a Tooltip
-  whose content is hidden unless the sidebar is collapsed *and* not on a phone
-  (`sidebar.tsx:534-542`). That is runtime state, so the hiding cannot be
-  rendered; wiring it needs a controller target and a decision about what a
-  collapsed-and-mobile sidebar even means. The button ships without it, which
-  costs an icon-only sidebar its labels.
 - **`asChild`.** Five parts take it upstream, to render as a link instead of a
   button. This gem answers it everywhere with `as:` — documented on
   `ApplicationViewComponent#initialize` as exactly that — so the prop needs no

@@ -5,11 +5,13 @@ module Shadcn
     module MenuButton
       # SidebarMenuButton — the row a sidebar is mostly made of.
       #
-      # `tooltip:` is not ported. Upstream wraps the button in a Tooltip whose
-      # content is hidden unless the sidebar is collapsed and not on a phone
-      # (vendor/shadcn/ui/sidebar.tsx:534-542) — runtime state a server cannot
-      # know, and wiring it needs controller work this batch does not do. See
-      # features/sidebar.md.
+      # `tooltip:` wraps the button in a Tooltip, as upstream does
+      # (vendor/shadcn/ui/sidebar.tsx:534-542). Upstream decides whether to show
+      # it with a runtime prop — `hidden={state !== "collapsed" || isMobile}` —
+      # which a server cannot evaluate. Here the same two conditions are CSS,
+      # read off the panel's own `group`: `data-state` is what the controller
+      # already writes, and `data-mobile` is what it sets while the mobile sheet
+      # is open. Same result, decided by the browser rather than by the render.
       class Component < ApplicationViewComponent
         default_tag :button
         slot_name :"sidebar-menu-button"
@@ -53,13 +55,31 @@ module Shadcn
           defaults { { variant: :default, size: :default } }
         end
 
-        attr_reader :variant, :size, :active
+        # A tooltip is only of use when the label beside the icon is gone, so it
+        # is hidden while the sidebar is expanded, and while the mobile sheet is
+        # showing the full labels anyway.
+        TOOLTIP_CLASSES = "group-data-[state=expanded]:hidden group-data-[mobile=true]:hidden"
 
-        def initialize(variant: :default, size: :default, active: false, **attributes)
+        attr_reader :variant, :size, :active, :tooltip
+
+        def initialize(variant: :default, size: :default, active: false, tooltip: nil, **attributes)
           @variant = variant&.to_sym || :default
           @size = size&.to_sym || :default
           @active = active
+          @tooltip = tooltip
           super(**attributes)
+        end
+
+        def call
+          return render_element(body: content) if tooltip.blank?
+
+          render(Shadcn::Tooltip::Component.new(side: :right, align: :center)) do |wrapper|
+            # The trigger takes this button's own attributes, `data-slot`
+            # included, so the element in the document is still a
+            # `sidebar-menu-button` — which is what upstream's `asChild` does.
+            wrapper.with_trigger(as: tag_name, **element_attributes.transform_keys(&:to_sym)) { content }
+            wrapper.with_tooltip_content(class: TOOLTIP_CLASSES) { tooltip }
+          end
         end
 
         def style_variants

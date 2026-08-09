@@ -91,6 +91,13 @@ RSpec.describe "reverse parity" do
     "select-list" => %w[group/select-list max-h-[inherit]],
     "select-input-wrapper" => %w[pb-0],
 
+    # The two conditions upstream writes as a React prop on the sidebar menu
+    # button's tooltip — `hidden={state !== "collapsed" || isMobile}`
+    # (sidebar.tsx:541). Neither is knowable when the server renders, so here
+    # they are classes reading the panel's own attributes. The tokens are this
+    # port's, and exist in no TSX for that reason. See features/sidebar.md.
+    "tooltip-content" => %w[group-data-[mobile=true]:hidden group-data-[state=expanded]:hidden],
+
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
     "native-select-icon" => %w[lucide lucide-chevron-down]

@@ -78,6 +78,42 @@ RSpec.describe "Sidebar", :js do
     expect(page).to have_css("#{sidebar}[data-state=expanded]")
   end
 
+  # The tooltip labels a menu row once the panel is a rail of icons, so it is
+  # positioned against a button that changes width underneath it: hovering a row
+  # opens the tooltip — CSS-hidden while expanded — and the shortcut then shrinks
+  # that button from the panel's width to the icon's without the pointer ever
+  # moving off it. Nothing in `resize` or `scroll` fires for that, which left the
+  # label stranded where the wide button used to end. floating-ui repositions
+  # because `autoUpdate` observes the reference element; `FloatingLayer` observes
+  # the anchor for the same reason.
+  #
+  # Driven from focus rather than hover, which is the keyboard user's route
+  # through it — Tab to a row, then the shortcut — and the only one where the
+  # tooltip survives the collapse: a pointer resting on a 239px row is outside
+  # the 32px button it becomes, so hovering closes the tooltip on the way and
+  # proves nothing. `focus` is the same event Tab raises.
+  it "keeps a tooltip on its anchor when the panel collapses under it" do
+    button = find("[data-slot=sidebar-menu-button]", text: "Models")
+    page.execute_script("arguments[0].focus()", button.native)
+
+    press_with_meta("b")
+    expect(page).to have_css("#{sidebar}[data-state=collapsed]")
+
+    label = find("[data-slot=tooltip-content]", text: "Models")
+
+    # The tooltip is unhidden by `data-state=collapsed` landing, but moved a
+    # frame later, when the observer's `requestAnimationFrame` runs — so it is
+    # briefly visible in the wrong place, and reading `rect` once races that.
+    # `synchronize` retries the measurement instead, which is the same fix
+    # `have_css(..., visible:)` was to `be_visible` elsewhere in this suite.
+    page.document.synchronize do
+      gap = label.rect.x - (button.rect.x + button.rect.width)
+      next if gap.between?(0, 8)
+
+      raise Capybara::ExpectationNotMet, "the tooltip sits #{gap}px from its anchor"
+    end
+  end
+
   # `matchMedia` observes the real viewport, so the window is really resized.
   # 375×667 is an iPhone SE; the breakpoint is `md`, which upstream's own
   # desktop tree names in its `md:block` (sidebar.tsx:210).
