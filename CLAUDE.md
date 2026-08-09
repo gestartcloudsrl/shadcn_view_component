@@ -177,5 +177,5 @@ what gets it covered by the snapshot, preview and accessibility specs.
 - [Features](.claude/docs/features/README.md) — per component, whether it is 1:1
   with shadcn or adapted, extended or ours, and why. Written to be lifted into
   the public README rather than summarised again.
-- [TODO](.claude/docs/todo.md) — open work, the 14 unported components grouped
+- [TODO](.claude/docs/todo.md) — open work, the 13 unported components grouped
   by what actually blocks them, and what is deliberately not being done

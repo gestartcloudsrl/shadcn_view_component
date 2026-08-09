@@ -1,0 +1,49 @@
+<%# Upstream's example, in the one configuration this port reproduces: each
+    panel stays inside its own item rather than being moved into a shared
+    viewport. shadcn supports both and ships the classes for this one — see
+    `features/navigation-menu.md` for why the other cannot be done here.
+
+    Three items so the panels have somewhere to slide *from*: `data-motion` is
+    computed by comparing the item you left with the one you reached, and with
+    two the direction is the same either way. The third item is a plain link,
+    which is what `Trigger::Component.new.css_classes` is for — upstream
+    exports the same string as `navigationMenuTriggerStyle`. %>
+<div class="flex h-72 items-start justify-center pt-6">
+  <%= render(Shadcn::NavigationMenu::Component.new) do %>
+    <%= render(Shadcn::NavigationMenu::List::Component.new) do %>
+      <% {
+           "Getting started" => [
+             [ "Introduction", "Re-usable components built with Radix and Tailwind." ],
+             [ "Installation", "How to install dependencies and structure your app." ]
+           ],
+           "Components" => [
+             [ "Accordion", "A vertically stacked set of interactive headings." ],
+             [ "Dialog", "A window overlaid on the primary window." ]
+           ]
+         }.each do |label, links| %>
+        <%= render(Shadcn::NavigationMenu::Item::Component.new) do %>
+          <%= render(Shadcn::NavigationMenu::Trigger::Component.new) { label } %>
+          <%= render(Shadcn::NavigationMenu::Content::Component.new(class: "md:w-[400px]")) do %>
+            <ul class="grid gap-1">
+              <% links.each do |title, blurb| %>
+                <li>
+                  <%= render(Shadcn::NavigationMenu::Link::Component.new(as: :a, href: "#")) do %>
+                    <div class="text-sm leading-none font-medium"><%= title %></div>
+                    <p class="text-sm leading-snug text-muted-foreground"><%= blurb %></p>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%= render(Shadcn::NavigationMenu::Item::Component.new) do %>
+        <%= render(Shadcn::NavigationMenu::Link::Component.new(
+              as: :a, href: "#",
+              class: Shadcn::NavigationMenu::Trigger::Component.new.css_classes
+            )) { "Documentation" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

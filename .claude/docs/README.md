@@ -21,6 +21,7 @@ written.
 | [plans/2026-08-08-searchable-select.md](plans/2026-08-08-searchable-select.md) | the searchable select — the first component here built rather than ported, and the measurements that chose its shape |
 | [plans/2026-08-08-sidebar-behaviour.md](plans/2026-08-08-sidebar-behaviour.md) | the Sidebar's first branch: the Stimulus controller and the contract page it was driven from, before any of the 23 parts existed |
 | [features/message-scroller.md](features/message-scroller.md) | the message scroller: 2,439 lines of shadcn's own primitive measured before porting, the two surfaces deliberately left out, and the one place server rendering forces a difference |
+| [features/navigation-menu.md](features/navigation-menu.md) | why the navigation menu ships one of upstream's two configurations, and the two timing specs that asserted nothing until a mutation said so |
 | [features/sidebar.md](features/sidebar.md) | the Sidebar as shipped — what upstream's three-tree render became here, and the four things that one tree cost |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything

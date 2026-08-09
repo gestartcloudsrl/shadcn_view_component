@@ -67,14 +67,14 @@ scroller's load behaviour is asserted, because it is the realistic case.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (14)
+## Components not ported (13)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
 `not_yet_ported` and fails if the two drift. Eleven have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
-`hover-card`, `direction` and `scroll-area` — leaving 14.
+`hover-card`, `direction`, `scroll-area` and `navigation-menu` — leaving 13.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -96,8 +96,11 @@ error was mine, and is recorded with the group it belongs to.
   event handlers. All eight candidates were re-checked with the right
   instrument afterwards; `input-group` was the only one affected.
 
-- **Radix behaviour to reimplement in Stimulus** (4): `slider` (63),
-  `navigation-menu` (168), `context-menu` (252), `menubar` (276).
+- **Radix behaviour to reimplement in Stimulus** (3): `slider` (63),
+  `context-menu` (252), `menubar` (276).
+  *`navigation-menu` has shipped, in the one of upstream's two configurations
+  that does not need a portal — see
+  [features/navigation-menu.md](features/navigation-menu.md).*
   *`scroll-area` has shipped, and it is the sharpest case yet of the line count
   in this list measuring the wrong thing: 58 lines of shadcn over 1,189 of
   Radix. Most of that did not survive — the layout is CSS, and the controller
