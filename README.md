@@ -359,9 +359,14 @@ These are also where the gem's only hand-written CSS lives: `shimmer`,
 `scrollbar-gutter-stable` are shadcn's own utilities rather than Tailwind's, and
 are reproduced at the end of `shadcn.css`.
 
+**Reading direction** — write `dir="rtl"` on any ancestor and the components
+that navigate with arrow keys follow it. shadcn ships a `DirectionProvider` for
+this; there is none here, because the browser already resolves `dir` before a
+Stimulus controller runs.
+
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
-combobox, menubar, navigation-menu, context-menu, scroll-area,
-slider, form, and drawer.
+combobox, menubar, navigation-menu, context-menu, scroll-area, slider, form,
+and drawer.
 
 ## What is and is not verified
 

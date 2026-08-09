@@ -125,10 +125,15 @@ RSpec.describe "Tabs", :js do
     expect(panel["aria-labelledby"]).to eq(trigger["id"])
   end
 
+  # Written against the shape rather than the count: exactly one tab stop, and
+  # it is the selected one. The count version broke the day a third tab was
+  # added to the preview, which is the sort of thing a preview is free to do.
   it "uses a roving tabindex" do
     tabindexes = all("[data-slot=tabs-trigger]").map { |trigger| trigger["tabindex"] }
 
-    expect(tabindexes).to eq(%w[0 -1])
+    expect(tabindexes.count("0")).to eq(1)
+    expect(tabindexes.uniq).to contain_exactly("0", "-1")
+    expect(tabindexes.first).to eq("0")
   end
 
   context "when another tab is clicked" do

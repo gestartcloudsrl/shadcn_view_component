@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { directionAwareKey, readDirection } from "shadcn/direction"
 
 // Radix's ToggleGroup, in both `single` and `multiple` modes, with the roving
 // tabindex its items use.
@@ -43,7 +44,8 @@ export default class extends Controller {
   }
 
   keydown(event) {
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key]
+    const key = directionAwareKey(event.key, readDirection(this.element))
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[key]
     if (!step) return
 
     event.preventDefault()

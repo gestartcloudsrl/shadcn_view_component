@@ -1,12 +1,21 @@
+<%# Three tabs rather than upstream's two, and the count is load-bearing. Arrow
+    navigation wraps, so with two triggers "forward" and "backward" both land on
+    the other one — which made every reading-direction assertion in
+    `spec/system/direction_spec.rb` pass without the code under test. Three is
+    the smallest number at which the two are distinguishable. %>
 <%= render(Shadcn::Tabs::Component.new(value: "account", class: "w-[420px]")) do |t| %>
   <% t.with_list do |l| %>
     <% l.with_trigger(value: "account") { "Account" } %>
     <% l.with_trigger(value: "password") { "Password" } %>
+    <% l.with_trigger(value: "sessions") { "Sessions" } %>
   <% end %>
   <% t.with_panel(value: "account") do %>
     <div class="rounded-lg border p-4 text-sm">Make changes to your account here.</div>
   <% end %>
   <% t.with_panel(value: "password") do %>
     <div class="rounded-lg border p-4 text-sm">Change your password here.</div>
+  <% end %>
+  <% t.with_panel(value: "sessions") do %>
+    <div class="rounded-lg border p-4 text-sm">Sign out of other devices.</div>
   <% end %>
 <% end %>
