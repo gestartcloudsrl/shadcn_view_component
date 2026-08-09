@@ -42,6 +42,7 @@ RSpec.describe "shadcn/ui parity" do
     "kbd" => "kbd",
     "label" => "label",
     "marker" => "marker",
+    "message-scroller" => "message_scroller",
     "message" => "message",
     "native-select" => "native_select",
     "pagination" => "pagination",
@@ -69,7 +70,7 @@ RSpec.describe "shadcn/ui parity" do
   not_yet_ported = %w[
     calendar carousel chart combobox command
     context-menu direction drawer form hover-card input-otp
-    menubar message-scroller navigation-menu resizable
+    menubar navigation-menu resizable
     scroll-area slider sonner
   ].freeze
 

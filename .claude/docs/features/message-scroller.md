@@ -3,9 +3,16 @@
 **Verdict: adapted — a reimplementation of shadcn's own primitive, deliberately
 narrower than it.**
 
-**Status: geometry ported, nothing else.** `app/javascript/shadcn/scroll_geometry.js`
-is the first slice — 17 pure functions, no controller yet. The rest of this file
-records the measurements and the two cuts agreed before any code was written.
+**Status: it works, minus prepend anchoring.** The five components, the
+controller and the three CSS utilities ship. It opens at the live end, follows
+messages as they arrive, releases when the reader scrolls up, and lights each
+button from `data-scrollable`.
+
+**Not written yet: prepend anchoring.** Rows carry `data-scroll-anchor` because
+`scroll_geometry.js` reads it and the anchor-finding functions are ported, but
+nothing acts on either — loading older messages above the viewport will move it.
+That was the one slice named as *not* to cut, and it is staged rather than
+dropped.
 
 **Upstream:** `vendor/shadcn/ui/message-scroller.tsx` is a thin wrapper — six
 parts, all delegating — over `@shadcn/react/message-scroller`, which shadcn
@@ -157,7 +164,15 @@ because the raw geometry would strobe the button once per streamed chunk.
 three already reproduced for `attachment`. Same caveat as those: shadcn's own
 CSS, no vendored source, nothing local to diff against.
 
-**These block the markup, not the controller.** `message-scroller-viewport`
+**Ported.** All three are at the end of `shadcn.css`. `scroll-fade-b` was read
+rather than derived from `scroll-fade-x`, and that was the right call: it fades
+one edge instead of two, so it carries a single animation rather than a pair; it
+composites its mask with `mask-composite: intersect`, which the horizontal one
+does not; and its timeline is `scroll(self y)` against `scroll(self inline)`.
+Deriving it would have got all three wrong.
+
+The original note, kept because the reasoning still holds:
+**These blocked the markup, not the controller.** `message-scroller-viewport`
 carries all three, so shipping the components without them would put three
 inert classes in the bundle — which `parity_spec` cannot see, since it compares
 class text and not generated CSS. `scroll-fade-b` is the vertical sibling of the
@@ -174,6 +189,14 @@ were.
 | `getElementTop` is in the scroller's coordinates and survives scrolling | same file, mutation-verified — dropping `+ scrollTop` fails two |
 | the anchor finders, and `nearest` answering "stay where you are" | same file |
 | a computed length that is `normal` reads 0 rather than `NaN` | same file |
+| opening at the live end, following an arriving message, and staying put once the reader has scrolled away | `spec/system/message_scroller_spec.rb`, mutation-verified — removing the follow release fails three examples |
+| each button's `data-active`, and its tab order following it | same file, and `accessibility_spec` |
+
+**One behaviour is deliberately unasserted.** `commitScrollState` publishes
+`end: false` while following, so a streamed chunk cannot strobe the end button.
+Removing that mask fails nothing: the gap it hides lasts a single frame, and an
+assertion taken at a point cannot see it. Sampling across frames would be the
+instrument; none exists here. Recorded rather than faked.
 
 Everything else above is a measurement, not a guarantee: the line counts and
 call sites were read from the vendored source at `vendor/shadcn-react/REVISION`,

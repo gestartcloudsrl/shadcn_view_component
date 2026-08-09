@@ -1,0 +1,59 @@
+<%# The markup only. The Stimulus controller does not exist yet, so nothing
+    here follows the live end, sizes the tail spacer or lights the buttons —
+    both stay at `data-active="false"`, which is how they render.
+
+    That is deliberate rather than unfinished: the rows carry `data-message-id`
+    and `data-scroll-anchor`, which is the markup's half of the contract
+    `shadcn/scroll_geometry.js` already reads, and building the controller
+    against real markup beats inventing target names for it. See
+    `.claude/docs/features/message-scroller.md`.
+
+    The height is the preview's, not the component's: the scroller is
+    `size-full`, so it takes whatever it is put in — and with no height at all
+    there is nothing to scroll and nothing to see. %>
+<div class="h-[420px] w-[420px] rounded-xl border">
+  <%= render(Shadcn::MessageScroller::Component.new(auto_scroll: true)) do %>
+    <%= render(Shadcn::MessageScroller::Viewport::Component.new) do %>
+      <%= render(Shadcn::MessageScroller::Content::Component.new(class: "p-4")) do %>
+        <%# Enough of them to overflow the frame. A scroller whose content
+            fits has nothing to follow and nothing to publish: `scrollHeight`
+            equals `clientHeight`, `data-scrollable` never appears, and every
+            assertion about it passes for the wrong reason. %>
+        <% [
+             [ "Is the registry entry published?", :start ],
+             [ "It is — the component and the example both went out this morning.", :end ],
+             [ "Good. What changed in the last release?", :start ],
+             [ "The scroller keeps the viewport steady when older messages load above it.", :end ],
+             [ "That is the part everyone gets wrong.", :start ],
+             [ "It is also the part with the most tests upstream.", :end ],
+             [ "Does it still follow the end while a reply streams in?", :start ],
+             [ "It does, and it stops the moment you scroll up to read.", :end ],
+             [ "What brings it back?", :start ],
+             [ "The button at the bottom, or reaching the end yourself.", :end ],
+             [ "And the tail spacer?", :start ],
+             [ "It is what lets the last message reach the top instead of the bottom.", :end ]
+           ].each_with_index do |(text, align), index| %>
+          <% id = "m#{index + 1}" %>
+          <%# One anchored row, which is what a "turn" is: the message the
+              scroller moves to the top rather than to the bottom. %>
+          <%= render(Shadcn::MessageScroller::Item::Component.new(
+                message_id: id, scroll_anchor: index == 6
+              )) do %>
+            <%= render(Shadcn::Message::Component.new(align:)) do %>
+              <%= render(Shadcn::Message::Content::Component.new) do %>
+                <%= render(Shadcn::Bubble::Component.new(
+                      variant: align == :end ? :default : :muted, align:
+                    )) do %>
+                  <%= render(Shadcn::Bubble::Content::Component.new) { text } %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= render(Shadcn::MessageScroller::Button::Component.new(direction: :start)) %>
+    <%= render(Shadcn::MessageScroller::Button::Component.new) %>
+  <% end %>
+</div>

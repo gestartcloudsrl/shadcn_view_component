@@ -588,3 +588,54 @@
     display: none;
   }
 }
+
+/* The message scroller's three, read the same way and on the same terms as the
+   attachment's above — from the stylesheet ui.shadcn.com serves, on 2026-08-09,
+   with nothing in this repository to diff them against.
+
+   `scroll-fade-b` is the vertical sibling of `scroll-fade-x` and was read
+   rather than derived from it: it turns out to differ in more than an axis. It
+   fades one edge, not two, so it carries a single animation instead of a pair;
+   its mask composites with `mask-composite: intersect`, which the horizontal
+   one does not do; and its timeline is `scroll(self y)` against
+   `scroll(self inline)`. Deriving it would have got all three wrong. */
+
+@property --scroll-fade-b {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes scroll-fade-reveal-b {
+  0% {
+    --scroll-fade-b: var(--_scroll-fade-size-b);
+  }
+
+  to {
+    --scroll-fade-b: 0px;
+  }
+}
+
+@utility scroll-fade-b {
+  --_scroll-fade-size-b: var(--scroll-fade-b-size, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+  --scroll-fade-mask: linear-gradient(to bottom, #000 0, #000 calc(100% - var(--scroll-fade-b, 0px)), transparent 100%);
+  --scroll-fade-b: var(--_scroll-fade-size-b);
+  -webkit-mask-image: var(--scroll-fade-mask);
+  mask-image: var(--scroll-fade-mask);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  animation: 1ms ease-in-out scroll-fade-reveal-b;
+  animation-timeline: scroll(self y);
+  animation-range: calc(100% - var(--scroll-fade-reveal, calc(var(--spacing) * 24))) 100%;
+  animation-fill-mode: both;
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+@utility scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
+}

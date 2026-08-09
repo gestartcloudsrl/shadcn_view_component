@@ -20,6 +20,9 @@ en:
       empty: No results found.
       dialog_label: Select an option
       list_label: Options
+    message_scroller:
+      scroll_to_end: Scroll to end
+      scroll_to_start: Scroll to start
     sidebar:
       toggle: Toggle Sidebar
     spinner:
