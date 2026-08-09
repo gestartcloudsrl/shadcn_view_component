@@ -28,7 +28,7 @@ Ambiguity resolves toward "has to hold up in an app I will never see", not
 toward "good enough here".
 
 **Before deciding *how* to build something, open upstream's own example and read
-what it renders.** Not the vendored copy — the live component on
+what it renders — its shape, not its looks.** Not the vendored copy — the live component on
 [ui.shadcn.com](https://ui.shadcn.com), in the right variant tab. The vendored
 sources say what was true when they were copied and answer "what does this
 version do"; they never answer "what does upstream do today", and neither
@@ -45,7 +45,10 @@ and the conclusion was still wrong, because the docs now show a different
 variant first.
 
 Reading the source is how a claim gets *checked*. Looking at the example is how
-a decision gets *made*.
+a decision gets *made*. What the example does **not** settle is appearance: the
+docs now serve the Base UI registry, whose Button is a different component from
+the `new-york-v4` one ported here, so a class string is checked against
+`vendor/shadcn/ui/` and never against a screenshot.
 
 **Read [`.claude/docs/`](.claude/docs/README.md) before changing anything
 structural** — it holds why the port is shaped the way it is, and which
@@ -93,6 +96,8 @@ lib/tasks/themes.rake            # the theme generator
 vendor/shadcn/                   # upstream TSX + themes.json, the parity reference
 vendor/radix/                    # the Radix primitives shadcn wraps — what the
                                  # controllers are answerable to on behaviour
+vendor/shadcn-react/             # @shadcn/react, the primitive shadcn publishes
+                                 # itself — same role, for the message scroller
 ```
 
 A part that is only an element with a `data-slot` and fixed classes is declared

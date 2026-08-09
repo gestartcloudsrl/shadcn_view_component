@@ -143,6 +143,11 @@ Four things to know before writing one:
 - Turbo paints the cached snapshot before the fresh body; asserting during that
   preview is a race. `wait_for_turbo` waits for the `data-turbo-preview` marker
   to clear. One spec was flaky 1-in-5 before this.
+- **`stimulus_contract_spec` makes "markup now, behaviour later" impossible.**
+  The moment a component names a controller, a target or an action, that spec
+  fails until the JavaScript declares it. So a component with behaviour is one
+  slice, not two — worth knowing before planning to land its markup first, which
+  is what the message scroller's plan assumed and had to abandon.
 - **A failure that only appears in a full run may be leaked global state, not
   flake.** `dismiss.js` keeps one layer stack for the page, and a sheet whose
   outside-click had been broken never popped its own layer. Ten examples across
@@ -267,12 +272,19 @@ worked and axe accepted it. It has since been switched to `aria-labelledby` to
 match the FormBuilder — the label was `sr-only`, so `<label for>`'s only
 advantage, click-to-focus, was not buying anything.
 
-## What the two vendored references are worth
+## What the three vendored references are worth
 
 `vendor/shadcn/` is checked on every run: `parity_spec` reads it, so a drifted
-copy fails the suite. **`vendor/radix/` is policed by nobody.** No spec reads it
-— its own README says so — and it can go stale the moment Radix ships past the
-commit in `REVISION`. It is a citation source, not a fixture.
+copy fails the suite. **`vendor/radix/` and `vendor/shadcn-react/` are policed
+by nobody.** No spec reads either — both READMEs say so — and each can go stale
+the moment upstream ships past the commit in its `REVISION`. They are citation
+sources, not fixtures.
+
+`vendor/shadcn-react/` is the newest and the odd one: `@shadcn/react` is not a
+primitive shadcn wraps but one shadcn *publishes*, MIT and dependency-free, in
+the same repository `vendor/shadcn/` comes from. It is vendored for the same
+reason `vendor/radix/` is — a reimplementation with nothing to check itself
+against is guesswork.
 
 Neither answers the question people actually ask of them. Both are a snapshot of
 *what was vendored*, and the interesting question is usually *what upstream does
@@ -292,6 +304,14 @@ and the question was "what does a person see when they check".
 So: a claim about **what this port must match** is settled by reading
 `vendor/`. A claim about **what upstream does** is settled by opening it. When
 they are the same sentence, they are still two claims.
+
+**And opening it settles shape, not appearance.** The message scroller's buttons
+looked wrong beside the live demo's — `rounded-md` with no border against
+`rounded-2xl` with one — and nothing was wrong: that page serves the Base UI
+registry, whose Button is a different component from `new-york-v4`'s. Which
+parts nest where, and which element owns which attribute, transfer from the
+demo. How it *looks* does not, because the look belongs to a registry this gem
+does not port. Check a class string against `vendor/shadcn/ui/`.
 
 And a third case, which is neither: **choosing a shape is not a claim to check
 but a decision to make, and the example decides it.** The searchable select was

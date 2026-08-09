@@ -84,6 +84,22 @@ Three things were hand-written rather than pulled in:
   `tw-animate-css`, driven by Tailwind's own `--tw-duration` so `duration-200`
   keeps working.
 - **The lucide icons**, inlined in `Shadcn::Icon::Component`.
+- **Six utilities that are shadcn's own CSS rather than Tailwind's** —
+  `shimmer`, `scroll-fade-x`, `scroll-fade-b`, `scrollbar-none`,
+  `scrollbar-thin`, `scrollbar-gutter-stable`. `attachment` and the message
+  scroller reach for them the way they reach for `truncate`, and Tailwind emits
+  nothing for a name it does not know, so without these the components would
+  ship them inert — which `parity_spec` cannot see, because it compares class
+  *text* and not generated CSS.
+
+  They are the one part of this gem with **no vendored source to diff against**:
+  `vendor/shadcn/` holds TSX, examples and `themes.json` and no CSS at all, so
+  they were read from the stylesheet ui.shadcn.com serves and are dated in
+  `shadcn.css`. Nothing here will notice when upstream changes them. Read the
+  next one rather than deriving it from a sibling: `scroll-fade-b` looked like
+  `scroll-fade-x` with an axis swapped and is not — one edge rather than two, so
+  one animation rather than a pair, plus `mask-composite: intersect` and a
+  different timeline.
 
 ## API shape
 

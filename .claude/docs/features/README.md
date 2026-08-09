@@ -43,7 +43,7 @@ project keeps catching itself in.
 | Component | Verdict | Why |
 |---|---|---|
 | [sidebar.md](sidebar.md) | **ours** / adapted | no Radix Sidebar exists; the runtime mobile branch cannot survive server rendering |
-| [message-scroller.md](message-scroller.md) | **adapted**, not yet implemented | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, with the measurements that sized them |
+| [message-scroller.md](message-scroller.md) | **adapted** | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, and one difference server rendering forces |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:
@@ -53,3 +53,12 @@ anything about them:
   matches, including the typeahead.
 - **dropdown-menu** — *extended*: `loop:` exposes what Radix has as a prop and
   shadcn does not pass.
+- **attachment** — *1:1 in markup, with a caveat a host should know*. Three of
+  its classes are shadcn's own CSS rather than Tailwind's and are reproduced in
+  `shadcn.css` from the served stylesheet, with no vendored source to diff
+  against (`decisions/01-architecture.md`). And its error-state description
+  carries upstream's `text-destructive/80`, which axe measures at 4.36:1 where
+  AA wants 4.5 — kept, because changing it would emit a class upstream does not,
+  and named as an exception in `spec/system/accessibility_spec.rb`.
+- **message, bubble, marker** — believed 1:1 in markup and variants, and *not
+  assessed beyond that*. They have no behaviour to diverge in.

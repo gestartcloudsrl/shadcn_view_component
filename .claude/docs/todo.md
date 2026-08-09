@@ -3,6 +3,10 @@
 Ordered by what blocks a release, then by value. Rationale for anything already
 decided is in `decisions/`.
 
+The dummy serves two full pages a Lookbook preview cannot give: `/sidebar` and
+`/chat`. Both double as system-spec fixtures — `/chat` is where the message
+scroller's load behaviour is asserted, because it is the realistic case.
+
 ## Before publishing
 
 - [ ] **Create the GitHub repository and push.** The gemspec already points at

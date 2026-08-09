@@ -20,7 +20,7 @@ written.
 | [specs/2026-08-08-sidebar-mobile-rendering-design.md](specs/2026-08-08-sidebar-mobile-rendering-design.md) | how the Sidebar port decides between its desktop tree and its mobile Sheet, given a server that cannot know the viewport |
 | [plans/2026-08-08-searchable-select.md](plans/2026-08-08-searchable-select.md) | the searchable select — the first component here built rather than ported, and the measurements that chose its shape |
 | [plans/2026-08-08-sidebar-behaviour.md](plans/2026-08-08-sidebar-behaviour.md) | the Sidebar's first branch: the Stimulus controller and the contract page it was driven from, before any of the 23 parts existed |
-| [features/message-scroller.md](features/message-scroller.md) | the message scroller before any of it is written: what shadcn's own primitive contains, measured, and the two surfaces deliberately left out |
+| [features/message-scroller.md](features/message-scroller.md) | the message scroller: 2,439 lines of shadcn's own primitive measured before porting, the two surfaces deliberately left out, and the one place server rendering forces a difference |
 | [features/sidebar.md](features/sidebar.md) | the Sidebar as shipped — what upstream's three-tree render became here, and the four things that one tree cost |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
