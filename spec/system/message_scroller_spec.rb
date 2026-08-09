@@ -191,4 +191,47 @@ RSpec.describe "Message scroller", :js do
     expect(page).to have_css("#{end_button}[data-active=false]", visible: :all)
     expect(scroll_top).to be > 0
   end
+
+  # Server rendering forces the one difference from upstream that is not a
+  # translation. React mounts this component empty and fills it, so its first
+  # content change takes the "no items before" branch, goes to the end, and
+  # never jumps to an anchor that was there from the start — measured on the
+  # live demo, where the tail spacer is hidden and the viewport sits at the end.
+  #
+  # Here the rows arrive with the document, so without seeding them as handled
+  # the first observer finds an unhandled anchor and takes the reader to it: the
+  # conversation opens part-way up, under a screenful of tail spacer.
+  #
+  # `/chat` is the fixture because it is the realistic case — the newest turn
+  # marked, the way an application would render it.
+  context "when the markup arrives with a turn already anchored" do
+    before do
+      visit "/chat"
+      wait_for_stimulus
+    end
+
+    it "still opens at the live end, with no tail spacer" do
+      state = page.evaluate_script(<<~JS)
+        (() => {
+          const viewport = document.querySelector("[data-slot=message-scroller-viewport]")
+          const spacer = document.querySelector("[data-message-scroller-spacer]")
+          const items = document.querySelectorAll("[data-slot=message-scroller-item]")
+          const last = items[items.length - 1]
+          return JSON.stringify({
+            atEnd: Math.abs(viewport.scrollTop - (viewport.scrollHeight - viewport.clientHeight)) <= 1,
+            spacerHidden: spacer.hidden,
+            lastIsAnchor: last.dataset.scrollAnchor,
+            lastBottomWithin: viewport.clientHeight -
+              (last.getBoundingClientRect().bottom - viewport.getBoundingClientRect().top)
+          })
+        })()
+      JS
+
+      expect(JSON.parse(state)).to include(
+        "atEnd" => true, "spacerHidden" => true, "lastIsAnchor" => "true"
+      )
+      # The newest message sits at the bottom of the frame, not somewhere up it.
+      expect(JSON.parse(state)["lastBottomWithin"]).to be_between(0, 32)
+    end
+  end
 end
