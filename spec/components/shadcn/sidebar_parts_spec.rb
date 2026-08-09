@@ -27,6 +27,31 @@ RSpec.describe Shadcn::Sidebar, type: :component do
     expect(page.find("[data-slot='sidebar-footer']")["data-sidebar"]).to eq("custom")
   end
 
+  # The nine declared with `sidebar_part`, each checked for the two attributes
+  # and the element upstream uses. The class strings were extracted from the
+  # vendored source rather than transcribed, and every token verified to exist
+  # in its own block — transcription had already gone wrong twice before that.
+  {
+    "sidebar-group" => %w[group div],
+    "sidebar-group-label" => %w[group-label div],
+    "sidebar-group-action" => %w[group-action button],
+    "sidebar-group-content" => %w[group-content div],
+    "sidebar-menu" => %w[menu ul],
+    "sidebar-menu-item" => %w[menu-item li],
+    "sidebar-menu-badge" => %w[menu-badge div],
+    "sidebar-menu-sub" => %w[menu-sub ul],
+    "sidebar-menu-sub-item" => %w[menu-sub-item li]
+  }.each do |slot, (marker, tag)|
+    it "renders #{slot} as a #{tag} carrying data-sidebar=#{marker}" do
+      component = slot.delete_prefix("sidebar-").tr("-", "_").camelize
+      render_inline(described_class.const_get(component)::Component.new)
+
+      element = page.find("[data-slot='#{slot}']", visible: :all)
+      expect(element["data-sidebar"]).to eq(marker)
+      expect(element.tag_name).to eq(tag)
+    end
+  end
+
   describe "the panel" do
     it "renders the desktop tree, with data-collapsible empty and the value kept beside it" do
       render_inline(described_class::Component.new) { "nav" }

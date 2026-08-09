@@ -40,6 +40,52 @@ module Shadcn
                            classes: "flex min-h-0 flex-1 flex-col gap-2 overflow-auto " \
                                     "group-data-[collapsible=icon]:overflow-hidden"
 
+    sidebar_part :group, slot: "sidebar-group",
+                 classes: "relative flex w-full min-w-0 flex-col p-2"
+
+    sidebar_part :group_label, slot: "sidebar-group-label",
+                 classes: "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium " \
+                          "text-sidebar-foreground/70 ring-sidebar-ring outline-hidden " \
+                          "transition-[margin,opacity] duration-200 ease-linear " \
+                          "focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 " \
+                          "group-data-[collapsible=icon]:-mt-8 " \
+                          "group-data-[collapsible=icon]:opacity-0"
+
+    sidebar_part :group_action, slot: "sidebar-group-action", tag: :button,
+                 classes: "absolute top-3.5 right-3 flex aspect-square w-5 items-center " \
+                          "justify-center rounded-md p-0 text-sidebar-foreground ring-sidebar-ring " \
+                          "outline-hidden transition-transform hover:bg-sidebar-accent " \
+                          "hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 " \
+                          "[&>svg]:shrink-0 after:absolute after:-inset-2 md:after:hidden " \
+                          "group-data-[collapsible=icon]:hidden"
+
+    sidebar_part :group_content, slot: "sidebar-group-content",
+                 classes: "w-full text-sm"
+
+    sidebar_part :menu, slot: "sidebar-menu", tag: :ul,
+                 classes: "flex w-full min-w-0 flex-col gap-1"
+
+    sidebar_part :menu_item, slot: "sidebar-menu-item", tag: :li,
+                 classes: "group/menu-item relative"
+
+    sidebar_part :menu_badge, slot: "sidebar-menu-badge",
+                 classes: "pointer-events-none absolute right-1 flex h-5 min-w-5 items-center " \
+                          "justify-center rounded-md px-1 text-xs font-medium " \
+                          "text-sidebar-foreground tabular-nums select-none " \
+                          "peer-hover/menu-button:text-sidebar-accent-foreground " \
+                          "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground " \
+                          "peer-data-[size=sm]/menu-button:top-1 " \
+                          "peer-data-[size=default]/menu-button:top-1.5 " \
+                          "peer-data-[size=lg]/menu-button:top-2.5 " \
+                          "group-data-[collapsible=icon]:hidden"
+
+    sidebar_part :menu_sub, slot: "sidebar-menu-sub", tag: :ul,
+                 classes: "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l " \
+                          "border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden"
+
+    sidebar_part :menu_sub_item, slot: "sidebar-menu-sub-item", tag: :li,
+                 classes: "group/menu-sub-item relative"
+
     # The one part upstream stamps with `data-slot` alone, so it takes the plain
     # macro and must not gain a `data-sidebar`.
     part :inset, slot: "sidebar-inset", tag: :main,
