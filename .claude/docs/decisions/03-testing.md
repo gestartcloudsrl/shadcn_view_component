@@ -347,6 +347,22 @@ producing the result the example was looking for.
 The example fails with `startAutoScroll` neutralised, which the three attempts
 before it did not.
 
+### Nothing here looks at the page
+
+Worth stating flatly, because it has now cost twice. axe reads roles, the
+snapshots compare HTML, the system specs assert attributes, and the parity pair
+compares class tokens. **Not one of them renders a picture and looks at it.**
+
+The searchable select shipped with an invisible cursor and every instrument
+agreed it was fine. The Sidebar shipped with `collapsible: :offcanvas` where its
+demo uses `:icon`, so collapsing hid the whole panel instead of leaving a rail
+of icons — again with a green suite, because every assertion was about
+attributes that were all correct.
+
+Both were found by a person opening the page. There is no automated substitute
+here and no plan to add one; what there is, is the obligation to *look* before
+calling a component done, and to say so when you have not.
+
 ### What a system spec cannot see
 
 It reads the DOM, so it sees attributes, text and structure. It does not see

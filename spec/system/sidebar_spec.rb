@@ -36,7 +36,10 @@ RSpec.describe "Sidebar", :js do
 
     find(trigger).click
     expect(page).to have_css("#{sidebar}[data-state=collapsed]")
-    expect(find(sidebar)["data-collapsible"]).to eq("offcanvas")
+    # The page renders `collapsible: :icon`, which is what upstream's demo uses,
+    # so this is the value the controller must fill in — read from
+    # `data-sidebar-collapsible`, never guessed.
+    expect(find(sidebar)["data-collapsible"]).to eq("icon")
 
     find(trigger).click
     expect(page).to have_css("#{sidebar}[data-state=expanded]")

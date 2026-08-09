@@ -1,29 +1,50 @@
-<%# shadcn's own `sidebar-demo`, read from the iframe it actually renders in —
-    `ui.shadcn.com/view/radix-nova/sidebar-demo` — rather than from the docs
-    page's left navigation, which is the site's own chrome and a different
-    thing entirely.
+<%# shadcn's own `sidebar-demo`, read from the iframe it renders in —
+    ui.shadcn.com/view/radix-nova/sidebar-demo — with `collapsible: :icon`,
+    which is what that demo uses: collapsing leaves a rail of icons rather than
+    sliding the whole panel away.
 
-    Its shape, and what each piece needs:
+    The icons are inlined rather than bundled. `Icon::Component`'s PATHS holds
+    the icons the *components* need; these are a demo's decoration, and putting
+    eight of them into a library's payload for one preview is the wrong trade.
+    Their paths were read from upstream's rendered demo rather than recalled.
 
-      header   menu → item → a DropdownMenu whose trigger is a size-lg
-               MenuButton: the team switcher
-      content  "Platform" — menu of Collapsible items, each opening a MenuSub
-               "Projects" — plain items, each with a MenuAction
-      footer   the same switcher shape, with an Avatar: the user menu
-      inset    the Trigger, and the page
-
-    The menu button renders as an `<a>` through `as:`, which is this gem's
-    answer to upstream's `asChild`. %>
+    A gap this makes visible: `tooltip:` on the menu button is not ported, so a
+    collapsed rail would show unlabelled icons where upstream shows a styled
+    label on hover. The `title:` on each button here is a stopgap — the
+    browser's native tooltip, which labels the icons but looks nothing like
+    upstream's and cannot be styled. See features/sidebar.md. %>
 <%
-  platform = {
-    "Playground" => %w[History Starred Settings],
-    "Models" => %w[Genesis Explorer Quantum],
-    "Documentation" => [ "Introduction", "Get Started", "Tutorials" ]
+  icons = {
+    "gallery-vertical-end" => %(<path d="M7 2h10"/><path d="M5 6h14"/><rect width="18" height="12" x="3" y="10" rx="2"/>),
+    "square-terminal" => %(<path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>),
+    "bot" => %(<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>),
+    "book-open" => %(<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>),
+    "settings-2" => %(<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>),
+    "frame" => %(<line x1="22" x2="2" y1="6" y2="6"/><line x1="22" x2="2" y1="18" y2="18"/><line x1="6" x2="6" y1="2" y2="22"/><line x1="18" x2="18" y1="2" y2="22"/>),
+    "chart-pie" => %(<path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>),
+    "map" => %(<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>),
   }
-  projects = [ "Design Engineering", "Sales & Marketing", "Travel" ]
+
+  glyph = ->(name, extra = nil) do
+    tag.svg(
+      icons.fetch(name).html_safe,
+      xmlns: "http://www.w3.org/2000/svg", width: 24, height: 24,
+      viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+      "stroke-width": 2, "stroke-linecap": "round", "stroke-linejoin": "round",
+      class: [ "size-4 shrink-0", extra ].compact.join(" "), "aria-hidden": true
+    )
+  end
+
+  platform = {
+    "Playground" => [ "square-terminal", %w[History Starred Settings] ],
+    "Models" => [ "bot", %w[Genesis Explorer Quantum] ],
+    "Documentation" => [ "book-open", [ "Introduction", "Get Started", "Tutorials" ] ],
+    "Settings" => [ "settings-2", %w[General Team Billing] ]
+  }
+  projects = [ [ "Design Engineering", "frame" ], [ "Sales & Marketing", "chart-pie" ], [ "Travel", "map" ] ]
 %>
 <%= render(Shadcn::Sidebar::Provider::Component.new) do %>
-  <%= render(Shadcn::Sidebar::Component.new) do %>
+  <%= render(Shadcn::Sidebar::Component.new(collapsible: :icon)) do %>
     <%= render(Shadcn::Sidebar::Header::Component.new) do %>
       <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
         <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
@@ -32,8 +53,8 @@
                  class: Shadcn::Sidebar::MenuButton::Component.new(size: :lg).css_classes,
                  "data-size": "lg"
                ) do %>
-              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <%= render(Shadcn::Icon::Component.new("panel-left", class: "size-4")) %>
+              <div class="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <%= glyph.call("gallery-vertical-end") %>
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
                 <span class="truncate font-medium">Acme Inc</span>
@@ -58,12 +79,14 @@
       <%= render(Shadcn::Sidebar::Group::Component.new) do %>
         <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Platform" } %>
         <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
-          <% platform.each_with_index do |(section, pages), index| %>
+          <% platform.each_with_index do |(section, (name, pages)), index| %>
             <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
               <%= render(Shadcn::Collapsible::Component.new(open: index.zero?, class: "group/collapsible")) do |collapsible| %>
                 <% collapsible.with_trigger(
-                     class: Shadcn::Sidebar::MenuButton::Component.new.css_classes
+                     class: Shadcn::Sidebar::MenuButton::Component.new.css_classes,
+                     title: section
                    ) do %>
+                  <%= glyph.call(name) %>
                   <span><%= section %></span>
                   <%= render(Shadcn::Icon::Component.new(
                         "chevron-right",
@@ -87,12 +110,13 @@
         <% end %>
       <% end %>
 
-      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+      <%= render(Shadcn::Sidebar::Group::Component.new(class: "group-data-[collapsible=icon]:hidden")) do %>
         <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Projects" } %>
         <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
-          <% projects.each do |project| %>
+          <% projects.each do |(project, name)| %>
             <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
-              <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#")) do %>
+              <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#", title: project)) do %>
+                <%= glyph.call(name) %>
                 <span><%= project %></span>
               <% end %>
               <%= render(Shadcn::Sidebar::MenuAction::Component.new(show_on_hover: true, "aria-label": "More")) do %>
@@ -112,7 +136,7 @@
                  class: Shadcn::Sidebar::MenuButton::Component.new(size: :lg).css_classes,
                  "data-size": "lg"
                ) do %>
-              <%= render(Shadcn::Avatar::Component.new(class: "size-8 rounded-lg")) do |avatar| %>
+              <%= render(Shadcn::Avatar::Component.new(class: "size-8 shrink-0 rounded-lg")) do |avatar| %>
                 <% avatar.with_fallback { "SC" } %>
               <% end %>
               <div class="grid flex-1 text-left text-sm leading-tight">
