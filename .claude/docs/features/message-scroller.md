@@ -3,9 +3,9 @@
 **Verdict: adapted — a reimplementation of shadcn's own primitive, deliberately
 narrower than it.**
 
-**Status: not implemented.** This file records the measurements and the two cuts
-agreed before any code was written, so the next session starts from what was
-established rather than from the same reading.
+**Status: geometry ported, nothing else.** `app/javascript/shadcn/scroll_geometry.js`
+is the first slice — 17 pure functions, no controller yet. The rest of this file
+records the measurements and the two cuts agreed before any code was written.
 
 **Upstream:** `vendor/shadcn/ui/message-scroller.tsx` is a thin wrapper — six
 parts, all delegating — over `@shadcn/react/message-scroller`, which shadcn
@@ -95,10 +95,19 @@ difference is not cuts: `stores.ts` and most of `use-message-scroller-refs.ts`
 are `useSyncExternalStore` plumbing that exists because React needs a bridge to
 external state, and in Stimulus the DOM is already that store.
 
-`geometry.ts` is the piece to do first — pure functions over
+`geometry.ts` was the piece done first — pure functions over
 `getBoundingClientRect`, `scrollTop` and two `data-` attributes, no React at
-all, so it transcribes nearly line for line and can be unit-tested without a
-browser.
+all, so it transcribed nearly line for line.
+
+**Correcting the plan on one point:** that slice was described as
+unit-testable without a browser. It is not, because this gem has no npm and
+nothing runs its JavaScript outside Chrome. `spec/system/scroll_geometry_spec.rb`
+builds a synthetic scroller, imports the module through the importmap and calls
+the functions directly — unit tests in everything but the runner. Real layout
+turns out to be the better instrument anyway: every one of these functions
+exists because `scrollHeight`, `getBoundingClientRect` and computed padding
+disagree in ways only a browser produces, and a stubbed rect would assert the
+stub.
 
 ## CSS that is not Tailwind's
 
@@ -108,7 +117,13 @@ CSS, no vendored source, nothing local to diff against.
 
 ## Where each claim is enforced
 
-Nothing yet. Every figure above was measured from the vendored source at
-`vendor/shadcn-react/REVISION`, by counting lines and call sites, and none of it
-is guarded by a spec — `vendor/shadcn-react/` is read by no spec, exactly as
-`vendor/radix/` is not.
+| Claim | Enforced by |
+|---|---|
+| the spacer is excluded from the rows, and the content's bottom is measured from them rather than from `scrollHeight` | `spec/system/scroll_geometry_spec.rb`, mutation-verified — dropping the exclusion fails three examples |
+| `getElementTop` is in the scroller's coordinates and survives scrolling | same file, mutation-verified — dropping `+ scrollTop` fails two |
+| the anchor finders, and `nearest` answering "stay where you are" | same file |
+| a computed length that is `normal` reads 0 rather than `NaN` | same file |
+
+Everything else above is a measurement, not a guarantee: the line counts and
+call sites were read from the vendored source at `vendor/shadcn-react/REVISION`,
+and **no spec reads that directory** — exactly as none reads `vendor/radix/`.
