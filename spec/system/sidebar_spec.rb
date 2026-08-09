@@ -182,6 +182,62 @@ RSpec.describe "Sidebar", :js do
       end
     end
 
+    # Upstream's mobile branch is a real `Sheet`, so the dimmed backdrop and the
+    # slide come with it (sheet.tsx:39 and :63-67). Here the sheet *is* this
+    # panel: the overlay ships hidden in the server's markup — it is the gem's
+    # own `sheet-overlay`, so a host styling that slot reaches this one — and
+    # the slide is keyed on the container's own `data-state`, which nothing but
+    # the mobile branch ever writes.
+    it "dims the page behind the sheet, and slides the panel in" do
+      expect(page).to have_css("[data-slot=sheet-overlay]", visible: :hidden)
+
+      find(trigger).click
+
+      expect(page).to have_css("[data-slot=sheet-overlay][data-state=open]", visible: :visible)
+      expect(find("[data-slot=sidebar-container]")["data-state"]).to eq("open")
+
+      press(:escape)
+
+      expect(page).to have_css("[data-slot=sheet-overlay]", visible: :hidden)
+    end
+
+    # Clicking the dimmed backdrop is how a sheet is usually closed, and adding
+    # the overlay is what broke it: it is a *child* of `sidebar`, so a dismiss
+    # layer registered on `sidebar` read a click on the backdrop as a click
+    # inside itself. Upstream never meets this — its overlay is the content's
+    # sibling, portalled beside it — so the layer here is registered on the
+    # panel, the half that is not the backdrop.
+    it "closes when the dimmed backdrop is clicked" do
+      find(trigger).click
+      expect(page).to have_css("[data-slot=sheet-overlay][data-state=open]", visible: :visible)
+
+      # Offset from the centre, because the centre of a full-viewport backdrop
+      # is behind the panel: at 375 wide with an 18rem sheet, the part a finger
+      # can actually reach is the strip to its right.
+      find("[data-slot=sheet-overlay]").click(x: 150, y: 0)
+
+      expect(page).to have_css(sidebar, visible: :hidden)
+    end
+
+    # The close is what the animation is for, and what makes it possible to get
+    # wrong: `data-mobile` going away is what re-hides the container, so
+    # removing it in the same tick as `data-state="closed"` would take the panel
+    # off screen before a frame of the slide-out could paint — which is exactly
+    # how every `animate-out` in this port was inert once before
+    # (`exit_animation_spec.rb`). Pinned mid-exit against a forced duration.
+    it "keeps the sheet on screen until its slide-out has played" do
+      find(trigger).click
+      expect(page).to have_css("[data-slot=sidebar-container]", visible: :visible)
+      force_animations("[data-slot=sidebar-container]", duration: "3s")
+
+      press(:escape)
+
+      expect(find(sidebar)["data-mobile"]).to eq("true")
+      expect(find("[data-slot=sidebar-container]")["data-state"]).to eq("closed")
+      # Interaction state does not wait: a sheet on its way out answers nothing.
+      expect(page).to have_no_css("[data-slot=sidebar-container][data-state=open]")
+    end
+
     # The one that matters most. Upstream's toggleSidebar moves `openMobile` on
     # mobile and `open` on desktop (sidebar.tsx:92-95), so opening the sheet on
     # a phone must not overwrite what the desktop remembered.

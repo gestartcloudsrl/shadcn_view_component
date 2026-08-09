@@ -97,8 +97,13 @@ RSpec.describe "reverse parity" do
     # container turns visible at upstream's `SIDEBAR_WIDTH_MOBILE`, and the
     # spacer that reserves the panel's width in the page stops reserving it,
     # because a sheet overlays the page rather than sitting beside it.
+    # `z-50` and `shadow-lg` are `sheet-content`'s own (sheet.tsx:63) and the
+    # slide classes beside them are too — those pass this spec unprefixed,
+    # because they are upstream's strings. These two carry the mobile prefix
+    # only because the same element is the desktop panel the rest of the time.
     "sidebar-container" => %w[
       group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile)
+      group-data-[mobile=true]:z-50 group-data-[mobile=true]:shadow-lg
     ],
     "sidebar-gap" => %w[group-data-[mobile=true]:w-0],
 

@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { pushLayer, removeLayer } from "shadcn/dismiss"
 import { trapFocus, focusFirst, lockScroll, unlockScroll } from "shadcn/focus"
 import * as topLayer from "shadcn/top_layer"
+import { ExitQueue } from "shadcn/animation"
 
 // Upstream's own name and lifetime (vendor/shadcn/ui/sidebar.tsx:28-29).
 const COOKIE = "sidebar_state"
@@ -20,10 +21,14 @@ const MOBILE_QUERY = "(max-width: 767px)"
 // The state is small: expanded or collapsed on desktop, and a separate
 // ephemeral flag on mobile that is deliberately never persisted.
 export default class extends Controller {
-  static targets = [ "sidebar", "trigger" ]
+  static targets = [ "sidebar", "trigger", "container", "overlay" ]
   static values = { open: Boolean, openMobile: Boolean }
 
   connect() {
+    // Holds the DOM half of a close until the sheet's slide-out has played.
+    // Same module and the same reason as `dialog_controller.js`.
+    this.exits = new ExitQueue()
+
     // Bound on `window` rather than on the element, so it fires wherever focus
     // happens to be — which is what upstream does (sidebar.tsx:96-111), and the
     // point of a shortcut. Removed again in `disconnect()`: Turbo tears
@@ -53,6 +58,9 @@ export default class extends Controller {
     window.removeEventListener("keydown", this.onKeydown)
     this.media?.removeEventListener("change", this.onMediaChange)
     this.closeMobile()
+    // Turbo may be detaching the element: there is nothing to animate for, and
+    // the deferred teardown still has to run.
+    this.exits.flushAll()
   }
 
   get isMobile() {
@@ -131,6 +139,10 @@ export default class extends Controller {
     const sidebar = this.sidebarTarget
     if (sidebar.dataset.mobile === "true") return
 
+    // Reopened before the slide-out finished: the teardown is still queued and
+    // would undo an open sheet a moment after it appeared.
+    if (this.hasContainerTarget) this.exits.cancel(this.containerTarget)
+
     sidebar.dataset.mobile = "true"
     // Undoes upstream's `hidden … md:block`, which is CSS-hidden below the
     // breakpoint because React renders a different tree there rather than
@@ -139,13 +151,26 @@ export default class extends Controller {
     // the class exactly.
     sidebar.style.display = "block"
 
+    // `sheet-content` and `sheet-overlay` are animated by their own
+    // `data-[state=…]` classes, exactly as upstream writes them; nothing else
+    // here reads these two attributes.
+    this.setSheetState("open")
+
     topLayer.enable(sidebar)
     topLayer.show(sidebar)
     lockScroll()
-    this.releaseFocus = trapFocus(sidebar, this.hasTriggerTarget ? this.triggerTarget : undefined)
-    focusFirst(sidebar)
+
+    // The panel, not the sheet: the overlay is a child of `sidebar`, so a layer
+    // registered on `sidebar` counts a click on the dimmed backdrop as a click
+    // *inside* itself and never dismisses. Upstream has no such problem — its
+    // overlay is the content's sibling, portalled beside it. Here the two share
+    // a parent, and the layer has to be the half that is not the backdrop.
+    const panel = this.hasContainerTarget ? this.containerTarget : sidebar
+
+    this.releaseFocus = trapFocus(panel, this.hasTriggerTarget ? this.triggerTarget : undefined)
+    focusFirst(panel)
     this.layer = pushLayer({
-      element: sidebar,
+      element: panel,
       // Without the trigger as an anchor, the very click that opens the sheet
       // reaches the dismiss layer as an outside click and closes it again.
       anchors: this.hasTriggerTarget ? [ this.triggerTarget ] : [],
@@ -162,18 +187,44 @@ export default class extends Controller {
     const sidebar = this.sidebarTarget
     if (sidebar.dataset.mobile !== "true") return
 
-    delete sidebar.dataset.mobile
-    sidebar.style.removeProperty("display")
-
-    topLayer.hide(sidebar)
-    // Paired with the `enable` above, and not optional: this element is laid
-    // out around, so leaving it a popover leaves it `position: fixed` and the
-    // page draws over the desktop sidebar from then on.
-    topLayer.disable(sidebar)
+    // Interaction state goes now: a sheet that is sliding out must not answer
+    // Escape, keep the page's scroll locked or hold focus. Only what is still
+    // being *looked at* waits — the same split `floating.js` makes.
     unlockScroll()
     this.releaseFocus?.()
     this.releaseFocus = null
     if (this.layer) removeLayer(this.layer)
     this.layer = null
+
+    this.setSheetState("closed")
+
+    // What ends the sheet is `data-mobile` going away — it is what
+    // `group-data-[mobile=true]:flex` reads — so it has to outlast the
+    // slide-out rather than start it. The container is the element that
+    // animates, and at `duration-300` the longer of the two.
+    const finish = () => {
+      delete sidebar.dataset.mobile
+      sidebar.style.removeProperty("display")
+      if (this.hasOverlayTarget) this.overlayTarget.hidden = true
+
+      topLayer.hide(sidebar)
+      // Paired with the `enable` above, and not optional: this element is laid
+      // out around, so leaving it a popover leaves it `position: fixed` and the
+      // page draws over the desktop sidebar from then on.
+      topLayer.disable(sidebar)
+    }
+
+    if (this.hasContainerTarget) this.exits.defer(this.containerTarget, finish)
+    else finish()
+  }
+
+  // The overlay is `hidden` in the server's markup and stays that way on
+  // desktop, where nothing ever opens a sheet.
+  setSheetState(state) {
+    if (this.hasContainerTarget) this.containerTarget.dataset.state = state
+    if (!this.hasOverlayTarget) return
+
+    if (state === "open") this.overlayTarget.hidden = false
+    this.overlayTarget.dataset.state = state
   }
 }

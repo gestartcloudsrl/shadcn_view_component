@@ -59,6 +59,12 @@ a frame. Three paths had it: `floating.js#hide`, `dialog_controller#render`, and
 removing the wrapper. Interaction releases at once — the dismiss layer, aria,
 focus, the scroll lock — because a layer on its way out must not answer Escape.
 
+`sidebar_controller.js` is the fourth path, added with the mobile sheet's slide.
+What it defers is not `hidden` but `data-mobile`: that attribute is what
+`group-data-[mobile=true]:flex` reads, so removing it in the same tick as
+`data-state="closed"` takes the panel off screen before a frame of the slide-out
+can paint — the same failure in a different spelling.
+
 `hidden` used to be what took closing content out of the tab order and the
 accessibility tree too, in the same tick, and now it does not reach either
 until the wait above is over — for the length of a fade, a dismissed dialog

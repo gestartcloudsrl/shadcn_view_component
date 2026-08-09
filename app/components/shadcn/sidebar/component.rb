@@ -59,12 +59,31 @@ module Shadcn
       def call
         return render_element(body: content) if bare?
 
-        render_element(body: safe_join([ gap, container ]))
+        render_element(body: safe_join([ overlay, gap, container ]))
       end
 
       private
 
       def bare? = collapsible == :none
+
+      # The dimmed backdrop upstream gets for free by rendering a real `Sheet`
+      # below `md` (sidebar.tsx:184). There is no Sheet here — this panel *is*
+      # the sheet — so the element it would have portalled has to be in the
+      # markup, hidden, from the start. It is the gem's own `sheet-overlay`,
+      # classes and all, rather than a new slot: a host styling `sheet-overlay`
+      # should reach this one too.
+      #
+      # `hidden` until the controller opens the sheet, and it stays in the
+      # server's markup on desktop, where nothing ever unhides it. The dialog
+      # target it inherits is cleared: this one answers to the sidebar.
+      def overlay
+        render(
+          Shadcn::Sheet::Overlay::Component.new(
+            "data-shadcn--dialog-target": nil,
+            "data-shadcn--sidebar-target": "overlay"
+          )
+        )
+      end
 
       def gap
         tag.div("data-slot": "sidebar-gap", class: gap_classes)
@@ -90,7 +109,14 @@ module Shadcn
       end
 
       def container
-        tag.div(inner, "data-slot": "sidebar-container", class: container_classes)
+        tag.div(
+          inner,
+          "data-slot": "sidebar-container",
+          # The element that animates, so the controller has to be able to write
+          # `data-state` on it and wait for its animations to settle.
+          "data-shadcn--sidebar-target": "container",
+          class: container_classes
+        )
       end
 
       def container_classes
@@ -109,8 +135,34 @@ module Shadcn
           # A `group-data-` variant rather than the inline `display` used on the
           # panel: both are two-class selectors, so they outrank `md:flex` at
           # every width without the specificity fight a bare class would lose.
-          "group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile)"
+          "group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile)",
+          # `z-50` and `shadow-lg` are `sheet-content`'s (sheet.tsx:63), and the
+          # overlay above carries `z-50` too — so the two match upstream's pair
+          # and DOM order decides, which puts the panel over its own backdrop.
+          # The desktop `z-10` would put it under.
+          "group-data-[mobile=true]:z-50 group-data-[mobile=true]:shadow-lg",
+          sheet_animation_classes
         )
+      end
+
+      # `sheet-content`'s own entrance and exit (sheet.tsx:63-68), keyed the way
+      # upstream keys them: on the element's *own* `data-state`, which the
+      # controller writes only on the mobile branch. On desktop the attribute is
+      # absent, so none of this matches and the panel keeps sliding on the
+      # `transition-[left,right,width]` above instead.
+      #
+      # The panel's `data-state` is a different axis — expanded or collapsed —
+      # which is why this one is on the container rather than up there.
+      def sheet_animation_classes
+        slide =
+          if side == :left
+            "data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left"
+          else
+            "data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right"
+          end
+
+        "data-[state=open]:animate-in data-[state=closed]:animate-out " \
+        "data-[state=open]:duration-500 data-[state=closed]:duration-300 #{slide}"
       end
 
       def side_classes

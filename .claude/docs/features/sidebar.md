@@ -75,6 +75,27 @@ The gem already requires Stimulus for every floating layer, so this adds no new
 dependency, but it is a real difference: upstream's server sends the Sheet
 markup, and this one does not.
 
+### The sheet's backdrop is a child, and that changed what dismisses
+
+**Upstream** portals the overlay beside the content: `SheetContent` renders
+`<SheetPortal><SheetOverlay /><SheetPrimitive.Content>` (`sheet.tsx:58-60`), so
+the dimmed backdrop and the panel are siblings on `document.body`.
+
+**Here** nothing is portalled, so the backdrop is rendered inside the panel — the
+gem's own `Sheet::Overlay::Component`, classes and all, so a host styling
+`sheet-overlay` reaches this one too. It ships `hidden` in the server's markup
+and stays that way on desktop, where nothing ever opens a sheet. The slide is
+`sheet-content`'s own (`sheet.tsx:63-67`), keyed the way upstream keys it — on
+the element's own `data-state`, which only the mobile branch writes — and the
+close waits it out through `ExitQueue`, the module `dialog_controller.js` uses.
+
+**What that cost.** A dismiss layer registered on the panel counts a click on its
+own children as inside, so the first version of this stopped outside clicks from
+closing the sheet: the backdrop *was* the sheet, as far as `dismiss.js` could
+tell. The layer is now registered on `sidebar-container` — the half that is not
+the backdrop — which is the sibling relationship upstream gets from the portal,
+recovered by choosing a different element rather than by moving one.
+
 ### The open state is the host's to render
 
 **Upstream** writes a `sidebar_state` cookie and never reads it back
@@ -133,17 +154,8 @@ only where Ruby conventions demand it — `isActive` becomes `active:`,
   `ApplicationViewComponent#initialize` as exactly that — so the prop needs no
   counterpart of its own. `MenuButton::Component.new(as: :a, href: …)` is what
   upstream writes as `<SidebarMenuButton asChild><a …>`.
-- **An exit animation for the mobile sheet.** `dialog_controller.js` runs its
-  closes through `ExitQueue`; this one hides immediately. With nothing animating,
-  `ExitQueue` would take its synchronous branch anyway — worth revisiting when
-  the components bring real animation classes.
 - **Server-side viewport detection.** A host may do it and pass `open:`; the gem
   takes no position and ships nothing for it.
-- **The sheet's overlay.** Upstream's mobile branch is a real `Sheet`, so it gets
-  `sheet-overlay` — the dimmed backdrop — for free. Here the sheet is this same
-  panel, and there is no overlay element to show: rendering one would mean adding
-  markup upstream's desktop tree does not have. Outside clicks still dismiss it,
-  through `dismiss.js`; what is missing is the dimming, not the behaviour.
 
 ## Where each claim is enforced
 
@@ -153,7 +165,12 @@ only where Ruby conventions demand it — `isActive` becomes `active:`,
 | the cookie, its name and its values | same file, mutation-verified |
 | `cmd/ctrl+b`, and a bare `b` left alone | same file, mutation-verified |
 | the mobile sheet opening, and Escape dismissing it | same file, mutation-verified |
+| the sheet showing the *panel*, at 18rem | same file, mutation-verified — the earlier assertion was on the wrapper and passed with the panel hidden |
+| the backdrop dimming, and a click on it closing the sheet | same file, mutation-verified |
+| the slide-out getting a frame before the panel goes | same file, pinned against a forced duration, mutation-verified |
+| the panel returning to the page's flow after a sheet | same file, mutation-verified |
 | a phone never writing the desktop cookie | same file, mutation-verified |
+| the tooltip staying on its anchor as the panel narrows | same file, mutation-verified |
 | every class string matching upstream's | `spec/parity_spec.rb` once the components exist |
 | no class rendered that upstream has dropped | `spec/reverse_parity_spec.rb`, same condition |
 
