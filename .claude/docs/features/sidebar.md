@@ -93,8 +93,10 @@ only where Ruby conventions demand it — `isActive` becomes `active:`,
   collapsed-and-mobile sidebar even means. The button ships without it, which
   costs an icon-only sidebar its labels.
 - **`asChild`.** Five parts take it upstream, to render as a link instead of a
-  button. Here the element is chosen with `tag:`, which every component in this
-  gem accepts, so the prop has no counterpart to port.
+  button. This gem answers it everywhere with `as:` — documented on
+  `ApplicationViewComponent#initialize` as exactly that — so the prop needs no
+  counterpart of its own. `MenuButton::Component.new(as: :a, href: …)` is what
+  upstream writes as `<SidebarMenuButton asChild><a …>`.
 - **An exit animation for the mobile sheet.** `dialog_controller.js` runs its
   closes through `ExitQueue`; this one hides immediately. With nothing animating,
   `ExitQueue` would take its synchronous branch anyway — worth revisiting when

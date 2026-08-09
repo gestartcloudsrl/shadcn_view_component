@@ -1,30 +1,66 @@
-<%# Eight of the family's 24 parts. The rest — Menu, Group, Sub and the leaves —
-    are markup and follow.
+<%# The composition shadcn's own documentation teaches, and the one its own site
+    navigation uses in production: content → group → (label + group content) →
+    menu → item → button.
+
+    The menu button renders as an `<a>`, which is what upstream's demo does
+    through `asChild`. Here that is `as:`, the keyword every component in this
+    gem takes for the same purpose.
 
     `open:` is what a Rails layout passes after reading the `sidebar_state`
     cookie the controller writes; here it takes its default. %>
+<%
+  sections = {
+    "Platform" => [
+      [ "Dashboard", "layout-dashboard", true ],
+      [ "Projects", "folder", false ],
+      [ "Team", "users", false ]
+    ],
+    "Settings" => [
+      [ "General", "settings", false ],
+      [ "Billing", "credit-card", false ]
+    ]
+  }
+%>
 <%= render(Shadcn::Sidebar::Provider::Component.new) do %>
   <%= render(Shadcn::Sidebar::Component.new) do %>
     <%= render(Shadcn::Sidebar::Header::Component.new) do %>
-      <span class="px-2 text-sm font-medium">Acme</span>
+      <span class="px-2 text-sm font-medium">Acme Inc</span>
     <% end %>
 
     <%= render(Shadcn::Sidebar::Content::Component.new) do %>
-      <nav class="flex flex-col gap-1 p-2" aria-label="Main">
-        <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent">Dashboard</a>
-        <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent">Settings</a>
-      </nav>
+      <% sections.each do |label, items| %>
+        <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+          <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { label } %>
+          <%= render(Shadcn::Sidebar::GroupContent::Component.new) do %>
+            <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+              <% items.each do |(title, _icon, active)| %>
+                <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+                  <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#", active:)) do %>
+                    <span><%= title %></span>
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
     <% end %>
 
     <%= render(Shadcn::Sidebar::Footer::Component.new) do %>
-      <span class="px-2 text-xs text-muted-foreground">v0.1.0</span>
+      <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#")) do %>
+        <span>Account</span>
+      <% end %>
     <% end %>
   <% end %>
 
   <%= render(Shadcn::Sidebar::Rail::Component.new) %>
 
   <%= render(Shadcn::Sidebar::Inset::Component.new) do %>
-    <%= render(Shadcn::Sidebar::Trigger::Component.new) %>
-    <p class="mt-4 text-sm text-muted-foreground">Page content.</p>
+    <div class="flex items-center gap-2 border-b p-2">
+      <%= render(Shadcn::Sidebar::Trigger::Component.new) %>
+      <%= render(Shadcn::Sidebar::Separator::Component.new(orientation: :vertical, class: "h-4")) %>
+      <span class="text-sm font-medium">Dashboard</span>
+    </div>
+    <p class="p-4 text-sm text-muted-foreground">Page content.</p>
   <% end %>
 <% end %>
