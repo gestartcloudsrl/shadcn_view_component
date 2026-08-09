@@ -75,11 +75,15 @@ RSpec.describe "reverse parity" do
     "empty" => %w[max-w-md],
     "item" => %w[max-w-md],
     "item-group" => %w[max-w-md],
-    "separator" => %w[my-4],
+    "separator" => %w[my-4 my-2],
     # A hover card usually hangs off something already in a sentence, so the
     # preview's trigger is an underlined link. Caller styling, like the widths
     # above.
     "hover-card-trigger" => %w[underline],
+    # The two boxes the scroll-area preview scrolls. A scroll area is `relative`
+    # and nothing else — it is the caller who says how big the window is, which
+    # is the whole point of the component.
+    "scroll-area" => %w[h-64 w-48],
     # A named Tailwind group the sidebar preview passes to a Collapsible, so a
     # menu item's chevron can rotate when its own section opens. Upstream's
     # sidebar demo does the same, but demos are not vendored here — only

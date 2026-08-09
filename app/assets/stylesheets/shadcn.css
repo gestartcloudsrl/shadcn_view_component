@@ -639,3 +639,18 @@
 @utility scrollbar-gutter-stable {
   scrollbar-gutter: stable;
 }
+
+/* What Radix injects as a `<style>` tag from its viewport
+   (vendor/radix/ui/scroll-area.tsx:266-278). Keyed on the slot rather than on a
+   class: it is the component working rather than something to style, so a host
+   should not be able to switch it off by accident — and there is no class token
+   for `parity_spec` to look for and miss. */
+[data-slot="scroll-area-viewport"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-slot="scroll-area-viewport"]::-webkit-scrollbar {
+  display: none;
+}

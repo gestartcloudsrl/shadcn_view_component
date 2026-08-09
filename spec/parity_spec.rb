@@ -50,6 +50,7 @@ RSpec.describe "shadcn/ui parity" do
     "popover" => "popover",
     "progress" => "progress",
     "radio-group" => "radio_group",
+    "scroll-area" => "scroll_area",
     "select" => "select",
     "separator" => "separator",
     "sidebar" => "sidebar",
@@ -80,7 +81,7 @@ RSpec.describe "shadcn/ui parity" do
     calendar carousel chart combobox command
     context-menu drawer form input-otp
     menubar navigation-menu resizable
-    scroll-area slider sonner
+    slider sonner
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.

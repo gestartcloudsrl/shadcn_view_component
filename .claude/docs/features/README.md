@@ -60,6 +60,18 @@ anything about them:
   carries upstream's `text-destructive/80`, which axe measures at 4.36:1 where
   AA wants 4.5 — kept, because changing it would emit a class upstream does not,
   and named as an exception in `spec/system/accessibility_spec.rb`.
+- **scroll-area** — *1:1 in markup, with four divergences worth knowing*.
+  Radix is 1,189 lines against shadcn's 58, and most of it does not survive the
+  crossing. **(1)** The viewport carries `tabindex="0"`, which Radix does not
+  set: axe fails a scrollable region with no keyboard access, Chrome and Firefox
+  make scrollers focusable themselves and Safari does not, and shadcn's own
+  classes style `focus-visible` on that element. **(2)** Two of Radix's four
+  `type` strategies are reproduced — `hover`, its default, and `always`; not
+  `scroll` or `auto`. **(3)** A second axis is asked for with
+  `orientation: :both` rather than by passing a second `<ScrollBar>` as a child,
+  which relies on React's Slottable to hoist it out of the viewport. **(4)** The
+  bars are hidden with `data-state` rather than unmounted, which is the same
+  rule that keeps floating content in place here.
 - **direction** — *ported as a module, not a component*. shadcn's file wraps
   Radix's `DirectionProvider`, which renders no DOM: React needs a context to
   read inherited state while rendering, and a Stimulus controller does not,
