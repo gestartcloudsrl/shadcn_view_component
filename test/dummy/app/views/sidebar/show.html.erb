@@ -1,35 +1,147 @@
-<%# The Sidebar, rendered by its components rather than by hand.
+<%# The same composition as the Lookbook preview
+    (app/components/shadcn/sidebar/previews/default.html.erb), rendered as a
+    full page.
 
-    This page began as hand-written markup — the contract the components would
-    have to emit, written while none of them existed. They now emit it, and the
-    system specs that drove the controller against the hand-written version pass
-    unchanged against this one. That is the contract being kept rather than
-    merely restated.
+    Both exist on purpose and the duplication is the cost of that: a preview
+    renders inside Lookbook's iframe, which is the wrong shape for a component
+    whose whole job is to sit beside a page. This route is where a human looks
+    at it, and where spec/system/sidebar_spec.rb drives the controller.
+
+    Change one and change the other — the system specs only cover the parts
+    that carry behaviour.
 
     In a real application `open:` comes from the cookie the controller writes:
     `Shadcn::Sidebar::Provider::Component.new(open: cookies["sidebar_state"] != "false")`. %>
+<%
+  platform = {
+    "Playground" => %w[History Starred Settings],
+    "Models" => %w[Genesis Explorer Quantum],
+    "Documentation" => [ "Introduction", "Get Started", "Tutorials" ]
+  }
+  projects = [ "Design Engineering", "Sales & Marketing", "Travel" ]
+%>
 <%= render(Shadcn::Sidebar::Provider::Component.new) do %>
   <%= render(Shadcn::Sidebar::Component.new) do %>
     <%= render(Shadcn::Sidebar::Header::Component.new) do %>
-      <span class="px-2 text-sm font-medium">Acme</span>
+      <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+        <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+          <%= render(Shadcn::DropdownMenu::Component.new) do |menu| %>
+            <% menu.with_trigger(
+                 class: Shadcn::Sidebar::MenuButton::Component.new(size: :lg).css_classes,
+                 "data-size": "lg"
+               ) do %>
+              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <%= render(Shadcn::Icon::Component.new("panel-left", class: "size-4")) %>
+              </div>
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-medium">Acme Inc</span>
+                <span class="truncate text-xs">Enterprise</span>
+              </div>
+              <%= render(Shadcn::Icon::Component.new("chevrons-up-down", class: "ml-auto")) %>
+            <% end %>
+            <% menu.with_menu_content(class: "w-56") do %>
+              <%= render(Shadcn::DropdownMenu::Label::Component.new) { "Teams" } %>
+              <% [ "Acme Inc", "Acme Corp.", "Evil Corp." ].each do |team| %>
+                <%= render(Shadcn::DropdownMenu::Item::Component.new) { team } %>
+              <% end %>
+              <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+              <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Add team" } %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
     <% end %>
 
     <%= render(Shadcn::Sidebar::Content::Component.new) do %>
-      <nav class="flex flex-col gap-1 p-2" data-testid="sidebar-nav">
-        <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent">Dashboard</a>
-        <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent" data-testid="nav-last">Settings</a>
-      </nav>
+      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+        <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Platform" } %>
+        <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+          <% platform.each_with_index do |(section, pages), index| %>
+            <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+              <%= render(Shadcn::Collapsible::Component.new(open: index.zero?, class: "group/collapsible")) do |collapsible| %>
+                <% collapsible.with_trigger(
+                     class: Shadcn::Sidebar::MenuButton::Component.new.css_classes
+                   ) do %>
+                  <span><%= section %></span>
+                  <%= render(Shadcn::Icon::Component.new(
+                        "chevron-right",
+                        class: "ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
+                      )) %>
+                <% end %>
+                <% collapsible.with_panel do %>
+                  <%= render(Shadcn::Sidebar::MenuSub::Component.new) do %>
+                    <% pages.each do |page| %>
+                      <%= render(Shadcn::Sidebar::MenuSubItem::Component.new) do %>
+                        <%= render(Shadcn::Sidebar::MenuSubButton::Component.new(href: "#")) do %>
+                          <span><%= page %></span>
+                        <% end %>
+                      <% end %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+        <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Projects" } %>
+        <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+          <% projects.each do |project| %>
+            <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+              <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#")) do %>
+                <span><%= project %></span>
+              <% end %>
+              <%= render(Shadcn::Sidebar::MenuAction::Component.new(show_on_hover: true, "aria-label": "More")) do %>
+                <%= render(Shadcn::Icon::Component.new("more-horizontal")) %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
     <% end %>
 
     <%= render(Shadcn::Sidebar::Footer::Component.new) do %>
-      <span class="px-2 text-xs text-muted-foreground">v0.1.0</span>
+      <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+        <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+          <%= render(Shadcn::DropdownMenu::Component.new(side: :top)) do |menu| %>
+            <% menu.with_trigger(
+                 class: Shadcn::Sidebar::MenuButton::Component.new(size: :lg).css_classes,
+                 "data-size": "lg"
+               ) do %>
+              <%= render(Shadcn::Avatar::Component.new(class: "size-8 rounded-lg")) do |avatar| %>
+                <% avatar.with_fallback { "SC" } %>
+              <% end %>
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-medium">shadcn</span>
+                <span class="truncate text-xs">m@example.com</span>
+              </div>
+              <%= render(Shadcn::Icon::Component.new("chevrons-up-down", class: "ml-auto")) %>
+            <% end %>
+            <% menu.with_menu_content(class: "w-56") do %>
+              <%= render(Shadcn::DropdownMenu::Label::Component.new) { "m@example.com" } %>
+              <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+              <% [ "Account", "Billing", "Notifications" ].each do |entry| %>
+                <%= render(Shadcn::DropdownMenu::Item::Component.new) { entry } %>
+              <% end %>
+              <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+              <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Log out" } %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
     <% end %>
   <% end %>
 
   <%= render(Shadcn::Sidebar::Rail::Component.new) %>
 
   <%= render(Shadcn::Sidebar::Inset::Component.new) do %>
-    <%= render(Shadcn::Sidebar::Trigger::Component.new) %>
-    <p class="mt-4 text-sm text-muted-foreground">Page content.</p>
+    <div class="flex items-center gap-2 border-b p-2">
+      <%= render(Shadcn::Sidebar::Trigger::Component.new) %>
+      <%= render(Shadcn::Sidebar::Separator::Component.new(orientation: :vertical, class: "h-4")) %>
+      <span class="text-sm font-medium">Dashboard</span>
+    </div>
+    <p class="p-4 text-sm text-muted-foreground">Page content.</p>
   <% end %>
 <% end %>

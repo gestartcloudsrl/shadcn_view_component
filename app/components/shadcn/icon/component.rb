@@ -17,6 +17,7 @@ module Shadcn
         "chevron-left" => %(<path d="m15 18-6-6 6-6"/>),
         "chevron-right" => %(<path d="m9 18 6-6-6-6"/>),
         "chevron-up" => %(<path d="m18 15-6-6-6 6"/>),
+        "chevrons-up-down" => %(<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>),
         "circle" => %(<circle cx="12" cy="12" r="10"/>),
         "loader-circle" => %(<path d="M21 12a9 9 0 1 1-6.219-8.56"/>),
         "ellipsis" => %(<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>) +

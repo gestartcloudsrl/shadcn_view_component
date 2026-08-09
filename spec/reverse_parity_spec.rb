@@ -66,7 +66,7 @@ RSpec.describe "reverse parity" do
     # Sizing a preview passes in to demonstrate the component at a sensible
     # width. Nothing to do with the port.
     "accordion" => %w[w-[420px]],
-    "collapsible" => %w[w-[420px]],
+
     "field-group" => %w[w-[420px]],
     "tabs" => %w[w-[420px]],
     "dropdown-menu-content" => %w[w-56],
@@ -76,6 +76,12 @@ RSpec.describe "reverse parity" do
     "item" => %w[max-w-md],
     "item-group" => %w[max-w-md],
     "separator" => %w[my-4],
+    # A named Tailwind group the sidebar preview passes to a Collapsible, so a
+    # menu item's chevron can rotate when its own section opens. Upstream's
+    # sidebar demo does the same, but demos are not vendored here — only
+    # `ui/*.tsx` and `examples/` are — so the token exists in no source this
+    # spec can see.
+    "collapsible" => %w[w-[420px] group/collapsible],
 
     # The searchable select, which is this gem's own component rather than a
     # port — no Radix base has one. Its classes come from shadcn's React Aria

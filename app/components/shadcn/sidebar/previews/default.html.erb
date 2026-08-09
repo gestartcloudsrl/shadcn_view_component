@@ -1,44 +1,102 @@
-<%# The composition shadcn's own documentation teaches, and the one its own site
-    navigation uses in production: content → group → (label + group content) →
-    menu → item → button.
+<%# shadcn's own `sidebar-demo`, read from the iframe it actually renders in —
+    `ui.shadcn.com/view/radix-nova/sidebar-demo` — rather than from the docs
+    page's left navigation, which is the site's own chrome and a different
+    thing entirely.
 
-    The menu button renders as an `<a>`, which is what upstream's demo does
-    through `asChild`. Here that is `as:`, the keyword every component in this
-    gem takes for the same purpose.
+    Its shape, and what each piece needs:
 
-    `open:` is what a Rails layout passes after reading the `sidebar_state`
-    cookie the controller writes; here it takes its default. %>
+      header   menu → item → a DropdownMenu whose trigger is a size-lg
+               MenuButton: the team switcher
+      content  "Platform" — menu of Collapsible items, each opening a MenuSub
+               "Projects" — plain items, each with a MenuAction
+      footer   the same switcher shape, with an Avatar: the user menu
+      inset    the Trigger, and the page
+
+    The menu button renders as an `<a>` through `as:`, which is this gem's
+    answer to upstream's `asChild`. %>
 <%
-  sections = {
-    "Platform" => [
-      [ "Dashboard", "layout-dashboard", true ],
-      [ "Projects", "folder", false ],
-      [ "Team", "users", false ]
-    ],
-    "Settings" => [
-      [ "General", "settings", false ],
-      [ "Billing", "credit-card", false ]
-    ]
+  platform = {
+    "Playground" => %w[History Starred Settings],
+    "Models" => %w[Genesis Explorer Quantum],
+    "Documentation" => [ "Introduction", "Get Started", "Tutorials" ]
   }
+  projects = [ "Design Engineering", "Sales & Marketing", "Travel" ]
 %>
 <%= render(Shadcn::Sidebar::Provider::Component.new) do %>
   <%= render(Shadcn::Sidebar::Component.new) do %>
     <%= render(Shadcn::Sidebar::Header::Component.new) do %>
-      <span class="px-2 text-sm font-medium">Acme Inc</span>
+      <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+        <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+          <%= render(Shadcn::DropdownMenu::Component.new) do |menu| %>
+            <% menu.with_trigger(
+                 class: Shadcn::Sidebar::MenuButton::Component.new(size: :lg).css_classes,
+                 "data-size": "lg"
+               ) do %>
+              <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <%= render(Shadcn::Icon::Component.new("panel-left", class: "size-4")) %>
+              </div>
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-medium">Acme Inc</span>
+                <span class="truncate text-xs">Enterprise</span>
+              </div>
+              <%= render(Shadcn::Icon::Component.new("chevrons-up-down", class: "ml-auto")) %>
+            <% end %>
+            <% menu.with_menu_content(class: "w-56") do %>
+              <%= render(Shadcn::DropdownMenu::Label::Component.new) { "Teams" } %>
+              <% [ "Acme Inc", "Acme Corp.", "Evil Corp." ].each do |team| %>
+                <%= render(Shadcn::DropdownMenu::Item::Component.new) { team } %>
+              <% end %>
+              <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+              <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Add team" } %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
     <% end %>
 
     <%= render(Shadcn::Sidebar::Content::Component.new) do %>
-      <% sections.each do |label, items| %>
-        <%= render(Shadcn::Sidebar::Group::Component.new) do %>
-          <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { label } %>
-          <%= render(Shadcn::Sidebar::GroupContent::Component.new) do %>
-            <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
-              <% items.each do |(title, _icon, active)| %>
-                <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
-                  <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#", active:)) do %>
-                    <span><%= title %></span>
+      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+        <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Platform" } %>
+        <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+          <% platform.each_with_index do |(section, pages), index| %>
+            <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+              <%= render(Shadcn::Collapsible::Component.new(open: index.zero?, class: "group/collapsible")) do |collapsible| %>
+                <% collapsible.with_trigger(
+                     class: Shadcn::Sidebar::MenuButton::Component.new.css_classes
+                   ) do %>
+                  <span><%= section %></span>
+                  <%= render(Shadcn::Icon::Component.new(
+                        "chevron-right",
+                        class: "ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
+                      )) %>
+                <% end %>
+                <% collapsible.with_panel do %>
+                  <%= render(Shadcn::Sidebar::MenuSub::Component.new) do %>
+                    <% pages.each do |page| %>
+                      <%= render(Shadcn::Sidebar::MenuSubItem::Component.new) do %>
+                        <%= render(Shadcn::Sidebar::MenuSubButton::Component.new(href: "#")) do %>
+                          <span><%= page %></span>
+                        <% end %>
+                      <% end %>
+                    <% end %>
                   <% end %>
                 <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+        <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Projects" } %>
+        <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+          <% projects.each do |project| %>
+            <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+              <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#")) do %>
+                <span><%= project %></span>
+              <% end %>
+              <%= render(Shadcn::Sidebar::MenuAction::Component.new(show_on_hover: true, "aria-label": "More")) do %>
+                <%= render(Shadcn::Icon::Component.new("more-horizontal")) %>
               <% end %>
             <% end %>
           <% end %>
@@ -47,8 +105,33 @@
     <% end %>
 
     <%= render(Shadcn::Sidebar::Footer::Component.new) do %>
-      <%= render(Shadcn::Sidebar::MenuButton::Component.new(as: :a, href: "#")) do %>
-        <span>Account</span>
+      <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+        <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+          <%= render(Shadcn::DropdownMenu::Component.new(side: :top)) do |menu| %>
+            <% menu.with_trigger(
+                 class: Shadcn::Sidebar::MenuButton::Component.new(size: :lg).css_classes,
+                 "data-size": "lg"
+               ) do %>
+              <%= render(Shadcn::Avatar::Component.new(class: "size-8 rounded-lg")) do |avatar| %>
+                <% avatar.with_fallback { "SC" } %>
+              <% end %>
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-medium">shadcn</span>
+                <span class="truncate text-xs">m@example.com</span>
+              </div>
+              <%= render(Shadcn::Icon::Component.new("chevrons-up-down", class: "ml-auto")) %>
+            <% end %>
+            <% menu.with_menu_content(class: "w-56") do %>
+              <%= render(Shadcn::DropdownMenu::Label::Component.new) { "m@example.com" } %>
+              <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+              <% [ "Account", "Billing", "Notifications" ].each do |entry| %>
+                <%= render(Shadcn::DropdownMenu::Item::Component.new) { entry } %>
+              <% end %>
+              <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+              <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Log out" } %>
+            <% end %>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
