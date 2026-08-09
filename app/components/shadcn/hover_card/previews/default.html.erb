@@ -1,0 +1,36 @@
+<%# The card upstream's example builds: a link that, held under the pointer for
+    a moment, explains what it points at.
+
+    The trigger is `as: :a` — a hover card usually hangs off something already
+    in the text — and it stays focusable, because Radix opens on focus as well
+    as on hover (hover-card.tsx:138-141) and that is the only way a keyboard
+    reaches it at all.
+
+    Nothing inside the card is reachable by keyboard: the controller takes every
+    tabbable in it out of the tab order, which is Radix's own behaviour and
+    follows from the card having no way to be tabbed *into*. Put nothing in one
+    that is only available there. %>
+<div class="flex h-64 items-start justify-center pt-12">
+  <%= render(Shadcn::HoverCard::Component.new) do |card| %>
+    <% card.with_trigger(as: :a, href: "#", class: "text-sm font-medium underline underline-offset-4") do %>
+      @shadcn
+    <% end %>
+    <% card.with_hover_card_content do %>
+      <div class="flex gap-4">
+        <%= render(Shadcn::Avatar::Component.new) do |avatar| %>
+          <% avatar.with_fallback { "SC" } %>
+        <% end %>
+        <div class="space-y-1">
+          <h4 class="text-sm font-semibold">@shadcn</h4>
+          <p class="text-sm">The React framework — created and maintained by @vercel.</p>
+          <p class="text-xs text-muted-foreground">Joined December 2021</p>
+          <%# A link, on purpose: it is what the tab-order behaviour has to act
+              on, and a card with nothing focusable in it would make that
+              assertion vacuous. It is also the realistic case — the reason to
+              build a card rather than a tooltip is that it can hold one. %>
+          <a href="#" class="text-xs font-medium underline underline-offset-4">View profile</a>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>

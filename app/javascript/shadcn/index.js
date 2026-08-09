@@ -15,9 +15,10 @@ import CheckboxController from "shadcn/controllers/checkbox_controller"
 import CollapsibleController from "shadcn/controllers/collapsible_controller"
 import DialogController from "shadcn/controllers/dialog_controller"
 import DropdownMenuController from "shadcn/controllers/dropdown_menu_controller"
+import HoverCardController from "shadcn/controllers/hover_card_controller"
 import InputGroupController from "shadcn/controllers/input_group_controller"
-import PopoverController from "shadcn/controllers/popover_controller"
 import MessageScrollerController from "shadcn/controllers/message_scroller_controller"
+import PopoverController from "shadcn/controllers/popover_controller"
 import RadioGroupController from "shadcn/controllers/radio_group_controller"
 import SelectController from "shadcn/controllers/select_controller"
 import SidebarController from "shadcn/controllers/sidebar_controller"
@@ -35,9 +36,10 @@ const CONTROLLERS = {
   collapsible: CollapsibleController,
   dialog: DialogController,
   "dropdown-menu": DropdownMenuController,
+  "hover-card": HoverCardController,
   "input-group": InputGroupController,
-  popover: PopoverController,
   "message-scroller": MessageScrollerController,
+  popover: PopoverController,
   "radio-group": RadioGroupController,
   select: SelectController,
   sidebar: SidebarController,

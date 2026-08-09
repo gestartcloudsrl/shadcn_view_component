@@ -36,6 +36,7 @@ RSpec.describe "shadcn/ui parity" do
     "dropdown-menu" => "dropdown_menu",
     "empty" => "empty",
     "field" => "field",
+    "hover-card" => "hover_card",
     "input" => "input",
     "input-group" => "input_group",
     "item" => "item",
@@ -69,7 +70,7 @@ RSpec.describe "shadcn/ui parity" do
   # side it belongs on fails the example below, which is the whole point of it.
   not_yet_ported = %w[
     calendar carousel chart combobox command
-    context-menu direction drawer form hover-card input-otp
+    context-menu direction drawer form input-otp
     menubar navigation-menu resizable
     scroll-area slider sonner
   ].freeze
@@ -81,6 +82,13 @@ RSpec.describe "shadcn/ui parity" do
   # the tokenizer picks out of an inline style, not a utility.
   allowed_missing = {
     "toggle-group" => %w[--gap],
+    # The `data-slot` on `HoverCardPrimitive.Portal`. Nothing is portalled here
+    # — the decision the whole JavaScript layer rests on, in
+    # decisions/02-javascript.md — so there is no element to carry it. Every
+    # other family with a Portal hits this too; this is the first one whose
+    # portal is the only thing between the root and the content, so it is the
+    # first where the slot name reaches the tokenizer at all.
+    "hover-card" => %w[hover-card-portal],
     # Three kinds, all deliberate.
     #
     # `--sidebar-width` and friends are bare CSS variables the tokenizer picks
