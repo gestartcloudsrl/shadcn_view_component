@@ -1,0 +1,36 @@
+<%# Upstream's example: a bordered box of tags, taller than it is allowed to be.
+
+    The scrollbar is `type: :hover` by default — Radix's default too — so it is
+    not there until the pointer is. Radix *unmounts* it; nothing is unmounted
+    here, so it ships with `data-state="hidden"` and the controller moves the
+    attribute.
+
+    The second one asks for both axes, which is what puts a corner between the
+    two bars: each stops short of the other by exactly its thickness, and the
+    corner fills what is left. `always` on that one so both are visible in a
+    screenshot without a pointer in it. %>
+<div class="flex gap-6">
+  <%= render(Shadcn::ScrollArea::Component.new(class: "h-64 w-48 rounded-md border")) do %>
+    <div class="p-4">
+      <h4 class="mb-4 text-sm leading-none font-medium">Tags</h4>
+      <% 24.times do |index| %>
+        <div class="text-sm">v1.2.0-beta.<%= 24 - index %></div>
+        <%= render(Shadcn::Separator::Component.new(class: "my-2")) %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= render(Shadcn::ScrollArea::Component.new(
+        orientation: :both, type: :always, class: "h-64 w-72 rounded-md border"
+      )) do %>
+    <div class="w-max p-4">
+      <% 20.times do |row| %>
+        <div class="flex gap-4 py-1 text-sm whitespace-nowrap">
+          <% 6.times do |column| %>
+            <span class="w-24">cell <%= row + 1 %>.<%= column + 1 %></span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
