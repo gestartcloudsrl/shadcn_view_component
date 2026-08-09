@@ -1,13 +1,8 @@
-<%# The Sidebar, rendered by its components rather than by hand.
+<%# Eight of the family's 24 parts. The rest — Menu, Group, Sub and the leaves —
+    are markup and follow.
 
-    This page began as hand-written markup — the contract the components would
-    have to emit, written while none of them existed. They now emit it, and the
-    system specs that drove the controller against the hand-written version pass
-    unchanged against this one. That is the contract being kept rather than
-    merely restated.
-
-    In a real application `open:` comes from the cookie the controller writes:
-    `Shadcn::Sidebar::Provider::Component.new(open: cookies["sidebar_state"] != "false")`. %>
+    `open:` is what a Rails layout passes after reading the `sidebar_state`
+    cookie the controller writes; here it takes its default. %>
 <%= render(Shadcn::Sidebar::Provider::Component.new) do %>
   <%= render(Shadcn::Sidebar::Component.new) do %>
     <%= render(Shadcn::Sidebar::Header::Component.new) do %>
@@ -15,9 +10,9 @@
     <% end %>
 
     <%= render(Shadcn::Sidebar::Content::Component.new) do %>
-      <nav class="flex flex-col gap-1 p-2" data-testid="sidebar-nav">
+      <nav class="flex flex-col gap-1 p-2" aria-label="Main">
         <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent">Dashboard</a>
-        <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent" data-testid="nav-last">Settings</a>
+        <a href="#" class="rounded-md px-2 py-1.5 text-sm hover:bg-sidebar-accent">Settings</a>
       </nav>
     <% end %>
 

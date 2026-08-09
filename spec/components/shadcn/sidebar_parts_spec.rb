@@ -27,6 +27,58 @@ RSpec.describe Shadcn::Sidebar, type: :component do
     expect(page.find("[data-slot='sidebar-footer']")["data-sidebar"]).to eq("custom")
   end
 
+  describe "the panel" do
+    it "renders the desktop tree, with data-collapsible empty and the value kept beside it" do
+      render_inline(described_class::Component.new) { "nav" }
+
+      panel = page.find("[data-slot='sidebar']")
+      expect(panel["data-collapsible"]).to eq("")
+      expect(panel["data-sidebar-collapsible"]).to eq("offcanvas")
+      expect(panel["data-side"]).to eq("left")
+      expect(page).to have_css("[data-slot='sidebar-gap']")
+      expect(page.find("[data-slot='sidebar-inner']")).to have_text("nav")
+    end
+
+    # A different element with different classes, not the same one with a flag
+    # (vendor/shadcn/ui/sidebar.tsx:166-180).
+    it "renders a bare panel when collapsible is none" do
+      render_inline(described_class::Component.new(collapsible: :none)) { "nav" }
+
+      expect(page).to have_no_css("[data-slot='sidebar-gap']")
+      expect(page.find("[data-slot='sidebar']")["data-side"]).to be_nil
+      expect(page.find("[data-slot='sidebar']")[:class]).to include("w-(--sidebar-width)")
+    end
+
+    it "moves the container to the right and pads it for the inset variant" do
+      render_inline(described_class::Component.new(side: :right, variant: :inset))
+
+      container = page.find("[data-slot='sidebar-container']")[:class]
+      expect(container).to include("right-0")
+      expect(container).to include("p-2")
+    end
+  end
+
+  describe "the trigger and the rail" do
+    it "gives the trigger the button's ghost icon styling and a screen-reader name" do
+      render_inline(described_class::Trigger::Component.new)
+
+      trigger = page.find("[data-slot='sidebar-trigger']")
+      expect(trigger["data-sidebar"]).to eq("trigger")
+      expect(trigger[:class]).to include("size-7")
+      expect(page.find("span.sr-only")).to have_text("Toggle Sidebar")
+    end
+
+    # Upstream keeps the rail out of the tab order because it duplicates the
+    # trigger (sidebar.tsx:289).
+    it "keeps the rail out of the tab order" do
+      render_inline(described_class::Rail::Component.new)
+
+      rail = page.find("[data-slot='sidebar-rail']", visible: :all)
+      expect(rail["tabindex"]).to eq("-1")
+      expect(rail["aria-label"]).to eq("Toggle Sidebar")
+    end
+  end
+
   # The one part in the family that carries no `data-sidebar` at all, so it is
   # declared with the plain macro and must not gain one.
   it "leaves the inset alone, which upstream stamps only with data-slot" do

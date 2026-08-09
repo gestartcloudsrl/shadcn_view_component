@@ -20,6 +20,8 @@ en:
       empty: No results found.
       dialog_label: Select an option
       list_label: Options
+    sidebar:
+      toggle: Toggle Sidebar
     spinner:
       loading: Loading
     theme:
