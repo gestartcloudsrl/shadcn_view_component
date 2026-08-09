@@ -346,11 +346,11 @@ input, textarea, native-select, field, empty, item, button-group
 input-group
 
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
-dropdown-menu (including submenus), popover, tooltip, select
+dropdown-menu (including submenus), popover, tooltip, select, sidebar
 
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
-combobox, sidebar, menubar, navigation-menu, context-menu, hover-card,
-scroll-area, slider, form, drawer, and the AI chat components.
+combobox, menubar, navigation-menu, context-menu, hover-card, scroll-area,
+slider, form, drawer, and the AI chat components.
 
 ## What is and is not verified
 

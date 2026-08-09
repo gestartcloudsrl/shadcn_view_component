@@ -131,15 +131,24 @@ adding a preview is what gets a component covered.
 Two of the fixed bugs were deliberately re-introduced to confirm the specs catch
 them.
 
-Three things to know before writing one:
+Four things to know before writing one:
 
 - The gallery layout carries its own ModeToggle and ThemeSelector, so a preview's
   dropdown or select is **not** the only one on the page.
 - Clicking an overlay element does not work — Selenium aims at its centre, which
   is where the dialog sits. `click_outside` clicks a viewport corner instead.
+  When the overlay itself is the target — the sidebar sheet's backdrop is what
+  a user taps to close it — `click(x:, y:)` offsets from that centre to a part
+  of it nothing covers.
 - Turbo paints the cached snapshot before the fresh body; asserting during that
   preview is a race. `wait_for_turbo` waits for the `data-turbo-preview` marker
   to clear. One spec was flaky 1-in-5 before this.
+- **A failure that only appears in a full run may be leaked global state, not
+  flake.** `dismiss.js` keeps one layer stack for the page, and a sheet whose
+  outside-click had been broken never popped its own layer. Ten examples across
+  `overlays_spec` and `select_spec` failed in `rake` and passed file-by-file.
+  Before hunting a race, check whether an earlier example left something on a
+  module-level stack.
 
 ## Asserting on an animation
 
@@ -330,6 +339,31 @@ Repeated green runs are not the argument for the fix — the racing version was
 green repeatedly too. The argument is structural: a waiting matcher cannot lose
 the race, and the other form can.
 
+The same argument reaches **anything read once**, and `rect` is the usual
+offender: a tooltip is unhidden by an attribute landing but *moved* a frame
+later, when the reposition's `requestAnimationFrame` runs, so a geometry
+assertion taken immediately measures the old place. That example passed alone
+and failed in the full suite with exactly the figure the mutation produced.
+`page.document.synchronize { … raise Capybara::ExpectationNotMet unless … }`
+retries the measurement; it is `have_css`'s waiting for a value no matcher
+covers. Two details it needs: `Capybara::ExpectationNotMet` is a subclass of
+`ElementNotFound`, so `synchronize` rescues it and re-raises the message on
+timeout, and elements with no height — `sidebar-gap` is a spacer with a width
+and nothing in it — need `visible: :all` or `find` will not return them.
+
+### `visible:` reads `display`, not opacity
+
+`visible: :visible` and `visible: :hidden` ask the driver whether the element is
+*displayed*. An overlay mid-fade, or one whose `fade-out-0` has ended and left it
+opaque again, is displayed either way — so an assertion written as "the backdrop
+is gone" measured nothing, and a mutation that broke exactly that behaviour went
+green. Assert the thing the code controls: the `hidden` attribute, which
+`[data-slot][hidden]` turns into `display: none`, is what `visible: :hidden`
+then reads.
+
+Where a fade is the subject, `getComputedStyle` through `evaluate_script` is the
+instrument — the same one named under *What a system spec cannot see*.
+
 ### When Selenium's pointer will not land, use CDP
 
 `move_to` and `click_and_hold` both left the select's scroll buttons untouched —
@@ -346,6 +380,53 @@ producing the result the example was looking for.
 
 The example fails with `startAutoScroll` neutralised, which the three attempts
 before it did not.
+
+### Done means the suite is green **and** the page has been looked at
+
+Two steps, both required. Neither substitutes for the other.
+
+**Run the suite.** It catches what it catches.
+
+**Then open the page and look at it.** Every instrument here reads the DOM —
+axe reads roles, the snapshots compare HTML, the system specs assert attributes,
+the parity pair compares class tokens. **Not one of them renders a picture.** A
+component can be wrong in every way that matters to a person while every
+assertion about it passes.
+
+This has now cost three times, all with a green suite:
+
+- the searchable select's cursor moved but coloured nothing, because the
+  highlight moved to an attribute no rule styled;
+- the Sidebar collapsed to nothing rather than to a rail of icons, because the
+  preview took the default `collapsible` where the demo it copies uses `:icon`;
+- the Rail was rendered as a sibling of the panel rather than inside it, so its
+  `absolute` resolved against the page and drew a two-pixel line straight
+  through the icons.
+
+Every one was found by a person opening the page, and every one had passed
+everything. So: look before calling a component done, and if you have not
+looked, say so rather than reporting it finished.
+
+### Assert on what a person would see, not on the element the flag lands on
+
+The sidebar's mobile sheet never showed its panel — the container inside carries
+its own `hidden … md:flex`, and `md:flex` can only ever switch on *above* the
+breakpoint it names. The spec asserted `have_css("[data-slot=sidebar]", visible:
+:visible)` and was green for the whole branch, because the flag and the inline
+`display` land on the outer element, which turns visible whether or not anything
+inside it does.
+
+Nothing in the earlier entries would have caught it. It is not a race, not an
+appearance-versus-DOM gap, and not a missing control: the assertion was correct,
+waited properly, and discriminated — one element too far out. The design spec
+made the same mistake in prose, naming the panel's `hidden … md:block` as *the*
+class that hides it.
+
+The question that catches it is the one already in `CLAUDE.md` for comments,
+asked of a selector instead: **which element did I name, and is it the one a
+person looks at?** A wrapper, a provider and a group root are all things a flag
+naturally lands on and none of them are what anybody sees. Reach one level in —
+`sidebar-container` and its width, not `sidebar` and its visibility.
 
 ### What a system spec cannot see
 

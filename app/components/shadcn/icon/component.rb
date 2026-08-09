@@ -17,6 +17,7 @@ module Shadcn
         "chevron-left" => %(<path d="m15 18-6-6 6-6"/>),
         "chevron-right" => %(<path d="m9 18 6-6-6-6"/>),
         "chevron-up" => %(<path d="m18 15-6-6-6 6"/>),
+        "chevrons-up-down" => %(<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>),
         "circle" => %(<circle cx="12" cy="12" r="10"/>),
         "loader-circle" => %(<path d="M21 12a9 9 0 1 1-6.219-8.56"/>),
         "ellipsis" => %(<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>) +
@@ -27,6 +28,7 @@ module Shadcn
                  %(<path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>) +
                  %(<path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/>) +
                  %(<path d="m19.07 4.93-1.41 1.41"/>),
+        "panel-left" => %(<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>),
         "search" => %(<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>),
         "x" => %(<path d="M18 6 6 18"/><path d="m6 6 12 12"/>)
       }.freeze

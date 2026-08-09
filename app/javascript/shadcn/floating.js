@@ -36,6 +36,7 @@ export class FloatingLayer {
     this.frame = null
     this.exits = new ExitQueue()
     this.reposition = this.reposition.bind(this)
+    this.resizes = new ResizeObserver(this.reposition)
   }
 
   show() {
@@ -60,6 +61,14 @@ export class FloatingLayer {
 
     window.addEventListener("scroll", this.reposition, true)
     window.addEventListener("resize", this.reposition)
+
+    // A `resize` event only fires for the window, and the anchor can change
+    // size while it stays still — a sidebar menu button goes from 239px to
+    // 32px when the panel collapses under an open tooltip, which left the
+    // label 200px out to the right of the icon it names. floating-ui's
+    // `autoUpdate` observes both the reference and the floating element; this
+    // observes the anchor only, which is the side that moves the result.
+    if (this.trigger) this.resizes.observe(this.trigger)
 
     this.layer = pushLayer({
       element: this.content,
@@ -113,6 +122,7 @@ export class FloatingLayer {
   dismount() {
     window.removeEventListener("scroll", this.reposition, true)
     window.removeEventListener("resize", this.reposition)
+    this.resizes.disconnect()
 
     if (this.frame) cancelAnimationFrame(this.frame)
     this.frame = null
@@ -144,8 +154,10 @@ export class FloatingLayer {
     this.open ? this.hide() : this.show()
   }
 
-  // Bound to `scroll` (capture, so every scrolling ancestor fires it) and to
-  // `resize`. Positioning writes a transform and then reads `offsetWidth`,
+  // Bound to `scroll` (capture, so every scrolling ancestor fires it), to
+  // `resize`, and to the anchor's own `ResizeObserver` — which also fires once
+  // on `observe()`, harmlessly: `show()` has already positioned synchronously.
+  // Positioning writes a transform and then reads `offsetWidth`,
   // which forces a synchronous layout, so coalesce into one frame instead of
   // reflowing on every event.
   reposition() {

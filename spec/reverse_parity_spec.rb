@@ -66,7 +66,7 @@ RSpec.describe "reverse parity" do
     # Sizing a preview passes in to demonstrate the component at a sensible
     # width. Nothing to do with the port.
     "accordion" => %w[w-[420px]],
-    "collapsible" => %w[w-[420px]],
+
     "field-group" => %w[w-[420px]],
     "tabs" => %w[w-[420px]],
     "dropdown-menu-content" => %w[w-56],
@@ -76,6 +76,12 @@ RSpec.describe "reverse parity" do
     "item" => %w[max-w-md],
     "item-group" => %w[max-w-md],
     "separator" => %w[my-4],
+    # A named Tailwind group the sidebar preview passes to a Collapsible, so a
+    # menu item's chevron can rotate when its own section opens. Upstream's
+    # sidebar demo does the same, but demos are not vendored here — only
+    # `ui/*.tsx` and `examples/` are — so the token exists in no source this
+    # spec can see.
+    "collapsible" => %w[w-[420px] group/collapsible],
 
     # The searchable select, which is this gem's own component rather than a
     # port — no Radix base has one. Its classes come from shadcn's React Aria
@@ -84,6 +90,29 @@ RSpec.describe "reverse parity" do
     "select-item" => %w[data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground],
     "select-list" => %w[group/select-list max-h-[inherit]],
     "select-input-wrapper" => %w[pb-0],
+
+    # Upstream renders a Sheet below `md` and this panel above it, so its
+    # classes never have to describe a phone. Here there is one tree and the
+    # sheet *is* this panel, so the mobile branch has to be said in CSS: the
+    # container turns visible at upstream's `SIDEBAR_WIDTH_MOBILE`, and the
+    # spacer that reserves the panel's width in the page stops reserving it,
+    # because a sheet overlays the page rather than sitting beside it.
+    # `z-50` and `shadow-lg` are `sheet-content`'s own (sheet.tsx:63) and the
+    # slide classes beside them are too — those pass this spec unprefixed,
+    # because they are upstream's strings. These two carry the mobile prefix
+    # only because the same element is the desktop panel the rest of the time.
+    "sidebar-container" => %w[
+      group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile)
+      group-data-[mobile=true]:z-50 group-data-[mobile=true]:shadow-lg
+    ],
+    "sidebar-gap" => %w[group-data-[mobile=true]:w-0],
+
+    # The two conditions upstream writes as a React prop on the sidebar menu
+    # button's tooltip — `hidden={state !== "collapsed" || isMobile}`
+    # (sidebar.tsx:541). Neither is knowable when the server renders, so here
+    # they are classes reading the panel's own attributes. The tokens are this
+    # port's, and exist in no TSX for that reason. See features/sidebar.md.
+    "tooltip-content" => %w[group-data-[mobile=true]:hidden group-data-[state=expanded]:hidden],
 
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.

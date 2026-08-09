@@ -202,3 +202,79 @@ Not to reintroduce: no class token moved out of the family, so `parity_spec` had
 nothing to say about any of it — the content still carries every class upstream
 emits, including the `overflow-y-auto` that is now inert on it, exactly as it is
 inert on shadcn's.
+
+## Promotion to the top layer was never undone
+
+`top_layer.enable()` set `popover="manual"` and nothing ever removed it. The UA
+gives `[popover]` `position: fixed` whether it is showing or not, so
+`hidePopover()` does not put an element back in the page's flow. The reset in
+`shadcn.css` neutralises the rest of those defaults — `inset`, `width`, border,
+background — and deliberately not `position`, because every caller through
+`floating.js` enables it on a wrapper `createWrapper()` already made fixed.
+
+The Sidebar is the first caller to promote an element the page is laid out
+*around*. From the first time its mobile sheet opened, the panel stayed out of
+flow: `sidebar-gap` reserved nothing and the page was drawn straight over the
+desktop sidebar, at every width, for the rest of the session.
+
+Fixed with `top_layer.disable()`, in `closeMobile()`'s deferred teardown —
+alongside `hide()`, after the slide-out, since the sheet wants `position: fixed`
+for as long as it is on screen.
+
+Not to reintroduce: a second component promoting an in-flow element needs the
+same pairing. Promotion is not symmetric with `show`/`hide`.
+
+## The mobile sheet opened onto an empty strip
+
+Two elements hide below `md`, not one — the panel's `hidden … md:block` and
+`sidebar-container`'s own `hidden … md:flex`. The controller undid the first and
+nothing undid the second, and `md:flex` can only ever switch on *above* the
+breakpoint it names, so the sheet's contents had never rendered on a phone.
+
+Fixed with `group-data-[mobile=true]:flex` on the container, plus upstream's
+`SIDEBAR_WIDTH_MOBILE` as `--sidebar-width-mobile`.
+
+Not to reintroduce: the system spec asserted the *outer* element was visible and
+passed throughout, and the design spec named only the panel's class. Both are
+recorded in [03-testing.md](03-testing.md#assert-on-what-a-person-would-see-not-on-the-element-the-flag-lands-on).
+
+## A dismiss layer counted its own backdrop as inside
+
+Upstream portals `sheet-overlay` beside the content, so a click on it is outside.
+Nothing is portalled here, so the sidebar's backdrop is a *child* of the panel —
+and `pushLayer({ element: sidebar })` then read a click on the backdrop as a
+click inside the layer. Tapping the dimmed area stopped closing the sheet.
+
+Fixed by registering the layer on `sidebar-container`, the half that is not the
+backdrop: the sibling relationship recovered by choosing a different element
+rather than by moving one.
+
+Not to reintroduce: it also cost ten unrelated failures in `overlays_spec` and
+`select_spec` that appeared only in a full run, because the layer was never
+popped from `dismiss.js`'s shared stack.
+
+## A floating layer did not follow an anchor that resized
+
+`FloatingLayer` positioned on open and then listened for `scroll` and `resize`.
+Neither fires when the *anchor* changes size while staying put — and the sidebar
+is where that happens: focus a menu row, press `cmd/ctrl+b`, and the button goes
+from the panel's width to the icon's under an open tooltip. The label stayed 207
+pixels out from the icon it names.
+
+floating-ui does not have this because `autoUpdate` observes the reference
+element. `FloatingLayer` now observes its anchor with a `ResizeObserver`, which
+fixes it for every popper-based component rather than for the sidebar alone.
+
+## The backdrop reappeared after its own fade
+
+Nothing in the compiled bundle sets `animation-fill-mode` — so an element returns
+to its **pre-animation** state the instant its keyframes end. The sheet's overlay
+was hidden from the container's `ExitQueue` callback, so `fade-out-0` finished at
+150ms, the overlay snapped back to a full `bg-black/50`, and a sheet of grey
+glass sat over an emptied page until the panel's `duration-300` ran out.
+
+Fixed by deferring each element on its own animations, which is the rule
+`dialog_controller.js` already states for its layers.
+
+Not to reintroduce: "hide it when the close finishes" is only safe where one
+element animates. Where two do, the shorter one must not wait for the longer.

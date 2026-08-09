@@ -63,12 +63,12 @@ decided is in `decisions/`.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (23)
+## Components not ported (22)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Four have since been ported —
-`empty`, `button-group`, `input-group`, `item` — leaving 23.
+`not_yet_ported` and fails if the two drift. Five have since been ported —
+`empty`, `button-group`, `input-group`, `item`, `sidebar` — leaving 22.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -104,18 +104,22 @@ error was mine, and is recorded with the group it belongs to.
   package shadcn publishes itself. `drawer` was filed as a plain port and is
   vaul.*
 
-- **Cases of their own** (2): `form` is react-hook-form, and the Rails answer is
+- **A case of its own** (1): `form` is react-hook-form, and the Rails answer is
   the FormBuilder that already exists plus `field`, already ported — so it may
-  be a question already answered rather than a port. `sidebar` is 726 lines
-  composing sheet, tooltip, button, input, separator and skeleton, with a
-  `use-mobile` hook; it was filed as a plain port and is the largest component
-  in shadcn.
+  be a question already answered rather than a port.
+  *`sidebar` was the second entry here and has shipped: all 23 renderable parts,
+  the open state and its cookie, `cmd/ctrl+b`, the menu button's `tooltip:`, and
+  a mobile branch with the Sheet's backdrop and slide. The twenty-fourth export
+  is `useSidebar`, a React hook whose job here is the Stimulus controller. See
+  [features/sidebar.md](features/sidebar.md) and
+  [decisions/02-javascript.md](decisions/02-javascript.md).*
 
 The old list said "command/combobox" on one line. They are two files upstream,
 which is why the total was 27 and not 26.
 
-Most wanted in a real Rails app, roughly: command, calendar, sonner, sidebar,
-combobox, slider — which is, awkwardly, five of the twelve hardest.
+Most wanted in a real Rails app, roughly: command, calendar, sonner, combobox,
+slider — which is, awkwardly, five of the eleven hardest. `sidebar` was on this
+list and has shipped.
 
 Filtering is no longer wholly behind them: `Select::Component.new(searchable: true)`
 ships a filterable select, built rather than ported since no Radix-based shadcn
@@ -190,6 +194,15 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **The Sidebar's mobile sheet has no role and no accessible name.** It
+      traps focus, locks scroll and dims the page behind it — everything a modal
+      does — while announcing nothing. Upstream's is a Radix Dialog, so it
+      carries `role="dialog"`, `aria-modal` and a screen-reader-only
+      `SheetTitle`/`SheetDescription`: *"Sidebar"* and *"Displays the mobile
+      sidebar."* (`vendor/shadcn/ui/sidebar.tsx:198-201`). Nothing here does.
+      `accessibility_spec` cannot see it: the sidebar preview is only ever
+      exercised at desktop width, where there is no sheet. Whatever fixes it
+      should add a mobile case there at the same time.
 - [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
       the only `infinite` animation in `shadcn.css` and so the strongest
       candidate of the lot, and it got neither of the two things the others

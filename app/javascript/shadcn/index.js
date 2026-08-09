@@ -19,6 +19,7 @@ import InputGroupController from "shadcn/controllers/input_group_controller"
 import PopoverController from "shadcn/controllers/popover_controller"
 import RadioGroupController from "shadcn/controllers/radio_group_controller"
 import SelectController from "shadcn/controllers/select_controller"
+import SidebarController from "shadcn/controllers/sidebar_controller"
 import SwitchController from "shadcn/controllers/switch_controller"
 import TabsController from "shadcn/controllers/tabs_controller"
 import ThemeController from "shadcn/controllers/theme_controller"
@@ -37,6 +38,7 @@ const CONTROLLERS = {
   popover: PopoverController,
   "radio-group": RadioGroupController,
   select: SelectController,
+  sidebar: SidebarController,
   switch: SwitchController,
   tabs: TabsController,
   theme: ThemeController,

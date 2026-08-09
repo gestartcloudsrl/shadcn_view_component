@@ -33,6 +33,18 @@ fixed the same problem with far less change.
 hesitate — and it then turned out they had never played at all, for an unrelated
 reason. See below.
 
+**Promotion has to be undone, and only one caller has ever needed it.** The UA
+gives `[popover]` `position: fixed`, and that applies whether it is showing or
+not — `hidePopover()` does not put the element back in the page's flow. The reset
+in `shadcn.css` neutralises the rest of those defaults (`inset`, `width`, border,
+background) and deliberately not `position`, because every caller through
+`floating.js` enables it on a wrapper `createWrapper()` already made fixed. The
+Sidebar is the exception: its mobile sheet promotes the *panel*, an element the
+page is laid out around. Left enabled after the sheet closed, the panel stayed
+out of flow and the page was drawn over the desktop sidebar from then on.
+`top_layer.disable()` exists for that, and `closeMobile()` is its only caller —
+if a second component ever promotes an in-flow element, it needs the same pairing.
+
 ## Closing waits for the animation; everything else does not
 
 Closing used to set `hidden` in the same tick as `data-state="closed"`, and
@@ -46,6 +58,12 @@ a frame. Three paths had it: `floating.js#hide`, `dialog_controller#render`, and
 `hidden`, unwrapping the content back to its placeholder, `hidePopover()`,
 removing the wrapper. Interaction releases at once — the dismiss layer, aria,
 focus, the scroll lock — because a layer on its way out must not answer Escape.
+
+`sidebar_controller.js` is the fourth path, added with the mobile sheet's slide.
+What it defers is not `hidden` but `data-mobile`: that attribute is what
+`group-data-[mobile=true]:flex` reads, so removing it in the same tick as
+`data-state="closed"` takes the panel off screen before a frame of the slide-out
+can paint — the same failure in a different spelling.
 
 `hidden` used to be what took closing content out of the tab order and the
 accessibility tree too, in the same tick, and now it does not reach either
@@ -196,6 +214,49 @@ Worth noting how the first draft of that spec read: it compared the content's
 *left edge* to the trigger's and called a correctly centred panel 80px out.
 `align` defaults to `:center`, so centres are what to compare. An assertion
 built on the wrong assumption fails just as loudly as a real bug.
+
+## The Sidebar keeps one tree and changes its behaviour
+
+shadcn's `Sidebar` renders three different DOM trees and picks between them while
+rendering, with a `matchMedia` hook (`vendor/shadcn/ui/sidebar.tsx:154`): a plain
+`<div>` when `collapsible="none"`, a `Sheet` on a phone, the desktop tree
+otherwise. A server cannot do that, so the branch had to be replaced rather than
+translated.
+
+The server renders the desktop tree. Below `md` the controller gives that same
+DOM the behaviour of a Sheet — top layer, dismiss, focus trap, scroll lock — from
+the same three modules `dialog_controller.js` composes, **without moving it**.
+Building a Sheet in JavaScript and relocating the content into it is closer to
+React and was rejected for the reason above: moving content out of a controller's
+element unbinds the Stimulus actions inside, and a sidebar is made of links and
+buttons. Rendering both trees and hiding one was rejected too — a navigation tree
+in the DOM twice, on every page, for every visitor.
+
+The accepted cost: **on a phone, before JavaScript runs, there is no sidebar.**
+Upstream's server sends the Sheet markup; this one does not. Every floating layer
+here already requires Stimulus, so it adds no dependency, but it is a real
+difference and the [feature record](../features/sidebar.md) says so to a host.
+
+Two details worth keeping:
+
+- **The breakpoint needed nothing vendored.** `hooks/use-mobile` is not among the
+  vendored sources, but upstream's desktop tree carries `md:block`
+  (`sidebar.tsx:210`), and `md` is 768px in Tailwind's default scale. The value
+  was read rather than invented or made configurable.
+- **Two elements hide below the breakpoint, not one.** The panel carries
+  `hidden … md:block` and the container inside it carries `hidden … md:flex`.
+  React never renders either below `md`, so upstream never has to undo either;
+  this port has to undo both. The panel's is undone with an inline `display` —
+  it beats the utility without out-specifying `md:block` at every other width,
+  and removing the property restores the class exactly. The container's is
+  undone with `group-data-[mobile=true]:flex`, a two-class selector that outranks
+  `md:flex` on specificity, which is what a *bare* class toggle could not do.
+
+  Only the panel's was undone at first, and the sheet opened onto an empty strip
+  for six commits. Both the design spec and the system spec named the panel and
+  stopped there — the spec asserted the outer element was visible, which it was.
+  A sentence about "the class that hides it" was true of the element it was
+  written from and false of the one inside it; see the trap in `CLAUDE.md`.
 
 ## Controllers re-sync on `turbo:morph`
 

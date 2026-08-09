@@ -41,3 +41,19 @@ export function hide(element) {
   try { element.hidePopover() } catch { /* already closed */ }
   return true
 }
+
+// Hiding a popover does not put it back in the page's flow: the UA gives
+// `[popover]` `position: fixed`, and that applies open or closed. `shadcn.css`
+// neutralises the rest of those defaults but deliberately not `position`, which
+// every other caller here wants — they enable it on a wrapper that is fixed
+// anyway.
+//
+// The Sidebar is the one caller that enables it on an element the page is laid
+// out around. Left enabled, the panel stays out of flow after the mobile sheet
+// closes, and the page is drawn over a sidebar that is still visible.
+export function disable(element) {
+  if (!usable(element)) return false
+
+  element.removeAttribute("popover")
+  return true
+}
