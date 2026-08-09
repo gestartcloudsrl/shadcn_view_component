@@ -97,12 +97,22 @@ correcting by a delta measured from a position the reader had left — a wilder
 jump than doing nothing. It is re-captured in the same frame the scroll state
 commits in.
 
-**A server-rendered `scroll_anchor: true` is jumped to on load.** The controller
-acts on any anchor it has not handled, so a row marked in the markup is scrolled
-to as soon as the first observer fires, and the anchored mode then holds
-following off. That is upstream's behaviour and it is correct — but it makes a
-poor fixture, which is why the preview marks nothing and the coverage sits on a
-turn that *arrives*.
+**Anchors already in the markup count as handled**, and this is the one place
+server rendering forces a difference from upstream rather than a translation of
+it. React mounts the component empty and fills it, so upstream's first content
+change takes the `previousItemCount === 0` branch, goes to the end, and never
+jumps to an anchor that was there from the start. Measured on the live demo: at
+rest the tail spacer is hidden and the viewport sits at the very end.
+
+Here the rows arrive with the document, so without seeding them the first
+observer finds an unhandled anchor and takes the reader to it — a conversation
+opening part-way up under a screenful of tail spacer, which upstream never
+shows. `scroll_anchor` keeps its meaning for turns that *arrive*.
+
+An earlier note in this file said the opposite: that jumping on load was
+upstream's behaviour and correct. That was wrong, and wrong in the way this repo
+keeps catching — asserted from the vendored source, which says what the code
+does, without asking what the running component actually shows.
 
 ## Estimate
 
@@ -202,6 +212,7 @@ were.
 | each button's `data-active`, and its tab order following it | same file, and `accessibility_spec` |
 | holding the reader in place through a prepend | same file, mutation-verified — **only because the example turns native scroll anchoring off first** |
 | an arriving anchored turn landing at the top with the previous one peeking | same file, mutation-verified |
+| a conversation whose markup already marks a turn still opening at the end | same file, against `/chat`, mutation-verified |
 
 **The prepend example measured the browser before it measured this code.** It
 passed with the entire prepend branch deleted, because Chrome anchors scroll

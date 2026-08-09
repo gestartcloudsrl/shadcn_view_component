@@ -1,0 +1,94 @@
+<%# A chat, composed the way upstream's first message-scroller example composes
+    one — read from the demo rather than imagined:
+
+      card > card-content > message-scroller > viewport > content
+                                                 > item[scroll_anchor] > message
+                                                     > message-content
+                                                         > message-header
+                                                         > bubble > bubble-content
+
+    Two details in that shape are worth naming, because neither is obvious and
+    both come from the demo rather than from the TSX.
+
+    The *item* is the scroller's row and the *message* is the layout inside it.
+    They are separate components on purpose: the row is what the scroller
+    measures, anchors and skips laying out while off screen, and the message is
+    what decides which side the bubble sits on. Putting a message straight into
+    the content column would render, and the scroller would have nothing to hold
+    on to.
+
+    Only the last turn is anchored. `scroll_anchor: true` marks the message the
+    scroller takes to the *top* of the viewport rather than the bottom, with the
+    previous turn still peeking above it — which is what you want for the reply
+    you are about to read, and not for the ones behind it.
+
+    The header carries no avatar: upstream's example puts the speaker's name in
+    a `message-header` above the bubble for the agent, and nothing at all above
+    the reader's own messages. %>
+<%
+  turns = [
+    [ :user,  nil,               "The astrophage line keeps drifting off the curve after the third pass." ],
+    [ :agent, "Mary (Agent)",    "Confirmed. The drift starts once the sample crosses 96°C, which is where the medium stops behaving." ],
+    [ :user,  nil,               "Can we hold it under that?" ],
+    [ :agent, "Mary (Agent)",    "Not with the current housing. The heat comes from the pass itself, so the fix is fewer passes rather than better cooling." ],
+    [ :user,  nil,               "Then let us try four shorter ones." ],
+    [ :agent, "Mary (Agent)",    "Running it now. The first two are already inside tolerance." ],
+    [ :user,  nil,               "Good. Ping me when the fourth lands." ]
+  ]
+%>
+<div class="flex min-h-svh items-center justify-center bg-background p-6">
+  <%= render(Shadcn::Card::Component.new(class: "flex h-[560px] w-full max-w-xl flex-col overflow-hidden")) do |card| %>
+    <% card.with_header(class: "border-b pb-6") do |header| %>
+      <% header.with_title { "Project Hail Mary" } %>
+      <% header.with_description { "Two people and a spectrometer." } %>
+      <% header.with_action do %>
+        <%= render(Shadcn::Button::Component.new(variant: :ghost, size: :"icon-sm", "aria-label": "Conversation options")) do %>
+          <%= render(Shadcn::Icon::Component.new("more-horizontal")) %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%# `min-h-0 flex-1 p-0`, which is upstream's own: the scroller is
+        `size-full` and takes whatever it is given, so the card is what decides
+        the height and `min-h-0` is what lets the flex child actually shrink to
+        it instead of growing to its content. %>
+    <% card.with_card_content(class: "min-h-0 flex-1 p-0") do %>
+      <%= render(Shadcn::MessageScroller::Component.new(auto_scroll: true)) do %>
+        <%= render(Shadcn::MessageScroller::Viewport::Component.new) do %>
+          <%= render(Shadcn::MessageScroller::Content::Component.new(class: "gap-4 px-6 py-4")) do %>
+            <% turns.each_with_index do |(speaker, name, text), index| %>
+              <%= render(Shadcn::MessageScroller::Item::Component.new(
+                    message_id: "t#{index + 1}", scroll_anchor: index == turns.length - 1
+                  )) do %>
+                <%= render(Shadcn::Message::Component.new(align: speaker == :user ? :end : :start)) do %>
+                  <%= render(Shadcn::Message::Content::Component.new) do %>
+                    <% if name %>
+                      <%= render(Shadcn::Message::Header::Component.new) { name } %>
+                    <% end %>
+                    <%= render(Shadcn::Bubble::Component.new(variant: speaker == :user ? :muted : :ghost)) do %>
+                      <%= render(Shadcn::Bubble::Content::Component.new) { text } %>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <%# One button, pointing at the end, which is upstream's example: there
+            is no "back to the top" in a conversation. It shows itself only when
+            there is something below you. %>
+        <%= render(Shadcn::MessageScroller::Button::Component.new) %>
+      <% end %>
+    <% end %>
+
+    <% card.with_footer(class: "border-t pt-6") do %>
+      <form class="flex w-full items-center gap-2" onsubmit="return false">
+        <%= render(Shadcn::Input::Component.new(
+              name: "message", placeholder: "Message Mary…", "aria-label": "Message", class: "flex-1"
+            )) %>
+        <%= render(Shadcn::Button::Component.new(type: "submit")) { "Send" } %>
+      </form>
+    <% end %>
+  <% end %>
+</div>

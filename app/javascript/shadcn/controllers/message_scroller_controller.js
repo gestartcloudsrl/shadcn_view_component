@@ -63,10 +63,28 @@ export default class extends Controller {
 
     // What a content change is measured against. `handledAnchors` is a WeakSet
     // so an anchor removed from the DOM stops being remembered along with it.
-    this.itemCount = this.items().length
-    this.firstItem = this.items()[0] ?? null
-    this.handledAnchors = new WeakSet()
+    const items = this.items()
+
+    this.itemCount = items.length
+    this.firstItem = items[0] ?? null
     this.prependAnchor = null
+
+    // Anchors already in the markup count as handled, and this is the one place
+    // server rendering forces a difference from upstream rather than a
+    // translation of it. React mounts this component empty and fills it, so its
+    // first content change takes the `previousItemCount === 0` branch, goes to
+    // the end, and never jumps to an anchor that was there from the start.
+    // Measured on the live demo: at rest the tail spacer is hidden and the
+    // viewport sits at the very end, anchored last turn or not.
+    //
+    // Here the rows arrive with the document. Without this the first observer
+    // finds an unhandled anchor and takes the reader to it, so a conversation
+    // opens part-way up with a screenful of tail spacer below — which upstream
+    // never shows. `scroll_anchor` keeps its meaning for turns that *arrive*.
+    this.handledAnchors = new WeakSet()
+    for (const item of items) {
+      if (item.dataset.scrollAnchor === "true") this.handledAnchors.add(item)
+    }
 
     this.onScroll = () => this.scheduleStateCommit()
     this.viewportTarget.addEventListener("scroll", this.onScroll, { passive: true })
