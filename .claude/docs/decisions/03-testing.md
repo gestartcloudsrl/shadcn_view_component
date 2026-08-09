@@ -460,6 +460,25 @@ Reach for it whenever the thing under test is *shown* rather than *recorded*.
   say nothing about duration, easing, or whether an exit reads as the reverse of
   its entrance.
 
+### A browser that already does it will pass your spec for you
+
+The message scroller holds the reader's position when older messages load
+above. Its first example asserted exactly that, and passed with the entire
+feature deleted — Chrome anchors scroll natively and was doing the work.
+
+This is not the same failure as *Run a control, every time*. There the spec was
+measured against a baseline and the baseline was missing; here the baseline was
+the platform, quietly supplying the behaviour under test. The controller is even
+written to be a no-op where the browser got there first, which is correct and is
+precisely what made the example vacuous.
+
+The fix is to remove the platform's help rather than to assert harder:
+`overflow-anchor: none` on the content is what turns "does a scroller hold its
+position?" into "does *this code* hold it?". Reach for the same move whenever
+the behaviour under test has a native equivalent — smooth scrolling, scroll
+anchoring, lazy loading, form validation, dialog focus. The question to ask is
+not *does it work* but **what would still be true if I deleted my code?**
+
 ### The harness zeroes animation durations, and one utility needs them
 
 `Capybara.disable_animation` injects `* { animation-duration: 0s !important }`

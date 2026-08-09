@@ -43,6 +43,7 @@ project keeps catching itself in.
 | Component | Verdict | Why |
 |---|---|---|
 | [sidebar.md](sidebar.md) | **ours** / adapted | no Radix Sidebar exists; the runtime mobile branch cannot survive server rendering |
+| [message-scroller.md](message-scroller.md) | **adapted**, not yet implemented | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, with the measurements that sized them |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:

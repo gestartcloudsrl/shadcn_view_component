@@ -63,13 +63,14 @@ decided is in `decisions/`.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (18)
+## Components not ported (17)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Nine have since been ported —
-`empty`, `button-group`, `input-group`, `item`, `sidebar`, and the four
-markup-only ones, `message`, `bubble`, `attachment`, `marker` — leaving 18.
+`not_yet_ported` and fails if the two drift. Ten have since been ported —
+`empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
+ones (`message`, `bubble`, `attachment`, `marker`) and `message-scroller` —
+leaving 17.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -98,11 +99,16 @@ error was mine, and is recorded with the group it belongs to.
   of work as `dropdown_menu` and `select` — roving focus, typeahead, submenus,
   drag — not the same class as `badge`.*
 
-- **Blocked by a third-party npm package** (10): `drawer` (vaul), `chart`
+- **Blocked by a third-party npm package** (9): `drawer` (vaul), `chart`
   (recharts), `command` (cmdk), `carousel` (embla-carousel-react), `input-otp`,
   `sonner` (+ next-themes), `resizable` (react-resizable-panels), `calendar`
-  (react-day-picker), `combobox` (**@base-ui/react**), `message-scroller`
-  (**@shadcn/react/message-scroller**).
+  (react-day-picker), `combobox` (**@base-ui/react**).
+  *`message-scroller` was in this group and has shipped. The package it depends
+  on turned out to be MIT, dependency-free and in `shadcn-ui/ui` — the repo this
+  gem already vendors from — so it was vendored to `vendor/shadcn-react/` and
+  reimplemented against it rather than treated as a blocker. Prepend anchoring
+  is the one piece still unwritten; see
+  [features/message-scroller.md](features/message-scroller.md).*
   *Two of these were not recorded as blocked at all. `combobox` has moved off
   Radix to Base UI, so reimplementing it means tracking a second headless API
   rather than the one already understood; `message-scroller` depends on a
@@ -170,6 +176,21 @@ expires reaches pineapple — now covered by "stays put when the accumulated sea
 matches nothing" in `spec/system/select_spec.rb`. **What Base UI does instead was
 not measured**: the docs demo's panel closed on every click attempt, by mouse and
 by keyboard, and driving it was abandoned rather than guessed at.
+
+## Do not compare the look against the docs site
+
+Measured 2026-08-09 while checking the message scroller's buttons: the live
+demo's button computes to `rounded-2xl` with a 1px border, and this port's to
+`rounded-md` with none. Neither is wrong. The docs page serves the **Base UI**
+registry, whose Button is a different component from `new-york-v4`'s — the
+variant order recorded above, showing up as a visual difference rather than a
+behavioural one.
+
+So the rule in `CLAUDE.md` — open upstream's example and read what it renders —
+holds for *shape*: which parts nest where, which element owns which attribute.
+It does not transfer to **appearance**, because the appearance on that page
+belongs to a registry this gem does not port. Check a class string against
+`vendor/shadcn/ui/`, not against a screenshot.
 
 ## The registry moved, and this gem ports the older one
 
