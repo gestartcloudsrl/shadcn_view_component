@@ -129,17 +129,57 @@ RSpec.describe "Sidebar", :js do
 
     after { page.driver.browser.manage.window.resize_to(1400, 900) }
 
+    # Asserted on `sidebar-container` rather than on `sidebar`, and that is the
+    # whole point of the example. The flag and the inline `display` land on the
+    # outer element, so it turns visible whether or not anything inside it does
+    # — and for as long as this suite has existed, nothing did: the container
+    # carries its own `hidden … md:flex`, which the breakpoint it names can only
+    # ever switch off *above* `md`. The sheet opened onto an empty strip and
+    # every assertion here passed.
     it "opens as a sheet over the page, and Escape dismisses it" do
       expect(page).to have_css(sidebar, visible: :hidden)
 
       find(trigger).click
 
-      expect(page).to have_css(sidebar, visible: :visible)
+      expect(page).to have_css("[data-slot=sidebar-container]", visible: :visible)
       expect(find(sidebar)["data-mobile"]).to eq("true")
+      # `SIDEBAR_WIDTH_MOBILE`, 18rem (sidebar.tsx:31) — upstream applies it by
+      # overriding `--sidebar-width` on the Sheet; there is no second element
+      # here, so the panel reads `--sidebar-width-mobile` instead.
+      expect(find("[data-slot=sidebar-container]").rect.width.round).to eq(288)
 
       press(:escape)
 
       expect(page).to have_css(sidebar, visible: :hidden)
+    end
+
+    # `top_layer.enable` sets `popover="manual"`, and the UA gives `[popover]`
+    # `position: fixed` whether it is showing or not. `shadcn.css` neutralises
+    # the rest of those defaults and deliberately not that one, because every
+    # other caller enables it on a wrapper that is fixed anyway. This is the one
+    # element the page is laid out *around*, so leaving it enabled left the
+    # desktop sidebar out of flow and the page drawn straight over it.
+    it "returns the panel to the page's flow once the sheet has been closed" do
+      find(trigger).click
+      expect(page).to have_css("[data-slot=sidebar-container]", visible: :visible)
+
+      press(:escape)
+      expect(page).to have_css(sidebar, visible: :hidden)
+
+      page.driver.browser.manage.window.resize_to(1400, 900)
+      expect(page).to have_css("#{sidebar}[data-state=expanded]")
+
+      # `visible: :all` because the gap is a spacer with no content: it has the
+      # panel's width and no height, which Selenium reports as not displayed.
+      # Its width is exactly what is being measured.
+      page.document.synchronize do
+        gap = find("[data-slot=sidebar-gap]", visible: :all).rect
+        inset = find("[data-slot=sidebar-inset]", visible: :all).rect
+        next if inset.x >= gap.x + gap.width
+
+        raise Capybara::ExpectationNotMet,
+              "the page starts at #{inset.x}, over a sidebar ending at #{gap.x + gap.width}"
+      end
     end
 
     # The one that matters most. Upstream's toggleSidebar moves `openMobile` on

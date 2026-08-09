@@ -109,8 +109,14 @@ export default class extends Controller {
     // `group-data-[collapsible=offcanvas]:…`, so filling it always would style
     // an open sidebar as a closed one. The value to collapse *to* therefore
     // cannot live here; it lives in `data-sidebar-collapsible`.
+    //
+    // Empty on the mobile branch for a second reason: upstream's mobile tree
+    // has no collapsed state to carry (sidebar.tsx:182-204), and here the same
+    // element serves both, so a `collapsed` left over from the desktop would
+    // style the sheet as a rail of icons — or, with `offcanvas`, slide it off
+    // the screen it was just opened on.
     sidebar.dataset.collapsible =
-      this.openValue ? "" : (sidebar.dataset.sidebarCollapsible || "offcanvas")
+      this.openValue || this.isMobile ? "" : (sidebar.dataset.sidebarCollapsible || "offcanvas")
 
     if (this.isMobile && this.openMobileValue) this.openMobile()
     else this.closeMobile()
@@ -160,6 +166,10 @@ export default class extends Controller {
     sidebar.style.removeProperty("display")
 
     topLayer.hide(sidebar)
+    // Paired with the `enable` above, and not optional: this element is laid
+    // out around, so leaving it a popover leaves it `position: fixed` and the
+    // page draws over the desktop sidebar from then on.
+    topLayer.disable(sidebar)
     unlockScroll()
     this.releaseFocus?.()
     this.releaseFocus = null

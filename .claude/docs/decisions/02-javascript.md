@@ -33,6 +33,18 @@ fixed the same problem with far less change.
 hesitate — and it then turned out they had never played at all, for an unrelated
 reason. See below.
 
+**Promotion has to be undone, and only one caller has ever needed it.** The UA
+gives `[popover]` `position: fixed`, and that applies whether it is showing or
+not — `hidePopover()` does not put the element back in the page's flow. The reset
+in `shadcn.css` neutralises the rest of those defaults (`inset`, `width`, border,
+background) and deliberately not `position`, because every caller through
+`floating.js` enables it on a wrapper `createWrapper()` already made fixed. The
+Sidebar is the exception: its mobile sheet promotes the *panel*, an element the
+page is laid out around. Left enabled after the sheet closed, the panel stayed
+out of flow and the page was drawn over the desktop sidebar from then on.
+`top_layer.disable()` exists for that, and `closeMobile()` is its only caller —
+if a second component ever promotes an in-flow element, it needs the same pairing.
+
 ## Closing waits for the animation; everything else does not
 
 Closing used to set `hidden` in the same tick as `data-state="closed"`, and
@@ -225,11 +237,20 @@ Two details worth keeping:
   vendored sources, but upstream's desktop tree carries `md:block`
   (`sidebar.tsx:210`), and `md` is 768px in Tailwind's default scale. The value
   was read rather than invented or made configurable.
-- **`hidden … md:block` is undone with an inline `display`.** That class is why
-  the desktop tree is invisible below the breakpoint — React never renders it
-  there, so upstream never has to undo it. Inline beats the utility without
-  having to out-specify `md:block` at every other width, and removing the
-  property restores the class exactly, which a toggled class would not.
+- **Two elements hide below the breakpoint, not one.** The panel carries
+  `hidden … md:block` and the container inside it carries `hidden … md:flex`.
+  React never renders either below `md`, so upstream never has to undo either;
+  this port has to undo both. The panel's is undone with an inline `display` —
+  it beats the utility without out-specifying `md:block` at every other width,
+  and removing the property restores the class exactly. The container's is
+  undone with `group-data-[mobile=true]:flex`, a two-class selector that outranks
+  `md:flex` on specificity, which is what a *bare* class toggle could not do.
+
+  Only the panel's was undone at first, and the sheet opened onto an empty strip
+  for six commits. Both the design spec and the system spec named the panel and
+  stopped there — the spec asserted the outer element was visible, which it was.
+  A sentence about "the class that hides it" was true of the element it was
+  written from and false of the one inside it; see the trap in `CLAUDE.md`.
 
 ## Controllers re-sync on `turbo:morph`
 

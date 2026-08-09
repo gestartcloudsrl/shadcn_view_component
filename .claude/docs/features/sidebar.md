@@ -43,12 +43,32 @@ gem already made: nothing is portalled, because moving content out of a
 controller's element unbinds the Stimulus actions inside it — and a sidebar is
 made of links and buttons.
 
-**One consequence to know if you write your own markup:** upstream's desktop
-tree carries `hidden … md:block`, which is why it is invisible below the
-breakpoint — React never renders it there, so upstream never has to undo it. This
-port does, with an inline `display` set while the mobile sheet is open and
-removed when it closes. If you override that element's `display` yourself, that
-is the interaction to watch.
+**One consequence to know if you write your own markup:** the desktop tree hides
+itself below the breakpoint — React never renders it there, so upstream never has
+to undo it — and this port has to undo it in **two** places, because two elements
+carry that pattern:
+
+| | Hidden below `md` by | Undone by |
+|---|---|---|
+| `sidebar` | `hidden … md:block` | an inline `display`, set while the sheet is open |
+| `sidebar-container` | `hidden … md:flex` | `group-data-[mobile=true]:flex` |
+
+Only the first was undone for the branch's first six commits, and the sheet
+opened onto an empty strip: the flag and the inline `display` land on the outer
+element, so it turns visible whether or not anything inside it does. The system
+spec asserted on that outer element and passed throughout. The container also
+takes upstream's `SIDEBAR_WIDTH_MOBILE` there — 18rem, which upstream applies by
+overriding `--sidebar-width` on the Sheet, and which this port publishes as
+`--sidebar-width-mobile` because there is no second element to override it on.
+
+**The other thing the one-tree choice costs:** `top_layer.enable` marks the panel
+`popover="manual"`, and the UA gives `[popover]` `position: fixed` whether it is
+showing or not. `shadcn.css` neutralises the rest of those defaults and
+deliberately not that one — every other caller enables it on a wrapper that is
+fixed anyway. This is the only element the page is laid out *around*, so the
+attribute has to come back off on close (`top_layer.disable`). Left on, the panel
+stays out of flow and the page is drawn straight over the desktop sidebar from
+the first time the sheet is opened.
 
 **What it costs you:** on a phone, before JavaScript runs, there is no sidebar.
 The gem already requires Stimulus for every floating layer, so this adds no new
@@ -119,6 +139,11 @@ only where Ruby conventions demand it — `isActive` becomes `active:`,
   the components bring real animation classes.
 - **Server-side viewport detection.** A host may do it and pass `open:`; the gem
   takes no position and ships nothing for it.
+- **The sheet's overlay.** Upstream's mobile branch is a real `Sheet`, so it gets
+  `sheet-overlay` — the dimmed backdrop — for free. Here the sheet is this same
+  panel, and there is no overlay element to show: rendering one would mean adding
+  markup upstream's desktop tree does not have. Outside clicks still dismiss it,
+  through `dismiss.js`; what is missing is the dimming, not the behaviour.
 
 ## Where each claim is enforced
 

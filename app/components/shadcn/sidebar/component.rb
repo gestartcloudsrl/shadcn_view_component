@@ -78,7 +78,14 @@ module Shadcn
           "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
-          inset_like? ? floating : plain
+          inset_like? ? floating : plain,
+          # This element exists to reserve the panel's width in the page's flow.
+          # A sheet overlays the page instead, so on the mobile branch it has to
+          # reserve nothing. The Popover API already takes the panel out of flow
+          # while the sheet is open, which makes this redundant there and load
+          # -bearing everywhere else: `top_layer.js` is feature-detected, and the
+          # fallback leaves the panel in flow.
+          "group-data-[mobile=true]:w-0"
         )
       end
 
@@ -91,7 +98,18 @@ module Shadcn
           "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) " \
           "transition-[left,right,width] duration-200 ease-linear md:flex",
           side_classes,
-          padding_classes
+          padding_classes,
+          # Upstream renders a Sheet below `md` and this panel above it, so its
+          # `hidden … md:flex` is never asked to show anything on a phone. Here
+          # there is one tree and the sheet *is* this element, so the mobile
+          # branch has to turn both of those off. The controller does that for
+          # the panel's own `hidden … md:block`; nothing was doing it for the
+          # container inside, which is why the sheet opened onto an empty strip.
+          #
+          # A `group-data-` variant rather than the inline `display` used on the
+          # panel: both are two-class selectors, so they outrank `md:flex` at
+          # every width without the specificity fight a bare class would lose.
+          "group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile)"
         )
       end
 

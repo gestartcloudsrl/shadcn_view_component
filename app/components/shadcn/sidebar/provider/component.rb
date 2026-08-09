@@ -15,6 +15,11 @@ module Shadcn
       class Component < ApplicationViewComponent
         WIDTH = "16rem"
         WIDTH_ICON = "3rem"
+        # Upstream's `SIDEBAR_WIDTH_MOBILE` (sidebar.tsx:31), which it applies by
+        # overriding `--sidebar-width` on the Sheet it renders instead of the
+        # panel. There is no second element here to override it on, so it is
+        # published as its own variable and the panel reaches for it directly.
+        WIDTH_MOBILE = "18rem"
 
         slot_name :"sidebar-wrapper"
 
@@ -34,7 +39,10 @@ module Shadcn
 
         def element_attributes(**defaults)
           super(**{
-            style: merged_style("--sidebar-width: #{WIDTH}; --sidebar-width-icon: #{WIDTH_ICON};"),
+            style: merged_style(
+              "--sidebar-width: #{WIDTH}; --sidebar-width-icon: #{WIDTH_ICON}; " \
+              "--sidebar-width-mobile: #{WIDTH_MOBILE};"
+            ),
             "data-controller" => "shadcn--sidebar",
             "data-shadcn--sidebar-open-value" => open
           }.merge(defaults))

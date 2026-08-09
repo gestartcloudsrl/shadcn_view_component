@@ -91,6 +91,17 @@ RSpec.describe "reverse parity" do
     "select-list" => %w[group/select-list max-h-[inherit]],
     "select-input-wrapper" => %w[pb-0],
 
+    # Upstream renders a Sheet below `md` and this panel above it, so its
+    # classes never have to describe a phone. Here there is one tree and the
+    # sheet *is* this panel, so the mobile branch has to be said in CSS: the
+    # container turns visible at upstream's `SIDEBAR_WIDTH_MOBILE`, and the
+    # spacer that reserves the panel's width in the page stops reserving it,
+    # because a sheet overlays the page rather than sitting beside it.
+    "sidebar-container" => %w[
+      group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile)
+    ],
+    "sidebar-gap" => %w[group-data-[mobile=true]:w-0],
+
     # The two conditions upstream writes as a React prop on the sidebar menu
     # button's tooltip — `hidden={state !== "collapsed" || isMobile}`
     # (sidebar.tsx:541). Neither is knowable when the server renders, so here
