@@ -18,6 +18,7 @@ import DropdownMenuController from "shadcn/controllers/dropdown_menu_controller"
 import HoverCardController from "shadcn/controllers/hover_card_controller"
 import InputGroupController from "shadcn/controllers/input_group_controller"
 import MessageScrollerController from "shadcn/controllers/message_scroller_controller"
+import NavigationMenuController from "shadcn/controllers/navigation_menu_controller"
 import PopoverController from "shadcn/controllers/popover_controller"
 import RadioGroupController from "shadcn/controllers/radio_group_controller"
 import ScrollAreaController from "shadcn/controllers/scroll_area_controller"
@@ -40,6 +41,7 @@ const CONTROLLERS = {
   "hover-card": HoverCardController,
   "input-group": InputGroupController,
   "message-scroller": MessageScrollerController,
+  "navigation-menu": NavigationMenuController,
   popover: PopoverController,
   "radio-group": RadioGroupController,
   "scroll-area": ScrollAreaController,

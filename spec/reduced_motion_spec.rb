@@ -59,12 +59,24 @@ RSpec.describe "reduced motion in the compiled bundle" do
   # every example below green without asserting anything — the failure
   # `.claude/docs/decisions/03-testing.md` records happening twice already.
   classes = Dir[root.join("app/components/**/*.rb")].flat_map do |file|
-    File.read(file).scan(/[\w\[\]=:-]*animate-(?:in|out|accordion-up|accordion-down)/)
+    File.read(file).scan(%r{[\w\[\]=:/.^-]*animate-(?:in|out|accordion-up|accordion-down)})
   end.uniq.sort
 
   # This repo only ever pairs these utilities with a bare class or a
   # `data-[state=X]:` variant (confirmed by the scan above) — it does not
   # attempt to handle other variant shapes.
+  escape = ->(value) { value.gsub(%r{[\[\]=/:^]}) { |char| "\\#{char}" } }
+
+  # Two shapes this cannot reconstruct, and does not try to. A variant chain
+  # naming a group compiles to `:is(:where(.group\/name)[attr=value] *)`, and an
+  # attribute *prefix* match to `[data-motion^=...]`; both are Tailwind's own
+  # syntax, and writing them out here would be asserting a guess about the
+  # compiler rather than about this gem. For those, the assertion is that the
+  # class itself appears inside a reduced-motion block with the collapse —
+  # per usage, exactly as for the shapes below, and without inventing the
+  # selector around it.
+  reconstructable = ->(token) { !token.include?("/") && !token.include?("^") }
+
   compiled_selector = lambda do |token|
     next ".#{token}" unless token.include?(":")
 
@@ -86,6 +98,14 @@ RSpec.describe "reduced motion in the compiled bundle" do
 
   classes.each do |token|
     it "collapses `#{token}` under reduced motion" do
+      unless reconstructable.call(token)
+        css = bundle_path.read
+        pattern = /@media \(prefers-reduced-motion:reduce\)\{\.#{Regexp.escape(escape.call(token))}[^{]*\{animation-duration:\.01ms/
+
+        expect(css).to match(pattern), "no reduced-motion collapse compiled for `#{token}`"
+        next
+      end
+
       selector = compiled_selector.call(token)
       important = needs_important.fetch(token.split(":").last)
       css = bundle_path.read

@@ -46,6 +46,7 @@ RSpec.describe "shadcn/ui parity" do
     "message-scroller" => "message_scroller",
     "message" => "message",
     "native-select" => "native_select",
+    "navigation-menu" => "navigation_menu",
     "pagination" => "pagination",
     "popover" => "popover",
     "progress" => "progress",
@@ -80,7 +81,7 @@ RSpec.describe "shadcn/ui parity" do
   not_yet_ported = %w[
     calendar carousel chart combobox command
     context-menu drawer form input-otp
-    menubar navigation-menu resizable
+    menubar resizable
     slider sonner
   ].freeze
 
@@ -98,6 +99,21 @@ RSpec.describe "shadcn/ui parity" do
     # portal is the only thing between the root and the content, so it is the
     # first where the slot name reaches the tokenizer at all.
     "hover-card" => %w[hover-card-portal],
+    # The whole of `NavigationMenuViewport`. Upstream's default moves every
+    # panel into one shared box that animates between their sizes — measured on
+    # the live demo, the content's parent is `navigation-menu-viewport`, which
+    # means React portalled it there. Nothing is portalled here, so this port
+    # ships the `viewport={false}` configuration shadcn also supports, and the
+    # box that would hold nothing is not rendered at all. Shipping it empty
+    # would put an element in the page that looks like the component working.
+    # See features/navigation-menu.md.
+    "navigation-menu" => %w[
+      navigation-menu-viewport origin-top-center mt-1.5 z-50 bg-popover
+      text-popover-foreground h-[var(--radix-navigation-menu-viewport-height)]
+      md:w-[var(--radix-navigation-menu-viewport-width)]
+      data-[state=closed]:animate-out data-[state=closed]:zoom-out-95
+      data-[state=open]:animate-in data-[state=open]:zoom-in-90
+    ],
     # Three kinds, all deliberate.
     #
     # `--sidebar-width` and friends are bare CSS variables the tokenizer picks

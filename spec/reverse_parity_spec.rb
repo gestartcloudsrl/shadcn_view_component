@@ -84,6 +84,10 @@ RSpec.describe "reverse parity" do
     # and nothing else — it is the caller who says how big the window is, which
     # is the whole point of the component.
     "scroll-area" => %w[h-64 w-48],
+    # The width the preview gives a navigation panel. Upstream's own example
+    # sizes them at the call site too — a menu does not know how wide its
+    # contents want to be.
+    "navigation-menu-content" => %w[md:w-[400px]],
     # A named Tailwind group the sidebar preview passes to a Collapsible, so a
     # menu item's chevron can rotate when its own section opens. Upstream's
     # sidebar demo does the same, but demos are not vendored here — only

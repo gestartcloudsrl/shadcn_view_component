@@ -43,6 +43,7 @@ project keeps catching itself in.
 | Component | Verdict | Why |
 |---|---|---|
 | [sidebar.md](sidebar.md) | **ours** / adapted | no Radix Sidebar exists; the runtime mobile branch cannot survive server rendering |
+| [navigation-menu.md](navigation-menu.md) | **adapted** | upstream's shared viewport needs a portal, so this ships the `viewport={false}` configuration shadcn also supports |
 | [message-scroller.md](message-scroller.md) | **adapted** | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, and one difference server rendering forces |
 
 Components with a known divergence but no file yet — write one before claiming
