@@ -68,9 +68,17 @@ RSpec.describe "shadcn/ui parity" do
   # Vendored for reference but not ported yet. Kept here rather than in a
   # document so the two lists cannot drift: adding a TSX without deciding which
   # side it belongs on fails the example below, which is the whole point of it.
+  # A category of one, and it needs its own list rather than a home in either of
+  # the two below. `direction.tsx` wraps Radix's `DirectionProvider`, which is a
+  # React context and renders no DOM: there are no classes to compare, so the
+  # example that reads them would fail on an empty extraction. It is ported —
+  # `app/javascript/shadcn/direction.js` and the three controllers that read it
+  # — and it has no markup to be checked against.
+  no_markup = %w[direction].freeze
+
   not_yet_ported = %w[
     calendar carousel chart combobox command
-    context-menu direction drawer form input-otp
+    context-menu drawer form input-otp
     menubar navigation-menu resizable
     scroll-area slider sonner
   ].freeze
@@ -141,7 +149,7 @@ RSpec.describe "shadcn/ui parity" do
   end
 
   it "accounts for every component vendored for comparison" do
-    expect((ports.keys + not_yet_ported).sort).to eq(ShadcnSource.vendored_components)
+    expect((ports.keys + not_yet_ported + no_markup).sort).to eq(ShadcnSource.vendored_components)
   end
 
   ports.each do |tsx, directory|

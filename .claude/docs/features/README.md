@@ -60,6 +60,12 @@ anything about them:
   carries upstream's `text-destructive/80`, which axe measures at 4.36:1 where
   AA wants 4.5 — kept, because changing it would emit a class upstream does not,
   and named as an exception in `spec/system/accessibility_spec.rb`.
+- **direction** — *ported as a module, not a component*. shadcn's file wraps
+  Radix's `DirectionProvider`, which renders no DOM: React needs a context to
+  read inherited state while rendering, and a Stimulus controller does not,
+  because the browser has resolved `dir` before it runs. So a host writes `dir`
+  on any ancestor — `<html>` included — and `tabs`, `toggle-group` and
+  `radio-group` follow it. There is nothing to render and no provider to mount.
 - **hover-card** — *1:1 in markup; one behaviour of Radix's not reproduced*.
   Every tabbable inside the card is taken out of the tab order, which is Radix's
   own (`vendor/radix/ui/hover-card.tsx:324-327`) and follows from the card

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { directionAwareKey, readDirection } from "shadcn/direction"
 
 // Radix's RadioGroup: `role="radiogroup"` with roving tabindex over its items
 // and arrow-key navigation that also selects, per the ARIA radio pattern.
@@ -28,7 +29,7 @@ export default class extends Controller {
     const keys = {
       ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1
     }
-    const step = keys[event.key]
+    const step = keys[directionAwareKey(event.key, readDirection(this.element))]
     if (!step) return
 
     event.preventDefault()

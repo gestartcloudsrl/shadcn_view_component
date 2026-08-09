@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { directionAwareKey, readDirection } from "shadcn/direction"
 import { uniqueId } from "shadcn/id"
 
 // Radix's Tabs: roving tabindex across the triggers, arrow keys following the
@@ -32,14 +33,18 @@ export default class extends Controller {
     const horizontal = this.orientationValue === "horizontal"
     const forward = horizontal ? "ArrowRight" : "ArrowDown"
     const backward = horizontal ? "ArrowLeft" : "ArrowUp"
+    // Right-to-left swaps the two horizontal arrows, so the key that *means*
+    // forward is translated before it is compared. `shadcn/direction.js` says
+    // why this is a module and not a provider.
+    const key = directionAwareKey(event.key, readDirection(this.element))
 
     const triggers = this.triggerTargets.filter((t) => !t.disabled)
     const index = triggers.indexOf(event.currentTarget)
     if (index === -1) return
 
     let next = null
-    if (event.key === forward) next = triggers[(index + 1) % triggers.length]
-    else if (event.key === backward) next = triggers[(index - 1 + triggers.length) % triggers.length]
+    if (key === forward) next = triggers[(index + 1) % triggers.length]
+    else if (key === backward) next = triggers[(index - 1 + triggers.length) % triggers.length]
     else if (event.key === "Home") next = triggers[0]
     else if (event.key === "End") next = triggers[triggers.length - 1]
     else return
