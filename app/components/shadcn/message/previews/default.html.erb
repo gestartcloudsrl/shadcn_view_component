@@ -1,0 +1,35 @@
+<%# The composition upstream's own demo renders, read from it rather than
+    inferred from the TSX: a group of messages, each an avatar beside a
+    content column, and the *bubble* nested inside that column. The message
+    lays out the row; the bubble is what carries the surface.
+
+    `align: :end` is what turns a message around — `data-[align=end]` reverses
+    the row and pushes the bubble and the footer to the other side. %>
+<div class="flex w-[420px] flex-col gap-6">
+  <%= render(Shadcn::Message::Group::Component.new) do %>
+    <%= render(Shadcn::Message::Component.new) do %>
+      <%= render(Shadcn::Message::Avatar::Component.new) do %>
+        <%= render(Shadcn::Avatar::Component.new(class: "size-8")) do |avatar| %>
+          <% avatar.with_fallback { "SC" } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Message::Content::Component.new) do %>
+        <%= render(Shadcn::Bubble::Component.new(variant: :muted)) do %>
+          <%= render(Shadcn::Bubble::Content::Component.new) do %>
+            I checked the registry and the component is published.
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= render(Shadcn::Message::Component.new(align: :end)) do %>
+      <%= render(Shadcn::Message::Content::Component.new) do %>
+        <%= render(Shadcn::Message::Header::Component.new) { "You" } %>
+        <%= render(Shadcn::Bubble::Component.new(align: :end)) do %>
+          <%= render(Shadcn::Bubble::Content::Component.new) { "Thanks — I will pull it in." } %>
+        <% end %>
+        <%= render(Shadcn::Message::Footer::Component.new) { "9:41 AM" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

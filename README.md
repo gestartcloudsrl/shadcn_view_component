@@ -348,9 +348,14 @@ input-group
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
 dropdown-menu (including submenus), popover, tooltip, select, sidebar
 
+**AI chat** — message, bubble, attachment, marker. These are markup and
+variants, with no behaviour of their own. `attachment` is the one component
+whose CSS is not all Tailwind: `shimmer`, `scroll-fade-x` and `scrollbar-none`
+are shadcn's own utilities and are reproduced at the end of `shadcn.css`.
+
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
 combobox, menubar, navigation-menu, context-menu, hover-card, scroll-area,
-slider, form, drawer, and the AI chat components.
+slider, form, drawer, and the remaining AI chat components (message-scroller).
 
 ## What is and is not verified
 

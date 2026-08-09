@@ -1,0 +1,80 @@
+<%# Read from upstream's own demo: an attachment is a media square beside a
+    content column of title and description, and the two orientations rearrange
+    exactly that.
+
+    `state:` is the interesting argument. It is not a variant — it picks no
+    classes — it is written as `data-state` and read by selectors on this
+    element and on its children, which is how `error` reaches the description's
+    colour and how `uploading` and `processing` reach the title's `shimmer`.
+    That last one is shadcn's own CSS rather than Tailwind's; see the section at
+    the end of `shadcn.css`.
+
+    The media squares carry a file extension rather than a glyph. `Icon`'s
+    registry holds the eleven icons the *components* need and none of them is a
+    document, and the alternative — inlining lucide paths for a demo — is what
+    the sidebar preview does only because that demo is a copy of upstream's.
+    Recalling an SVG path from memory is the one thing not to do here. %>
+<div class="flex w-[420px] flex-col gap-6">
+  <%= render(Shadcn::Attachment::Component.new) do %>
+    <%= render(Shadcn::Attachment::Media::Component.new) do %>
+      <span class="text-[10px] font-medium">PDF</span>
+    <% end %>
+    <%= render(Shadcn::Attachment::Content::Component.new) do %>
+      <%= render(Shadcn::Attachment::Title::Component.new) { "quarterly-report.pdf" } %>
+      <%= render(Shadcn::Attachment::Description::Component.new) { "PDF · 2.4 MB" } %>
+    <% end %>
+    <%= render(Shadcn::Attachment::Actions::Component.new) do %>
+      <%= render(Shadcn::Attachment::Action::Component.new("aria-label": "Remove")) do %>
+        <%= render(Shadcn::Icon::Component.new("x")) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# `uploading` and `error` are the two states that change what you see. %>
+  <%= render(Shadcn::Attachment::Component.new(state: :uploading, size: :sm)) do %>
+    <%= render(Shadcn::Attachment::Media::Component.new) do %>
+      <span class="text-[10px] font-medium">TXT</span>
+    <% end %>
+    <%= render(Shadcn::Attachment::Content::Component.new) do %>
+      <%= render(Shadcn::Attachment::Title::Component.new) { "notes.txt" } %>
+      <%= render(Shadcn::Attachment::Description::Component.new) { "Uploading…" } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Attachment::Component.new(state: :error, size: :sm)) do %>
+    <%= render(Shadcn::Attachment::Media::Component.new) do %>
+      <span class="text-[10px] font-medium">ZIP</span>
+    <% end %>
+    <%= render(Shadcn::Attachment::Content::Component.new) do %>
+      <%= render(Shadcn::Attachment::Title::Component.new) { "archive.zip" } %>
+      <%= render(Shadcn::Attachment::Description::Component.new) { "Upload failed" } %>
+    <% end %>
+  <% end %>
+
+  <%# The vertical orientation is what the group scrolls, and the trigger is
+      what makes a whole card clickable — stretched over it at `z-10`, under the
+      actions' `z-20` so a close button still wins.
+
+      Six of them, so the row genuinely overflows and `scroll-fade-x` has
+      something to fade. That utility is driven by a scroll timeline, and it is
+      the one thing on this page a screenshot taken through the suite gets
+      wrong: the harness injects `animation-duration: 0s !important`, which
+      lands both 1ms interpolations on their end value and paints a fade on the
+      leading edge at rest. Measured with the duration handed back —
+      `--scroll-fade-s` is 0 at `scrollLeft: 0` and only the trailing edge
+      fades, which is correct. %>
+  <%= render(Shadcn::Attachment::Group::Component.new) do %>
+    <% [ "workspace.png", "desk-reference.jpg", "office-reference.jpg",
+         "whiteboard.png", "sketch-01.jpg", "sketch-02.jpg" ].each do |name| %>
+      <%= render(Shadcn::Attachment::Component.new(orientation: :vertical)) do %>
+        <%= render(Shadcn::Attachment::Media::Component.new(variant: :image)) do %>
+          <span class="text-[10px] font-medium">IMG</span>
+        <% end %>
+        <%= render(Shadcn::Attachment::Content::Component.new) do %>
+          <%= render(Shadcn::Attachment::Title::Component.new) { name } %>
+        <% end %>
+        <%= render(Shadcn::Attachment::Trigger::Component.new("aria-label": "Open #{name}")) %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

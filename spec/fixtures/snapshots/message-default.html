@@ -1,0 +1,30 @@
+<div class="flex w-[420px] flex-col gap-6">
+<div data-slot="message-group" class="flex min-w-0 flex-col gap-2">
+<div data-slot="message" data-align="start" class="group/message relative flex w-full min-w-0 gap-2 text-sm data-[align=end]:flex-row-reverse">
+<div data-slot="message-avatar" class="flex w-fit min-w-8 shrink-0 items-center justify-center self-end overflow-hidden rounded-full bg-muted group-has-data-[slot=message-footer]/message:-translate-y-8">
+<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-8">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">SC
+</span>
+</span>
+</div>
+<div data-slot="message-content" class="flex w-full min-w-0 flex-col gap-2.5 wrap-break-word group-data-[align=end]/message:*:data-slot:self-end">
+<div data-slot="bubble" data-variant="muted" data-align="start" class="group/bubble relative flex w-fit max-w-[80%] min-w-0 flex-col gap-1 group-data-[align=end]/message:self-end data-[align=end]:self-end data-[variant=ghost]:max-w-full *:data-[slot=bubble-content]:bg-muted [&amp;&gt;[data-slot=bubble-content]:is(button,a):hover]:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_5%)]">
+<div data-slot="bubble-content" class="w-fit max-w-full min-w-0 overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50"> I checked the registry and the component is published.
+</div>
+</div>
+</div>
+</div>
+<div data-slot="message" data-align="end" class="group/message relative flex w-full min-w-0 gap-2 text-sm data-[align=end]:flex-row-reverse">
+<div data-slot="message-content" class="flex w-full min-w-0 flex-col gap-2.5 wrap-break-word group-data-[align=end]/message:*:data-slot:self-end">
+<div data-slot="message-header" class="flex max-w-full min-w-0 items-center px-3 text-xs font-medium text-muted-foreground group-has-data-[variant=ghost]/message:px-0">You
+</div>
+<div data-slot="bubble" data-variant="default" data-align="end" class="group/bubble relative flex w-fit max-w-[80%] min-w-0 flex-col gap-1 group-data-[align=end]/message:self-end data-[align=end]:self-end data-[variant=ghost]:max-w-full *:data-[slot=bubble-content]:bg-primary *:data-[slot=bubble-content]:text-primary-foreground [&amp;&gt;[data-slot=bubble-content]:is(button,a):hover]:bg-primary/80">
+<div data-slot="bubble-content" class="w-fit max-w-full min-w-0 overflow-hidden rounded-xl border border-transparent px-3 py-2 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/50">Thanks — I will pull it in.
+</div>
+</div>
+<div data-slot="message-footer" class="flex max-w-full min-w-0 items-center px-3 text-xs font-medium text-muted-foreground group-has-data-[variant=ghost]/message:px-0 group-data-[align=end]/message:justify-end">9:41 AM
+</div>
+</div>
+</div>
+</div>
+</div>

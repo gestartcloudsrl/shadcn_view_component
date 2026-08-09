@@ -63,21 +63,26 @@ decided is in `decisions/`.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (22)
+## Components not ported (18)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Five have since been ported —
-`empty`, `button-group`, `input-group`, `item`, `sidebar` — leaving 22.
+`not_yet_ported` and fails if the two drift. Nine have since been ported —
+`empty`, `button-group`, `input-group`, `item`, `sidebar`, and the four
+markup-only ones, `message`, `bubble`, `attachment`, `marker` — leaving 18.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
 
-- **Markup only** (4 left): `message`, `bubble`, `attachment`, `marker` — no
-  library, `radix-ui` only for `Slot`, no state and no event handlers.
-  *All four were filed under "AI chat set", which implied a difficulty they do
-  not have — `message` imports nothing whatsoever. They are now the easiest
-  things left in the backlog.*
+- **Markup only** (0 left): `message`, `bubble`, `attachment` and `marker` have
+  shipped — 22 parts, no controller, no event handlers.
+  *The classification held on behaviour and understated the rest. Three of the
+  four carry cva variants, `attachment` restamps `Button`, and `attachment`
+  also reaches for three utilities that are shadcn's own CSS rather than
+  Tailwind's — `shimmer`, `scroll-fade-x`, `scrollbar-none` — which no vendored
+  source here defines. They were read from the stylesheet ui.shadcn.com serves
+  and are now at the end of `shadcn.css`, which is the only hand-written CSS in
+  this gem with nothing local to diff it against.*
 
   *`input-group` was in this group and should not have been.* It has an
   `onClick` on its addon — clicking the addon focuses the group's control — so

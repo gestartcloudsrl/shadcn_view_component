@@ -1,0 +1,22 @@
+<%# Every variant, because every one of them styles the *child* rather than the
+    bubble itself — they are all `*:data-[slot=bubble-content]:…` selectors, so
+    a bubble rendered without its content shows nothing at all. Seeing them side
+    by side is what makes that arrangement visible.
+
+    The last one carries reactions, which overlap the bubble's corner and are
+    positioned by `side` and `align` rather than by where they sit in the
+    markup. %>
+<div class="flex w-[420px] flex-col gap-3">
+  <%= render(Shadcn::Bubble::Group::Component.new) do %>
+    <% %i[default secondary muted tinted outline ghost destructive].each do |variant| %>
+      <%= render(Shadcn::Bubble::Component.new(variant:)) do %>
+        <%= render(Shadcn::Bubble::Content::Component.new) { variant.to_s } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Bubble::Component.new(variant: :muted, class: "mb-3")) do %>
+    <%= render(Shadcn::Bubble::Content::Component.new) { "With a reaction on it." } %>
+    <%= render(Shadcn::Bubble::Reactions::Component.new) { "👍 2" } %>
+  <% end %>
+</div>
