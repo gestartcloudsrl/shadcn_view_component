@@ -89,6 +89,14 @@ and stays that way on desktop, where nothing ever opens a sheet. The slide is
 the element's own `data-state`, which only the mobile branch writes — and the
 close waits it out through `ExitQueue`, the module `dialog_controller.js` uses.
 
+**Each of the two waits on its own animations**, the way the dialog's layers do,
+and this is not a tidiness point. Nothing in the compiled bundle sets
+`animation-fill-mode`, so an element returns to its *pre-animation* state the
+instant its keyframes end. Hiding the backdrop on the panel's clock therefore
+did not merely hide it late: `fade-out-0` finished, the overlay snapped back to a
+full `bg-black/50`, and a sheet of grey glass sat over an emptied page for the
+difference between the two durations — 150ms against `duration-300` upstream.
+
 **What that cost.** A dismiss layer registered on the panel counts a click on its
 own children as inside, so the first version of this stopped outside clicks from
 closing the sheet: the backdrop *was* the sheet, as far as `dismiss.js` could
@@ -168,6 +176,7 @@ only where Ruby conventions demand it — `isActive` becomes `active:`,
 | the sheet showing the *panel*, at 18rem | same file, mutation-verified — the earlier assertion was on the wrapper and passed with the panel hidden |
 | the backdrop dimming, and a click on it closing the sheet | same file, mutation-verified |
 | the slide-out getting a frame before the panel goes | same file, pinned against a forced duration, mutation-verified |
+| the backdrop leaving on its own clock, not the panel's | same file, two forced durations; the load-bearing half is that the panel is *still* leaving when the backdrop has gone |
 | the panel returning to the page's flow after a sheet | same file, mutation-verified |
 | a phone never writing the desktop cookie | same file, mutation-verified |
 | the tooltip staying on its anchor as the panel narrows | same file, mutation-verified |

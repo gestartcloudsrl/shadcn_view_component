@@ -139,9 +139,10 @@ export default class extends Controller {
     const sidebar = this.sidebarTarget
     if (sidebar.dataset.mobile === "true") return
 
-    // Reopened before the slide-out finished: the teardown is still queued and
-    // would undo an open sheet a moment after it appeared.
+    // Reopened before the slide-out finished: both teardowns are still queued
+    // and would undo an open sheet a moment after it appeared.
     if (this.hasContainerTarget) this.exits.cancel(this.containerTarget)
+    if (this.hasOverlayTarget) this.exits.cancel(this.overlayTarget)
 
     sidebar.dataset.mobile = "true"
     // Undoes upstream's `hidden … md:block`, which is CSS-hidden below the
@@ -198,14 +199,23 @@ export default class extends Controller {
 
     this.setSheetState("closed")
 
+    // Each element waits on its *own* animations, as the dialog's layers do.
+    // Hiding the backdrop on the container's clock instead looks broken rather
+    // than merely late: nothing in the compiled bundle sets
+    // `animation-fill-mode`, so the moment `fade-out-0` ends the overlay snaps
+    // back to a full `bg-black/50` and sits there — the panel gone, a grey
+    // sheet of glass left over it — until the longer animation finishes.
+    // Upstream's two clocks differ the same way, 150ms against `duration-300`.
+    if (this.hasOverlayTarget) {
+      this.exits.defer(this.overlayTarget, () => { this.overlayTarget.hidden = true })
+    }
+
     // What ends the sheet is `data-mobile` going away — it is what
     // `group-data-[mobile=true]:flex` reads — so it has to outlast the
-    // slide-out rather than start it. The container is the element that
-    // animates, and at `duration-300` the longer of the two.
+    // slide-out rather than start it.
     const finish = () => {
       delete sidebar.dataset.mobile
       sidebar.style.removeProperty("display")
-      if (this.hasOverlayTarget) this.overlayTarget.hidden = true
 
       topLayer.hide(sidebar)
       // Paired with the `enable` above, and not optional: this element is laid

@@ -238,6 +238,36 @@ RSpec.describe "Sidebar", :js do
       expect(page).to have_no_css("[data-slot=sidebar-container][data-state=open]")
     end
 
+    # The backdrop is hidden on its own clock, not the panel's. Nothing in the
+    # compiled bundle sets `animation-fill-mode` — `reduced_motion_spec.rb` reads
+    # that same bundle — so an element sits at its *pre-animation* state the
+    # moment its keyframes end. Hiding the overlay when the panel finished left
+    # it snapping back to a full `bg-black/50` over an empty page for the
+    # difference between the two durations.
+    #
+    # Forced to 3s against the panel's 400ms so the two clocks are unmistakably
+    # apart, and read after the shorter one: with the defect the overlay is
+    # still there, opaque again.
+    it "takes the backdrop away on its own clock, not the panel's" do
+      find(trigger).click
+      expect(page).to have_css("[data-slot=sheet-overlay]", visible: :visible)
+
+      force_animations("[data-slot=sheet-overlay]", duration: "400ms")
+      force_animations("[data-slot=sidebar-container]", duration: "3s")
+
+      press(:escape)
+
+      # `visible: :hidden` rather than the absence of a visible one: Selenium
+      # reads `display`, and an overlay mid-fade is opaque or transparent
+      # without either counting as hidden. What is being asserted is the
+      # `hidden` attribute the controller sets, which `[data-slot][hidden]`
+      # turns into `display: none`.
+      expect(page).to have_css("[data-slot=sheet-overlay]", visible: :hidden)
+      # The panel is still on its way out, which is what makes the overlay's
+      # absence meaningful rather than merely simultaneous.
+      expect(find(sidebar)["data-mobile"]).to eq("true")
+    end
+
     # The one that matters most. Upstream's toggleSidebar moves `openMobile` on
     # mobile and `open` on desktop (sidebar.tsx:92-95), so opening the sheet on
     # a phone must not overwrite what the desktop remembered.
