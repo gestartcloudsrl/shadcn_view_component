@@ -347,21 +347,31 @@ producing the result the example was looking for.
 The example fails with `startAutoScroll` neutralised, which the three attempts
 before it did not.
 
-### Nothing here looks at the page
+### Done means the suite is green **and** the page has been looked at
 
-Worth stating flatly, because it has now cost twice. axe reads roles, the
-snapshots compare HTML, the system specs assert attributes, and the parity pair
-compares class tokens. **Not one of them renders a picture and looks at it.**
+Two steps, both required. Neither substitutes for the other.
 
-The searchable select shipped with an invisible cursor and every instrument
-agreed it was fine. The Sidebar shipped with `collapsible: :offcanvas` where its
-demo uses `:icon`, so collapsing hid the whole panel instead of leaving a rail
-of icons — again with a green suite, because every assertion was about
-attributes that were all correct.
+**Run the suite.** It catches what it catches.
 
-Both were found by a person opening the page. There is no automated substitute
-here and no plan to add one; what there is, is the obligation to *look* before
-calling a component done, and to say so when you have not.
+**Then open the page and look at it.** Every instrument here reads the DOM —
+axe reads roles, the snapshots compare HTML, the system specs assert attributes,
+the parity pair compares class tokens. **Not one of them renders a picture.** A
+component can be wrong in every way that matters to a person while every
+assertion about it passes.
+
+This has now cost three times, all with a green suite:
+
+- the searchable select's cursor moved but coloured nothing, because the
+  highlight moved to an attribute no rule styled;
+- the Sidebar collapsed to nothing rather than to a rail of icons, because the
+  preview took the default `collapsible` where the demo it copies uses `:icon`;
+- the Rail was rendered as a sibling of the panel rather than inside it, so its
+  `absolute` resolved against the page and drew a two-pixel line straight
+  through the icons.
+
+Every one was found by a person opening the page, and every one had passed
+everything. So: look before calling a component done, and if you have not
+looked, say so rather than reporting it finished.
 
 ### What a system spec cannot see
 

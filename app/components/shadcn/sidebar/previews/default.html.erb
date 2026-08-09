@@ -158,9 +158,14 @@
         <% end %>
       <% end %>
     <% end %>
-  <% end %>
 
-  <%= render(Shadcn::Sidebar::Rail::Component.new) %>
+    <%# Inside the panel, last, exactly where upstream puts it: its `absolute`
+        is meant to resolve against `sidebar-container`, and its
+        `group-data-[side=left]:-right-4` against the panel's own `group`.
+        Rendered as a sibling instead it positions against the page and draws a
+        line straight through the icons. %>
+    <%= render(Shadcn::Sidebar::Rail::Component.new) %>
+  <% end %>
 
   <%= render(Shadcn::Sidebar::Inset::Component.new) do %>
     <div class="flex items-center gap-2 border-b p-2">
