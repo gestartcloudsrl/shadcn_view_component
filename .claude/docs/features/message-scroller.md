@@ -109,11 +109,62 @@ exists because `scrollHeight`, `getBoundingClientRect` and computed padding
 disagree in ways only a browser produces, and a stubbed rect would assert the
 stub.
 
+## The contract the controller and the markup have to agree on
+
+Read from `vendor/shadcn-react/message-scroller/components.tsx` and
+`use-message-scroller-controller.ts`, so the next session does not read them
+again.
+
+**`MessageScrollerProvider` renders no DOM at all** (`components.tsx:89-107`) —
+it is pure context, and it is where the controller's five options live:
+`autoScroll`, `defaultScrollPosition`, `scrollEdgeThreshold`,
+`scrollPreviousItemPeek`, `scrollMargin`. It therefore has no counterpart here,
+the same answer `useSidebar` got: the options become Stimulus values and
+`data-controller` goes on the root, which is a real element.
+
+**Attributes, all of them:**
+
+| element | attribute | written by |
+|---|---|---|
+| root *and* viewport | `data-scrollable="start end"` (space-joined, removed when neither) | controller |
+| root *and* viewport | `data-autoscrolling` (boolean attribute) | controller |
+| item | `data-message-id`, `data-scroll-anchor="true"｜"false"` | server |
+| button | `data-active="true"｜"false"` | controller |
+
+`geometry.js` reads `data-scroll-anchor` and `data-message-id`, so those two are
+the markup's side of the contract and must be rendered even before a controller
+exists.
+
+**The content column ends in a spacer** — `<div aria-hidden
+data-message-scroller-spacer hidden>` (`components.tsx:301-307`), a sibling of
+the items with no `data-slot`, whose height the controller sets so the last
+message can reach the top of the viewport. It is the reason `getContentBottom`
+exists rather than reading `scrollHeight`. The content also defaults to
+`role="log"` with `aria-relevant="additions"`.
+
+**Four modes**, held on the controller and never written to the DOM:
+`following-bottom`, `free-scrolling`, `settling-jump`, `anchored-to-message`.
+`reconcileFollowMode` (`:140-169`) is the only place any of them changes. Two
+details in it are worth not rediscovering: arming is suppressed while
+`anchored-to-message`, because the tail spacer makes a freshly anchored turn read
+as "at the end" and re-arming there lets the first streamed chunk yank the reader
+off the anchor; and `commitScrollState` publishes `end: false` while following,
+because the raw geometry would strobe the button once per streamed chunk.
+
 ## CSS that is not Tailwind's
 
 `scroll-fade-b`, `scrollbar-thin` and `scrollbar-gutter-stable`, on top of the
 three already reproduced for `attachment`. Same caveat as those: shadcn's own
 CSS, no vendored source, nothing local to diff against.
+
+**These block the markup, not the controller.** `message-scroller-viewport`
+carries all three, so shipping the components without them would put three
+inert classes in the bundle — which `parity_spec` cannot see, since it compares
+class text and not generated CSS. `scroll-fade-b` is the vertical sibling of the
+`scroll-fade-x` already in `shadcn.css` and needs its own `@property
+--scroll-fade-t/b` pair and keyframes; **do not derive it from the horizontal
+one**, read it from the stylesheet ui.shadcn.com serves, the way the other three
+were.
 
 ## Where each claim is enforced
 
