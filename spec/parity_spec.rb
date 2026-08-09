@@ -46,6 +46,7 @@ RSpec.describe "shadcn/ui parity" do
     "radio-group" => "radio_group",
     "select" => "select",
     "separator" => "separator",
+    "sidebar" => "sidebar",
     "sheet" => "sheet",
     "skeleton" => "skeleton",
     "spinner" => "spinner",
@@ -65,7 +66,7 @@ RSpec.describe "shadcn/ui parity" do
     attachment bubble calendar carousel chart combobox command
     context-menu direction drawer form hover-card input-otp
     marker menubar message message-scroller navigation-menu resizable
-    scroll-area sidebar slider sonner
+    scroll-area slider sonner
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.
@@ -73,7 +74,31 @@ RSpec.describe "shadcn/ui parity" do
 
   # Tokens the port legitimately does not carry. `--gap` is a bare CSS variable
   # the tokenizer picks out of an inline style, not a utility.
-  allowed_missing = { "toggle-group" => %w[--gap] }.freeze
+  allowed_missing = {
+    "toggle-group" => %w[--gap],
+    # Three kinds, all deliberate.
+    #
+    # `--sidebar-width` and friends are bare CSS variables the tokenizer picks
+    # out of an inline style, like `--gap` above. The port emits them, but
+    # inside an interpolated Ruby string, so the literal it sees is
+    # `--sidebar-width: ` rather than the bare name.
+    #
+    # The hyphenated `data-sidebar` values are *derived* rather than written:
+    # `sidebar_part` builds them from the slot name, so they are in no string
+    # literal here. Only the hyphenated ones show up as missing — the tokenizer
+    # requires Tailwind punctuation, so `header` and `content` never counted as
+    # classes in the first place.
+    #
+    # `[&>button]:hidden` belongs to the mobile Sheet branch, which this port
+    # does not render at all: the controller gives the desktop tree a Sheet's
+    # behaviour instead. See decisions/02-javascript.md.
+    "sidebar" => %w[
+      --sidebar-width --sidebar-width-icon --skeleton-width
+      group-action group-content group-label
+      menu-badge menu-item menu-sub menu-sub-item
+      [&>button]:hidden
+    ]
+  }.freeze
 
   # `data-slot`s this port carries that no vendored TSX does. Parity is one-way —
   # it asserts upstream's classes are present, never that ours are upstream's —

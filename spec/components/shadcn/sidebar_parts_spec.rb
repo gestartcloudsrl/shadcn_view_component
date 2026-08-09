@@ -104,6 +104,57 @@ RSpec.describe Shadcn::Sidebar, type: :component do
     end
   end
 
+  describe "the parts that carry a variant or wrap another component" do
+    it "restamps the ported Input and keeps its classes" do
+      render_inline(described_class::Input::Component.new)
+
+      field = page.find("[data-slot='sidebar-input']")
+      expect(field["data-sidebar"]).to eq("input")
+      expect(field[:class]).to include("h-8")
+      # The parent's own classes are inherited rather than restated.
+      expect(field[:class]).to include("border-input")
+    end
+
+    it "gives the menu button its size and active attributes" do
+      render_inline(described_class::MenuButton::Component.new(size: :lg, active: true))
+
+      button = page.find("[data-slot='sidebar-menu-button']")
+      expect(button["data-size"]).to eq("lg")
+      expect(button["data-active"]).to eq("true")
+      expect(button[:class]).to include("h-12")
+    end
+
+    it "adds the hover-reveal classes to a menu action only when asked" do
+      render_inline(described_class::MenuAction::Component.new)
+      expect(page.find("[data-slot='sidebar-menu-action']")[:class]).not_to include("md:opacity-0")
+
+      render_inline(described_class::MenuAction::Component.new(show_on_hover: true))
+      expect(page.find("[data-slot='sidebar-menu-action']")[:class]).to include("md:opacity-0")
+    end
+
+    it "renders the sub button as a link, sized md by default" do
+      render_inline(described_class::MenuSubButton::Component.new)
+
+      link = page.find("[data-slot='sidebar-menu-sub-button']")
+      expect(link.tag_name).to eq("a")
+      expect(link["data-size"]).to eq("md")
+      expect(link[:class]).to include("text-sm")
+    end
+
+    # Upstream randomises the width so a column of them does not look like a
+    # barcode (sidebar.tsx:611-613).
+    it "draws a skeleton width inside upstream's range, and the icon only on request" do
+      render_inline(described_class::MenuSkeleton::Component.new)
+      expect(page).to have_no_css("[data-sidebar='menu-skeleton-icon']")
+
+      width = page.find("[data-sidebar='menu-skeleton-text']")[:style][/--skeleton-width:\s*(\d+)%/, 1].to_i
+      expect(width).to be_between(50, 90)
+
+      render_inline(described_class::MenuSkeleton::Component.new(show_icon: true))
+      expect(page).to have_css("[data-sidebar='menu-skeleton-icon']")
+    end
+  end
+
   # The one part in the family that carries no `data-sidebar` at all, so it is
   # declared with the plain macro and must not gain one.
   it "leaves the inset alone, which upstream stamps only with data-slot" do

@@ -2,9 +2,10 @@
 
 **Verdict: ours, and adapted where it touches upstream.**
 
-**Status: in progress.** The behaviour ships; none of the 24 components do. What
-is written below about markup describes the contract they will emit, and lives
-today in `test/dummy/app/views/sidebar/show.html.erb` rather than in the gem.
+**Status: complete, with one named gap.** All 23 renderable parts ship. The
+twenty-fourth export upstream is `useSidebar`, a React hook whose job here is
+the Stimulus controller. `tooltip:` on the menu button is not ported — see
+below.
 
 **Upstream:** `vendor/shadcn/ui/sidebar.tsx` — 726 lines, 24 parts, the largest
 component shadcn publishes. It composes sheet, tooltip, button, input, separator
@@ -78,13 +79,22 @@ library disagreeing with itself.
 
 ## Added
 
-Nothing yet. `collapsible`, `variant` and `side` are upstream's own props, and
-the controller reads them rather than inventing any.
+Nothing. `collapsible`, `variant`, `side`, `size`, `variant` on the menu button
+and `show_on_hover` on the menu action are all upstream's own props, renamed
+only where Ruby conventions demand it — `isActive` becomes `active:`,
+`showIcon` becomes `show_icon:`.
 
 ## Not reproduced
 
-- **`collapsible="none"`** and the `icon` variant — class-only, and they belong
-  with the components rather than the behaviour.
+- **`tooltip:` on the menu button.** Upstream wraps the button in a Tooltip
+  whose content is hidden unless the sidebar is collapsed *and* not on a phone
+  (`sidebar.tsx:534-542`). That is runtime state, so the hiding cannot be
+  rendered; wiring it needs a controller target and a decision about what a
+  collapsed-and-mobile sidebar even means. The button ships without it, which
+  costs an icon-only sidebar its labels.
+- **`asChild`.** Five parts take it upstream, to render as a link instead of a
+  button. Here the element is chosen with `tag:`, which every component in this
+  gem accepts, so the prop has no counterpart to port.
 - **An exit animation for the mobile sheet.** `dialog_controller.js` runs its
   closes through `ExitQueue`; this one hides immediately. With nothing animating,
   `ExitQueue` would take its synchronous branch anyway — worth revisiting when
