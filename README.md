@@ -350,9 +350,9 @@ dropdown-menu (including submenus), popover, tooltip, select, sidebar
 
 **AI chat** — message, bubble, attachment, marker, message-scroller. The first
 four are markup and variants with no behaviour of their own; the scroller
-follows its own live end and is the one component here reimplemented from a
-package shadcn publishes rather than from Radix. Its prepend anchoring — holding
-the viewport steady when older messages load above — is not written yet.
+follows its own live end, holds the view still when older history loads above,
+and is the one component here reimplemented from a package shadcn publishes
+rather than from Radix.
 
 These are also where the gem's only hand-written CSS lives: `shimmer`,
 `scroll-fade-x`, `scroll-fade-b`, `scrollbar-none`, `scrollbar-thin` and

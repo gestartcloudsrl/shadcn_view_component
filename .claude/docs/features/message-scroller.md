@@ -3,16 +3,11 @@
 **Verdict: adapted — a reimplementation of shadcn's own primitive, deliberately
 narrower than it.**
 
-**Status: it works, minus prepend anchoring.** The five components, the
-controller and the three CSS utilities ship. It opens at the live end, follows
-messages as they arrive, releases when the reader scrolls up, and lights each
-button from `data-scrollable`.
-
-**Not written yet: prepend anchoring.** Rows carry `data-scroll-anchor` because
-`scroll_geometry.js` reads it and the anchor-finding functions are ported, but
-nothing acts on either — loading older messages above the viewport will move it.
-That was the one slice named as *not* to cut, and it is staged rather than
-dropped.
+**Status: complete, within the two cuts.** The five components, the controller
+and the three CSS utilities ship. It opens at the live end, follows messages as
+they arrive, releases when the reader scrolls up, holds the view still when
+older history loads above, takes an arriving anchored turn to the top with the
+previous one peeking, and lights each button from `data-scrollable`.
 
 **Upstream:** `vendor/shadcn/ui/message-scroller.tsx` is a thin wrapper — six
 parts, all delegating — over `@shadcn/react/message-scroller`, which shadcn
@@ -93,7 +88,21 @@ So `geometry.ts` reduces 387 → ~316, not to ~210, and the commands file 326 �
 `capturePrependAnchor` / `restorePrependedAnchor`, and the four anchor-finding
 functions in geometry (~60 lines). Keeping the viewport steady when older
 messages load above is the behaviour a chat log is judged on, and it is the
-cheapest of the three slices.
+cheapest of the three slices. Ported, and worth two notes:
+
+**The anchor has to be re-captured after scrolling, not only after a content
+change.** It is "the row you are looking at", and scrolling is what changes
+which row that is. Capturing on content changes alone left the restore
+correcting by a delta measured from a position the reader had left — a wilder
+jump than doing nothing. It is re-captured in the same frame the scroll state
+commits in.
+
+**A server-rendered `scroll_anchor: true` is jumped to on load.** The controller
+acts on any anchor it has not handled, so a row marked in the markup is scrolled
+to as soon as the first observer fires, and the anchored mode then holds
+following off. That is upstream's behaviour and it is correct — but it makes a
+poor fixture, which is why the preview marks nothing and the coverage sits on a
+turn that *arrives*.
 
 ## Estimate
 
@@ -191,6 +200,16 @@ were.
 | a computed length that is `normal` reads 0 rather than `NaN` | same file |
 | opening at the live end, following an arriving message, and staying put once the reader has scrolled away | `spec/system/message_scroller_spec.rb`, mutation-verified — removing the follow release fails three examples |
 | each button's `data-active`, and its tab order following it | same file, and `accessibility_spec` |
+| holding the reader in place through a prepend | same file, mutation-verified — **only because the example turns native scroll anchoring off first** |
+| an arriving anchored turn landing at the top with the previous one peeking | same file, mutation-verified |
+
+**The prepend example measured the browser before it measured this code.** It
+passed with the entire prepend branch deleted, because Chrome anchors scroll
+natively and held the position on its own. The controller exists for the engines
+that do not — upstream names Safari — and its restore is deliberately written as
+a correction that is a no-op where the browser got there first. The example now
+sets `overflow-anchor: none` on the content, which is what asks the question
+about *this* code rather than about Chrome's.
 
 **One behaviour is deliberately unasserted.** `commitScrollState` publishes
 `end: false` while following, so a streamed chunk cannot strobe the end button.

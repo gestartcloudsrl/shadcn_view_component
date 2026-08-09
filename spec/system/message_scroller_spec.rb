@@ -5,9 +5,6 @@ require "spec_helper"
 # The behaviour, driven from the preview. `scroll_geometry_spec.rb` covers the
 # measurements underneath; this covers what the controller does with them.
 #
-# Prepend anchoring is not here because it is not written yet — the rows carry
-# `data-scroll-anchor` for the geometry to read and nothing acts on it. See
-# `.claude/docs/features/message-scroller.md`.
 RSpec.describe "Message scroller", :js do
   let(:root) { "[data-slot=message-scroller]" }
   let(:viewport) { "[data-slot=message-scroller-viewport]" }
@@ -40,6 +37,48 @@ RSpec.describe "Message scroller", :js do
       item.dataset.scrollAnchor = "false"
       item.style.height = "120px"
       item.textContent = #{text.to_json}
+      content.insertBefore(item, spacer)
+    JS
+  end
+
+  # Where a given row sits relative to the viewport — the frame of reference the
+  # whole prepend trick is built on, because it is the one that survives rows
+  # being inserted above it.
+  def viewport_top_of(message_id)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const item = document.querySelector('[data-message-id="#{message_id}"]')
+        const viewport = document.querySelector("#{viewport}")
+        return Math.round(item.getBoundingClientRect().top - viewport.getBoundingClientRect().top)
+      })()
+    JS
+  end
+
+  def prepend_messages(count)
+    page.execute_script(<<~JS)
+      const content = document.querySelector("[data-slot=message-scroller-content]")
+      for (let i = 0; i < #{count}; i++) {
+        const item = document.createElement("div")
+        item.dataset.slot = "message-scroller-item"
+        item.dataset.messageId = `older-${i}`
+        item.dataset.scrollAnchor = "false"
+        item.style.height = "150px"
+        item.textContent = `older ${i}`
+        content.insertBefore(item, content.firstElementChild)
+      }
+    JS
+  end
+
+  def append_anchor(id)
+    page.execute_script(<<~JS)
+      const content = document.querySelector("[data-slot=message-scroller-content]")
+      const spacer = content.querySelector("[data-message-scroller-spacer]")
+      const item = document.createElement("div")
+      item.dataset.slot = "message-scroller-item"
+      item.dataset.messageId = #{id.to_json}
+      item.dataset.scrollAnchor = "true"
+      item.style.height = "120px"
+      item.textContent = "a new turn"
       content.insertBefore(item, spacer)
     JS
   end
@@ -100,6 +139,47 @@ RSpec.describe "Message scroller", :js do
 
     expect(page).to have_css("#{end_button}[data-active=true]")
     wait_for_scroll_top(0)
+  end
+
+  # The behaviour a chat log is judged on. Loading older history inserts rows
+  # *above* the viewport, and a scroller that treats them as content growth
+  # throws the reader down the page.
+  #
+  # `overflow-anchor: none` is what makes this example mean anything. Chrome
+  # anchors scroll natively and holds the position on its own, so the first
+  # version of this passed with the whole prepend branch deleted — it was
+  # measuring the browser. The controller exists for the engines that do not do
+  # it (upstream names Safari), and its restore is deliberately written as a
+  # correction that is a no-op where the browser got there first. Turning the
+  # native behaviour off is how you ask whether *this* code works.
+  it "holds the reader in place when older messages load above" do
+    find(start_button).click
+    wait_for_scroll_top(0)
+
+    page.execute_script(
+      "document.querySelector('[data-slot=message-scroller-content]').style.overflowAnchor = 'none'"
+    )
+
+    before_top = viewport_top_of("m1")
+    prepend_messages(3)
+
+    expect(viewport_top_of("m1")).to be_within(2).of(before_top)
+    expect(scroll_top).to be >= 450
+  end
+
+  # An arriving turn is taken to the *top*, not the bottom — with the previous
+  # one still peeking above it, which is what makes it read as a continuation
+  # rather than as the start of the world.
+  it "takes an arriving anchored turn to the top, leaving the previous one peeking" do
+    find(start_button).click
+    wait_for_scroll_top(0)
+
+    append_anchor("turn-1")
+
+    expect(page).to have_css('[data-message-id="turn-1"]')
+    top = viewport_top_of("turn-1")
+    expect(top).to be > 0
+    expect(top).to be_within(24).of(64)
   end
 
   it "returns to the end from the end button" do

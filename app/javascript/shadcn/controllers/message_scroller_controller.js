@@ -1,10 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 import {
-  getContentBottom,
+  getElementScrollTop,
+  getElementViewportTop,
+  getFirstVisibleMessageItem,
   getFlexGap,
   getMaxScrollTop,
+  getMessageScrollerItems,
   getMessageScrollerScrollable,
-  getTailSpacerHeight
+  getNewScrollAnchor,
+  getTailSpacerHeight,
+  getUnanchoredScrollAnchor,
+  hasMultipleNewScrollAnchors
 } from "shadcn/scroll_geometry"
 
 // A chat log that follows its own live end, ported from
@@ -14,9 +20,7 @@ import {
 //
 // Two of upstream's surfaces are deliberately absent, measured and argued in
 // `.claude/docs/features/message-scroller.md`: the visibility store, and
-// `scrollToMessage`. Prepend anchoring is not absent so much as not here yet —
-// the rows already carry `data-scroll-anchor` because `scroll_geometry.js`
-// reads it, and nothing acts on it until that slice lands.
+// `scrollToMessage`.
 
 // Upstream's `AUTOSCROLLING_CLEAR_DELAY` (types.ts:22): how long
 // `data-autoscrolling` outlives a programmatic smooth scroll.
@@ -35,7 +39,13 @@ export default class extends Controller {
     // is here instead, which is the only place it can be in a Stimulus value.
     scrollEdgeThreshold: { type: Number, default: 8 },
     scrollMargin: { type: Number, default: 0 },
-    scrollPreviousItemPeek: { type: Number, default: 0 }
+    // How much of the previous turn stays visible above an anchored one, so it
+    // reads as a continuation rather than as the top of the world.
+    scrollPreviousItemPeek: { type: Number, default: 64 },
+    // Upstream hangs this off the *viewport* (components.tsx:131). Here every
+    // option is a value on the root, because the element that would have
+    // carried them — the Provider — renders no DOM at all.
+    preserveScrollOnPrepend: { type: Boolean, default: true }
   }
 
   connect() {
@@ -50,6 +60,13 @@ export default class extends Controller {
     this.spacerHeight = 0
     this.frame = null
     this.autoscrollingTimer = null
+
+    // What a content change is measured against. `handledAnchors` is a WeakSet
+    // so an anchor removed from the DOM stops being remembered along with it.
+    this.itemCount = this.items().length
+    this.firstItem = this.items()[0] ?? null
+    this.handledAnchors = new WeakSet()
+    this.prependAnchor = null
 
     this.onScroll = () => this.scheduleStateCommit()
     this.viewportTarget.addEventListener("scroll", this.onScroll, { passive: true })
@@ -67,6 +84,7 @@ export default class extends Controller {
 
     this.applyDefaultScrollPosition()
     this.commitScrollState()
+    this.capturePrependAnchor()
   }
 
   disconnect() {
@@ -125,7 +143,16 @@ export default class extends Controller {
 
     this.lastScrollTop = scrollTop
 
-    if (this.autoScrollValue && !scrollable.end) {
+    // Arming is suppressed while anchored or settling, and that is the subtle
+    // half. A freshly anchored turn sits above a tail spacer, which makes it
+    // read as "at the end" — re-arming there would let the first streamed chunk
+    // pull the reader off the row they were just taken to.
+    if (
+      this.autoScrollValue &&
+      !scrollable.end &&
+      this.mode !== "settling-jump" &&
+      this.mode !== "anchored-to-message"
+    ) {
       this.mode = "following-bottom"
     } else if (this.mode === "following-bottom" && scrollable.end && scrolledUp && !this.autoscrolling) {
       this.mode = "free-scrolling"
@@ -152,6 +179,12 @@ export default class extends Controller {
     this.frame = requestAnimationFrame(() => {
       this.frame = null
       this.commitScrollState()
+      // Re-captured after every settled scroll, not only after a content
+      // change: the anchor is "the row you are looking at", and scrolling is
+      // what changes which row that is. Leaving it behind makes the next
+      // prepend correct by a delta measured from somewhere you have left —
+      // which is a wilder jump than doing nothing at all.
+      this.capturePrependAnchor()
     })
   }
 
@@ -234,11 +267,143 @@ export default class extends Controller {
     this.spacerTarget.style.marginTop = next > 0 ? `${-getFlexGap(this.contentTarget)}px` : ""
   }
 
+  // Take a row to the top of the viewport, sizing the tail spacer so it can
+  // actually get there — without it, the last messages stop at the bottom.
+  // `keepPreviousPeek` leaves the previous turn showing above, which is what
+  // makes an arriving turn read as a continuation.
+  scrollToElement(element, { align = "start", behavior = "auto", keepPreviousPeek = false } = {}) {
+    if (!this.contentTarget.contains(element)) return false
+
+    const scrollMargin = keepPreviousPeek
+      ? this.scrollMarginValue + this.scrollPreviousItemPeekValue
+      : this.scrollMarginValue
+
+    const scrollTop = getElementScrollTop({
+      align, element, scrollMargin, spacer: this.spacer, viewport: this.viewportTarget
+    })
+
+    this.setTailSpacerHeight(this.tailSpacerFor(scrollTop))
+
+    // Seed the prepend anchor with the jump target, so a prepend landing before
+    // this scroll settles still preserves the row we were taken to.
+    this.prependAnchor = {
+      element,
+      viewportTop: getElementViewportTop(element, this.viewportTarget)
+    }
+
+    this.mode = keepPreviousPeek ? "anchored-to-message" : "settling-jump"
+    this.scrollToPosition(scrollTop, { behavior })
+
+    return true
+  }
+
+  // ------------------------------------------------------------- prepend
+
+  // The first visible row and where it sits *relative to the viewport*. That
+  // frame of reference is the whole trick: it is what survives rows being
+  // inserted above it.
+  capturePrependAnchor() {
+    const anchor = getFirstVisibleMessageItem({
+      content: this.contentTarget,
+      spacer: this.spacer,
+      viewport: this.viewportTarget
+    })
+
+    this.prependAnchor = anchor
+      ? { element: anchor, viewportTop: getElementViewportTop(anchor, this.viewportTarget) }
+      : null
+  }
+
+  // Correct the scroll by however far the remembered row moved. Where the
+  // browser's own scroll anchoring already handled the prepend the delta is
+  // zero and this does nothing — which is why it corrects a measurement rather
+  // than checking a capability flag, since engines misreport those.
+  restorePrependedAnchor() {
+    const anchor = this.prependAnchor
+
+    if (!anchor || !anchor.element.isConnected) return false
+
+    const delta = getElementViewportTop(anchor.element, this.viewportTarget) - anchor.viewportTop
+
+    if (Math.abs(delta) <= EPSILON) return false
+
+    this.viewportTarget.scrollTop += delta
+    anchor.viewportTop = getElementViewportTop(anchor.element, this.viewportTarget)
+    this.scheduleStateCommit()
+
+    return true
+  }
+
   // ---------------------------------------------------------- reacting
 
+  // Branch order is load-bearing, and it is upstream's (:393-481): a prepend is
+  // not an append, and an arriving turn is not a row that merely grew.
   handleContentChange() {
-    if (this.mode === "following-bottom" && this.autoScrollValue) this.scrollToEnd()
-    else this.scheduleStateCommit()
+    const items = this.items()
+    const previousCount = this.itemCount
+    const previousFirst = this.firstItem
+
+    this.itemCount = items.length
+    this.firstItem = items[0] ?? null
+
+    this.reconcileScrollPosition(items, previousCount, previousFirst)
+    this.capturePrependAnchor()
+  }
+
+  reconcileScrollPosition(items, previousCount, previousFirst) {
+    if (previousCount === 0) {
+      if (items.length > 0 && this.autoScrollValue) return this.scrollToEnd()
+
+      return this.scheduleStateCommit()
+    }
+
+    // Rows arrived *above* the ones already there, which is what loading older
+    // history looks like. Hold the view still rather than treating them as new.
+    const previousFirstIndex = previousFirst ? items.indexOf(previousFirst) : -1
+
+    if (this.preserveScrollOnPrependValue && previousFirstIndex > 0) {
+      return this.restorePrependedAnchor()
+    }
+
+    if (items.length > previousCount) {
+      const anchor = getNewScrollAnchor(items, previousCount)
+
+      if (anchor) {
+        // A batch of several anchored turns landing at once should keep
+        // following the end rather than yank back to anchor the first of them.
+        if (
+          this.autoScrollValue &&
+          this.mode === "following-bottom" &&
+          hasMultipleNewScrollAnchors(items, previousCount)
+        ) {
+          return this.scrollToEnd()
+        }
+
+        this.scrollToElement(anchor, { keepPreviousPeek: true })
+        this.handledAnchors.add(anchor)
+        return true
+      }
+    }
+
+    // Same rows, but one of them just became an anchor — a turn marked after it
+    // was already on the page.
+    if (items.length === previousCount) {
+      const anchor = getUnanchoredScrollAnchor(items, this.handledAnchors)
+
+      if (anchor) {
+        this.scrollToElement(anchor, { keepPreviousPeek: true })
+        this.handledAnchors.add(anchor)
+        return true
+      }
+    }
+
+    if (this.mode === "following-bottom" && this.autoScrollValue) return this.scrollToEnd()
+
+    return this.scheduleStateCommit()
+  }
+
+  items() {
+    return getMessageScrollerItems(this.contentTarget, this.spacer)
   }
 
   // A resize is not a content change: rows growing as they stream arrive here

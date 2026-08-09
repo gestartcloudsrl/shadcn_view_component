@@ -34,11 +34,14 @@
              [ "It is what lets the last message reach the top instead of the bottom.", :end ]
            ].each_with_index do |(text, align), index| %>
           <% id = "m#{index + 1}" %>
-          <%# One anchored row, which is what a "turn" is: the message the
-              scroller moves to the top rather than to the bottom. %>
-          <%= render(Shadcn::MessageScroller::Item::Component.new(
-                message_id: id, scroll_anchor: index == 6
-              )) do %>
+          <%# No row here is anchored, deliberately. `scroll_anchor: true` marks
+              a turn the scroller takes to the *top* of the viewport, and it
+              acts on any anchor it has not handled yet — so a server-rendered
+              one is jumped to on load and then holds following off, which is
+              correct and makes a fixture that says nothing about anything else.
+              The behaviour is covered where it actually happens, on a turn that
+              arrives: see `spec/system/message_scroller_spec.rb`. %>
+          <%= render(Shadcn::MessageScroller::Item::Component.new(message_id: id)) do %>
             <%= render(Shadcn::Message::Component.new(align:)) do %>
               <%= render(Shadcn::Message::Content::Component.new) do %>
                 <%= render(Shadcn::Bubble::Component.new(
