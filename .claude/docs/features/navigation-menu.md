@@ -43,6 +43,14 @@ its classes are declared in `parity_spec`'s `allowed_missing` with this reason.
 
 ## Also not reproduced
 
+- **`NavigationMenuIndicator`.** The little arrow that slides under the open
+  trigger. It exists to point at the shared viewport, and measured on the live
+  demo **upstream's own examples render none of them** — both are
+  `viewport="true"` and neither uses one. In this configuration each panel
+  already carries its own border and shadow, so an arrow lands on top of it
+  pointing at nothing. It was in this port's first preview for one reason only,
+  that the component exists, and a person looking at the page asked what the
+  grey dot was.
 - **`NavigationMenuSub`.** Radix has one; shadcn does not export it, so it is
   not part of this port's surface.
 - **Vertical orientation.** Radix takes `orientation`; shadcn's example is a
@@ -65,7 +73,6 @@ once you are already inside it.
 | the grace period after a close | same file, mutation-verified |
 | one panel at a time, and which side it arrives from | same file, mutation-verified |
 | Escape closing and returning focus, ArrowDown stepping into the panel | same file, mutation-verified |
-| the indicator sitting under the open trigger | same file, mutation-verified |
 
 **Two of those examples asserted nothing until a mutation said so**, and both
 for the same reason: `have_css` retries for two seconds, so an assertion made

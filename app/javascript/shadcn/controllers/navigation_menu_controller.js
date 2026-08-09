@@ -11,7 +11,7 @@ import { directionAwareKey, readDirection } from "shadcn/direction"
 // flash panels at anyone sweeping past, and one that always waited would feel
 // stuck once you were already inside it.
 export default class extends Controller {
-  static targets = [ "trigger", "content", "indicator" ]
+  static targets = [ "trigger", "content" ]
   static values = {
     // Radix's own (navigation-menu.tsx:136-137).
     delay: { type: Number, default: 200 },
@@ -129,8 +129,6 @@ export default class extends Controller {
       content.dataset.state = "open"
     }
 
-    this.moveIndicator(trigger)
-
     if (this.layer) removeLayer(this.layer)
     this.layer = pushLayer({
       element: content || trigger,
@@ -154,11 +152,6 @@ export default class extends Controller {
 
     if (this.layer) removeLayer(this.layer)
     this.layer = null
-
-    if (this.hasIndicatorTarget) {
-      this.indicatorTarget.dataset.state = "hidden"
-      this.indicatorTarget.hidden = true
-    }
 
     if (focusTrigger) trigger.focus()
 
@@ -191,24 +184,6 @@ export default class extends Controller {
     const forward = triggers.indexOf(next) > triggers.indexOf(previous)
 
     return forward ? `${prefix}-end` : `${prefix}-start`
-  }
-
-  // Two custom properties rather than a `left` and a `width`, because that is
-  // what Radix publishes and the arrow's own transform already reads them.
-  moveIndicator(trigger) {
-    if (!this.hasIndicatorTarget) return
-
-    const root = this.element.getBoundingClientRect()
-    const rect = trigger.getBoundingClientRect()
-
-    this.element.style.setProperty(
-      "--radix-navigation-menu-indicator-size", `${rect.width}px`
-    )
-    this.element.style.setProperty(
-      "--radix-navigation-menu-indicator-position", `${rect.left - root.left}px`
-    )
-    this.indicatorTarget.hidden = false
-    this.indicatorTarget.dataset.state = "visible"
   }
 
   // --------------------------------------------------------------- helpers

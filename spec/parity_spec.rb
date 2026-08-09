@@ -106,8 +106,17 @@ RSpec.describe "shadcn/ui parity" do
     # ships the `viewport={false}` configuration shadcn also supports, and the
     # box that would hold nothing is not rendered at all. Shipping it empty
     # would put an element in the page that looks like the component working.
+    # `NavigationMenuIndicator` goes with it: the little arrow exists to point at
+    # that shared box, and measured on the live demo **upstream's own examples
+    # render none** — both are `viewport="true"` and neither uses one. In this
+    # configuration each panel already carries its own border and shadow, so an
+    # arrow lands on top of it pointing at nothing.
     # See features/navigation-menu.md.
     "navigation-menu" => %w[
+      navigation-menu-indicator top-full z-[1] h-1.5 items-end overflow-hidden
+      data-[state=hidden]:animate-out data-[state=hidden]:fade-out
+      data-[state=visible]:animate-in data-[state=visible]:fade-in
+      top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md
       navigation-menu-viewport origin-top-center mt-1.5 z-50 bg-popover
       text-popover-foreground h-[var(--radix-navigation-menu-viewport-height)]
       md:w-[var(--radix-navigation-menu-viewport-width)]

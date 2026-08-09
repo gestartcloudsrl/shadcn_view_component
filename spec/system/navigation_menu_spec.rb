@@ -13,7 +13,6 @@ require "spec_helper"
 RSpec.describe "Navigation menu", :js do
   let(:trigger) { "[data-slot=navigation-menu-trigger]" }
   let(:content) { "[data-slot=navigation-menu-content]" }
-  let(:indicator) { "[data-slot=navigation-menu-indicator]" }
 
   def point(element, event, pointer_type: "mouse")
     page.execute_script(<<~JS, element)
@@ -188,35 +187,5 @@ RSpec.describe "Navigation menu", :js do
       expect(page.evaluate_script("document.activeElement.dataset.slot"))
         .to eq("navigation-menu-trigger")
     end
-  end
-
-  # The arrow slides to sit under whichever trigger is open. Position and width
-  # travel as the two custom properties Radix publishes, which is why the
-  # element's own transform already reads them.
-  it "moves the indicator under the open trigger" do
-    speed_up
-    expect(page).to have_css("#{indicator}[data-state=hidden]", visible: :all)
-
-    point(triggers[1], "pointerenter")
-    expect(page).to have_css("#{indicator}[data-state=visible]", visible: :visible)
-
-    measured = page.evaluate_script(<<~JS)
-      (() => {
-        const root = document.querySelector("[data-slot=navigation-menu]")
-        const style = window.getComputedStyle(root)
-        const trigger = document.querySelectorAll(#{trigger.to_json})[1]
-        return {
-          size: style.getPropertyValue("--radix-navigation-menu-indicator-size").trim(),
-          position: style.getPropertyValue("--radix-navigation-menu-indicator-position").trim(),
-          triggerWidth: Math.round(trigger.getBoundingClientRect().width),
-          triggerLeft: Math.round(
-            trigger.getBoundingClientRect().left - root.getBoundingClientRect().left
-          )
-        }
-      })()
-    JS
-
-    expect(measured["size"].to_f.round).to eq(measured["triggerWidth"])
-    expect(measured["position"].to_f.round).to be_within(1).of(measured["triggerLeft"])
   end
 end
