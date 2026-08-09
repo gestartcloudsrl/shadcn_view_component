@@ -5,6 +5,7 @@ at the revision recorded in `REVISION`:
 
 | Path | Upstream |
 |---|---|
+| `ui/hover-card.tsx` | `packages/react/hover-card/src/hover-card.tsx` |
 | `ui/menu.tsx` | `packages/react/menu/src/menu.tsx` |
 | `ui/roving-focus-group.tsx` | `packages/react/roving-focus/src/roving-focus-group.tsx` |
 | `ui/select.tsx` | `packages/react/select/src/select.tsx` |

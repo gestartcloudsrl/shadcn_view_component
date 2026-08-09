@@ -67,14 +67,14 @@ scroller's load behaviour is asserted, because it is the realistic case.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (17)
+## Components not ported (16)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Ten have since been ported —
+`not_yet_ported` and fails if the two drift. Eleven have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
-ones (`message`, `bubble`, `attachment`, `marker`) and `message-scroller` —
-leaving 17.
+ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller` and
+`hover-card` — leaving 16.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -96,9 +96,15 @@ error was mine, and is recorded with the group it belongs to.
   event handlers. All eight candidates were re-checked with the right
   instrument afterwards; `input-group` was the only one affected.
 
-- **Radix behaviour to reimplement in Stimulus** (7): `hover-card` (44 lines),
-  `scroll-area` (58), `slider` (63), `navigation-menu` (168), `context-menu`
-  (252), `menubar` (276), `direction` (22).
+- **Radix behaviour to reimplement in Stimulus** (6): `scroll-area` (58),
+  `slider` (63), `navigation-menu` (168), `context-menu` (252), `menubar` (276),
+  `direction` (22).
+  *`hover-card` (44) was the smallest and has shipped. It cost almost no new
+  machinery — `floating.js` and `dismiss.js` already existed — and what it
+  needed instead was reading Radix's source for two behaviours the shadcn file
+  cannot show: every tabbable inside the card leaves the tab order, and the
+  card stays open while text in it is selected. The first is ported; the second
+  is not, and is recorded in features/README.md.*
   *Six of these were filed as "plain ports, no blocker". They are the same class
   of work as `dropdown_menu` and `select` — roving focus, typeahead, submenus,
   drag — not the same class as `badge`.*

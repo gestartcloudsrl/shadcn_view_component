@@ -76,6 +76,10 @@ RSpec.describe "reverse parity" do
     "item" => %w[max-w-md],
     "item-group" => %w[max-w-md],
     "separator" => %w[my-4],
+    # A hover card usually hangs off something already in a sentence, so the
+    # preview's trigger is an underlined link. Caller styling, like the widths
+    # above.
+    "hover-card-trigger" => %w[underline],
     # A named Tailwind group the sidebar preview passes to a Collapsible, so a
     # menu item's chevron can rotate when its own section opens. Upstream's
     # sidebar demo does the same, but demos are not vendored here — only
