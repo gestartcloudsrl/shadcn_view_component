@@ -177,6 +177,21 @@ matches nothing" in `spec/system/select_spec.rb`. **What Base UI does instead wa
 not measured**: the docs demo's panel closed on every click attempt, by mouse and
 by keyboard, and driving it was abandoned rather than guessed at.
 
+## Do not compare the look against the docs site
+
+Measured 2026-08-09 while checking the message scroller's buttons: the live
+demo's button computes to `rounded-2xl` with a 1px border, and this port's to
+`rounded-md` with none. Neither is wrong. The docs page serves the **Base UI**
+registry, whose Button is a different component from `new-york-v4`'s — the
+variant order recorded above, showing up as a visual difference rather than a
+behavioural one.
+
+So the rule in `CLAUDE.md` — open upstream's example and read what it renders —
+holds for *shape*: which parts nest where, which element owns which attribute.
+It does not transfer to **appearance**, because the appearance on that page
+belongs to a registry this gem does not port. Check a class string against
+`vendor/shadcn/ui/`, not against a screenshot.
+
 ## The registry moved, and this gem ports the older one
 
 Found while looking for the searchable select's source, 2026-08-08.

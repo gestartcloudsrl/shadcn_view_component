@@ -11,7 +11,17 @@
     The height is the preview's, not the component's: the scroller is
     `size-full`, so it takes whatever it is put in — and with no height at all
     there is nothing to scroll and nothing to see. %>
-<div class="h-[420px] w-[420px] rounded-xl border">
+<%# `bg-card`, and that is not decoration. The buttons are `bg-background` with
+    no border width — upstream's own string (message-scroller.tsx:102), and the
+    `new-york-v4` Button's `secondary` variant adds no border either — so on a
+    surface that is *also* `--background` they have no visible edge at all. They
+    are meant to float over a panel, which is what a chat log sits in.
+
+    Worth knowing before comparing this to ui.shadcn.com: that page now serves
+    the Base UI registry, whose Button is `rounded-2xl border`. Measured on the
+    live demo. Its buttons look different because it is a different Button, not
+    because this port dropped something. %>
+<div class="h-[420px] w-[420px] rounded-xl border bg-card">
   <%= render(Shadcn::MessageScroller::Component.new(auto_scroll: true)) do %>
     <%= render(Shadcn::MessageScroller::Viewport::Component.new) do %>
       <%= render(Shadcn::MessageScroller::Content::Component.new(class: "p-4")) do %>
