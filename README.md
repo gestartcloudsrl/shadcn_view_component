@@ -347,7 +347,7 @@ input-group
 
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
 dropdown-menu (including submenus), popover, tooltip, hover-card, select,
-scroll-area, navigation-menu, sidebar
+scroll-area, navigation-menu, slider, sidebar
 
 **AI chat** — message, bubble, attachment, marker, message-scroller. The first
 four are markup and variants with no behaviour of their own; the scroller
@@ -366,7 +366,7 @@ this; there is none here, because the browser already resolves `dir` before a
 Stimulus controller runs.
 
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
-combobox, menubar, context-menu, slider, form, and drawer.
+combobox, menubar, context-menu, form, and drawer.
 
 ## What is and is not verified
 

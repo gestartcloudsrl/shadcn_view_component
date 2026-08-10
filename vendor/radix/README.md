@@ -11,6 +11,7 @@ at the revision recorded in `REVISION`:
 | `ui/navigation-menu.tsx` | `packages/react/navigation-menu/src/navigation-menu.tsx` |
 | `ui/roving-focus-group.tsx` | `packages/react/roving-focus/src/roving-focus-group.tsx` |
 | `ui/select.tsx` | `packages/react/select/src/select.tsx` |
+| `ui/slider.tsx` | `packages/react/slider/src/slider.tsx` |
 
 None of it is loaded at runtime, and unlike `vendor/shadcn/`, **no spec reads
 it**. `vendor/shadcn/` is checked by `parity_spec` on every run, so it cannot

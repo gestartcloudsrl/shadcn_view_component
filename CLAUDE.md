@@ -124,7 +124,7 @@ These bite while editing, so they are here rather than in the docs.
 - **Slot content renders before block content.** Mixing the two in one parent
   reorders things — see the select and dropdown previews for why they render
   items in the block.
-- **Select, Checkbox and Switch are `<button>`s with an ARIA role**, so they need
+- **Select, Checkbox, Switch and the Slider's thumbs carry an ARIA role**, so they need
   a name pointed at them — the FormBuilder wires `aria-labelledby`, a bare
   component has nothing; `ThemeSelector` names its trigger the same way. (`<label
   for>` *does* name a button, but `role="combobox"` is the case that cannot take
@@ -177,5 +177,5 @@ what gets it covered by the snapshot, preview and accessibility specs.
 - [Features](.claude/docs/features/README.md) — per component, whether it is 1:1
   with shadcn or adapted, extended or ours, and why. Written to be lifted into
   the public README rather than summarised again.
-- [TODO](.claude/docs/todo.md) — open work, the 13 unported components grouped
+- [TODO](.claude/docs/todo.md) — open work, the 12 unported components grouped
   by what actually blocks them, and what is deliberately not being done

@@ -61,6 +61,14 @@ anything about them:
   carries upstream's `text-destructive/80`, which axe measures at 4.36:1 where
   AA wants 4.5 — kept, because changing it would emit a class upstream does not,
   and named as an exception in `spec/system/accessibility_spec.rb`.
+- **slider** — *1:1 in markup, with one addition Rails needs*. Each thumb is a
+  `role="slider"` with its own `aria-valuenow`, so a two-handled range is two
+  controls; `aria_label:` takes one string or one per thumb, because axe fails a
+  role with no name and "Price" twice names neither end. The port also renders a
+  **hidden input per thumb** when given a `name:` — shadcn's file renders none,
+  because in React the value is state rather than markup, and a Rails form has
+  to submit something. Not reproduced: `inverted`, which Radix takes and shadcn
+  never passes.
 - **scroll-area** — *1:1 in markup, with four divergences worth knowing*.
   Radix is 1,189 lines against shadcn's 58, and most of it does not survive the
   crossing. **(1)** The viewport carries `tabindex="0"`, which Radix does not
