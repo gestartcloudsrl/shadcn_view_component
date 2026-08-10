@@ -73,6 +73,15 @@ anything about them:
   reading variables nothing sets — which `parity_spec` cannot see, since it asks
   whether a token appears anywhere in the family and not whether it appears on
   the right element.
+
+  **Submenus close on a time-based grace, not a shaped one.** Radix draws a
+  polygon from the point where the pointer left the trigger to the panel's
+  edges and honours it only while the pointer is moving *toward* the panel
+  (`vendor/radix/ui/menu.tsx:1136-1160`). This port grants the same 300ms
+  without the direction test, which is more forgiving and never less: a pointer
+  heading away still gets the delay it would not have had upstream. Before it
+  existed, nothing closed a hovered submenu at all — it waited for Escape or a
+  click outside.
 - **slider** — *1:1 in markup, with one addition Rails needs*. Each thumb is a
   `role="slider"` with its own `aria-valuenow`, so a two-handled range is two
   controls; `aria_label:` takes one string or one per thumb, because axe fails a

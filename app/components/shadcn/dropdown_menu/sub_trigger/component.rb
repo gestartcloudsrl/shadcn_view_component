@@ -38,7 +38,8 @@ module Shadcn
             "data-shadcn--dropdown-menu-target" => "trigger",
             "data-action" => "click->shadcn--dropdown-menu#toggle " \
                              "keydown->shadcn--dropdown-menu#triggerKeydown " \
-                             "pointerenter->shadcn--dropdown-menu#open"
+                             "pointerenter->shadcn--dropdown-menu#open " \
+                             "pointerleave->shadcn--dropdown-menu#closeLater"
           }.merge(defaults))
         end
 

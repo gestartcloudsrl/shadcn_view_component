@@ -3,6 +3,11 @@ import { uniqueId } from "shadcn/id"
 import { FloatingLayer } from "shadcn/floating"
 import { Typeahead } from "shadcn/typeahead"
 
+// Radix's own: 100ms before a hovered sub-trigger opens (menu.tsx:1123), and
+// 300ms of grace after the pointer leaves it (menu.tsx:1157-1160).
+const SUB_OPEN_DELAY = 100
+const SUB_GRACE_DELAY = 300
+
 // Radix's DropdownMenu: a `role="menu"` layer with the ARIA menu keyboard
 // pattern — arrow keys move a `data-highlighted` cursor, typing jumps to a
 // matching item, Escape closes and returns focus to the trigger.
@@ -65,6 +70,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.cancelSubTimers()
     if (this.layer) this.layer.destroy()
   }
 
@@ -92,13 +98,34 @@ export default class extends Controller {
     this.layer.show()
   }
 
-  // Submenus open on hover, like Radix's SubTrigger.
+  // Submenus open on hover, like Radix's SubTrigger — after 100ms, so crossing
+  // a trigger on the way somewhere else does not open it (menu.tsx:1123).
   open() {
-    this.layer.show()
+    this.cancelSubTimers()
+    this.subTimer = setTimeout(() => this.layer.show(), SUB_OPEN_DELAY)
   }
 
   close() {
+    this.cancelSubTimers()
     this.layer.hide()
+  }
+
+  // Leaving the trigger, or the panel, starts a close the other one can cancel
+  // by being arrived at. Without it a submenu opened by hovering stays open for
+  // as long as the menu does, because nothing else was ever going to shut it.
+  //
+  // Radix grants the same grace but shapes it: a polygon from the exit point to
+  // the panel's edges, honoured only while the pointer is *moving toward* it
+  // (menu.tsx:1136-1160). This is the time half without the direction half —
+  // more forgiving, never less. See features/README.md.
+  closeLater() {
+    this.cancelSubTimers()
+    this.subTimer = setTimeout(() => this.layer.hide(), SUB_GRACE_DELAY)
+  }
+
+  cancelSubTimers() {
+    if (this.subTimer) clearTimeout(this.subTimer)
+    this.subTimer = null
   }
 
   // Opening with ArrowDown/ArrowUp lands on the first/last item, like Radix.
