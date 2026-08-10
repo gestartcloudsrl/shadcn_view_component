@@ -30,7 +30,9 @@ module Shadcn
             "data-state" => "closed",
             hidden: true,
             "data-shadcn--dropdown-menu-target" => "content",
-            "data-action" => "keydown->shadcn--dropdown-menu#contentKeydown"
+            "data-action" => "keydown->shadcn--dropdown-menu#contentKeydown " \
+                             "pointerenter->shadcn--dropdown-menu#cancelSubTimers " \
+                             "pointerleave->shadcn--dropdown-menu#closeLater"
           }.merge(defaults))
         end
 

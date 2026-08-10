@@ -3,6 +3,11 @@ import { uniqueId } from "shadcn/id"
 import { FloatingLayer } from "shadcn/floating"
 import { Typeahead } from "shadcn/typeahead"
 
+// Radix's own: 100ms before a hovered sub-trigger opens (menu.tsx:1123), and
+// 300ms of grace after the pointer leaves it (menu.tsx:1157-1160).
+const SUB_OPEN_DELAY = 100
+const SUB_GRACE_DELAY = 300
+
 // Radix's DropdownMenu: a `role="menu"` layer with the ARIA menu keyboard
 // pattern — arrow keys move a `data-highlighted` cursor, typing jumps to a
 // matching item, Escape closes and returns focus to the trigger.
@@ -10,6 +15,12 @@ export default class extends Controller {
   static targets = [ "trigger", "content", "item" ]
   static values = {
     open: Boolean,
+    // The `--radix-*` custom properties the content's classes read. The context
+    // menu is this same controller with a different prefix and a different way
+    // in — its markup, its keyboard and its submenus are the dropdown's, which
+    // is why it has no controller of its own. The Sheet reuses the dialog's for
+    // the same reason.
+    prefix: { type: String, default: "dropdown-menu" },
     side: { type: String, default: "bottom" },
     align: { type: String, default: "start" },
     sideOffset: { type: Number, default: 4 },
@@ -32,7 +43,7 @@ export default class extends Controller {
     this.layer = new FloatingLayer({
       trigger: this.triggerTarget,
       content: this.contentTarget,
-      prefix: "dropdown-menu",
+      prefix: this.prefixValue,
       side: this.sideValue,
       align: this.alignValue,
       sideOffset: this.sideOffsetValue,
@@ -59,6 +70,7 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.cancelSubTimers()
     if (this.layer) this.layer.destroy()
   }
 
@@ -66,13 +78,54 @@ export default class extends Controller {
     this.layer.toggle()
   }
 
-  // Submenus open on hover, like Radix's SubTrigger.
-  open() {
+  // A right-click opens the menu *at the pointer*, so the layer is measured
+  // against a point rather than against the element that was pressed. Radix
+  // does the same with a virtual element; `popper.js` only ever calls
+  // `getBoundingClientRect`, so a zero-sized rect at the coordinates is the
+  // whole of it.
+  openAtPointer(event) {
+    event.preventDefault()
+
+    const { clientX: x, clientY: y } = event
+
+    this.layer.anchor = {
+      getBoundingClientRect: () => ({
+        top: y, bottom: y, left: x, right: x, width: 0, height: 0, x, y
+      })
+    }
+
+    this.layer.hide()
     this.layer.show()
   }
 
+  // Submenus open on hover, like Radix's SubTrigger — after 100ms, so crossing
+  // a trigger on the way somewhere else does not open it (menu.tsx:1123).
+  open() {
+    this.cancelSubTimers()
+    this.subTimer = setTimeout(() => this.layer.show(), SUB_OPEN_DELAY)
+  }
+
   close() {
+    this.cancelSubTimers()
     this.layer.hide()
+  }
+
+  // Leaving the trigger, or the panel, starts a close the other one can cancel
+  // by being arrived at. Without it a submenu opened by hovering stays open for
+  // as long as the menu does, because nothing else was ever going to shut it.
+  //
+  // Radix grants the same grace but shapes it: a polygon from the exit point to
+  // the panel's edges, honoured only while the pointer is *moving toward* it
+  // (menu.tsx:1136-1160). This is the time half without the direction half —
+  // more forgiving, never less. See features/README.md.
+  closeLater() {
+    this.cancelSubTimers()
+    this.subTimer = setTimeout(() => this.layer.hide(), SUB_GRACE_DELAY)
+  }
+
+  cancelSubTimers() {
+    if (this.subTimer) clearTimeout(this.subTimer)
+    this.subTimer = null
   }
 
   // Opening with ArrowDown/ArrowUp lands on the first/last item, like Radix.

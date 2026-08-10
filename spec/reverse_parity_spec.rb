@@ -88,6 +88,11 @@ RSpec.describe "reverse parity" do
     # sizes them at the call site too — a menu does not know how wide its
     # contents want to be.
     "navigation-menu-content" => %w[md:w-[400px]],
+    # The preview's own region and panel widths. Upstream gives the context
+    # trigger no classes at all — it is an area to right-click, and how big it
+    # is can only come from the caller.
+    "context-menu-trigger" => %w[h-40],
+    "context-menu-content" => %w[w-52],
     # A named Tailwind group the sidebar preview passes to a Collapsible, so a
     # menu item's chevron can rotate when its own section opens. Upstream's
     # sidebar demo does the same, but demos are not vendored here — only

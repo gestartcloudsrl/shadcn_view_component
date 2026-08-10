@@ -32,6 +32,7 @@ RSpec.describe "shadcn/ui parity" do
     "card" => "card",
     "checkbox" => "checkbox",
     "collapsible" => "collapsible",
+    "context-menu" => "context_menu",
     "dialog" => "dialog",
     "dropdown-menu" => "dropdown_menu",
     "empty" => "empty",
@@ -81,13 +82,20 @@ RSpec.describe "shadcn/ui parity" do
 
   not_yet_ported = %w[
     calendar carousel chart combobox command
-    context-menu drawer form input-otp
+    drawer form input-otp
     menubar resizable
     sonner
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.
-  inherits = { "sheet" => %w[dialog], "alert_dialog" => %w[dialog] }.freeze
+  # Families layered on another's parts. The context menu is the largest case:
+  # eleven of its fifteen slots are the dropdown's, restamped, which is why it
+  # has no controller of its own either.
+  inherits = {
+    "sheet" => %w[dialog],
+    "alert_dialog" => %w[dialog],
+    "context_menu" => %w[dropdown_menu]
+  }.freeze
 
   # Tokens the port legitimately does not carry. `--gap` is a bare CSS variable
   # the tokenizer picks out of an inline style, not a utility.
@@ -100,6 +108,9 @@ RSpec.describe "shadcn/ui parity" do
     # portal is the only thing between the root and the content, so it is the
     # first where the slot name reaches the tokenizer at all.
     "hover-card" => %w[hover-card-portal],
+    # The same, for the same reason: nothing is portalled here, so there is no
+    # element to carry the Portal's slot.
+    "context-menu" => %w[context-menu-portal],
     # The whole of `NavigationMenuViewport`. Upstream's default moves every
     # panel into one shared box that animates between their sizes — measured on
     # the live demo, the content's parent is `navigation-menu-viewport`, which
