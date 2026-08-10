@@ -67,15 +67,15 @@ scroller's load behaviour is asserted, because it is the realistic case.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (11)
+## Components not ported (10)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Eleven have since been ported —
+`not_yet_ported` and fails if the two drift. Seventeen have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
-`hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider` and
-`context-menu` — leaving 11.
+`hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
+`context-menu` and `menubar` — leaving 10.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -97,11 +97,17 @@ error was mine, and is recorded with the group it belongs to.
   event handlers. All eight candidates were re-checked with the right
   instrument afterwards; `input-group` was the only one affected.
 
-- **Radix behaviour to reimplement in Stimulus** (1): `menubar` (276).
-  *`context-menu` was the other, and the guess held: eleven of its fifteen slots
+- **Radix behaviour to reimplement in Stimulus** (0): the group is empty.
+  *`context-menu` was one, and the guess held: eleven of its fifteen slots
   are the dropdown's restamped, and it needed no controller of its own — only a
-  `contextmenu` handler and an anchor measured at a point. `menubar` wraps the
-  same `menu.tsx` and should run the same way.*
+  `contextmenu` handler and an anchor measured at a point.*
+  *`menubar` was the other, and the guess held only halfway. Each menu is
+  indeed a `shadcn--dropdown-menu` with a different prefix, but the bar around
+  them is not the dropdown's at all: one menu open at a time, hover switching
+  once one is, a tab stop managed by hand, and arrows that keep walking from
+  inside an open panel. That is a controller of its own, and Radix's own
+  `menubar.tsx` — vendored while porting it — is what the four behaviours are
+  answerable to.*
   *`navigation-menu` has shipped, in the one of upstream's two configurations
   that does not need a portal — see
   [features/navigation-menu.md](features/navigation-menu.md).*
