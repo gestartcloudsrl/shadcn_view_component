@@ -16,6 +16,14 @@ import { ExitQueue } from "shadcn/animation"
 export class FloatingLayer {
   constructor(options) {
     this.trigger = options.trigger
+    // What the content is *measured* against, which is not always what opened
+    // it: a context menu is anchored to the point you pressed, not to the area
+    // you pressed it in. Anything with a `getBoundingClientRect()` will do —
+    // `popper.js` asks for nothing else — so a caller can hand over a bare
+    // object standing for a point. Everything else the trigger is used for
+    // (its `data-state`, the dismiss anchor, the resize observer) still wants
+    // the real element.
+    this.anchor = options.anchor || options.trigger
     this.content = options.content
     this.home = options.home || this.content.parentElement
     this.prefix = options.prefix || "popper"
@@ -172,9 +180,9 @@ export class FloatingLayer {
   // The opening position cannot wait for a frame: the wrapper starts at the
   // top-left of the viewport, so a deferred first placement flashes there.
   applyPosition() {
-    if (!this.mounted || !this.trigger) return
+    if (!this.mounted || !this.anchor) return
 
-    position(this.trigger, this.content, {
+    position(this.anchor, this.content, {
       side: this.side,
       align: this.align,
       sideOffset: this.sideOffset,

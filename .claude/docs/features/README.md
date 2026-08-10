@@ -61,6 +61,18 @@ anything about them:
   carries upstream's `text-destructive/80`, which axe measures at 4.36:1 where
   AA wants 4.5 — kept, because changing it would emit a class upstream does not,
   and named as an exception in `spec/system/accessibility_spec.rb`.
+- **context-menu** — *1:1 in markup; no controller of its own*. Measured against
+  `dropdown-menu.tsx`: the two declare the same fifteen slots and eleven carry
+  byte-identical classes once the prefix is normalised, so most of this family
+  **is** the dropdown's restamped, and one controller drives both — the same
+  relationship `Sheet` has with `Dialog` here. What differs is the way in: a
+  `contextmenu` event opens the panel at the *pointer*, so `FloatingLayer` grew
+  an optional `anchor` that is measured instead of the trigger. `content` and
+  `sub-content` keep their own class strings, because those read
+  `--radix-context-menu-*` and inheriting the dropdown's would leave them
+  reading variables nothing sets — which `parity_spec` cannot see, since it asks
+  whether a token appears anywhere in the family and not whether it appears on
+  the right element.
 - **slider** — *1:1 in markup, with one addition Rails needs*. Each thumb is a
   `role="slider"` with its own `aria-valuenow`, so a two-handled range is two
   controls; `aria_label:` takes one string or one per thumb, because axe fails a
