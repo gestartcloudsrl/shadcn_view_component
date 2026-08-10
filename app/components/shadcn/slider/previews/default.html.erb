@@ -1,0 +1,17 @@
+<%# Three, because the component behaves differently in each.
+
+    One thumb is the ordinary case. Two is what upstream's own default gives
+    you when you pass no value at all — `[min, max]` — and is where
+    `min_steps_between_thumbs` and "which thumb does a press move" start to
+    mean something. The third is disabled, which is a state and not a variant:
+    the root carries `data-disabled` and the thumbs leave the tab order. %>
+<div class="flex w-[420px] flex-col gap-8">
+  <%= render(Shadcn::Slider::Component.new(value: 50, name: "volume", aria_label: "Volume")) %>
+
+  <%= render(Shadcn::Slider::Component.new(
+        value: [ 25, 75 ], min_steps_between_thumbs: 1, name: "range",
+        aria_label: [ "Minimum price", "Maximum price" ]
+      )) %>
+
+  <%= render(Shadcn::Slider::Component.new(value: 30, disabled: true, aria_label: "Brightness")) %>
+</div>

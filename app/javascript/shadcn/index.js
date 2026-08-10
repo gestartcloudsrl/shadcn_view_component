@@ -24,6 +24,7 @@ import RadioGroupController from "shadcn/controllers/radio_group_controller"
 import ScrollAreaController from "shadcn/controllers/scroll_area_controller"
 import SelectController from "shadcn/controllers/select_controller"
 import SidebarController from "shadcn/controllers/sidebar_controller"
+import SliderController from "shadcn/controllers/slider_controller"
 import SwitchController from "shadcn/controllers/switch_controller"
 import TabsController from "shadcn/controllers/tabs_controller"
 import ThemeController from "shadcn/controllers/theme_controller"
@@ -47,6 +48,7 @@ const CONTROLLERS = {
   "scroll-area": ScrollAreaController,
   select: SelectController,
   sidebar: SidebarController,
+  slider: SliderController,
   switch: SwitchController,
   tabs: TabsController,
   theme: ThemeController,
