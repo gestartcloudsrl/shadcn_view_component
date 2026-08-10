@@ -79,11 +79,19 @@ module Shadcn
         ((value.to_f - min) / (max - min) * 100).clamp(0, 100)
       end
 
+      # A single-thumb slider fills from the start of the scale, not from its own
+      # value — otherwise the fill has zero width and there is nothing to see.
+      # Radix's rule: `valuesCount > 1 ? Math.min(...percentages) : 0`
+      # (slider.tsx:592).
+      def range_start
+        values.size > 1 ? percent_of(values.min) : 0
+      end
+
       def track
         render(Shadcn::Slider::Track::Component.new(orientation:)) do
           render(Shadcn::Slider::Range::Component.new(
             orientation:,
-            start_percent: percent_of(values.min),
+            start_percent: range_start,
             end_percent: percent_of(values.max)
           ))
         end

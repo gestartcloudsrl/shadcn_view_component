@@ -78,7 +78,12 @@ export default class extends Controller {
     const edgeEnd = this.vertical ? "top" : "right"
 
     if (this.hasRangeTarget) {
-      this.rangeTarget.style[edgeStart] = `${this.percentOf(Math.min(...values))}%`
+      // A single thumb fills from the start of the scale rather than from its
+      // own value, which would leave the range zero-wide — Radix's
+      // `valuesCount > 1 ? Math.min(...percentages) : 0` (slider.tsx:592).
+      const start = values.length > 1 ? this.percentOf(Math.min(...values)) : 0
+
+      this.rangeTarget.style[edgeStart] = `${start}%`
       this.rangeTarget.style[edgeEnd] = `${100 - this.percentOf(Math.max(...values))}%`
     }
 

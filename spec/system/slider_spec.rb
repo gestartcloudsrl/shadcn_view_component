@@ -141,6 +141,18 @@ RSpec.describe "Slider", :js do
     end
   end
 
+  # The example that was missing, and the bug it would have caught: a
+  # single-thumb slider fills from the *start of the scale*, not from its own
+  # value. Filling from the value leaves the range zero-wide — every attribute
+  # correct, every other example green, and nothing visible on the page.
+  it "fills from the start of the scale when there is one thumb" do
+    expect(edges_of(single)).to eq("left" => "0%", "right" => "50%")
+
+    single.find("[data-slot=slider-thumb]").send_keys(:end)
+
+    expect(edges_of(single)).to eq("left" => "0%", "right" => "0%")
+  end
+
   # The filled part of the groove is one element with two edges, not a width —
   # which is how a two-thumb range stays a single element.
   it "fills the groove between the lowest and highest thumb" do
