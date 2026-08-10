@@ -46,9 +46,16 @@ variant first.
 
 Reading the source is how a claim gets *checked*. Looking at the example is how
 a decision gets *made*. What the example does **not** settle is appearance: the
-docs now serve the Base UI registry, whose Button is a different component from
-the `new-york-v4` one ported here, so a class string is checked against
-`vendor/shadcn/ui/` and never against a screenshot.
+docs now serve a different registry from the `new-york-v4` one ported here, so a
+class string is checked against `vendor/shadcn/ui/` and never against a
+screenshot.
+
+That has already misled twice, both times *after* the rule was written down, so
+it needs its practical half: **read the element's `className` before measuring
+anything.** `cn-*`, `ring-` where the port has `border`, `rounded-lg` where it
+has `rounded-md`, `data-open:` where it has `data-[state=open]:` — any of those
+means you are looking at the other registry, and nothing measured afterwards is
+a comparison. See [todo.md](.claude/docs/todo.md).
 
 **Read [`.claude/docs/`](.claude/docs/README.md) before changing anything
 structural** — it holds why the port is shaped the way it is, and which

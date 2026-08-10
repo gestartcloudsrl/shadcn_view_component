@@ -220,6 +220,27 @@ It does not transfer to **appearance**, because the appearance on that page
 belongs to a registry this gem does not port. Check a class string against
 `vendor/shadcn/ui/`, not against a screenshot.
 
+**It happened twice, the same way, with the rule already written down.** The
+second time, 2026-08-10: a person compared the two context menus side by side
+and ours had a visibly thicker line where a submenu meets its parent. Both
+panels were measured, both overlaps came out the same, and the difference was
+still there — because the *shape* was identical and the difference was not
+geometric at all. The docs' panel computes `border-width: 0` and is drawn with
+`ring-1 ring-foreground/10`; ours carries `border`, which is what
+`vendor/shadcn/ui/context-menu.tsx` asks for. Two borders meeting read as one
+thick line; a ring meeting a border reads as one thin one.
+
+So the rule needs its practical half, because knowing it abstractly did not
+stop either mistake:
+
+> **Read the element's class list before measuring anything.** `cn-*` classes,
+> `ring-` instead of `border`, `rounded-lg` instead of `rounded-md`, `data-open:`
+> instead of `data-[state=open]:` — any of those means the page is rendering the
+> other registry, and no measurement taken after that point is a comparison.
+
+It costs one `getComputedStyle`-free look at `element.className` and settles in
+seconds what pixels cannot settle at all.
+
 ## The registry moved, and this gem ports the older one
 
 Found while looking for the searchable select's source, 2026-08-08.
