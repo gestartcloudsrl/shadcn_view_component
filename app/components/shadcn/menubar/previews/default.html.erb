@@ -1,0 +1,52 @@
+<%# Three menus, which is the smallest number at which the bar behaves like one:
+    with two, "next" and "previous" land on the same name and neither the arrows
+    nor the wrap-around can be told apart.
+
+    Everything inside a menu is the dropdown's — items, submenu, checkbox and
+    radio — and the bar is what this component adds on top. %>
+<div class="flex h-72 items-start justify-center pt-6">
+  <%= render(Shadcn::Menubar::Component.new) do %>
+    <%= render(Shadcn::Menubar::Menu::Component.new) do |menu| %>
+      <% menu.with_trigger { "File" } %>
+      <% menu.with_menu_content do %>
+        <%= render(Shadcn::Menubar::Item::Component.new) do %>
+          New tab
+          <%= render(Shadcn::Menubar::Shortcut::Component.new) { "⌘T" } %>
+        <% end %>
+        <%= render(Shadcn::Menubar::Item::Component.new) { "New window" } %>
+        <%= render(Shadcn::Menubar::Separator::Component.new) %>
+        <%= render(Shadcn::Menubar::Sub::Component.new) do |sub| %>
+          <% sub.with_trigger { "Share" } %>
+          <% sub.with_menu_content do %>
+            <%= render(Shadcn::Menubar::Item::Component.new) { "Email link" } %>
+            <%= render(Shadcn::Menubar::Item::Component.new) { "Messages" } %>
+          <% end %>
+        <% end %>
+        <%= render(Shadcn::Menubar::Separator::Component.new) %>
+        <%= render(Shadcn::Menubar::Item::Component.new) do %>
+          Print
+          <%= render(Shadcn::Menubar::Shortcut::Component.new) { "⌘P" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= render(Shadcn::Menubar::Menu::Component.new) do |menu| %>
+      <% menu.with_trigger { "Edit" } %>
+      <% menu.with_menu_content do %>
+        <%= render(Shadcn::Menubar::Item::Component.new) do %>
+          Undo
+          <%= render(Shadcn::Menubar::Shortcut::Component.new) { "⌘Z" } %>
+        <% end %>
+        <%= render(Shadcn::Menubar::Item::Component.new) { "Redo" } %>
+      <% end %>
+    <% end %>
+
+    <%= render(Shadcn::Menubar::Menu::Component.new) do |menu| %>
+      <% menu.with_trigger { "View" } %>
+      <% menu.with_menu_content do %>
+        <%= render(Shadcn::Menubar::CheckboxItem::Component.new(checked: true)) { "Always show bookmarks" } %>
+        <%= render(Shadcn::Menubar::CheckboxItem::Component.new) { "Always show full URLs" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

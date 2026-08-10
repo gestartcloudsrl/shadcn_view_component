@@ -448,6 +448,37 @@ person looks at?** A wrapper, a provider and a group root are all things a flag
 naturally lands on and none of them are what anybody sees. Reach one level in —
 `sidebar-container` and its width, not `sidebar` and its visibility.
 
+### Dispatching a key at a chosen element proves the handler, never the focus
+
+The menubar's panel shipped without `tabindex="-1"`, so `focus()` on it was
+silently a no-op and an opened menu held no focus at all: no arrow keys, no
+typeahead, no Escape. Ten system examples were green over it. Each one had
+picked its own element and dispatched a `KeyboardEvent` there —
+`document.querySelector(panel).dispatchEvent(…)` — which is a direct call to
+the handler with the focus question written out of the test.
+
+The pull toward doing that is real and looks like diligence: `send_keys` on the
+panel fails with `ElementNotInteractable` while the bug is present, and
+dispatching is the obvious way past a failing step. That failure *was* the
+finding.
+
+So: at least one example per interactive family has to type the way a person
+does — **`send_keys` on the element the component focused, never on one the
+spec looked up.** Dispatching stays useful for the cases it is honest about
+(an event a driver cannot produce, a handler being checked in isolation), and
+its comment should say which. What it cannot stand in for is the question of
+whether the keyboard arrives at all, and that question has no separate spec:
+it is only ever answered as a side effect of typing.
+
+The same run also produced the opposite lesson. A `handOver()` was written on
+the dropdown so a menu handing the bar to a sibling would not take the focus
+back — reasoned from Radix, where the rule is real
+(`vendor/radix/ui/menubar.tsx:324-330`). No mutation could distinguish it,
+including one that read `activeElement` *after* the exit animation rather than
+before. Our close returns focus synchronously, before the new panel opens, so
+there was nothing to prevent. It was deleted. A citation establishes that
+upstream needed something; only a failing spec establishes that we do.
+
 ### What a system spec cannot see
 
 It reads the DOM, so it sees attributes, text and structure. It does not see

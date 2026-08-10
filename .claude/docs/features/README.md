@@ -82,6 +82,26 @@ anything about them:
   heading away still gets the delay it would not have had upstream. Before it
   existed, nothing closed a hovered submenu at all — it waited for Escape or a
   click outside.
+- **menubar** — *1:1 in markup; its own controller over the dropdown's*. Each
+  menu is a `shadcn--dropdown-menu` with `prefix: "menubar"`, the same
+  arrangement `context-menu` has, and eight of the sixteen slots are the
+  dropdown's restamped. What is not the dropdown's is the bar: one menu open at
+  a time, a name you merely *cross* switching to it once one is, a single tab
+  stop moved by focus rather than left on every name, and arrows that keep
+  walking the bar from inside an open panel. Those four are
+  `shadcn--menubar`, and `vendor/radix/ui/menubar.tsx` — vendored while porting
+  it — is what they are answerable to. `loop` defaults to **true** here and
+  `false` in the dropdown, which is Radix's own split
+  (`vendor/radix/ui/menubar.tsx:76`): a bar is a ring, a list is not.
+
+  Two attributes are added to `menubar-content` that appear in neither vendored
+  file — `tabindex="-1"` and `aria-orientation="vertical"` — because Radix adds
+  them at runtime, through FocusScope and Menu, rather than writing them in the
+  component. The dropdown's content already carried both. The `tabindex` is
+  load-bearing rather than cosmetic: without it `focus()` on the panel is
+  silently a no-op, so the panel never holds focus, and the arrow keys, the
+  typeahead and Escape are all left listening on an element nothing types into
+  — an opened menu that looks right and answers nothing.
 - **slider** — *1:1 in markup, with one addition Rails needs*. Each thumb is a
   `role="slider"` with its own `aria-valuenow`, so a two-handled range is two
   controls; `aria_label:` takes one string or one per thumb, because axe fails a

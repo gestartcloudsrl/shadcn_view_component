@@ -46,6 +46,7 @@ RSpec.describe "shadcn/ui parity" do
     "marker" => "marker",
     "message-scroller" => "message_scroller",
     "message" => "message",
+    "menubar" => "menubar",
     "native-select" => "native_select",
     "navigation-menu" => "navigation_menu",
     "pagination" => "pagination",
@@ -83,7 +84,7 @@ RSpec.describe "shadcn/ui parity" do
   not_yet_ported = %w[
     calendar carousel chart combobox command
     drawer form input-otp
-    menubar resizable
+    resizable
     sonner
   ].freeze
 
@@ -94,7 +95,8 @@ RSpec.describe "shadcn/ui parity" do
   inherits = {
     "sheet" => %w[dialog],
     "alert_dialog" => %w[dialog],
-    "context_menu" => %w[dropdown_menu]
+    "context_menu" => %w[dropdown_menu],
+    "menubar" => %w[dropdown_menu]
   }.freeze
 
   # Tokens the port legitimately does not carry. `--gap` is a bare CSS variable
@@ -111,6 +113,8 @@ RSpec.describe "shadcn/ui parity" do
     # The same, for the same reason: nothing is portalled here, so there is no
     # element to carry the Portal's slot.
     "context-menu" => %w[context-menu-portal],
+    # The same again: nothing is portalled here.
+    "menubar" => %w[menubar-portal],
     # The whole of `NavigationMenuViewport`. Upstream's default moves every
     # panel into one shared box that animates between their sizes — measured on
     # the live demo, the content's parent is `navigation-menu-viewport`, which
