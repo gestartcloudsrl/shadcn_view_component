@@ -29,6 +29,7 @@ module ShadcnViewComponent
     # @param orientation [Symbol] :vertical, :horizontal or :responsive
     def shadcn_field(method, label: nil, description: nil, orientation: :vertical, **options, &block)
       messages = errors_for(method)
+      described[method.to_s] = description.present?
 
       @template.render(Shadcn::Field::Component.new(
         orientation:,
@@ -145,6 +146,23 @@ module ShadcnViewComponent
 
     private
 
+    # Which attributes have actually had a description rendered. `aria-describedby`
+    # may only name elements that exist — a reference to a missing id is invalid
+    # ARIA and simply resolves to nothing, so the control ends up describing
+    # itself as having a description it does not have.
+    #
+    # Upstream has the same defect and it is not reproduced on purpose:
+    # `FormControl` sets `aria-describedby` to the description id unconditionally
+    # (form.tsx:113-119), whether or not a `FormDescription` was ever rendered.
+    # This port shipped it too, until writing features/form.md checked the claim
+    # that it did not.
+    #
+    # A control rendered outside any `shadcn_field` is the same case and gets the
+    # same answer: no description element, so nothing to point at.
+    def described
+      @described ||= {}
+    end
+
     def errors_for(method)
       return [] unless object.respond_to?(:errors)
 
@@ -161,8 +179,9 @@ module ShadcnViewComponent
 
     # Everything a control needs to belong to the form and to announce itself.
     def control_options(method, **options)
+      wants_description = options.delete(:described_by) != false
       described_by = [
-        (description_id(method) if options.delete(:described_by) != false),
+        (description_id(method) if wants_description && described[method.to_s]),
         (error_id(method) if errors_for(method).any?)
       ].compact
 

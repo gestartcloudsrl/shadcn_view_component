@@ -82,9 +82,23 @@ RSpec.describe "shadcn/ui parity" do
   # — and it has no markup to be checked against.
   no_markup = %w[direction].freeze
 
+  # Ported by something that is not a component. `form.tsx` is react-hook-form's
+  # field state given five wrappers; the state has no counterpart on a server,
+  # and the wrappers' job — id, name, `aria-describedby`, `aria-invalid`, the
+  # error text — is Rails' FormBuilder's. So `ShadcnViewComponent::FormBuilder`
+  # is where this family went, over the `Field` components upstream also builds
+  # its own newer form examples on.
+  #
+  # It is a separate list from `not_yet_ported` because that one is a promise:
+  # everything in it is meant to arrive one day, and `form` is not. The
+  # divergences that follow from the decision are in features/form.md, and
+  # nothing here checks them — this port emits `field-*` slots where upstream's
+  # form emits `form-*`, so a class comparison would only restate that.
+  ported_as_a_form_builder = %w[form].freeze
+
   not_yet_ported = %w[
     calendar carousel chart combobox command
-    form input-otp
+    input-otp
     resizable
     sonner
   ].freeze
@@ -193,7 +207,9 @@ RSpec.describe "shadcn/ui parity" do
   end
 
   it "accounts for every component vendored for comparison" do
-    expect((ports.keys + not_yet_ported + no_markup).sort).to eq(ShadcnSource.vendored_components)
+    accounted = ports.keys + not_yet_ported + no_markup + ported_as_a_form_builder
+
+    expect(accounted.sort).to eq(ShadcnSource.vendored_components)
   end
 
   ports.each do |tsx, directory|

@@ -375,8 +375,17 @@ that navigate with arrow keys follow it. shadcn ships a `DirectionProvider` for
 this; there is none here, because the browser already resolves `dir` before a
 Stimulus controller runs.
 
+**Forms** — `shadcn_form_with` and `f.shadcn_input_field`, `f.shadcn_select`,
+`f.shadcn_switch` and the rest. shadcn's Form component is react-hook-form's
+per-field state given five wrappers; there is no such state on a server, and
+what the wrappers do with it is what Rails' `FormBuilder` already does with a
+model. So that family is a FormBuilder here rather than components, built over
+`field`. It emits `field-*` slots where upstream's form emits `form-*`, errors
+come from `ActiveModel::Errors` after a round trip rather than as you type, and
+all of an attribute's messages are shown rather than the first.
+
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
-combobox, and form.
+and combobox.
 
 ## What is and is not verified
 
