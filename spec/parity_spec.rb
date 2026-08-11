@@ -44,6 +44,7 @@ RSpec.describe "shadcn/ui parity" do
     "kbd" => "kbd",
     "label" => "label",
     "marker" => "marker",
+    "drawer" => "drawer",
     "message-scroller" => "message_scroller",
     "message" => "message",
     "menubar" => "menubar",
@@ -83,7 +84,7 @@ RSpec.describe "shadcn/ui parity" do
 
   not_yet_ported = %w[
     calendar carousel chart combobox command
-    drawer form input-otp
+    form input-otp
     resizable
     sonner
   ].freeze
@@ -96,6 +97,7 @@ RSpec.describe "shadcn/ui parity" do
     "sheet" => %w[dialog],
     "alert_dialog" => %w[dialog],
     "context_menu" => %w[dropdown_menu],
+    "drawer" => %w[dialog],
     "menubar" => %w[dropdown_menu]
   }.freeze
 

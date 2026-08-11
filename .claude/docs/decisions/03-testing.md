@@ -272,13 +272,18 @@ worked and axe accepted it. It has since been switched to `aria-labelledby` to
 match the FormBuilder — the label was `sr-only`, so `<label for>`'s only
 advantage, click-to-focus, was not buying anything.
 
-## What the three vendored references are worth
+## What the vendored references are worth
 
 `vendor/shadcn/` is checked on every run: `parity_spec` reads it, so a drifted
-copy fails the suite. **`vendor/radix/` and `vendor/shadcn-react/` are policed
-by nobody.** No spec reads either — both READMEs say so — and each can go stale
-the moment upstream ships past the commit in its `REVISION`. They are citation
-sources, not fixtures.
+copy fails the suite. **`vendor/radix/`, `vendor/shadcn-react/` and
+`vendor/vaul/` are policed by nobody.** No spec reads any of them — each README
+says so — and each can go stale the moment upstream ships past the commit in its
+`REVISION`. They are citation sources, not fixtures.
+
+`vendor/vaul/` is the odd one: it is a *stylesheet*, and part of it is
+reproduced in `shadcn.css` and does run. Nothing checks that the two agree.
+`parity_spec` cannot — it compares Tailwind class text, and a rule in a
+stylesheet is not a class.
 
 `vendor/shadcn-react/` is the newest and the odd one: `@shadcn/react` is not a
 primitive shadcn wraps but one shadcn *publishes*, MIT and dependency-free, in
@@ -401,6 +406,22 @@ producing the result the example was looking for.
 The example fails with `startAutoScroll` neutralised, which the three attempts
 before it did not.
 
+And when the gesture has a *speed*, dispatch touch rather than mouse. The
+Drawer's release threshold is distance over elapsed time, so before writing any
+of it a control ran first: eight CDP moves 20ms apart arrived with eight
+distinct positions and eight distinct timestamps, and the same 240px thrown
+(1.99 px/ms) came out 6× faster than dragged (0.31 px/ms). That is what said a
+velocity threshold was testable here at all.
+
+`Input.dispatchTouchEvent` rather than `Input.dispatchMouseEvent`, though, and
+not for realism: a touch pointer is implicitly captured by whatever it started
+on, a mouse pointer is not, and vaul — like this port — binds its handlers to
+the panel. Driven by mouse, the moves stop arriving the moment the panel slides
+out from under the cursor, so half of every drag is lost and the retracting half
+cannot be reached at all. The first version of the drawer spec was written with
+the mouse and five examples failed for that reason, which reads exactly like a
+broken component.
+
 ### Done means the suite is green **and** the page has been looked at
 
 Two steps, both required. Neither substitutes for the other.
@@ -510,6 +531,16 @@ Reach for it whenever the thing under test is *shown* rather than *recorded*.
   the expected name was scheduled and that the element eventually leaves. They
   say nothing about duration, easing, or whether an exit reads as the reverse of
   its entrance.
+- **The Drawer's `shouldDrag`, where it decides between the drag and a scroll.**
+  Both the climb up to the first scrolled ancestor and the direction
+  short-circuit above it are unreachable from a spec here: measured, Chrome
+  cancels a pointer stream that starts inside a scroll container — whichever way
+  it then travels — and scrolls the container itself, so the gesture ends before
+  our code is asked. `spec/system/drawer_spec.rb` asserts the outcome a person
+  gets and says in the example itself that the platform is what produces it.
+  The branches stay, because they are vaul's and they answer wherever the
+  platform does not step in first, which is every device this gem ships to and
+  none it can be tested on here. See [features/drawer.md](../features/drawer.md).
 
 ### A browser that already does it will pass your spec for you
 

@@ -119,4 +119,19 @@ RSpec.describe "reduced motion in the compiled bundle" do
       expect(actual).to eq(expected)
     end
   end
+
+  # The Drawer is outside the scan above and cannot be brought into it: its
+  # entrance is a plain CSS animation on `[data-vaul-drawer]` rather than a
+  # Tailwind `animate-*` class, because vaul's own stylesheet is where it comes
+  # from and `drawer.tsx` carries no animation class at all. Nothing scanning
+  # `app/components` can find it, so it is named here.
+  #
+  # Both properties, not one: the panel's entrance is an `animation` and its
+  # spring-back is a `transition`, and collapsing only the first would leave a
+  # released drag gliding for half a second under reduced motion.
+  it "collapses the drawer's animation and its spring-back" do
+    rule = bundle_path.read[/@media \(prefers-reduced-motion:reduce\)\{\[data-vaul-drawer\]\{[^}]*\}/]
+
+    expect(rule).to include("transition-duration:.01ms").and include("animation-duration:.01ms")
+  end
 end

@@ -1,0 +1,21 @@
+<%# The same long list in a drawer that closes sideways. It is the case where
+    the two gestures stop competing: a vertical pull scrolls the list, and a
+    horizontal one can only mean the drawer, so `shouldDrag` lets it through
+    without asking what is scrolled. %>
+<%= render(Shadcn::Drawer::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open filters" } %>
+  <% d.with_dialog_content(direction: :right) do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "Filters" } %>
+      <% h.with_description { "Scroll the list, or push the panel to the right." } %>
+    <% end %>
+    <div class="max-h-96 overflow-y-auto px-4">
+      <% 30.times do |i| %>
+        <div class="border-b py-3 text-sm last:border-b-0">Filter <%= i + 1 %></div>
+      <% end %>
+    </div>
+    <% c.with_footer do %>
+      <%= render(Shadcn::Drawer::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Close" } %>
+    <% end %>
+  <% end %>
+<% end %>

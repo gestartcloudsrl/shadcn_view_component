@@ -348,7 +348,7 @@ input-group
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
 dropdown-menu (including submenus), context-menu, menubar, popover, tooltip,
 hover-card, select,
-scroll-area, navigation-menu, slider, sidebar
+scroll-area, navigation-menu, slider, sidebar, drawer
 
 **AI chat** — message, bubble, attachment, marker, message-scroller. The first
 four are markup and variants with no behaviour of their own; the scroller
@@ -356,10 +356,19 @@ follows its own live end, holds the view still when older history loads above,
 and is the one component here reimplemented from a package shadcn publishes
 rather than from Radix.
 
-These are also where the gem's only hand-written CSS lives: `shimmer`,
+These are one of the two places hand-written CSS was unavoidable: `shimmer`,
 `scroll-fade-x`, `scroll-fade-b`, `scrollbar-none`, `scrollbar-thin` and
 `scrollbar-gutter-stable` are shadcn's own utilities rather than Tailwind's, and
-are reproduced at the end of `shadcn.css`.
+are reproduced at the end of `shadcn.css`. The drawer is the other.
+
+**Drawer** — dragged down or thrown, it closes; dragged up it gives a little and
+comes back. Upstream builds this on vaul rather than Radix, and vaul is a Radix
+dialog with a drag on top, so the open/close half is the dialog's here too and
+only the gesture is new. Four of vaul's features are deliberately not ported —
+snap points, scaling the page behind the drawer, its iOS `position: fixed`
+workaround and nested drawers. Its stylesheet is the second piece of
+hand-written CSS: `drawer.tsx` renders no entrance animation and no
+`touch-action`, and both are load-bearing.
 
 **Reading direction** — write `dir="rtl"` on any ancestor and the components
 that navigate with arrow keys follow it. shadcn ships a `DirectionProvider` for
@@ -367,7 +376,7 @@ this; there is none here, because the browser already resolves `dir` before a
 Stimulus controller runs.
 
 Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
-combobox, form, and drawer.
+combobox, and form.
 
 ## What is and is not verified
 

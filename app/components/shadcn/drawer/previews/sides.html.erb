@@ -1,0 +1,17 @@
+<%# One class string serves all four edges; only the attribute changes. %>
+<div class="flex items-center gap-2">
+  <% %i[bottom top left right].each do |direction| %>
+    <%= render(Shadcn::Drawer::Component.new) do |d| %>
+      <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { direction.to_s.capitalize } %>
+      <% d.with_dialog_content(direction:) do |c| %>
+        <% c.with_header do |h| %>
+          <% h.with_title { "From the #{direction}" } %>
+          <% h.with_description { "Dragged towards that edge, it closes." } %>
+        <% end %>
+        <% c.with_footer do %>
+          <%= render(Shadcn::Drawer::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Close" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
