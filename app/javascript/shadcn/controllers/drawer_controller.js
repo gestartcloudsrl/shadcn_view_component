@@ -65,23 +65,34 @@ export default class extends Controller {
     this.allowed = false
     this.startedAt = Date.now()
     this.start = this.vertical ? event.pageY : event.pageX
-
-    // No `setPointerCapture` here, and vaul does not use one either. Capturing
-    // retargets every later `pointermove` at the capturing element, which is
-    // exactly the information `shouldDrag` needs: it walks up from what the
-    // pointer is actually over to find the scroller that owns the gesture, and
-    // a captured event says "the panel" every time. The drawer follows the
-    // pointer while it is being dragged, so the pointer stays over it anyway.
+    // Capture, which vaul does not do — and the one place this port knowingly
+    // adds something rather than leaving something out.
+    //
+    // A touch pointer is captured by the browser anyway, so on the device this
+    // component is designed for vaul already gets every move and every release.
+    // A mouse is not, and vaul binds its handlers to the panel, so with a mouse
+    // it loses the gesture the moment the cursor crosses the panel's edge —
+    // which a drag *upwards* does immediately, since the rubber band leaves the
+    // pointer above the panel by design. Both halves of that were reported here
+    // from the gallery: a drag that stopped following, and, before it, a drag
+    // released outside that never ended at all because the `pointerup` went to
+    // whatever was under the cursor.
+    //
+    // Capturing makes the mouse behave the way touch already does rather than
+    // changing what the component does. The one thing it costs is the target,
+    // recovered in `elementUnder` below.
+    this.contentTarget.setPointerCapture?.(event.pointerId)
   }
 
   move(event) {
     if (!this.dragging) return
 
+
     const moved = (this.start - (this.vertical ? event.pageY : event.pageX)) * this.multiplier
     // Positive is *into* the drawer, which is the direction that scrolls.
     const inward = moved > 0
 
-    if (!this.allowed && !this.shouldDrag(event.target, inward)) return
+    if (!this.allowed && !this.shouldDrag(this.elementUnder(event), inward)) return
     this.allowed = true
 
     this.hold(this.contentTarget)
@@ -119,6 +130,14 @@ export default class extends Controller {
   // vaul's `shouldDrag`, minus the snap-point branches. It is what keeps a
   // scrollable drawer usable: a press that means "scroll the list" must not
   // also mean "throw the drawer away".
+  // What the pointer is really over. Capture retargets every move at the panel,
+  // and this is the one thing `shouldDrag` cannot do without: it climbs from
+  // there to find the scroller that owns the gesture, and a captured event says
+  // "the panel" every time.
+  elementUnder(event) {
+    return document.elementFromPoint(event.clientX, event.clientY) || event.target
+  }
+
   shouldDrag(target, inward) {
     let element = target
 

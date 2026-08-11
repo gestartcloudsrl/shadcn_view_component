@@ -55,8 +55,9 @@ class.
 ## What the specs do not prove
 
 `shouldDrag` decides whether a press inside the drawer means "drag the panel"
-or "scroll what is under my finger". Its scroll-climb, and the direction
-short-circuit above it, **are not exercised by any example here.** Measured
+or "scroll what is under my finger". Its scroll-climb, the direction
+short-circuit above it, and `elementUnder` — which exists only to feed the
+climb the right element — **are not exercised by any example here.** Measured
 rather than assumed: Chrome cancels a pointer stream that starts inside a
 scroll container — whichever way it then travels — and scrolls the container
 itself, so the gesture never reaches our code. The end behaviour is right, and
@@ -67,12 +68,44 @@ that does not step in first — which is every platform this gem will actually
 ship to and none that it can be tested on here. See
 [testing](../decisions/03-testing.md).
 
+## The one addition: pointer capture
+
+vaul does not capture the pointer, and this port does. It is the only place
+here that *adds* rather than leaves out, and it exists because vaul is written
+for a device where the browser does the capturing for it.
+
+A touch pointer is implicitly captured by whatever it started on, so on a phone
+vaul receives every move and every release however far the finger travels. A
+mouse is not, and vaul binds its handlers to the panel — so with a mouse the
+gesture is lost the moment the cursor crosses the panel's edge, which a drag
+*upwards* does immediately, since the rubber band leaves the pointer above the
+panel by design.
+
+Both halves of that were reported from the gallery, one after the other. First:
+released outside the panel, the `pointerup` went to whatever was under the
+cursor, the drag never ended, and the drawer followed the mouse around the page
+with no button held down. Then, after a first fix that ended the drag when the
+pointer left: the panel stopped following as soon as the cursor went above it.
+
+The first fix was the wrong one of the two available. Capturing solves both,
+and it does not change what the component does — it makes the mouse behave the
+way touch already does. What it costs is the target: every captured move
+reports the panel, which is exactly what `shouldDrag` climbs from, so
+`elementUnder` recovers it with `document.elementFromPoint`.
+
+A `lostpointercapture` handler was written alongside it and then deleted: with
+capture in place `pointerup` always arrives, no mutation could distinguish the
+handler, and it was the same shape as a piece of machinery the menubar shipped
+and then removed for the same reason. `elementUnder` survives that test only
+because the branch it feeds is the unreachable one below.
+
 ## The specs drive touch, not a mouse
 
-Not only because a drawer is a phone component. A touch pointer is *implicitly
-captured* by whatever it started on, so the moves keep arriving after the panel
-has slid out from under the finger; a mouse is not, and vaul binds its handlers
-to the panel. With a mouse the retracting half of a drag stops being delivered
-partway — a real limitation of vaul as well as of this port, and one that makes
-a mouse-driven spec test a gesture nobody performs while missing the one
-everybody does.
+Not only because a drawer is a phone component: a touch pointer is *implicitly
+captured*, so it exercises the path this port now gives the mouse as well, and
+it is the path the release thresholds were tuned on.
+
+Two examples are mouse-driven on purpose, and they are the two that found the
+capture bugs above — both were invisible to every touch-driven one, because a
+captured pointer can never leave the panel and so can never lose its own
+release.

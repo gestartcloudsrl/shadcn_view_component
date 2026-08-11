@@ -153,6 +153,90 @@ RSpec.describe "Drawer", :js do
       JS
     end
 
+    # Reported from the gallery, and only reproducible with a *mouse*: a touch
+    # pointer is captured by the panel, so it can never leave it, while a mouse
+    # can be let go anywhere. Released outside the panel, the release never
+    # reached the panel's own handler, the drag was never ended, and every later
+    # movement over the panel went on dragging it — the drawer following the
+    # cursor around with no button held down.
+    #
+    # Driven by mouse for that reason, and the one example here that is.
+    it "ends the drag when the pointer leaves the panel, button or no button" do
+      x, y = grip
+      cdp("Input.dispatchMouseEvent", type: "mousePressed", x:, y:, button: "left", clickCount: 1)
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: y + 60, button: "left")
+      sleep 0.05
+      # Up past the panel's own top edge, which is where the mouse stops being
+      # over it at all.
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: 5, button: "left")
+      sleep 0.05
+      cdp("Input.dispatchMouseEvent", type: "mouseReleased", x:, y: 5, button: "left", clickCount: 1)
+      sleep 0.05
+
+      # Whether that gesture ended open or closed is not the point and depends
+      # on where the pointer was last seen — both are legitimate. What is the
+      # point is that it *ended*: nothing is held down now, so what follows is a
+      # person moving the mouse across the page.
+      settled = page.evaluate_script(<<~JS)
+        document.querySelector(#{content.to_json}).dataset.state
+      JS
+      before = translated
+
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: y + 120, button: "none")
+      sleep 0.1
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: y - 40, button: "none")
+      sleep 0.1
+
+      expect(translated).to eq(before)
+      expect(page.evaluate_script(<<~JS)).to eq(settled)
+        document.querySelector(#{content.to_json}).dataset.state
+      JS
+    end
+
+    # A drag does not stop at the panel's edge. Pulled up past the top the panel
+    # rubber-bands and stays with the pointer, and bringing the pointer back down
+    # picks it up again — with a mouse as with a finger. Reported from the
+    # gallery: the panel stopped following as soon as the cursor left it.
+    it "keeps following a mouse that has gone outside the panel" do
+      x, y = grip
+      cdp("Input.dispatchMouseEvent", type: "mousePressed", x:, y:, button: "left", clickCount: 1)
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: y + 60, button: "left")
+      sleep 0.05
+      # Well above the panel's own top edge, where the cursor is over the page.
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: 5, button: "left")
+      sleep 0.05
+      retracted = translated
+
+      # And back down: if the drag had ended on the way out, this does nothing.
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: y + 90, button: "left")
+      sleep 0.05
+      returned = translated
+      cdp("Input.dispatchMouseEvent", type: "mouseReleased", x:, y: y + 90, button: "left", clickCount: 1)
+
+      expect(retracted).to be_between(-40, -5)
+      expect(returned).to be_within(6).of(90)
+    end
+
+    # A gesture taken back is not a gesture. Dragged well past the threshold and
+    # then pulled all the way up again before letting go, the release is measured
+    # from where the pointer ended, not from how far it once went — so the drawer
+    # stays. Only reachable because the pointer is captured: without that the
+    # upward half is never delivered, the release lands on the far-down position
+    # the panel was last seen at, and the same withdrawn gesture closes it.
+    it "stays open when a long drag is pulled all the way back before release" do
+      x, y = grip
+      height = page.evaluate_script("document.querySelector(#{content.to_json}).getBoundingClientRect().height")
+      cdp("Input.dispatchMouseEvent", type: "mousePressed", x:, y:, button: "left", clickCount: 1)
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: y + (height * 0.5).round, button: "left")
+      sleep 0.05
+      cdp("Input.dispatchMouseEvent", type: "mouseMoved", x:, y: 5, button: "left")
+      sleep 0.05
+      cdp("Input.dispatchMouseEvent", type: "mouseReleased", x:, y: 5, button: "left", clickCount: 1)
+
+      expect(page).to have_css("#{content}[data-state=open]", visible: :visible)
+      expect(translated).to be_within(1).of(0)
+    end
+
     # The overlay thins out as the panel leaves, which is the only part of the
     # drag a person sees away from the panel itself.
     it "fades the overlay in step with the panel" do
