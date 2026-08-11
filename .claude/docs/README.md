@@ -24,6 +24,7 @@ written.
 | [features/navigation-menu.md](features/navigation-menu.md) | why the navigation menu ships one of upstream's two configurations, and the two timing specs that asserted nothing until a mutation said so |
 | [features/sidebar.md](features/sidebar.md) | the Sidebar as shipped — what upstream's three-tree render became here, and the four things that one tree cost |
 | [features/drawer.md](features/drawer.md) | the Drawer: vaul's two release thresholds, the four features deliberately left out, the stylesheet that had to come with it, and the branch no spec here can reach |
+| [features/form.md](features/form.md) | why `form.tsx` is a FormBuilder here rather than components, part by part, and the seven divergences that follow |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
 measured is marked as measured; anything assumed says so.

@@ -92,6 +92,35 @@ RSpec.describe ShadcnViewComponent::FormBuilder do
         expect(doc.at_css("[data-slot=field-label]")).to be_nil
       end
     end
+
+    # `aria-describedby` may only name elements that exist; a reference to a
+    # missing id is invalid ARIA and resolves to nothing, so the control claims a
+    # description it does not have. Upstream sets the id unconditionally
+    # (form.tsx:113-119) and this port did too until the claim that it did not
+    # was checked while writing features/form.md.
+    context "without a description" do
+      it "does not describe the control by an element that was never rendered" do
+        doc = render_form(valid, "<%= f.shadcn_input_field :email, label: 'Email' %>")
+
+        expect(doc.at_css("[data-slot=input]")["aria-describedby"]).to be_nil
+      end
+
+      it "still names the error when there is one" do
+        doc = render_form(invalid, "<%= f.shadcn_input_field :email, label: 'Email' %>")
+
+        expect(doc.at_css("[data-slot=input]")["aria-describedby"]).to eq("signup_email_error")
+      end
+    end
+
+    # The same case reached another way: nothing rendered a description here
+    # either.
+    context "when a control is rendered outside any field" do
+      it "describes it by nothing" do
+        doc = render_form(valid, "<%= f.shadcn_input :email %>")
+
+        expect(doc.at_css("[data-slot=input]")["aria-describedby"]).to be_nil
+      end
+    end
   end
 
   describe "#shadcn_input" do

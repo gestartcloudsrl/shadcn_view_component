@@ -67,7 +67,7 @@ scroller's load behaviour is asserted, because it is the realistic case.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (9)
+## Components not ported (8)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
@@ -75,7 +75,8 @@ actually import rather than from memory, and `spec/parity_spec.rb` holds it as
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu`, `menubar` and `drawer` — leaving 9.
+`context-menu`, `menubar` and `drawer` — leaving 8, with `form` decided rather
+than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -132,6 +133,18 @@ error was mine, and is recorded with the group it belongs to.
   *Six of these were filed as "plain ports, no blocker". They are the same class
   of work as `dropdown_menu` and `select` — roving focus, typeahead, submenus,
   drag — not the same class as `badge`.*
+
+- **Decided, not pending** (1): `form`. It will not be ported as components.
+  `form.tsx` is react-hook-form's per-field state given five wrappers; the state
+  has no counterpart on a server, and what the wrappers do with it — id, name,
+  `aria-describedby`, `aria-invalid`, the error text — is what Rails'
+  `FormBuilder` already does with a model. `ShadcnViewComponent::FormBuilder` is
+  that, over the `Field` components. `parity_spec` holds it in its own list,
+  `ported_as_a_form_builder`, so "not yet" stops being claimed. The seven
+  divergences that follow are in [features/form.md](features/form.md) — and
+  writing them found one that was not a divergence at all but a defect shared
+  with upstream, since fixed: `aria-describedby` naming a description element
+  that was never rendered.
 
 - **Blocked by a third-party npm package** (8): `chart`
   (recharts), `command` (cmdk), `carousel` (embla-carousel-react), `input-otp`,
