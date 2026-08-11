@@ -36,7 +36,10 @@ export default class extends Controller {
 
     // The press that opens the drawer arrives before the animation does, and a
     // drag started during it reads a transform that is still moving.
-    this.opened = () => { this.openedAt = Date.now() }
+    this.opened = () => {
+      this.openedAt = Date.now()
+      this.reset()
+    }
     this.element.addEventListener("shadcn--dialog:open", this.opened)
   }
 
@@ -229,13 +232,16 @@ export default class extends Controller {
     }
   }
 
-  // The inline styles go first, and it is the `transform` that matters rather
-  // than the `transition`: nothing clears it on the way out, so the next time
-  // the drawer is opened it comes up already pushed however far the last drag
-  // pushed it — measured at 60px on the example that covers this, which is the
-  // whole of what the throw moved it.
+  // The inline styles stay, which is vaul's own shape (`closeDrawer` cancels the
+  // drag and does not touch the transform, index.tsx:536-549). The exit is a CSS
+  // animation with no `from`, so it starts at whatever the element currently
+  // reads — which is exactly where the finger left the panel. Clearing first
+  // sent the panel back to full height for a frame and slid it away from there,
+  // which is what a person sees as it springing up before it goes.
+  //
+  // They are cleared on the way back *in* instead, so the next open is square
+  // rather than already pushed however far the last drag pushed it.
   dismiss() {
-    this.reset()
     this.dialog?.close()
   }
 

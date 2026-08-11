@@ -217,6 +217,31 @@ RSpec.describe "Drawer", :js do
       expect(returned).to be_within(6).of(90)
     end
 
+    # The exit has to start from where the finger left the panel, not from the
+    # top. Reported from the gallery: dragged past the bottom edge, the drawer
+    # sprang back up to full height and only then slid away — because the drag's
+    # transform was cleared before the close rather than after it, so the exit
+    # animated from 0 instead of from where it was.
+    #
+    # The exit needs a real duration to be looked at: the whole harness runs
+    # under `--force-prefers-reduced-motion`, which collapses it to 0.01ms, so
+    # by default the panel is hidden before anything can be read and this is the
+    # one thing about the drawer no spec would otherwise see. `force_animations`
+    # is how the rest of the suite buys that time back.
+    it "slides away from where it was left, not from the top" do
+      x, y = grip
+      height = page.evaluate_script("document.querySelector(#{content.to_json}).getBoundingClientRect().height")
+      pulled = (height * 0.45).round
+      force_animations(content, duration: "800ms")
+
+      drag(from: [ x, y ], by: [ 0, pulled ], steps: 6, pause: 0.04)
+
+      # Read at once rather than waited for: 800ms later the panel is gone
+      # either way, and the jump back up is the whole of what is wrong.
+      expect(translated).to be > pulled * 0.7
+      expect(page).to have_css("#{content}[data-state=closed]", visible: :all)
+    end
+
     # A gesture taken back is not a gesture. Dragged well past the threshold and
     # then pulled all the way up again before letting go, the release is measured
     # from where the pointer ended, not from how far it once went — so the drawer

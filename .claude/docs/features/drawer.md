@@ -99,6 +99,26 @@ handler, and it was the same shape as a piece of machinery the menubar shipped
 and then removed for the same reason. `elementUnder` survives that test only
 because the branch it feeds is the unreachable one below.
 
+## The exit starts where the finger left it
+
+vaul's `closeDrawer` cancels the drag and does not touch the transform
+(`index.tsx:536-549`). That is not an omission: the exit is a CSS animation with
+no `from`, so it begins at whatever the element currently reads — which is
+exactly where the panel was let go. This port cleared the drag's inline styles
+before closing instead, so the panel snapped back to full height for a frame and
+slid away from *there*; dragged past the bottom edge it read as the drawer
+jumping up before it went. Reported from the gallery.
+
+The styles are cleared on the way back **in** rather than on the way out, which
+is what keeps a reopened drawer square. Both halves have their own example, and
+each kills only the other's mutation.
+
+Worth knowing for anything else about this component's exit: the suite runs
+under `--force-prefers-reduced-motion`, so the reduced-motion rule collapses the
+drawer's animation to 0.01ms and the panel is hidden before a spec can read
+anything. `force_animations` buys the time back, and without it this defect is
+invisible to every example in the file.
+
 ## The specs drive touch, not a mouse
 
 Not only because a drawer is a phone component: a touch pointer is *implicitly
