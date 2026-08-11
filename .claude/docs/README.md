@@ -10,7 +10,7 @@ written.
 |---|---|
 | [decisions/01-architecture.md](decisions/01-architecture.md) | project shape, the cva/`cn` mapping, `Shadcn::` namespacing, no-npm rule, the `part` macro, FormBuilder, performance, tooling |
 | [decisions/02-javascript.md](decisions/02-javascript.md) | how Radix was reimplemented: `display: contents` roots, why nothing is portalled, the Popover API top layer, `turbo:morph` |
-| [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the rejected reverse-parity check, system-spec pitfalls, what the two `vendor/` references are worth and why a control measurement is not optional |
+| [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the rejected reverse-parity check, system-spec pitfalls, what each `vendor/` reference is worth and why a control measurement is not optional |
 | [decisions/04-bugs-fixed.md](decisions/04-bugs-fixed.md) | the council's findings and their fixes — a list of things not to reintroduce |
 | [features/README.md](features/README.md) | per component: 1:1, adapted, extended or ours — the answer a host wants, written to be lifted into the public README |
 | [todo.md](todo.md) | open work, ordered by what blocks a release, plus what is deliberately not being done |
@@ -23,6 +23,7 @@ written.
 | [features/message-scroller.md](features/message-scroller.md) | the message scroller: 2,439 lines of shadcn's own primitive measured before porting, the two surfaces deliberately left out, and the one place server rendering forces a difference |
 | [features/navigation-menu.md](features/navigation-menu.md) | why the navigation menu ships one of upstream's two configurations, and the two timing specs that asserted nothing until a mutation said so |
 | [features/sidebar.md](features/sidebar.md) | the Sidebar as shipped — what upstream's three-tree render became here, and the four things that one tree cost |
+| [features/drawer.md](features/drawer.md) | the Drawer: vaul's two release thresholds, the four features deliberately left out, the stylesheet that had to come with it, and the branch no spec here can reach |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
 measured is marked as measured; anything assumed says so.

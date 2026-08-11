@@ -67,15 +67,15 @@ scroller's load behaviour is asserted, because it is the realistic case.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
-## Components not ported (10)
+## Components not ported (9)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Seventeen have since been ported —
+`not_yet_ported` and fails if the two drift. Eighteen have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu` and `menubar` — leaving 10.
+`context-menu`, `menubar` and `drawer` — leaving 9.
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -133,10 +133,20 @@ error was mine, and is recorded with the group it belongs to.
   of work as `dropdown_menu` and `select` — roving focus, typeahead, submenus,
   drag — not the same class as `badge`.*
 
-- **Blocked by a third-party npm package** (9): `drawer` (vaul), `chart`
+- **Blocked by a third-party npm package** (8): `chart`
   (recharts), `command` (cmdk), `carousel` (embla-carousel-react), `input-otp`,
   `sonner` (+ next-themes), `resizable` (react-resizable-panels), `calendar`
   (react-day-picker), `combobox` (**@base-ui/react**).
+  *`drawer` has shipped, and "blocked by a package" turned out to be the wrong
+  reading of it twice over. vaul is a Radix Dialog with a drag bolted on, so
+  the open/close half was already ported and only the drag was new — measured,
+  337 of vaul's 2,292 lines are the gesture and four features worth 541 more
+  were cut. And the actual obstacle was not the package at all but its
+  *stylesheet*: `drawer.tsx` renders no `touch-action` and no entrance
+  animation, both live in the 256 lines vaul ships beside it, and without
+  `touch-action: none` the browser takes the gesture and the drag never starts.
+  See [features/drawer.md](features/drawer.md). Read the remaining eight the
+  same way: the number in brackets is the package, not the work.*
   *`message-scroller` was in this group and has shipped. The package it depends
   on turned out to be MIT, dependency-free and in `shadcn-ui/ui` — the repo this
   gem already vendors from — so it was vendored to `vendor/shadcn-react/` and
@@ -147,7 +157,8 @@ error was mine, and is recorded with the group it belongs to.
   Radix to Base UI, so reimplementing it means tracking a second headless API
   rather than the one already understood; `message-scroller` depends on a
   package shadcn publishes itself. `drawer` was filed as a plain port and is
-  vaul.*
+  vaul — which was right to correct, though the correction then overstated it:
+  it has since shipped.*
 
 - **A case of its own** (1): `form` is react-hook-form, and the Rails answer is
   the FormBuilder that already exists plus `field`, already ported — so it may

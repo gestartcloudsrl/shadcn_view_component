@@ -1,0 +1,20 @@
+<%# The case the drag has to give way for: a list longer than the drawer. A
+    downward drag that starts part-way down the list scrolls it and must not
+    also throw the drawer away — which is what `shouldDrag` decides. %>
+<%= render(Shadcn::Drawer::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open a long drawer" } %>
+  <% d.with_dialog_content do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "Recent activity" } %>
+      <% h.with_description { "Scroll the list; the drawer stays put." } %>
+    <% end %>
+    <div class="max-h-64 overflow-y-auto px-4">
+      <% 30.times do |i| %>
+        <div class="border-b py-3 text-sm last:border-b-0">Entry <%= i + 1 %></div>
+      <% end %>
+    </div>
+    <% c.with_footer do %>
+      <%= render(Shadcn::Drawer::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Close" } %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -45,6 +45,7 @@ project keeps catching itself in.
 | [sidebar.md](sidebar.md) | **ours** / adapted | no Radix Sidebar exists; the runtime mobile branch cannot survive server rendering |
 | [navigation-menu.md](navigation-menu.md) | **adapted** | upstream's shared viewport needs a portal, so this ships the `viewport={false}` configuration shadcn also supports |
 | [message-scroller.md](message-scroller.md) | **adapted** | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, and one difference server rendering forces |
+| [drawer.md](drawer.md) | **adapted** | built on vaul rather than Radix: the drag is ported, four of vaul's features are not, and its stylesheet had to be reproduced |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:

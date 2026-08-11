@@ -14,6 +14,7 @@ import AvatarController from "shadcn/controllers/avatar_controller"
 import CheckboxController from "shadcn/controllers/checkbox_controller"
 import CollapsibleController from "shadcn/controllers/collapsible_controller"
 import DialogController from "shadcn/controllers/dialog_controller"
+import DrawerController from "shadcn/controllers/drawer_controller"
 import DropdownMenuController from "shadcn/controllers/dropdown_menu_controller"
 import HoverCardController from "shadcn/controllers/hover_card_controller"
 import InputGroupController from "shadcn/controllers/input_group_controller"
@@ -39,6 +40,7 @@ const CONTROLLERS = {
   checkbox: CheckboxController,
   collapsible: CollapsibleController,
   dialog: DialogController,
+  drawer: DrawerController,
   "dropdown-menu": DropdownMenuController,
   "hover-card": HoverCardController,
   "input-group": InputGroupController,

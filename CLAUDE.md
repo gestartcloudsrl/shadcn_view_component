@@ -105,6 +105,8 @@ vendor/radix/                    # the Radix primitives shadcn wraps — what th
                                  # controllers are answerable to on behaviour
 vendor/shadcn-react/             # @shadcn/react, the primitive shadcn publishes
                                  # itself — same role, for the message scroller
+vendor/vaul/                     # vaul's stylesheet — the Drawer's `touch-action`
+                                 # and slide keyframes, which `drawer.tsx` has not
 ```
 
 A part that is only an element with a `data-slot` and fixed classes is declared

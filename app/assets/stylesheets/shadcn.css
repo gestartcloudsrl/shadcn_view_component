@@ -654,3 +654,93 @@
 [data-slot="scroll-area-viewport"]::-webkit-scrollbar {
   display: none;
 }
+
+/* --------------------------------------------------------------------------
+ * The Drawer's own stylesheet, which is vaul's rather than shadcn's
+ *
+ * `drawer.tsx` renders no entrance animation and no `touch-action`: both are in
+ * the stylesheet vaul's package ships, and the component does not work without
+ * them. `touch-action: none` is load-bearing rather than decorative — without
+ * it the browser claims the vertical gesture, the pointer stream is cancelled
+ * mid-drag and the drawer never moves.
+ *
+ * Reproduced from `vendor/vaul/style.css`, which is vendored so this can be
+ * diffed against something. `parity_spec` still cannot see any of it: it
+ * compares Tailwind class *text* and a stylesheet rule is not a class.
+ *
+ * `[data-vaul-snap-points='false']` is in every selector because it is in
+ * vaul's, and the attribute is emitted as a constant `false` — this port has no
+ * snap points. Dropping the condition would be a smaller diff and a worse one:
+ * the day snap points arrive, these rules have to stop applying, and a selector
+ * that already says so is the difference between adding a feature and
+ * remembering to.
+ * -------------------------------------------------------------------------- */
+
+[data-vaul-drawer] {
+  touch-action: none;
+  will-change: transform;
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="bottom"][data-state="open"] {
+  animation-name: shadcn-drawer-from-bottom;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="bottom"][data-state="closed"] {
+  animation-name: shadcn-drawer-to-bottom;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="top"][data-state="open"] {
+  animation-name: shadcn-drawer-from-top;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="top"][data-state="closed"] {
+  animation-name: shadcn-drawer-to-top;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="left"][data-state="open"] {
+  animation-name: shadcn-drawer-from-left;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="left"][data-state="closed"] {
+  animation-name: shadcn-drawer-to-left;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="right"][data-state="open"] {
+  animation-name: shadcn-drawer-from-right;
+}
+[data-vaul-drawer][data-vaul-snap-points="false"][data-vaul-drawer-direction="right"][data-state="closed"] {
+  animation-name: shadcn-drawer-to-right;
+}
+
+@keyframes shadcn-drawer-from-bottom {
+  from { transform: translate3d(0, var(--initial-transform, 100%), 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes shadcn-drawer-to-bottom {
+  to { transform: translate3d(0, var(--initial-transform, 100%), 0); }
+}
+@keyframes shadcn-drawer-from-top {
+  from { transform: translate3d(0, calc(var(--initial-transform, 100%) * -1), 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes shadcn-drawer-to-top {
+  to { transform: translate3d(0, calc(var(--initial-transform, 100%) * -1), 0); }
+}
+@keyframes shadcn-drawer-from-left {
+  from { transform: translate3d(calc(var(--initial-transform, 100%) * -1), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes shadcn-drawer-to-left {
+  to { transform: translate3d(calc(var(--initial-transform, 100%) * -1), 0, 0); }
+}
+@keyframes shadcn-drawer-from-right {
+  from { transform: translate3d(var(--initial-transform, 100%), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes shadcn-drawer-to-right {
+  to { transform: translate3d(var(--initial-transform, 100%), 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vaul-drawer] {
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+  }
+}
