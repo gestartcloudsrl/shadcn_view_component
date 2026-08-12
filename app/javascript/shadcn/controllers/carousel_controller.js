@@ -45,20 +45,38 @@ export default class extends Controller {
     return this.vertical ? el.scrollHeight - el.clientHeight : el.scrollWidth - el.clientWidth
   }
 
-  // Where each slide sits inside the scroller. Measured rather than counted in
-  // widths: the track carries a negative margin against the items' padding —
-  // upstream's own gutter — so the first slide starts at -16 and a step of one
-  // item's width lands between two snap points rather than on one. Asking each
-  // item where it is costs a `getBoundingClientRect` and cannot drift.
+  get items() {
+    return [ ...this.viewportTarget.querySelectorAll("[data-slot=carousel-item]") ]
+  }
+
+  // Measured rather than counted in widths, and **relative to the first slide**.
+  //
+  // That is the whole of the fix for a reported defect, and the reason is worth
+  // keeping. The track carries a negative margin against each item's padding —
+  // upstream's gutter, `-ml-4` against `pl-4` — so an item is a gutter wider
+  // than the window, and its box begins a gutter left of the scroller's zero.
+  // Taken from the viewport's edge, the numbers are a gutter short: scrolling to
+  // one lines an item's *box* up with the window and pushes a gutter of its
+  // *content* off the far side. A card loses its border that way, and nothing
+  // that reads attributes can tell.
+  //
+  // Relative to the first item they are what the browser itself uses: the
+  // scroll origin is the track's start, so `scroll-snap-align: start` already
+  // agrees with these, and a released drag lands where a button would. An
+  // earlier version set a negative `scroll-margin` on every item to make that
+  // true; measured, it already was, and no mutation could tell the difference.
   get offsets() {
     const box = this.viewportTarget.getBoundingClientRect()
     const start = this.vertical ? box.top : box.left
-
-    return [ ...this.viewportTarget.querySelectorAll("[data-slot=carousel-item]") ].map((item) => {
+    const positions = this.items.map((item) => {
       const rect = item.getBoundingClientRect()
 
-      return Math.round((this.vertical ? rect.top : rect.left) - start + this.position)
+      return (this.vertical ? rect.top : rect.left) - start + this.position
     })
+
+    const first = positions[0] ?? 0
+
+    return positions.map((position) => Math.round(position - first))
   }
 
   previous() {

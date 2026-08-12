@@ -71,11 +71,28 @@ keys move them; before, the only way through the component was its two buttons.
 
 ## What moving by one slide means
 
-Not "the current position plus one item's width". The track carries a negative
-margin against the items' padding — upstream's own gutter, `-ml-4` against
-`pl-4` — so the first slide starts at **-16** and a step of one width lands
-between two snap points instead of on one. The controller asks each item where
-it is and takes the nearest one past where the scroller stands.
+Not "the current position plus one item's width", and not "where the item sits
+relative to the window" either. Both were wrong, and the second was reported
+from the gallery as *the card loses its right border* — and, in a carousel with
+a smaller gutter, its left one.
+
+The track carries a negative margin against each item's padding — upstream's own
+gutter, `-ml-4` against `pl-4` — so an item is a gutter **wider** than the
+window it has to fit in, and its box begins a gutter left of the scroller's
+zero. Measured from the window's edge, every position is a gutter short:
+scrolling to one lines an item's *box* up with the window and pushes a gutter of
+its *content* off the far side. One border's worth, which no attribute records
+and no spec that reads the DOM can see.
+
+Measured from the **first item**, they are the numbers the browser itself uses:
+the scroll origin is the track's start, so `scroll-snap-align: start` already
+agrees with them and a released drag lands where a button would. A version of
+this set a negative `scroll-margin` on every item to make that true; measured,
+it already was, and no mutation could tell the difference, so it is gone.
+
+`spec/system/carousel_spec.rb` asserts what a person sees rather than where the
+scroller stands: after every move, each visible slide's content is wholly inside
+the window.
 
 ## The keyboard
 
