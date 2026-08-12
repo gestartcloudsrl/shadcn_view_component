@@ -50,7 +50,11 @@ RSpec.describe "reverse parity" do
   # classes look invented.
   def upstream_corpus
     Dir[Pathname(__dir__).join("../vendor/shadcn/**/*.tsx")].each_with_object(Set.new) do |path, corpus|
-      File.read(path).scan(/"([^"\n]*)"/) { |(literal)| corpus.merge(literal.split(/\s+/)) }
+      # Through `ShadcnSource` rather than a regex of its own: a class written
+      # with `String.raw` lives in a backtick literal, and a scanner that reads
+      # only `"…"` calls it invented. The two directions share one idea of what
+      # a string literal is, so they cannot drift.
+      ShadcnSource.string_literals(File.read(path)).each { |literal| corpus.merge(literal.split(/\s+/)) }
     end
   end
 

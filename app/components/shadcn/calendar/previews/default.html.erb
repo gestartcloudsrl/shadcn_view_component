@@ -1,0 +1,8 @@
+<%# Upstream's "Calendar" example. The month is fixed rather than `Date.current`
+    so the snapshot does not change every day — the same reason the component
+    takes `month:` at all. %>
+<%= render(Shadcn::Calendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 12),
+      class: "rounded-md border shadow-sm"
+    )) %>

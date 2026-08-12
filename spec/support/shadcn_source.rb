@@ -19,7 +19,12 @@ module ShadcnSource
 
   # A token has to look like a Tailwind utility: some punctuation Tailwind uses
   # (`:`, `-`, `/`, `[`) and nothing that marks it as a path or a URL.
-  SHAPE = %r{\A[a-zA-Z0-9@!:.\[\]()'*&>=,%_/-]+\z}
+  #
+  # The backslash is in there for one component: `calendar.tsx` writes two of
+  # its classes with `String.raw` so that `[.rdp-button\_next>svg]` keeps its
+  # escape. Measured across the whole vendored corpus before widening this —
+  # those two tokens are the only thing it admits, and both are real classes.
+  SHAPE = %r{\A[a-zA-Z0-9@!:.\[\]()'*&>=,%_/\\-]+\z}
   PUNCTUATION = %r{[:\-/\[]}
   NOT_A_CLASS = %r{\A(?:@/|https?|\./|\.\./)|://}
 
@@ -28,15 +33,24 @@ module ShadcnSource
       Dir[VENDOR.join("*.tsx")].map { |path| File.basename(path, ".tsx") }.sort
     end
 
-    # Every Tailwind class the TSX emits, from its double-quoted string literals.
-    # Import statements are dropped first — including the multi-line form —
-    # because package names like "radix-ui" are shaped exactly like utilities.
+    # Every Tailwind class the TSX emits, from its string literals. Import
+    # statements are dropped first — including the multi-line form — because
+    # package names like "radix-ui" are shaped exactly like utilities.
     IMPORT = /^import\b[\s\S]*?from\s*["'][^"']+["']\s*$|^import\s*["'][^"']+["']\s*$/
 
-    def tsx_classes(name)
-      source = VENDOR.join("#{name}.tsx").read.gsub(IMPORT, "")
+    # Both spellings of a string literal, because a class can be written in
+    # either: `calendar.tsx` reaches for `String.raw` — a backtick literal — to
+    # keep a backslash it needs, and a scanner that reads only `"…"` reports
+    # those classes as invented by the port. `reverse_parity_spec` calls this
+    # too, so the two directions cannot disagree about what a literal is.
+    def string_literals(source)
+      body = source.gsub(IMPORT, "")
 
-      tsx_string_literals(source)
+      body.scan(/"([^"\\\n]*(?:\\.[^"\\\n]*)*)"/m).flatten + body.scan(/`([^`\n]*)`/).flatten
+    end
+
+    def tsx_classes(name)
+      string_literals(VENDOR.join("#{name}.tsx").read)
         .flat_map { |literal| literal.split(/\s+/) }
         .select { |token| class_like?(token) }
         .uniq
@@ -67,10 +81,6 @@ module ShadcnSource
       end
         .reject { |path| File.basename(path) == "preview.rb" }
         .map { |path| Pathname(path) }
-    end
-
-    def tsx_string_literals(source)
-      source.scan(/"([^"\\\n]*(?:\\.[^"\\\n]*)*)"/m).flatten
     end
 
     # Ripper hands back only the actual contents of string literals — comments,
