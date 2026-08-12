@@ -744,3 +744,53 @@
     animation-duration: 0.01ms;
   }
 }
+
+/* --------------------------------------------------------------------------
+ * The carousel's viewport, which is a scroller rather than a transformed track
+ *
+ * Upstream drives this component with embla, which translates the track inside
+ * an `overflow-hidden` box. This port drives it with the scroll container the
+ * box already is — `overflow: hidden` still makes one, which is why
+ * `carousel-content` keeps upstream's class exactly and nothing here fights it.
+ *
+ * What these rules add is the half a hidden overflow does not give: a finger
+ * can drag it, and a release lands on a slide instead of between two. The
+ * scrollbar is hidden because upstream's carousel shows none, and the same
+ * pair of declarations does it for `scroll-area`'s viewport a few rules above.
+ *
+ * Keyed on the `data-slot` for that reason: it is the shape this file already
+ * uses when behaviour has to reach an element whose classes are upstream's.
+ * -------------------------------------------------------------------------- */
+
+[data-slot="carousel-content"] {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+[data-slot="carousel-content"][data-orientation="vertical"] {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+}
+
+[data-slot="carousel-content"]::-webkit-scrollbar {
+  display: none;
+}
+
+[data-slot="carousel-item"] {
+  scroll-snap-align: start;
+}
+
+/* The slide. Declared rather than asked for from JavaScript so the browser
+ * keeps the decision: a context that will not animate simply lands, where a
+ * `behavior: "smooth"` it has decided to ignore can leave the scroll unstarted.
+ * Guarded, because a carousel that slides is exactly what someone who asked for
+ * less motion asked not to have. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-slot="carousel-content"] {
+    scroll-behavior: smooth;
+  }
+}

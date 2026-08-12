@@ -1,0 +1,22 @@
+<%# Upstream's own example: five slides, each the width of the viewport, with
+    the two controls sitting outside the box — `-left-12` and `-right-12`, which
+    is why the page needs room around it. %>
+<div class="px-14">
+  <%= render(Shadcn::Carousel::Component.new(class: "w-full max-w-xs")) do |c| %>
+    <% c.with_carousel_content do |content| %>
+      <% 5.times do |i| %>
+        <% content.with_item do %>
+          <div class="p-1">
+            <%= render(Shadcn::Card::Component.new) do |card| %>
+              <% card.with_card_content(class: "flex aspect-square items-center justify-center p-6") do %>
+                <span class="text-4xl font-semibold"><%= i + 1 %></span>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% c.with_previous %>
+    <% c.with_next_control %>
+  <% end %>
+</div>

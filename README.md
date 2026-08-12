@@ -348,7 +348,7 @@ input-group
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
 dropdown-menu (including submenus), context-menu, menubar, popover, tooltip,
 hover-card, select,
-scroll-area, navigation-menu, slider, sidebar, drawer
+scroll-area, navigation-menu, slider, sidebar, drawer, carousel
 
 **AI chat** — message, bubble, attachment, marker, message-scroller. The first
 four are markup and variants with no behaviour of their own; the scroller
@@ -384,8 +384,8 @@ model. So that family is a FormBuilder here rather than components, built over
 come from `ActiveModel::Errors` after a round trip rather than as you type, and
 all of an attribute's messages are shown rather than the first.
 
-Not ported: chart, sonner, calendar, carousel, resizable, input-otp, command,
-and combobox.
+Not ported: chart, sonner, calendar, resizable, input-otp, command, and
+combobox.
 
 ## What is and is not verified
 

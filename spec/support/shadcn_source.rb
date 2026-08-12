@@ -84,6 +84,12 @@ module ShadcnSource
       return false if token.match?(NOT_A_CLASS)
       return false unless token.match?(SHAPE)
 
+      # Punctuation on its own is punctuation. `carousel.tsx` throws
+      # `"useCarousel must be used within a <Carousel />"`, and `/>` has a
+      # slash, so it reached the comparison and was reported as a class the port
+      # had dropped. Every Tailwind utility has a letter in it.
+      return false unless token.match?(/[a-z]/i)
+
       # Bare words without Tailwind punctuation are prose or attribute values
       # ("button", "vertical", "alert"), not utilities.
       token.match?(PUNCTUATION)

@@ -47,6 +47,7 @@ project keeps catching itself in.
 | [message-scroller.md](message-scroller.md) | **adapted** | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, and one difference server rendering forces |
 | [drawer.md](drawer.md) | **adapted** | built on vaul rather than Radix: the drag is ported, four of vaul's features are not, and its stylesheet had to be reproduced |
 | [form.md](form.md) | **ours** | react-hook-form's field state has no server counterpart; the family is `ShadcnViewComponent::FormBuilder` over `Field` |
+| [carousel.md](carousel.md) | **adapted** | embla's 3,170 lines answer six questions a scroll container already answers; no loop, no plugins, no mouse drag |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:

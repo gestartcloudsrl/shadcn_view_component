@@ -12,6 +12,10 @@ module Shadcn
     class Component < ApplicationViewComponent
       # Only the icons referenced by the ported components are bundled.
       PATHS = {
+        # Read from lucide's own SVGs rather than recalled — the carousel's
+        # buttons are `ArrowLeft`/`ArrowRight` upstream, not chevrons.
+        "arrow-left" => %(<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>),
+        "arrow-right" => %(<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>),
         "check" => %(<path d="M20 6 9 17l-5-5"/>),
         "chevron-down" => %(<path d="m6 9 6 6 6-6"/>),
         "chevron-left" => %(<path d="m15 18-6-6 6-6"/>),

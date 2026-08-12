@@ -89,16 +89,16 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (8)
+## Components not ported (7)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Eighteen have since been ported —
+`not_yet_ported` and fails if the two drift. Nineteen have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu`, `menubar` and `drawer` — leaving 8, with `form` decided rather
-than pending (below).
+`context-menu`, `menubar`, `drawer` and `carousel` — leaving 7, with `form`
+decided rather than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -168,10 +168,18 @@ error was mine, and is recorded with the group it belongs to.
   with upstream, since fixed: `aria-describedby` naming a description element
   that was never rendered.
 
-- **Blocked by a third-party npm package** (8): `chart`
-  (recharts), `command` (cmdk), `carousel` (embla-carousel-react), `input-otp`,
+- **Blocked by a third-party npm package** (7): `chart`
+  (recharts), `command` (cmdk), `input-otp`,
   `sonner` (+ next-themes), `resizable` (react-resizable-panels), `calendar`
   (react-day-picker), `combobox` (**@base-ui/react**).
+  *`carousel` has shipped, and it is the clearest case yet that "blocked by a
+  package" is a question to ask rather than a fact to record. embla is 3,170
+  lines; `carousel.tsx` asks it for six things — two scrolls, two `canScroll`s
+  and two events — and a scroll container answers all six. What did not come
+  across is `loop`, the rest of `opts`, the `api` object, plugins and
+  mouse-drag; see [features/carousel.md](features/carousel.md). Read the
+  remaining seven the same way: measure what the component actually uses before
+  taking the dependency as the answer.*
   *`drawer` has shipped, and "blocked by a package" turned out to be the wrong
   reading of it twice over. vaul is a Radix Dialog with a drag bolted on, so
   the open/close half was already ported and only the drag was new — measured,

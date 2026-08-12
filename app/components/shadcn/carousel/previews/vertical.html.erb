@@ -1,0 +1,22 @@
+<%# Upstream's "Orientation". The axis reaches three places — the track becomes
+    a column, the items pad from the top, and the controls move above and below
+    and turn — so it is the root's argument and each part reads it. %>
+<div class="py-14">
+  <%= render(Shadcn::Carousel::Component.new(orientation: :vertical, class: "w-full max-w-xs")) do |c| %>
+    <% c.with_carousel_content(orientation: :vertical, class: "h-[240px]") do |content| %>
+      <% 5.times do |i| %>
+        <% content.with_item(orientation: :vertical) do %>
+          <div class="p-1">
+            <%= render(Shadcn::Card::Component.new) do |card| %>
+              <% card.with_card_content(class: "flex items-center justify-center p-6") do %>
+                <span class="text-3xl font-semibold"><%= i + 1 %></span>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% c.with_previous(orientation: :vertical) %>
+    <% c.with_next_control(orientation: :vertical) %>
+  <% end %>
+</div>
