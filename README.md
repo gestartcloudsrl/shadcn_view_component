@@ -384,7 +384,13 @@ model. So that family is a FormBuilder here rather than components, built over
 come from `ActiveModel::Errors` after a round trip rather than as you type, and
 all of an attribute's messages are shown rather than the first.
 
-Not ported: chart, sonner, calendar, resizable, command, and combobox.
+**Toaster** — notifications, stacked one behind another and fanned out under
+the pointer. shadcn's is a forty-line wrapper around `sonner` and renders no
+markup of its own, so this one is not a port: it keeps sonner's measurements and
+its stacking, and adds the two ways a Rails app actually raises a notification —
+a flash rendered with the page, and a `turbo_stream.append` onto the list.
+
+Not ported: chart, calendar, resizable, command, and combobox.
 
 ## What is and is not verified
 

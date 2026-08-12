@@ -18,6 +18,9 @@ en:
       go_to_previous: Go to previous page
       go_to_next: Go to next page
       more: More pages
+    toaster:
+      label: Notifications
+      dismiss: Dismiss
     select:
       search_label: Search options
       empty: No results found.

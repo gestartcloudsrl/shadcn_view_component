@@ -49,6 +49,7 @@ project keeps catching itself in.
 | [form.md](form.md) | **ours** | react-hook-form's field state has no server counterpart; the family is `ShadcnViewComponent::FormBuilder` over `Field` |
 | [carousel.md](carousel.md) | **adapted** | embla's 3,170 lines answer six questions a scroll container already answers; no loop, no plugins, no mouse drag |
 | [input-otp.md](input-otp.md) | **adapted** | one real input under the boxes, which is what the package is; the browser workarounds are not ported |
+| [toaster.md](toaster.md) | **ours** | `sonner.tsx` emits no markup at all, so there is nothing to be 1:1 with; sonner's measurements and stacking, Rails' three ways in |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:

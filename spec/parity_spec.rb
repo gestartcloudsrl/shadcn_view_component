@@ -84,6 +84,18 @@ RSpec.describe "shadcn/ui parity" do
   # — and it has no markup to be checked against.
   no_markup = %w[direction].freeze
 
+  # Ported as something of this port's own. `sonner.tsx` is forty lines that
+  # configure a package — a theme, five icons and four custom properties — and
+  # emits no `data-slot` at all: every element and every rule belongs to
+  # `sonner`, 1,601 lines of TypeScript and 729 of CSS that no vendored source
+  # here contains. There is no upstream markup to be 1:1 with, so a class
+  # comparison would be comparing this port against nothing.
+  #
+  # What it *is* compared against is written down instead: sonner's own
+  # measurements and the four colours `sonner.tsx` chooses. See
+  # features/toaster.md.
+  ported_as_ours = %w[sonner].freeze
+
   # Ported by something that is not a component. `form.tsx` is react-hook-form's
   # field state given five wrappers; the state has no counterpart on a server,
   # and the wrappers' job — id, name, `aria-describedby`, `aria-invalid`, the
@@ -101,7 +113,6 @@ RSpec.describe "shadcn/ui parity" do
   not_yet_ported = %w[
     calendar chart combobox command
     resizable
-    sonner
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.
@@ -208,7 +219,7 @@ RSpec.describe "shadcn/ui parity" do
   end
 
   it "accounts for every component vendored for comparison" do
-    accounted = ports.keys + not_yet_ported + no_markup + ported_as_a_form_builder
+    accounted = ports.keys + not_yet_ported + no_markup + ported_as_a_form_builder + ported_as_ours
 
     expect(accounted.sort).to eq(ShadcnSource.vendored_components)
   end

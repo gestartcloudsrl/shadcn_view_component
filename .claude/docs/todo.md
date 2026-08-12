@@ -89,7 +89,7 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (6)
+## Components not ported (5)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
@@ -97,8 +97,8 @@ actually import rather than from memory, and `spec/parity_spec.rb` holds it as
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu`, `menubar`, `drawer`, `carousel` and `input-otp` — leaving 6,
-with `form` decided rather than pending (below).
+`context-menu`, `menubar`, `drawer`, `carousel` and `input-otp` — leaving 5,
+with `form` and `sonner` decided rather than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -168,9 +168,18 @@ error was mine, and is recorded with the group it belongs to.
   with upstream, since fixed: `aria-describedby` naming a description element
   that was never rendered.
 
-- **Blocked by a third-party npm package** (6): `chart`
+- **Ours rather than ported** (1): `sonner`. `sonner.tsx` is forty lines of
+  configuration and emits no `data-slot` at all — every element and every rule
+  belongs to the package, 1,601 lines of TypeScript and 729 of CSS that no
+  vendored source here contains. There was nothing to be 1:1 with, so this is a
+  component of this port's own, holding sonner's measurements and its stacking
+  and adding the two ways in a Rails app actually wants: a flash rendered with
+  the page, and a `turbo_stream.append`. `parity_spec` holds it in
+  `ported_as_ours`. See [features/toaster.md](features/toaster.md).
+
+- **Blocked by a third-party npm package** (5): `chart`
   (recharts), `command` (cmdk),
-  `sonner` (+ next-themes), `resizable` (react-resizable-panels), `calendar`
+  `resizable` (react-resizable-panels), `calendar`
   (react-day-picker), `combobox` (**@base-ui/react**).
   *`input-otp` has shipped, and it went the same way `carousel` did: 715 lines
   of package, of which the component uses three values per box and a six-line

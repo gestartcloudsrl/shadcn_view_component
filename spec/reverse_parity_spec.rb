@@ -172,6 +172,19 @@ RSpec.describe "reverse parity" do
     "carousel-content" => %w[-ml-2 h-[240px]],
     "carousel-item" => %w[basis-1/2 basis-1/3],
 
+    # The whole toaster family, and it is here in full rather than waved
+    # through: `sonner.tsx` emits no markup at all, so every class this port
+    # renders for it is this port's. Listed one by one so that a class added
+    # *tomorrow* still has to be explained — a blanket exemption would make the
+    # only component with no upstream the only one nobody checks.
+    #
+    # The colours are the one judgement: sonner paints its icons by variant and
+    # its own palette is not in any vendored source, so these are Tailwind's
+    # nearest and are named here as a decision rather than a copy.
+    "toast" => %w[[&_[data-slot=toast-icon]]:animate-spin [&_[data-slot=toast-icon]]:text-amber-600 [&_[data-slot=toast-icon]]:text-blue-600 [&_[data-slot=toast-icon]]:text-destructive [&_[data-slot=toast-icon]]:text-emerald-600 dark:[&_[data-slot=toast-icon]]:text-amber-400 dark:[&_[data-slot=toast-icon]]:text-blue-400 dark:[&_[data-slot=toast-icon]]:text-emerald-400 data-[state=closed]:opacity-0 duration-[400ms] pointer-events-auto shadow-[0_4px_12px_rgba(0,0,0,0.1)] text-[13px]],
+    "toast-icon" => %w[lucide lucide-circle-check lucide-info lucide-loader-circle lucide-octagon-x lucide-triangle-alert],
+    "toaster" => %w[bottom-6 group/toaster right-6 top-6 z-[100]],
+
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
     "native-select-icon" => %w[lucide lucide-chevron-down]

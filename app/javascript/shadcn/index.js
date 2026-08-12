@@ -31,6 +31,7 @@ import SidebarController from "shadcn/controllers/sidebar_controller"
 import SliderController from "shadcn/controllers/slider_controller"
 import SwitchController from "shadcn/controllers/switch_controller"
 import TabsController from "shadcn/controllers/tabs_controller"
+import ToasterController from "shadcn/controllers/toaster_controller"
 import ThemeController from "shadcn/controllers/theme_controller"
 import ToggleController from "shadcn/controllers/toggle_controller"
 import ToggleGroupController from "shadcn/controllers/toggle_group_controller"
@@ -62,6 +63,7 @@ const CONTROLLERS = {
   theme: ThemeController,
   toggle: ToggleController,
   "toggle-group": ToggleGroupController,
+  toaster: ToasterController,
   tooltip: TooltipController
 }
 
