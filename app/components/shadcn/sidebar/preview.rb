@@ -7,9 +7,14 @@ module Shadcn
         render_with_template
       end
 
-      # Upstream's `floating` and `inset` variants, which the default preview
-      # does not show.
-      def variants
+      # Upstream's `floating` variant. Its own page: the panel is `fixed`, so
+      # two of them cannot share one.
+      def floating
+        render_with_template
+      end
+
+      # Upstream's `inset` variant, for the same reason.
+      def inset
         render_with_template
       end
     end

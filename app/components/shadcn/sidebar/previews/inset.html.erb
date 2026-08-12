@@ -1,0 +1,39 @@
+<%# Upstream's `inset` variant, which the default preview does not show.
+
+    A page of its own, and that is forced rather than chosen: the desktop panel
+    is `fixed inset-y-0 … h-svh` (sidebar.tsx), so it is measured against the
+    viewport and cannot be put in a box. The first version of this preview put
+    two providers in two bordered `h-64` divs to compare the variants side by
+    side; both panels escaped their boxes, one covered the other, and the label
+    beside each said the wrong thing. Lookbook gives every preview its own
+    iframe, which is the only frame a sidebar can be shown in.
+
+    `floating` gives the panel its own rounded border and shadow and stands it
+    off the edge; `inset` leaves the panel flush and pulls the page's container
+    in beside it. Both read `group-data-[variant=…]` off the provider, so the
+    difference is on `SidebarInset` as much as on the panel. %>
+<%= render(Shadcn::Sidebar::Provider::Component.new) do %>
+  <%= render(Shadcn::Sidebar::Component.new(variant: :inset, collapsible: :icon)) do %>
+    <%= render(Shadcn::Sidebar::Content::Component.new) do %>
+      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+        <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Workspace" } %>
+        <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+          <% [["search", "Search"], ["circle", "Projects"], ["check", "Done"]].each do |icon, label| %>
+            <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+              <%= render(Shadcn::Sidebar::MenuButton::Component.new(tooltip: label)) do %>
+                <%= render(Shadcn::Icon::Component.new(icon)) %>
+                <span><%= label %></span>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Sidebar::Inset::Component.new) do %>
+    <div class="flex items-center gap-2 border-b p-4">
+      <%= render(Shadcn::Sidebar::Trigger::Component.new) %>
+      <span class="text-sm text-muted-foreground">The page beside a inset panel — the trigger collapses it to a rail.</span>
+    </div>
+  <% end %>
+<% end %>
