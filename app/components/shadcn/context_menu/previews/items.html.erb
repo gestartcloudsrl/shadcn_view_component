@@ -1,0 +1,35 @@
+<%# Upstream's "Radio", "Destructive", "Icons" and "Groups": the four kinds of
+    item the default preview leaves out, which has the plain items, a submenu,
+    the shortcuts and the checkboxes.
+
+    All four are the dropdown's — this family declares no controller of its own
+    — so what is worth seeing here is that a right-click reaches them at all. %>
+<%= render(Shadcn::ContextMenu::Component.new) do |menu| %>
+  <% menu.with_trigger(class: "flex h-40 items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground") do %>
+    Right-click here
+  <% end %>
+  <% menu.with_menu_content(class: "w-52") do %>
+    <%= render(Shadcn::ContextMenu::Group::Component.new) do %>
+      <%= render(Shadcn::ContextMenu::Label::Component.new) { "Sort by" } %>
+      <%= render(Shadcn::ContextMenu::RadioGroup::Component.new) do %>
+        <% %w[Name Size Modified].each do |option| %>
+          <%= render(Shadcn::ContextMenu::RadioItem::Component.new(value: option.downcase, checked: option == "Name")) { option } %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::ContextMenu::Separator::Component.new) %>
+    <%= render(Shadcn::ContextMenu::Item::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("search")) %>
+      Find in folder
+    <% end %>
+    <%= render(Shadcn::ContextMenu::Item::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("check")) %>
+      Select all
+    <% end %>
+    <%= render(Shadcn::ContextMenu::Separator::Component.new) %>
+    <%= render(Shadcn::ContextMenu::Item::Component.new(variant: :destructive)) do %>
+      <%= render(Shadcn::Icon::Component.new("x")) %>
+      Move to bin
+    <% end %>
+  <% end %>
+<% end %>

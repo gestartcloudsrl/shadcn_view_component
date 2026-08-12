@@ -1,0 +1,63 @@
+<div data-slot="menubar" role="menubar" data-controller="shadcn--menubar" data-shadcn--menubar-loop-value="true" class="flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs">
+<div data-slot="menubar-menu" style="display:contents" data-controller="shadcn--dropdown-menu" data-shadcn--dropdown-menu-prefix-value="menubar" data-shadcn--menubar-target="menu" data-shadcn--dropdown-menu-side-value="bottom" data-shadcn--dropdown-menu-align-value="start" data-shadcn--dropdown-menu-side-offset-value="8" data-shadcn--dropdown-menu-align-offset-value="-4">
+<button data-slot="menubar-trigger" type="button" role="menuitem" aria-haspopup="menu" aria-expanded="false" data-state="closed" data-shadcn--dropdown-menu-target="trigger" data-shadcn--menubar-target="trigger" data-action="click-&gt;shadcn--dropdown-menu#toggle keydown-&gt;shadcn--dropdown-menu#triggerKeydown keydown-&gt;shadcn--menubar#keydown pointerenter-&gt;shadcn--menubar#pointerEnter focus-&gt;shadcn--menubar#focused" class="flex items-center rounded-sm px-2 py-1 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">View
+</button>
+<div data-slot="menubar-content" role="menu" tabindex="-1" aria-orientation="vertical" hidden="hidden" data-state="closed" data-shadcn--dropdown-menu-target="content" data-action="keydown-&gt;shadcn--dropdown-menu#contentKeydown keydown-&gt;shadcn--menubar#contentKeydown" class="z-50 min-w-[12rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+<div data-slot="menubar-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Sort by
+</div>
+<div data-slot="menubar-radio-group" role="group">
+<div data-slot="menubar-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="name" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter" class="relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Name
+</div>
+<div data-slot="menubar-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="date" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter" class="relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Date
+</div>
+<div data-slot="menubar-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="size" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter" class="relative flex cursor-default items-center gap-2 rounded-xs py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Size
+</div>
+</div>
+</div>
+</div>
+<div data-slot="menubar-menu" style="display:contents" data-controller="shadcn--dropdown-menu" data-shadcn--dropdown-menu-prefix-value="menubar" data-shadcn--menubar-target="menu" data-shadcn--dropdown-menu-side-value="bottom" data-shadcn--dropdown-menu-align-value="start" data-shadcn--dropdown-menu-side-offset-value="8" data-shadcn--dropdown-menu-align-offset-value="-4">
+<button data-slot="menubar-trigger" type="button" role="menuitem" aria-haspopup="menu" aria-expanded="false" data-state="closed" data-shadcn--dropdown-menu-target="trigger" data-shadcn--menubar-target="trigger" data-action="click-&gt;shadcn--dropdown-menu#toggle keydown-&gt;shadcn--dropdown-menu#triggerKeydown keydown-&gt;shadcn--menubar#keydown pointerenter-&gt;shadcn--menubar#pointerEnter focus-&gt;shadcn--menubar#focused" class="flex items-center rounded-sm px-2 py-1 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">Go
+</button>
+<div data-slot="menubar-content" role="menu" tabindex="-1" aria-orientation="vertical" hidden="hidden" data-state="closed" data-shadcn--dropdown-menu-target="content" data-action="keydown-&gt;shadcn--dropdown-menu#contentKeydown keydown-&gt;shadcn--menubar#contentKeydown" class="z-50 min-w-[12rem] origin-(--radix-menubar-content-transform-origin) overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95">
+<div data-slot="menubar-item" role="menuitem" tabindex="-1" data-variant="default" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground data-[variant=destructive]:*:[svg]:text-destructive!">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left">
+<path d="m15 18-6-6 6-6"/>
+</svg> Back
+</div>
+<div data-slot="menubar-item" role="menuitem" tabindex="-1" data-variant="default" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground data-[variant=destructive]:*:[svg]:text-destructive!">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right">
+<path d="m9 18 6-6-6-6"/>
+</svg> Forward
+</div>
+<div data-slot="menubar-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="menubar-item" role="menuitem" tabindex="-1" data-variant="default" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground data-[variant=destructive]:*:[svg]:text-destructive!">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+<circle cx="11" cy="11" r="8"/>
+<path d="m21 21-4.3-4.3"/>
+</svg> Find…
+</div>
+</div>
+</div>
+</div>

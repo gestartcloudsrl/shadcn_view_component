@@ -1,0 +1,38 @@
+<%# Upstream's "Radio" and "With Icons": the two kinds of item the default
+    preview leaves out, which has the plain items, the shortcuts, a submenu and
+    the checkboxes.
+
+    Both are the dropdown's, restamped — the bar's own behaviour is in the
+    default preview, which is where three menus are needed to see it. %>
+<%= render(Shadcn::Menubar::Component.new) do %>
+  <%= render(Shadcn::Menubar::Menu::Component.new) do |menu| %>
+    <% menu.with_trigger { "View" } %>
+    <% menu.with_menu_content do %>
+      <%= render(Shadcn::Menubar::Label::Component.new) { "Sort by" } %>
+      <%= render(Shadcn::Menubar::RadioGroup::Component.new) do %>
+        <% %w[Name Date Size].each do |option| %>
+          <%= render(Shadcn::Menubar::RadioItem::Component.new(value: option.downcase, checked: option == "Date")) { option } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Menubar::Menu::Component.new) do |menu| %>
+    <% menu.with_trigger { "Go" } %>
+    <% menu.with_menu_content do %>
+      <%= render(Shadcn::Menubar::Item::Component.new) do %>
+        <%= render(Shadcn::Icon::Component.new("chevron-left")) %>
+        Back
+      <% end %>
+      <%= render(Shadcn::Menubar::Item::Component.new) do %>
+        <%= render(Shadcn::Icon::Component.new("chevron-right")) %>
+        Forward
+      <% end %>
+      <%= render(Shadcn::Menubar::Separator::Component.new) %>
+      <%= render(Shadcn::Menubar::Item::Component.new) do %>
+        <%= render(Shadcn::Icon::Component.new("search")) %>
+        Find…
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
