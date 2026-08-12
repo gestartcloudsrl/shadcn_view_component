@@ -10,6 +10,11 @@ module Shadcn
       def outline
         render_with_template
       end
+
+      # Upstream's "Link", "Avatar" and "Image".
+      def link
+        render_with_template
+      end
     end
   end
 end

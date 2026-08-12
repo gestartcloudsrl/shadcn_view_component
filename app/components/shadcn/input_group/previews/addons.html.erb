@@ -1,0 +1,53 @@
+<%# Upstream's "Icon", "Kbd", "Dropdown" and "Spinner": four things an addon
+    holds that the default preview does not show, which has text, buttons and a
+    textarea.
+
+    An addon is a slot for anything — its only argument is `align:`, and the
+    default preview covers all four of those. What changes here is what goes
+    inside one. %>
+<div class="flex w-full max-w-md flex-col gap-6">
+  <%# An icon, which is the commonest case and the reason the addon has no
+      padding of its own. %>
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("search")) %>
+    <% end %>
+    <%= render(Shadcn::InputGroup::Input::Component.new(placeholder: "Search", "aria-label": "Search")) %>
+  <% end %>
+
+  <%# A shortcut on the trailing edge, which is what `Kbd` is for. %>
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Input::Component.new(placeholder: "Search commands", "aria-label": "Search commands")) %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new(align: :"inline-end")) do %>
+      <%= render(Shadcn::Kbd::Group::Component.new) do %>
+        <%= render(Shadcn::Kbd::Component.new) { "⌘" } %>
+        <%= render(Shadcn::Kbd::Component.new) { "K" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# A menu hanging off the addon's own button. %>
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Input::Component.new(placeholder: "you@example.com", "aria-label": "Email")) %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new(align: :"inline-end")) do %>
+      <%= render(Shadcn::DropdownMenu::Component.new) do |m| %>
+        <% m.with_trigger(as: :button, class: "inline-flex items-center gap-1 text-sm text-muted-foreground") do %>
+          Work
+          <%= render(Shadcn::Icon::Component.new("chevron-down")) %>
+        <% end %>
+        <% m.with_menu_content(class: "w-56") do %>
+          <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Work" } %>
+          <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Personal" } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# A spinner, for a field that is checking something as you type. %>
+  <%= render(Shadcn::InputGroup::Component.new) do %>
+    <%= render(Shadcn::InputGroup::Input::Component.new(value: "octocat", "aria-label": "Username")) %>
+    <%= render(Shadcn::InputGroup::Addon::Component.new(align: :"inline-end")) do %>
+      <%= render(Shadcn::Spinner::Component.new) %>
+    <% end %>
+  <% end %>
+</div>

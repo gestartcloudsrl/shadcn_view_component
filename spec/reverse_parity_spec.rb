@@ -148,6 +148,14 @@ RSpec.describe "reverse parity" do
     # port's, and exist in no TSX for that reason. See features/sidebar.md.
     "tooltip-content" => %w[group-data-[mobile=true]:hidden group-data-[state=expanded]:hidden],
 
+    # One of the six utilities in `shadcn.css` that are shadcn's own CSS rather
+    # than Tailwind's, read from the stylesheet ui.shadcn.com serves because no
+    # vendored source defines them. `attachment` reaches for it through a
+    # `data-state` selector, which never puts the word in any markup; the
+    # marker's status preview is the one place the gallery writes it out, and so
+    # the one place it is looked at.
+    "marker-content" => %w[shimmer],
+
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
     "native-select-icon" => %w[lucide lucide-chevron-down]

@@ -1,0 +1,32 @@
+<%# Upstream's "Status" and "Shimmer": a marker saying what is happening right
+    now, with the text lit by a band that travels across it.
+
+    `shimmer` is one of the six utilities in `shadcn.css` that are shadcn's own
+    CSS rather than Tailwind's — they were read from the stylesheet
+    ui.shadcn.com serves, because no vendored source here defines them, and
+    until this preview nothing in the gallery rendered one. A utility nobody
+    looks at is a utility nobody notices breaking. %>
+<div class="flex w-[420px] flex-col gap-4">
+  <%= render(Shadcn::Marker::Component.new) do %>
+    <%= render(Shadcn::Marker::Icon::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("loader-circle", class: "animate-spin")) %>
+    <% end %>
+    <%= render(Shadcn::Marker::Content::Component.new(class: "shimmer")) { "Thinking…" } %>
+  <% end %>
+
+  <%= render(Shadcn::Marker::Component.new) do %>
+    <%= render(Shadcn::Marker::Icon::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("search")) %>
+    <% end %>
+    <%= render(Shadcn::Marker::Content::Component.new(class: "shimmer")) { "Searching the archive" } %>
+  <% end %>
+
+  <%# And the same row once it is over, which is what the shimmer is the
+      absence of. %>
+  <%= render(Shadcn::Marker::Component.new) do %>
+    <%= render(Shadcn::Marker::Icon::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("check")) %>
+    <% end %>
+    <%= render(Shadcn::Marker::Content::Component.new) { "Found 12 matches" } %>
+  <% end %>
+</div>
