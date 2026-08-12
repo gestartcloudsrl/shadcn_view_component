@@ -130,6 +130,46 @@ module Shadcn
         super(**attributes)
       end
 
+      # Everything the controller needs to draw a month the server never
+      # rendered, and nothing else. The names, the formats and the modifier
+      # classes all cross from here rather than being written in JavaScript:
+      # `I18n` stays the only thing that decides how a date reads, and Tailwind
+      # only ever sees a class in Ruby source.
+      def element_attributes(**defaults)
+        super(**{
+          "data-controller" => "shadcn--calendar",
+          "data-shadcn--calendar-month-value" => month.first.iso8601,
+          "data-shadcn--calendar-week-starts-on-value" => month.week_starts_on,
+          "data-shadcn--calendar-fixed-weeks-value" => fixed_weeks,
+          "data-shadcn--calendar-show-outside-days-value" => show_outside_days,
+          "data-shadcn--calendar-show-week-number-value" => show_week_number,
+          "data-shadcn--calendar-start-month-value" => start_month&.beginning_of_month&.iso8601,
+          "data-shadcn--calendar-end-month-value" => end_month&.end_of_month&.iso8601,
+          "data-shadcn--calendar-mode-value" => mode,
+          "data-shadcn--calendar-selected-value" => selected_dates.to_json,
+          "data-shadcn--calendar-disabled-value" => portable_matchers.to_json,
+          "data-shadcn--calendar-day-names-value" => day_names.to_json,
+          "data-shadcn--calendar-short-day-names-value" => short_day_names.to_json,
+          "data-shadcn--calendar-month-names-value" => month_names.to_json,
+          "data-shadcn--calendar-short-month-names-value" => short_month_names.to_json,
+          "data-shadcn--calendar-date-format-value" => day_label_format,
+          "data-shadcn--calendar-month-format-value" => MONTH_FORMAT,
+          # Fetched with the placeholder as its own argument, so what crosses is
+          # the template rather than a rendered sentence — `I18n` raises on a
+          # missing interpolation and the controller needs the `%{date}` intact.
+          "data-shadcn--calendar-today-label-value" => shadcn_t("calendar.today_label", date: "%{date}"),
+          "data-shadcn--calendar-selected-label-value" => shadcn_t("calendar.selected_label", date: "%{date}"),
+          "data-shadcn--calendar-week-number-label-value" => shadcn_t("calendar.week_number", number: "%{number}"),
+          "data-shadcn--calendar-today-class-value" => TODAY_CLASS,
+          "data-shadcn--calendar-outside-class-value" => OUTSIDE_CLASS,
+          "data-shadcn--calendar-disabled-class-value" => DISABLED_CLASS,
+          "data-shadcn--calendar-hidden-class-value" => HIDDEN_CLASS,
+          "data-shadcn--calendar-range-start-class-value" => RANGE_START_CLASS,
+          "data-shadcn--calendar-range-middle-class-value" => RANGE_MIDDLE_CLASS,
+          "data-shadcn--calendar-range-end-class-value" => RANGE_END_CLASS
+        }.compact.merge(defaults))
+      end
+
       def call
         render_element(body: tag.div(safe_join([ nav, month_body ]), class: MONTHS_CLASS))
       end
@@ -152,6 +192,8 @@ module Shadcn
         tag.button(
           render(Icon::Component.new("chevron-#{direction == :previous ? 'left' : 'right'}", class: CHEVRON_CLASS)),
           type: "button",
+          "data-shadcn--calendar-target": direction,
+          "data-action": "click->shadcn--calendar##{direction}",
           class: Button::Component.variant_classes(
             variant: button_variant,
             class: [ NAV_BUTTON_CLASS, direction == :previous ? PREVIOUS_CLASS : NEXT_CLASS ].join(" ")
@@ -175,7 +217,8 @@ module Shadcn
 
       def plain_caption
         tag.span(month_label, class: "#{CAPTION_LABEL_CLASS} #{CAPTION_LABEL_LABEL_CLASS}",
-                 role: "status", "aria-live": "polite")
+                 role: "status", "aria-live": "polite",
+                 "data-shadcn--calendar-target": "caption")
       end
 
       # Two native `<select>`s, laid invisible over the label they change — the
@@ -191,7 +234,9 @@ module Shadcn
         ].compact
 
         tag.div(
-          safe_join(controls + [ tag.span(month_label, role: "status", "aria-live": "polite", style: STATUS_STYLE) ]),
+          safe_join(controls + [ tag.span(month_label, role: "status", "aria-live": "polite",
+                                          style: STATUS_STYLE,
+                                          "data-shadcn--calendar-target": "caption") ]),
           class: DROPDOWNS_CLASS
         )
       end
@@ -201,7 +246,7 @@ module Shadcn
           { value: number, label: I18n.t("date.abbr_month_names")[number] }
         end
 
-        dropdown(options, month.date.month, shadcn_t("calendar.choose_month"))
+        dropdown(options, month.date.month, shadcn_t("calendar.choose_month"), :monthSelect, :chooseMonth)
       end
 
       def year_dropdown
@@ -209,16 +254,18 @@ module Shadcn
         last = (end_month || month.date + 100.years).year
         options = (first..last).map { |year| { value: year, label: year.to_s } }
 
-        dropdown(options, month.date.year, shadcn_t("calendar.choose_year"))
+        dropdown(options, month.date.year, shadcn_t("calendar.choose_year"), :yearSelect, :chooseYear)
       end
 
-      def dropdown(options, value, label)
+      def dropdown(options, value, label, target, action)
         tag.span(
           safe_join([
             tag.select(
               safe_join(options.map { |option| tag.option(option[:label], value: option[:value], selected: option[:value] == value) }),
               class: DROPDOWN_CLASS,
-              "aria-label": label
+              "aria-label": label,
+              "data-shadcn--calendar-target": target,
+              "data-action": "change->shadcn--calendar##{action}"
             ),
             tag.span(
               safe_join([
@@ -238,6 +285,8 @@ module Shadcn
           safe_join([ weekday_header, weeks ]),
           class: GRID_CLASS,
           role: "grid",
+          "data-shadcn--calendar-target": "grid",
+          "data-action": "keydown->shadcn--calendar#keydown focusin->shadcn--calendar#focused",
           "aria-multiselectable": ("true" if mode != :single),
           "aria-label": month_label
         )
@@ -262,7 +311,8 @@ module Shadcn
       end
 
       def weeks
-        tag.tbody(safe_join(month.weeks.map { |week| week_row(week) }))
+        tag.tbody(safe_join(month.weeks.map { |week| week_row(week) }),
+                  "data-shadcn--calendar-target": "weeks")
       end
 
       def week_row(week)
@@ -345,13 +395,21 @@ module Shadcn
       # the arrow keys — the grid pattern, and what upstream's `isFocusTarget`
       # does. The selected day if it is here, otherwise today, otherwise the
       # first day of the month.
-      def focus_target?(day)
-        return false if disabled?(day)
-
-        day == (selected.find { |date| month.days.include?(date) } ||
-                (Date.current if month.days.include?(Date.current)) ||
-                month.first)
+      #
+      # A disabled candidate is passed over rather than taken: a tab stop on a
+      # disabled button is no tab stop at all, and the grid would drop out of
+      # the tab order for a calendar whose selected day happens to be blocked.
+      # The controller repeats this rule after every re-render, because a month
+      # with nothing tabbable is a month the keyboard cannot reach.
+      def focus_target
+        @focus_target ||= [
+          selected.find { |date| month.days.include?(date) },
+          (Date.current if month.days.include?(Date.current)),
+          month.first
+        ].compact.find { |date| !disabled?(date) } || month.first
       end
+
+      def focus_target?(day) = day == focus_target
 
       def selected?(day)
         return @range.cover?(day) if @range
@@ -372,10 +430,37 @@ module Shadcn
           (end_month && day.beginning_of_month > end_month.end_of_month)
       end
 
-      def month_label = I18n.l(month.date, format: "%B %Y")
+      MONTH_FORMAT = "%B %Y"
+
+      def month_label = I18n.l(month.date, format: MONTH_FORMAT)
+
+      # The two lists as the controller indexes them: weekdays by `Date#wday`,
+      # months from zero, which is what `getDay()` and `getMonth()` hand back.
+      def month_names = I18n.t("date.month_names").compact
+      def short_month_names = I18n.t("date.abbr_month_names").compact
+
+      def selected_dates = selected.map(&:iso8601)
+
+      # A `Date` and a `Range` of them cross to the browser as themselves. A
+      # callable cannot — it decided the month the server rendered, and says
+      # nothing about a month reached from the nav. Named here rather than left
+      # to be discovered; see features/calendar.md.
+      def portable_matchers
+        Array.wrap(disabled).filter_map do |matcher|
+          case matcher
+          when Date then matcher.iso8601
+          when Range then { from: matcher.begin&.to_date&.iso8601, to: matcher.end&.to_date&.iso8601 }
+          end
+        end
+      end
+
+      # One pattern, localized once and then handed to the controller as text —
+      # rather than a weekday glued onto a formatted date on one side and not
+      # the other, which is how the two first disagreed.
+      def day_label_format = "%A, #{I18n.t('date.formats.long')}"
 
       def day_label(day)
-        label = "#{day_names[day.wday]}, #{I18n.l(day, format: :long)}"
+        label = I18n.l(day, format: day_label_format)
         label = shadcn_t("calendar.today_label", date: label) if day == Date.current
         label = shadcn_t("calendar.selected_label", date: label) if selected?(day)
         label
