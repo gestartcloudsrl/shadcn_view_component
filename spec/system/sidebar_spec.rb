@@ -106,11 +106,25 @@ RSpec.describe "Sidebar", :js do
     # briefly visible in the wrong place, and reading `rect` once races that.
     # `synchronize` retries the measurement instead, which is the same fix
     # `have_css(..., visible:)` was to `be_visible` elsewhere in this suite.
+    # The gap is the tooltip's arrow and nothing else: an arrow has to fit
+    # between the panel and what it points at, so `popper.js` adds its height to
+    # the side offset, which is Radix's own rule. This example is about the
+    # tooltip staying *on* the button as the button shrinks under it — a stranded
+    # one sits where the 239px row used to end — so it is measured against the
+    # arrow rather than against a number, and a widened window would have hidden
+    # the day the arrow stops being drawn.
+    arrow = page.evaluate_script(<<~JS)
+      (() => {
+        const c = [...document.querySelectorAll("[data-slot=tooltip-content]")].find(e => !e.hidden)
+        return Math.round(c.querySelector("[data-slot=tooltip-arrow]").getBoundingClientRect().width)
+      })()
+    JS
+
     page.document.synchronize do
       gap = label.rect.x - (button.rect.x + button.rect.width)
-      next if gap.between?(0, 8)
+      next if (gap - arrow).abs <= 1
 
-      raise Capybara::ExpectationNotMet, "the tooltip sits #{gap}px from its anchor"
+      raise Capybara::ExpectationNotMet, "the tooltip sits #{gap}px from its anchor, past its #{arrow}px arrow"
     end
   end
 
