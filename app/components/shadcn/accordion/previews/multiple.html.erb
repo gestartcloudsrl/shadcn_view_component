@@ -1,0 +1,13 @@
+<%# Upstream's "Multiple" and "Disabled". Both are arguments rather than
+    markup — `type: :multiple` lets more than one panel stay open at a time,
+    and a disabled item cannot be opened at all. %>
+<%= render(Shadcn::Accordion::Component.new(type: :multiple, value: %w[shipping returns], class: "w-[420px]")) do |acc| %>
+  <% [["shipping", "How long does shipping take?", "Two to five working days.", false],
+      ["returns", "Can I return an order?", "Within thirty days, unopened.", false],
+      ["wholesale", "Do you sell wholesale?", "Not reachable — this item is disabled.", true]].each do |value, question, answer, disabled| %>
+    <% acc.with_item(value:, disabled:) do |item| %>
+      <% item.with_trigger { question } %>
+      <% item.with_panel { answer } %>
+    <% end %>
+  <% end %>
+<% end %>

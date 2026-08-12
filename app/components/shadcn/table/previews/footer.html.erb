@@ -1,0 +1,25 @@
+<%# Upstream's "Footer": a `<tfoot>` totalling the rows above it. %>
+<%= render(Shadcn::Table::Component.new) do %>
+  <%= render(Shadcn::Table::Header::Component.new) do %>
+    <%= render(Shadcn::Table::Row::Component.new) do %>
+      <% ["Invoice", "Status", "Method", "Amount"].each do |head| %>
+        <%= render(Shadcn::Table::Head::Component.new) { head } %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Table::Body::Component.new) do %>
+    <% [["INV001", "Paid", "Credit Card", "$250.00"],
+        ["INV002", "Pending", "PayPal", "$150.00"],
+        ["INV003", "Unpaid", "Bank Transfer", "$350.00"]].each do |row| %>
+      <%= render(Shadcn::Table::Row::Component.new) do %>
+        <% row.each { |cell| %><%= render(Shadcn::Table::Cell::Component.new) { cell } %><% } %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Table::Footer::Component.new) do %>
+    <%= render(Shadcn::Table::Row::Component.new) do %>
+      <%= render(Shadcn::Table::Cell::Component.new(colspan: 3)) { "Total" } %>
+      <%= render(Shadcn::Table::Cell::Component.new) { "$750.00" } %>
+    <% end %>
+  <% end %>
+<% end %>

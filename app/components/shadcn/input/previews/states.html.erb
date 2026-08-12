@@ -1,0 +1,20 @@
+<%# Upstream shows these as four examples — "Disabled", "Invalid", "File" and
+    "Required". They are one page here because none of them is a variant: each
+    is an attribute the caller passes straight through, and seeing them beside
+    one another is what shows that.
+
+    Every control is labelled. axe takes a placeholder as an accessible name, so
+    a placeholder-less input is the one that fails — which is what the invalid
+    example needs to be, since it carries a value rather than a placeholder. %>
+<div class="flex w-[320px] flex-col gap-4">
+  <% [["ordinary", "Ordinary", {}],
+      ["disabled", "Disabled", { disabled: true }],
+      ["invalid", "Invalid", { value: "not-an-email", "aria-invalid": "true" }],
+      ["file", "File", { type: "file" }],
+      ["required", "Required", { required: true }]].each do |id, label, options| %>
+    <div class="flex flex-col gap-2">
+      <%= render(Shadcn::Label::Component.new(for: "input-#{id}")) { label } %>
+      <%= render(Shadcn::Input::Component.new(id: "input-#{id}", **options)) %>
+    </div>
+  <% end %>
+</div>

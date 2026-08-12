@@ -71,6 +71,23 @@ RSpec.describe "reverse parity" do
     "tabs" => %w[w-[420px]],
     "dropdown-menu-content" => %w[w-56],
     "select-trigger" => %w[w-[200px] w-[220px] w-[240px]],
+    # The two floating panels the previews size at the call site, for the same
+    # reason the dropdown's content is sized above: a panel does not know how
+    # wide its contents want to be.
+    "popover-content" => %w[w-56],
+    "hover-card-content" => %w[w-56],
+    # A vertical slider is as long as the caller makes it — the component sets
+    # no length on either axis, which is what lets the same one lie down.
+    "slider" => %w[h-48],
+    # The scrolling-dialog preview, and the only three classes in the gallery
+    # that are a *technique* rather than sizing. A dialog whose body scrolls has
+    # to say which grid row gives (`grid-rows-[auto_1fr_auto]`), cap its own
+    # height (`max-h-[80vh]`) and drop the gap that would show through a flush
+    # header. None is upstream's markup: they are what a caller adds, and the
+    # preview exists to show that they are needed. See the preview's own
+    # comment for the `min-h-0` that goes with them, which lands on a plain div
+    # and so never reaches this spec.
+    "dialog-content" => %w[gap-0 grid-rows-[auto_1fr_auto] max-h-[80vh]],
     "skeleton" => %w[size-12 w-[200px] w-[250px]],
     "empty" => %w[max-w-md],
     "item" => %w[max-w-md],

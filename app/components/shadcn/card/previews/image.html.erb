@@ -1,0 +1,37 @@
+<%# Upstream's "Image": the picture is the card's first child, full width, and
+    the card's top padding comes off so it sits flush against the edge.
+
+    Everything is rendered in the *block*, none of it through the `header` and
+    `footer` slots. `Card#call` emits its slots and then the block, so an image
+    written first but passed as block content lands last — under the footer,
+    which is what the first version of this preview did. Upstream has no such
+    reordering: its Card renders `{children}` and the source order is the DOM
+    order. The select and dropdown previews render their items in the block for
+    the same reason.
+
+    Two more things are the caller's here and the component's there. The Card in
+    the registry this gem ports is `flex flex-col gap-6 rounded-xl border
+    bg-card py-6 …` and nothing else — no `has-[>img:first-child]:pt-0`, no
+    `*:[img:first-child]:rounded-t-xl` — so `pt-0` and `overflow-hidden` are
+    written out. Measured on the docs page on 2026-08-12, where the Card also
+    carries `--card-spacing`, `ring-1 ring-foreground/10` and a `size`, none of
+    which is in `vendor/shadcn/ui/card.tsx`: that is the other registry, and it
+    is why this is close rather than identical.
+
+    The footer's top padding is not written here: `card-footer` carries
+    `[.border-t]:pt-6`, so giving it a border is what asks for it.
+
+    A block of colour rather than a photograph: the gallery ships no binary
+    assets, and `aspect-video w-full` is the part of the shape that matters. %>
+<%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm overflow-hidden pt-0")) do %>
+  <div class="flex aspect-video w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+    Where the picture goes
+  </div>
+  <%= render(Shadcn::Card::Header::Component.new) do |h| %>
+    <% h.with_title { "Lakeside cabin" } %>
+    <% h.with_description { "Two bedrooms, one jetty." } %>
+  <% end %>
+  <%= render(Shadcn::Card::Footer::Component.new(class: "border-t bg-muted/50")) do %>
+    <%= render(Shadcn::Button::Component.new(class: "w-full")) { "Book" } %>
+  <% end %>
+<% end %>

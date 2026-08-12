@@ -1,0 +1,15 @@
+<%# Upstream's "No Close Button": the corner dismiss is left out, so the only
+    ways out are the footer, Escape and a click outside. %>
+<%= render(Shadcn::Dialog::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open" } %>
+  <% d.with_dialog_content(show_close_button: false) do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "Terms of service" } %>
+      <% h.with_description { "You have to answer before this closes from inside." } %>
+    <% end %>
+    <% c.with_footer do %>
+      <%= render(Shadcn::Dialog::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Decline" } %>
+      <%= render(Shadcn::Button::Component.new) { "Accept" } %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -36,8 +36,25 @@ module Shadcn
 
         private
 
+        # Two elements, as Radix renders them: a wrapper that Popper pins to the
+        # side the content landed on, and inside it the rotated square shadcn
+        # styles. They cannot be one element — the classes set `rotate` and
+        # `translate`, which in Tailwind v4 are their own CSS properties and
+        # compose with `transform` rather than being overridden by it, so a
+        # placement written on the same element fights them instead of moving
+        # them. `popper.js` positions the wrapper.
+        #
+        # `display:block` on both, in a style attribute rather than a class,
+        # because upstream's arrow is an `<svg>` — a replaced element, which
+        # takes a width and a height where an inline `<span>` does not. Without
+        # it `size-2.5` applies to nothing and the arrow is 10px of intent and
+        # 0px of box: which is how this shipped, invisible however it was
+        # placed. A class would have to be one no vendored source carries, and
+        # `reverse_parity_spec` is there to notice that.
         def arrow
-          tag.span(class: ARROW_CLASSES, "data-slot": "tooltip-arrow")
+          tag.span("data-slot": "tooltip-arrow", style: "position:absolute;display:block") do
+            tag.span(class: ARROW_CLASSES, style: "display:block")
+          end
         end
       end
     end

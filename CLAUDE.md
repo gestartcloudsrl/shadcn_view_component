@@ -133,6 +133,16 @@ These bite while editing, so they are here rather than in the docs.
 - **Slot content renders before block content.** Mixing the two in one parent
   reorders things — see the select and dropdown previews for why they render
   items in the block.
+
+  It has now been shipped twice, both times in the gallery and both times found
+  by a person looking at a page. `radio_group/default` put every radio through
+  the `item` slot from inside a row, so all of them stacked above all the
+  labels. `card/image` wrote the image first and passed it as block content, so
+  it rendered under the footer. **Nothing in the suite can see this**: axe
+  passes because the ids still match, the snapshot passes because it is the HTML
+  the code produces, and no spec asserts where anything lands. When a preview
+  needs its parts in a particular order, render them all in the block — the
+  parts are ordinary components and `render` them directly.
 - **Select, Checkbox, Switch and the Slider's thumbs carry an ARIA role**, so they need
   a name pointed at them — the FormBuilder wires `aria-labelledby`, a bare
   component has nothing; `ThemeSelector` names its trigger the same way. (`<label

@@ -1,0 +1,38 @@
+<%# Upstream's "Small", "Media" and "Small with Media" — `size: :sm` and the
+    `media` slot, which the default preview shows neither of. The action is
+    styled destructive, which is upstream's "Destructive": the dialog itself has
+    no variant, so the colour is the button's. %>
+<div class="flex items-center gap-2">
+  <%= render(Shadcn::AlertDialog::Component.new) do |d| %>
+    <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Small" } %>
+    <% d.with_dialog_content(size: :sm) do |c| %>
+      <% c.with_header do |h| %>
+        <% h.with_title { "Discard draft?" } %>
+        <% h.with_description { "It has not been saved anywhere." } %>
+      <% end %>
+      <% c.with_footer do %>
+        <%= render(Shadcn::AlertDialog::Cancel::Component.new) { "Keep" } %>
+        <%= render(Shadcn::AlertDialog::Action::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :destructive))) { "Discard" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::AlertDialog::Component.new) do |d| %>
+    <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Small with media" } %>
+    <% d.with_dialog_content(size: :sm) do |c| %>
+      <%# The media sits inside the header, which is where upstream puts it and
+          what its `row-span-2` is measured against. %>
+      <% c.with_header do |h| %>
+        <% h.with_media do %>
+          <%= render(Shadcn::Icon::Component.new("circle")) %>
+        <% end %>
+        <% h.with_title { "Delete this project?" } %>
+        <% h.with_description { "Everything in it goes with it." } %>
+      <% end %>
+      <% c.with_footer do %>
+        <%= render(Shadcn::AlertDialog::Cancel::Component.new) { "Cancel" } %>
+        <%= render(Shadcn::AlertDialog::Action::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :destructive))) { "Delete" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

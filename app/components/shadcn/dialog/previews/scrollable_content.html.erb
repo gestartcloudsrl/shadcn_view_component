@@ -1,0 +1,29 @@
+<%# Upstream's "Scrollable Content": the body scrolls and the header and footer
+    stay put, which is what a dialog taller than the viewport has to do.
+
+    Two classes carry it, and the first version of this preview had neither, so
+    the panel simply grew past its own `max-h` and pushed its footer off the
+    screen. The content is a grid, so the rows have to be told which one gives —
+    `grid-rows-[auto_1fr_auto]` — and a grid item's `min-height` is `auto`,
+    which means it refuses to shrink below its content until `min-h-0` says it
+    may. Neither is upstream's markup: they are what a caller has to add, and
+    that is what this preview is for. %>
+<%= render(Shadcn::Dialog::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open a long dialog" } %>
+  <% d.with_dialog_content(class: "grid max-h-[80vh] grid-rows-[auto_1fr_auto] gap-0 p-0") do |c| %>
+    <% c.with_header(class: "border-b p-6") do |h| %>
+      <% h.with_title { "Release notes" } %>
+      <% h.with_description { "Everything that changed in this version." } %>
+    <% end %>
+    <div class="min-h-0 overflow-y-auto px-6 py-4">
+      <% 20.times do |i| %>
+        <p class="border-b py-3 text-sm text-muted-foreground last:border-b-0">
+          Change <%= i + 1 %> — a line long enough to make the body worth scrolling.
+        </p>
+      <% end %>
+    </div>
+    <% c.with_footer(class: "border-t p-6") do %>
+      <%= render(Shadcn::Dialog::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Close" } %>
+    <% end %>
+  <% end %>
+<% end %>

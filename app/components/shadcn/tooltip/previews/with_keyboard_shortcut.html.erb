@@ -1,0 +1,11 @@
+<%# Upstream's "With Keyboard Shortcut": the tooltip carries the shortcut for
+    the thing it names, which is the case a `Kbd` inside one exists for. %>
+<%= render(Shadcn::Tooltip::Component.new) do |t| %>
+  <% t.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Save" } %>
+  <% t.with_tooltip_content do %>
+    <span class="flex items-center gap-2">
+      Save changes
+      <%= render(Shadcn::Kbd::Component.new) { "⌘S" } %>
+    </span>
+  <% end %>
+<% end %>

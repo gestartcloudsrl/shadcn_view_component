@@ -6,6 +6,11 @@ module Shadcn
       def default
         render_with_template
       end
+
+      # Upstream's "No Close Button".
+      def no_close_button
+        render_with_template
+      end
     end
   end
 end

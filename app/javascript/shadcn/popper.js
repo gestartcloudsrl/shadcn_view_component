@@ -101,6 +101,63 @@ function availableSpace(side, anchorRect, sideOffset, padding, viewport) {
 // Positions `content` (already inside a wrapper from `createWrapper`) relative
 // to `anchor`, flipping and shifting to stay on screen. Returns the resolved
 // side and align, which callers mirror onto `data-side` / `data-align`.
+// Radix places the arrow itself, through Popper: a wrapper pinned to the side
+// the content ended up on, offset along the cross axis so it points at the
+// anchor's middle (vendor's `@radix-ui/react-popper`, measured on the live
+// tooltip on 2026-08-12 — `position:absolute; bottom:0; transform:translateY(100%);
+// left:43.5px` for a tooltip placed on top).
+//
+// The tooltip's content renders the same two elements Radix does — a bare
+// wrapper and, inside it, the rotated square shadcn styles — because the
+// styling classes set `rotate` and `translate`, which are their own CSS
+// properties in Tailwind v4 and compose with `transform` rather than losing to
+// it. Placement written on the same element fights them; on the wrapper it does
+// not. Without any of this the arrow is laid out in the text flow after the
+// label: rendered, never seen, which is how it shipped.
+// Radix's own, verbatim: the wrapper is pinned to the edge opposite the side
+// the content took, and each side turns it so the same square points outwards.
+const ARROW_TRANSFORM = {
+  top: "translateY(100%)",
+  bottom: "rotate(180deg)",
+  left: "translateY(50%) rotate(-90deg) translateX(50%)",
+  right: "translateY(50%) rotate(90deg) translateX(-50%)"
+}
+
+// One origin per side, and they are not decoration: three of these transforms
+// rotate, and a rotation is only as right as the point it turns about. A single
+// origin for all four — which is what this had, and what put the left and right
+// arrows somewhere nobody could see them — spins two of them off their own edge.
+const ARROW_ORIGIN = {
+  top: "",
+  right: "0 0",
+  bottom: "center 0",
+  left: "100% 0"
+}
+
+function placeArrow(arrow, side, anchorRect, size, wrapperX, wrapperY) {
+  const width = arrow.offsetWidth || 10
+  const height = arrow.offsetHeight || 10
+  const vertical = side === "top" || side === "bottom"
+  const padding = 6
+
+  Object.assign(arrow.style, {
+    position: "absolute",
+    top: "", right: "", bottom: "", left: "",
+    transform: ARROW_TRANSFORM[side],
+    transformOrigin: ARROW_ORIGIN[side]
+  })
+
+  if (vertical) {
+    const centre = anchorRect.left + anchorRect.width / 2 - wrapperX - width / 2
+    arrow.style.left = `${Math.round(Math.min(Math.max(padding, centre), Math.max(padding, size.width - width - padding)))}px`
+    arrow.style[side === "top" ? "bottom" : "top"] = "0px"
+  } else {
+    const centre = anchorRect.top + anchorRect.height / 2 - wrapperY - height / 2
+    arrow.style.top = `${Math.round(Math.min(Math.max(padding, centre), Math.max(padding, size.height - height - padding)))}px`
+    arrow.style[side === "left" ? "right" : "left"] = "0px"
+  }
+}
+
 export function position(anchor, content, options = {}) {
   const {
     side = "bottom",
@@ -116,6 +173,15 @@ export function position(anchor, content, options = {}) {
   const viewport = { width: window.innerWidth, height: window.innerHeight }
   const anchorRect = measure(anchor)
 
+  // An arrow has to fit between the panel and what it points at, so its height
+  // is part of the offset rather than something to subtract later — Radix does
+  // the same, `offset({ mainAxis: sideOffset + arrowHeight })` in
+  // `@radix-ui/react-popper`. Which is why a tooltip whose `sideOffset` is 0,
+  // as shadcn's is (tooltip.tsx:47), still stands clear of its trigger: without
+  // this the panel sits flush and the arrow lies across the thing it came from.
+  const arrow = content.querySelector("[data-slot$='-arrow']")
+  const offset = sideOffset + (arrow ? arrow.offsetHeight : 0)
+
   if (matchAnchorWidth) content.style.minWidth = `${anchorRect.width}px`
 
   // Measure without a stale transform in the way.
@@ -123,21 +189,21 @@ export function position(anchor, content, options = {}) {
   const size = { width: content.offsetWidth, height: content.offsetHeight }
 
   let resolvedSide = side
-  if (!fits(side, anchorRect, size, sideOffset, collisionPadding, viewport)) {
+  if (!fits(side, anchorRect, size, offset, collisionPadding, viewport)) {
     const flipped = OPPOSITE[side]
-    if (fits(flipped, anchorRect, size, sideOffset, collisionPadding, viewport)) {
+    if (fits(flipped, anchorRect, size, offset, collisionPadding, viewport)) {
       resolvedSide = flipped
     } else {
       // Neither fits: take whichever has more room.
       resolvedSide =
-        availableSpace(flipped, anchorRect, sideOffset, collisionPadding, viewport) >
-        availableSpace(side, anchorRect, sideOffset, collisionPadding, viewport)
+        availableSpace(flipped, anchorRect, offset, collisionPadding, viewport) >
+        availableSpace(side, anchorRect, offset, collisionPadding, viewport)
           ? flipped
           : side
     }
   }
 
-  let { x, y } = place(resolvedSide, align, anchorRect, size, sideOffset, alignOffset)
+  let { x, y } = place(resolvedSide, align, anchorRect, size, offset, alignOffset)
 
   // Shift back into the viewport along the cross axis.
   const maxX = viewport.width - size.width - collisionPadding
@@ -147,7 +213,7 @@ export function position(anchor, content, options = {}) {
 
   wrapper.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`
 
-  const available = availableSpace(resolvedSide, anchorRect, sideOffset, collisionPadding, viewport)
+  const available = availableSpace(resolvedSide, anchorRect, offset, collisionPadding, viewport)
   const originX = resolvedSide === "left" ? "100%" : resolvedSide === "right" ? "0%" : "50%"
   const originY = resolvedSide === "top" ? "100%" : resolvedSide === "bottom" ? "0%" : "50%"
   const transformOrigin = `${originX} ${originY}`
@@ -172,6 +238,8 @@ export function position(anchor, content, options = {}) {
 
   content.dataset.side = resolvedSide
   content.dataset.align = align
+
+  if (arrow) placeArrow(arrow, resolvedSide, anchorRect, size, x, y)
 
   return { side: resolvedSide, align }
 }

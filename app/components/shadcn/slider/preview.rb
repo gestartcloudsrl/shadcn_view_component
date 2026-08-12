@@ -6,6 +6,11 @@ module Shadcn
       def default
         render_with_template
       end
+
+      # Upstream's "Vertical".
+      def vertical
+        render_with_template
+      end
     end
   end
 end

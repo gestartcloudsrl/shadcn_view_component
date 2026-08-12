@@ -67,6 +67,28 @@ scroller's load behaviour is asserted, because it is the realistic case.
       promotion drops the panel 82, 176 and 270 pixels, one figure per ancestor,
       which is what a containing-block failure looks like.
 
+## Examples upstream's docs show and this registry does not have
+
+The gallery is being filled from the ToC of each component's docs page. Some of
+what is there cannot be shown here, and the reason is always the same: the docs
+now serve a different registry from the `new-york-v4` this gem ports. Measured
+against the cva blocks and the `data-[…]` keys in `vendor/shadcn/ui`, not by
+grepping — `button rounded` matches `rounded-md` in a class string and means
+nothing.
+
+- `accordion` — borders, card
+- `badge` — with-spinner
+- `button` — spinner, cursor
+- `card` — size, spacing
+- `empty` — background
+- `toggle-group` — custom, **vertical** (`toggle-group.tsx` takes no
+  orientation at all; this one was invented twice before it was checked, once
+  as an `orientation:` that landed as an inert HTML attribute and once as a
+  `flex-col` that stacked three items of three different widths)
+
+Anything added to this list belongs in a preview comment too, so the next
+person reads it where they would look for it.
+
 ## Components not ported (8)
 
 All 27 unported sources were vendored, so this list is derived from what they

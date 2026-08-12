@@ -1,0 +1,7 @@
+<%# Upstream's "Vertical". The orientation is the root's argument and the
+    thumbs' arrow keys follow it, so Up and Down move a vertical slider where
+    Left and Right move a horizontal one. %>
+<div class="flex h-56 items-start gap-10">
+  <%= render(Shadcn::Slider::Component.new(value: 40, orientation: :vertical, class: "h-48", aria_label: "Volume")) %>
+  <%= render(Shadcn::Slider::Component.new(value: [ 20, 80 ], orientation: :vertical, class: "h-48", aria_label: [ "Lowest", "Highest" ])) %>
+</div>

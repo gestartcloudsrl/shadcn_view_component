@@ -114,6 +114,57 @@ RSpec.describe "Tooltip", :js do
       expect(inside).to be(true)
     end
 
+    # Reported from the gallery: no triangle. The arrow was in the markup and had
+    # been since the port, so nothing that reads HTML could see it — it was an
+    # inline `<span>`, and `size-2.5` does not apply to one, so it was 10px of
+    # intent and a 0px box. Upstream's is an `<svg>`, which takes a width
+    # because a replaced element does.
+    #
+    # Nothing positioned it either: Radix places the arrow through Popper, and
+    # `popper.js` did not know it existed, so even sized it would have sat in
+    # the text flow after the label.
+    it "draws an arrow, with a box and outside the panel it points from", :aggregate_failures do
+      box = page.evaluate_script(<<~JS)
+        (() => {
+          const c = document.querySelector("[data-slot=tooltip-content]")
+          const a = c.querySelector("[data-slot=tooltip-arrow]")
+          const cr = c.getBoundingClientRect(), ar = a.getBoundingClientRect()
+          return { w: Math.round(ar.width), h: Math.round(ar.height),
+                   below: Math.round(ar.bottom - cr.bottom),
+                   centred: Math.abs((ar.left + ar.width / 2) - (cr.left + cr.width / 2)) < 2 }
+        })()
+      JS
+
+      expect(box["w"]).to be > 0
+      expect(box["h"]).to be > 0
+      # Placed on the tooltip's own side — this one opens on top, so the arrow
+      # hangs below it — and pointed at the middle of the trigger.
+      expect(box["below"]).to be > 0
+      expect(box["centred"]).to be(true)
+    end
+
+    # And the panel stands clear of the trigger by the arrow's own height, which
+    # is what makes room for it. Radix folds that into the offset —
+    # `offset({ mainAxis: sideOffset + arrowHeight })` — which is why shadcn's
+    # `sideOffset = 0` (tooltip.tsx:47) still leaves a gap. Without it the panel
+    # sits flush and the arrow lies across the thing it points at, which is how
+    # this looked when it was reported.
+    it "stands off the trigger by the height of its own arrow", :aggregate_failures do
+      gap = page.evaluate_script(<<~JS)
+        (() => {
+          const c = document.querySelector("[data-slot=tooltip-content]")
+          const a = c.querySelector("[data-slot=tooltip-arrow]")
+          const t = document.querySelector("[data-slot=tooltip-trigger]")
+          const cr = c.getBoundingClientRect(), ar = a.getBoundingClientRect()
+          return { clear: Math.round(t.getBoundingClientRect().top - cr.bottom),
+                   arrowH: Math.round(ar.height) }
+        })()
+      JS
+
+      expect(gap["arrowH"]).to be > 0
+      expect(gap["clear"]).to be_within(1).of(gap["arrowH"])
+    end
+
     it "never takes focus" do
       expect(page.evaluate_script("document.activeElement.dataset.slot")).not_to eq("tooltip-content")
     end
@@ -136,6 +187,58 @@ RSpec.describe "Tooltip", :js do
       trigger.hover
 
       expect(find(content)["data-side"]).to eq("bottom")
+    end
+  end
+
+  # The four sides, on the preview built for them. `side:` belongs to the root:
+  # passed to `with_tooltip_content` it is swallowed into the content's
+  # attributes and quietly does nothing, which is how the sides preview shipped
+  # asking for `top` four times and looking, correctly, identical. Nothing here
+  # could see it — a keyword that lands in the attribute splat is valid Ruby,
+  # valid HTML, and invisible to every spec that reads the DOM for what it
+  # expected rather than for what was asked.
+  context "when a side is asked for" do
+    before do
+      visit_preview(:tooltip, :sides)
+      wait_for_stimulus
+    end
+
+    %w[Top Right Bottom Left].each do |label|
+      it "opens on the #{label.downcase} and stands clear of the trigger" do
+        find("[data-slot=tooltip-trigger]", text: label).hover
+        expect(page).to have_css(content)
+
+        measured = page.evaluate_script(<<~JS)
+          (() => {
+            const c = [...document.querySelectorAll("[data-slot=tooltip-content]")].find(e => !e.hidden)
+            const t = c.closest("[data-slot=tooltip]").querySelector("[data-slot=tooltip-trigger]")
+            const cr = c.getBoundingClientRect(), tr = t.getBoundingClientRect()
+            const side = c.dataset.side
+            const clear = side === "top" ? tr.top - cr.bottom
+                        : side === "bottom" ? cr.top - tr.bottom
+                        : side === "left" ? tr.left - cr.right
+                        : cr.left - tr.right
+            const a = c.querySelector("[data-slot=tooltip-arrow]")
+            const ar = a.getBoundingClientRect()
+            // How far the arrow reaches past the panel, on the edge it belongs to.
+            const past = side === "top" ? ar.bottom - cr.bottom
+                       : side === "bottom" ? cr.top - ar.top
+                       : side === "left" ? ar.right - cr.right
+                       : cr.left - ar.left
+            return { side, clear: Math.round(clear),
+                     arrow: [ Math.round(ar.width), Math.round(ar.height) ],
+                     past: Math.round(past) }
+          })()
+        JS
+
+        expect(measured["side"]).to eq(label.downcase)
+        expect(measured["clear"]).to be > 0
+        # The arrow has a box and it leans out of the panel towards the trigger.
+        # Without this the left and right arrows spun about the wrong origin and
+        # landed off their own edge, which four green examples did not notice.
+        expect(measured["arrow"]).to all(be > 0)
+        expect(measured["past"]).to be > 0
+      end
     end
   end
 

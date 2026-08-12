@@ -1,0 +1,34 @@
+<%# Upstream's "Checkboxes", "Radio Group" and "Destructive", none of which the
+    default preview shows: it has the label, the items, the separators and the
+    shortcuts, and stops there.
+
+    A checkbox item keeps the menu open when chosen and a radio item replaces
+    whichever of its group was set — both are the menu's own behaviour rather
+    than markup, and both are the dropdown controller's. %>
+<div class="flex items-center gap-2">
+  <%= render(Shadcn::DropdownMenu::Component.new) do |m| %>
+    <% m.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "View" } %>
+    <% m.with_menu_content(class: "w-56") do %>
+      <%= render(Shadcn::DropdownMenu::Label::Component.new) { "Appearance" } %>
+      <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+      <%= render(Shadcn::DropdownMenu::CheckboxItem::Component.new(checked: true)) { "Status bar" } %>
+      <%= render(Shadcn::DropdownMenu::CheckboxItem::Component.new) { "Activity bar" } %>
+      <%= render(Shadcn::DropdownMenu::CheckboxItem::Component.new(disabled: true)) { "Panel — not available" } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::DropdownMenu::Component.new) do |m| %>
+    <% m.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Panel position" } %>
+    <% m.with_menu_content(class: "w-56") do %>
+      <%= render(Shadcn::DropdownMenu::Label::Component.new) { "Position" } %>
+      <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+      <%= render(Shadcn::DropdownMenu::RadioGroup::Component.new) do %>
+        <% %w[Top Bottom Right].each do |side| %>
+          <%= render(Shadcn::DropdownMenu::RadioItem::Component.new(value: side.downcase, checked: side == "Bottom")) { side } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::DropdownMenu::Separator::Component.new) %>
+      <%= render(Shadcn::DropdownMenu::Item::Component.new(variant: :destructive)) { "Reset layout" } %>
+    <% end %>
+  <% end %>
+</div>
