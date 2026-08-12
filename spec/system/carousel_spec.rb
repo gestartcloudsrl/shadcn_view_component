@@ -36,6 +36,85 @@ RSpec.describe "Carousel", :js do
     JS
   end
 
+  # Which slide is at the window's start. The component decides where to scroll
+  # by asking the slide to align itself, so this asks the same question back
+  # rather than predicting a number — arithmetic here was wrong twice, once by a
+  # gutter and once by landing between the browser's own snap points.
+  def leading_slide
+    page.evaluate_script(<<~JS)
+      (() => {
+        const v = document.querySelector(#{viewport.to_json})
+        const box = v.getBoundingClientRect()
+        const distances = [...v.querySelectorAll("[data-slot=carousel-item]")]
+          .map((i) => Math.abs(i.getBoundingClientRect().left - box.left))
+        return distances.indexOf(Math.min(...distances))
+      })()
+    JS
+  end
+
+  # The same once the scroll has stopped moving.
+  def settled_leading_slide
+    last = nil
+
+    page.document.synchronize do
+      at = geometry["at"]
+      settled = at == last
+      last = at
+      raise Capybara::ExpectationNotMet, "still moving" unless settled
+
+      leading_slide
+    end
+  end
+
+  def each_carousel(&)
+    all("[data-slot=carousel]").each(&)
+  end
+
+  def leading_slide_in(root)
+    index_of_leading_slide(root["id"] || nil, root)
+  end
+
+  def settled_leading_slide_in(root)
+    last = nil
+
+    page.document.synchronize do
+      at = root.evaluate_script("this.querySelector('[data-slot=carousel-content]').scrollLeft").round
+      settled = at == last
+      last = at
+      raise Capybara::ExpectationNotMet, "still moving" unless settled
+
+      leading_slide_in(root)
+    end
+  end
+
+  def index_of_leading_slide(_id, root)
+    root.evaluate_script(<<~JS)
+      (() => {
+        const v = this.querySelector("[data-slot=carousel-content]")
+        const box = v.getBoundingClientRect()
+        const distances = [...v.querySelectorAll("[data-slot=carousel-item]")]
+          .map((i) => Math.abs(i.getBoundingClientRect().left - box.left))
+        return distances.indexOf(Math.min(...distances))
+      })()
+    JS
+  end
+
+  def visible_slide_content_in(root)
+    root.evaluate_script(<<~JS)
+      (() => {
+        const v = this.querySelector("[data-slot=carousel-content]")
+        const box = v.getBoundingClientRect()
+        return [...v.querySelectorAll("[data-slot=carousel-item] > *")]
+          .map((c) => {
+            const r = c.getBoundingClientRect()
+            return { left: r.left - box.left, right: r.right - box.left, width: box.width }
+          })
+          .filter((r) => r.right > 0.5 && r.left < r.width - 0.5)
+          .map((r) => r.left >= -0.5 && r.right <= r.width + 0.5)
+      })()
+    JS
+  end
+
   # Whether what a slide holds is wholly inside the window, which is the thing a
   # person sees. Reported as "the right border disappears": a card whose edge
   # falls a pixel outside a hidden overflow loses its border and nothing else,
@@ -86,23 +165,21 @@ RSpec.describe "Carousel", :js do
   end
 
   it "moves to the next slide, and to the one after it" do
-    second, third = geometry["offsets"].values_at(1, 2)
+    expect(leading_slide).to eq(0)
 
     find(nxt).click
-    expect(resting_position).to eq(second)
+    expect(settled_leading_slide).to eq(1)
 
     find(nxt).click
-    expect(resting_position).to eq(third)
+    expect(settled_leading_slide).to eq(2)
   end
 
   it "comes back the way it went" do
-    second = geometry["offsets"][1]
-
     find(nxt).click
-    expect(resting_position).to eq(second)
+    expect(settled_leading_slide).to eq(1)
 
     find(previous).click
-    expect(resting_position).to be_zero
+    expect(settled_leading_slide).to eq(0)
     expect(find(previous)).to be_disabled
   end
 
@@ -116,9 +193,11 @@ RSpec.describe "Carousel", :js do
   it "shows every slide whole, border and all", :aggregate_failures do
     expect(visible_slide_content).to all(be(true))
 
-    (geometry["offsets"].size - 1).times do |i|
+    slides = geometry["offsets"].size
+
+    (slides - 1).times do |i|
       find(nxt).click
-      expect(resting_position).to eq(geometry["offsets"][i + 1])
+      expect(settled_leading_slide).to eq(i + 1)
       expect(visible_slide_content).to all(be(true))
     end
   end
@@ -159,16 +238,14 @@ RSpec.describe "Carousel", :js do
   # Upstream binds these on the root and captures, so a control inside a slide
   # does not swallow them (carousel.tsx:119).
   it "moves with the arrow keys" do
-    second = geometry["offsets"][1]
-
     # Pressed on the next button, which is where a keyboard reaches this
     # component: the root takes no focus of its own, upstream's does not either,
     # and the handler is on the capture phase so it sees keys from inside.
     find(nxt).send_keys(:arrow_right)
-    expect(resting_position).to eq(second)
+    expect(settled_leading_slide).to eq(1)
 
     find(nxt).send_keys(:arrow_left)
-    expect(resting_position).to be_zero
+    expect(settled_leading_slide).to eq(0)
   end
 
   # The viewport is a real scroll container, which is the whole mechanism: a
@@ -189,6 +266,54 @@ RSpec.describe "Carousel", :js do
     expect(style["overflowX"]).to eq("auto")
     expect(style["snap"]).to eq("x mandatory")
     expect(style["align"]).to eq("start")
+  end
+
+  # Both of the reported defects were found here rather than on the default,
+  # and for two different reasons: more than one slide is visible at a time, and
+  # the second carousel asks for a smaller gutter. Upstream gives the *track*
+  # the caller's classes (carousel.tsx:138-152) and this port gave them to the
+  # viewport, so `-ml-2` landed where it does nothing while the items took
+  # `pl-2` — a gutter disagreeing with its own padding, which is a card whose
+  # left border is outside the window before anything is even scrolled.
+  describe "when several slides are visible at once" do
+    before do
+      visit_preview(:carousel, :sizes)
+      wait_for_stimulus
+    end
+
+    it "gives the track the gutter the caller asked for", :aggregate_failures do
+      gutters = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("[data-slot=carousel-content]")].map((v) => {
+          const track = v.firstElementChild
+          const item = v.querySelector("[data-slot=carousel-item]")
+          return { track: Math.round(parseFloat(getComputedStyle(track).marginLeft)),
+                   item: Math.round(parseFloat(getComputedStyle(item).paddingLeft)) }
+        })
+      JS
+
+      expect(gutters.size).to eq(2)
+      gutters.each { |pair| expect(pair["track"]).to eq(-pair["item"]) }
+    end
+
+    it "walks the whole way through, showing every slide whole", :aggregate_failures do
+      each_carousel do |root|
+        slides = root.all("[data-slot=carousel-item]").size
+        seen = [ leading_slide_in(root) ]
+
+        (slides - 1).times do
+          break if root.find("[data-slot=carousel-next]").disabled?
+
+          root.find("[data-slot=carousel-next]").click
+          seen << settled_leading_slide_in(root)
+          expect(visible_slide_content_in(root)).to all(be(true))
+        end
+
+        # It got somewhere, and never twice to the same place — which is what
+        # sticking on the second slide looked like.
+        expect(seen.uniq.size).to eq(seen.size)
+        expect(seen.last).to be >= slides - 3
+      end
+    end
   end
 
   describe "when it is vertical" do

@@ -24,9 +24,14 @@ module Shadcn
 
         def initialize(orientation: :horizontal, **attributes)
           @orientation = orientation&.to_sym == :vertical ? :vertical : :horizontal
-          super(**attributes)
+          # Held for the track and kept off the viewport, which is upstream's
+          # arrangement: `{...props}` and the className land on the inner div.
+          @track = attributes
+          super()
         end
 
+        # The caller's attributes went to the track above, so the viewport is
+        # given only its own.
         def element_attributes(**defaults)
           super(**{
             # Upstream sets no tabindex, and upstream's viewport is not a
@@ -47,13 +52,28 @@ module Shadcn
           }.merge(defaults))
         end
 
-        # The track is upstream's inner div: it takes the caller's classes,
-        # where the viewport takes none.
+        # Upstream gives the *track* the caller's className and leaves the
+        # viewport with `overflow-hidden` and nothing else (carousel.tsx:138-152).
+        # This port had it the other way round, so a preview asking for a
+        # smaller gutter with `-ml-2` put it on the viewport, where it does
+        # nothing, while the track kept `-ml-4` and the items took `pl-2`. A
+        # gutter that disagrees with its own padding is a slide whose content
+        # starts outside the window, which is a card with no left border.
         def call
-          render_element(body: tag.div(safe_join([ items, content ].flatten.compact), class: track_classes))
+          render_element(body: tag.div(safe_join([ items, content ].flatten.compact), **track_attributes))
         end
 
         private
+
+        def track_attributes
+          extra = @track.except(:class, "class")
+
+          # Merged rather than concatenated: a caller asking for a smaller gutter
+          # passes `-ml-2`, and `flex -ml-4 -ml-2` leaves both in the attribute
+          # for the cascade to arbitrate. `cn` is what resolves that everywhere
+          # else in this port.
+          extra.merge(class: ShadcnViewComponent.cn(track_classes, @track[:class] || @track["class"]))
+        end
 
         def track_classes
           horizontal? ? "flex -ml-4" : "flex -mt-4 flex-col"

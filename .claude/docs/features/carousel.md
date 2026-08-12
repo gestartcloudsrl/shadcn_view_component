@@ -69,6 +69,21 @@ The same divergence, for the same reason, as `scroll-area-viewport`.
 It earns its place beyond the audit. Tab now reaches the slides and the arrow
 keys move them; before, the only way through the component was its two buttons.
 
+## The caller's classes go on the track
+
+Upstream gives `CarouselContent`'s className and props to the **inner** div and
+leaves the viewport with `overflow-hidden` and nothing else
+(carousel.tsx:138-152). This port had it the other way round for a day, and the
+consequence was not cosmetic: upstream's "Spacing" example asks for a smaller
+gutter with `-ml-2` on the content and `pl-2` on the items, and with the class
+landing on the viewport the track kept `-ml-4` while the items took `pl-2`. A
+gutter that disagrees with its own padding puts the first slide's content
+outside the window before anything is scrolled — a card with no left border.
+
+Merged with `cn` rather than concatenated, for the same reason every other class
+in this port is: `flex -ml-4 -ml-2` leaves both in the attribute and lets the
+cascade decide.
+
 ## What moving by one slide means
 
 Not "the current position plus one item's width", and not "where the item sits
@@ -84,15 +99,33 @@ scrolling to one lines an item's *box* up with the window and pushes a gutter of
 its *content* off the far side. One border's worth, which no attribute records
 and no spec that reads the DOM can see.
 
-Measured from the **first item**, they are the numbers the browser itself uses:
-the scroll origin is the track's start, so `scroll-snap-align: start` already
-agrees with them and a released drag lands where a button would. A version of
-this set a negative `scroll-margin` on every item to make that true; measured,
-it already was, and no mutation could tell the difference, so it is gone.
+So the controller computes nothing. It asks which slide is at the window's start
+and calls `scrollIntoView` on the one beside it, which aligns by the same rule a
+released drag settles on — so a finger and a button cannot disagree, and there
+is no arithmetic left to be wrong about the gutter. Two versions of this did the
+sum themselves and both were wrong: one by a gutter, and one by landing between
+the browser's own snap points, where `scroll-snap-type: mandatory` pulled it
+straight back and the carousel stuck on its second slide.
+
+What the browser needs told is where a slide *begins*: `scroll-snap-align:
+start` aligns a box, and an item's box starts a gutter before its content. Each
+item takes a negative `scroll-margin` of its own leading padding, read from the
+item rather than fixed, because the gutter is the caller's.
 
 `spec/system/carousel_spec.rb` asserts what a person sees rather than where the
-scroller stands: after every move, each visible slide's content is wholly inside
-the window.
+scroller stands: which slide is in front, and that after every move each visible
+slide's content is wholly inside the window. It walks both of the "Sizes"
+carousels end to end, since more than one slide visible at a time and a
+non-default gutter are what the two reported defects needed.
+
+## What this gallery cannot show you
+
+The browsing context the Chrome extension drives runs **no animation frames**.
+Smooth scrolling never starts there, and neither do `scroll` events — which
+Chrome dispatches at frame time — so the buttons keep whatever state `connect`
+gave them however far the carousel is scrolled. Both are artefacts of that
+context: headless Chrome runs frames, and the system spec covers both. Worth
+knowing before reading a stuck-looking button there as a defect.
 
 ## The keyboard
 

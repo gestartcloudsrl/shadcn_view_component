@@ -18,6 +18,8 @@ export default class extends Controller {
     this.update = this.update.bind(this)
     this.viewportTarget.addEventListener("scroll", this.update, { passive: true })
 
+    this.alignSnapPoints()
+
     // A slide is as wide as the viewport until a caller says otherwise, so both
     // answers change when the box does.
     this.resizes = new ResizeObserver(this.update)
@@ -49,34 +51,39 @@ export default class extends Controller {
     return [ ...this.viewportTarget.querySelectorAll("[data-slot=carousel-item]") ]
   }
 
-  // Measured rather than counted in widths, and **relative to the first slide**.
+  // A slide begins where its *content* begins, and `scroll-snap-align: start`
+  // aligns a box. The track carries a negative margin against each item's
+  // padding — upstream's gutter, `-ml-4` against `pl-4` — so an item's box
+  // starts a gutter before what it holds, and snapping the box to the window
+  // pushes a gutter of the card past the far edge. One border's worth, which is
+  // how this was reported twice.
   //
-  // That is the whole of the fix for a reported defect, and the reason is worth
-  // keeping. The track carries a negative margin against each item's padding —
-  // upstream's gutter, `-ml-4` against `pl-4` — so an item is a gutter wider
-  // than the window, and its box begins a gutter left of the scroller's zero.
-  // Taken from the viewport's edge, the numbers are a gutter short: scrolling to
-  // one lines an item's *box* up with the window and pushes a gutter of its
-  // *content* off the far side. A card loses its border that way, and nothing
-  // that reads attributes can tell.
-  //
-  // Relative to the first item they are what the browser itself uses: the
-  // scroll origin is the track's start, so `scroll-snap-align: start` already
-  // agrees with these, and a released drag lands where a button would. An
-  // earlier version set a negative `scroll-margin` on every item to make that
-  // true; measured, it already was, and no mutation could tell the difference.
-  get offsets() {
+  // A negative `scroll-margin` moves each item's snap area onto its content.
+  // Read from the item rather than fixed at `1rem`, because the gutter is the
+  // caller's: upstream's "Spacing" example halves it.
+  alignSnapPoints() {
+    for (const item of this.items) {
+      const style = getComputedStyle(item)
+      const gutter = parseFloat(this.vertical ? style.paddingTop : style.paddingLeft) || 0
+
+      item.style[this.vertical ? "scrollMarginTop" : "scrollMarginLeft"] = `${-gutter}px`
+    }
+  }
+
+  // Which slide is at the window's start. Asked of the page rather than worked
+  // out: every version of this that did arithmetic got it wrong — once by a
+  // gutter, once by landing between the browser's own snap points — and the
+  // page always knows.
+  get leadingIndex() {
     const box = this.viewportTarget.getBoundingClientRect()
     const start = this.vertical ? box.top : box.left
-    const positions = this.items.map((item) => {
+    const distances = this.items.map((item) => {
       const rect = item.getBoundingClientRect()
 
-      return (this.vertical ? rect.top : rect.left) - start + this.position
+      return Math.abs((this.vertical ? rect.top : rect.left) - start)
     })
 
-    const first = positions[0] ?? 0
-
-    return positions.map((position) => Math.round(position - first))
+    return distances.indexOf(Math.min(...distances))
   }
 
   previous() {
@@ -99,25 +106,21 @@ export default class extends Controller {
     }
   }
 
-  // The nearest slide past where we are, in the direction asked for. A pixel of
-  // slack because a settled scroll is rarely a whole number.
+  // The slide next to the one in front, placed by the browser rather than by a
+  // number of this controller's own. `scrollIntoView` uses the same alignment a
+  // released drag settles on, so a finger and a button cannot disagree.
+  //
+  // `nearest` on the other axis so the page does not move under a horizontal
+  // carousel. No `behavior`: `scroll-behavior` is declared in CSS under a
+  // reduced-motion guard, and a context that has decided not to animate can
+  // leave a `behavior: "smooth"` scroll unstarted rather than instant.
   go(direction) {
-    const at = this.position
-    const offsets = this.offsets
-    const candidates = direction > 0
-      ? offsets.filter((offset) => offset > at + 1)
-      : offsets.filter((offset) => offset < at - 1).reverse()
+    const item = this.items[this.leadingIndex + direction]
+    if (!item) return
 
-    const to = candidates[0]
-    if (to === undefined) return
-
-    // No `behavior` here. `scroll-behavior` is in the stylesheet, under a
-    // `prefers-reduced-motion` guard, so the browser decides whether to animate
-    // and this asks only for a destination. Passing `behavior: "smooth"` would
-    // take that decision away from it — and in a context that runs no animation
-    // frames the scroll then never starts at all, which is a carousel that does
-    // nothing rather than one that jumps.
-    this.viewportTarget.scrollTo({ [this.vertical ? "top" : "left"]: to })
+    item.scrollIntoView(this.vertical
+      ? { block: "start", inline: "nearest" }
+      : { inline: "start", block: "nearest" })
   }
 
   // A pixel of slack at each end: a smooth scroll settles on a fractional
