@@ -1,0 +1,15 @@
+<%# The two routes sonner does not have.
+
+    Rendered with the page — which is what `Toaster::Component.new(flash:)` does
+    with a Rails flash, mapping `:notice` and `:alert` to the two variants
+    `redirect_to` produces without being asked — and appended afterwards, which
+    is what a `turbo_stream.append "shadcn-toasts"` does. Both arrive as ordinary
+    elements in the list, and the controller starts their clocks because it
+    watches the list rather than being told. %>
+<%= render(Shadcn::Toaster::Component.new(position: "top-center", duration: 0)) do |t| %>
+  <% t.with_toast(title: "Rendered with the page", description: "A flash, or anything else the server knows.", variant: :success) %>
+  <% t.with_toast(title: "Appended afterwards", description: "A turbo_stream.append onto this same list.", variant: :info) do |toast| %>
+    <% toast.with_action(variant: :outline, size: :sm) { "Undo" } %>
+  <% end %>
+  <% t.with_toast(title: "Still working", description: "A loading toast keeps no clock at all.", variant: :loading) %>
+<% end %>

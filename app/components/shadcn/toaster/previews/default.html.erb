@@ -1,0 +1,19 @@
+<%# The JavaScript route: an event on the document, which the toaster hears
+    wherever it is on the page. `sonner`'s `toast()` is a function you import;
+    this is an event, because a Rails app has no bundler step to import into. %>
+<div class="flex flex-wrap items-center gap-2">
+  <% [["default", "Event created"],
+      ["success", "Changes saved"],
+      ["info", "A new version is available"],
+      ["warning", "Your trial ends on Friday"],
+      ["error", "Could not save changes"]].each do |variant, message| %>
+    <%= render(Shadcn::Button::Component.new(
+          variant: :outline,
+          onclick: "document.dispatchEvent(new CustomEvent('shadcn--toast', { detail: " \
+                   "{ title: #{message.to_json}, description: 'Sunday, December 03, 2023 at 9:00 AM', " \
+                   "variant: #{variant.to_json} } }))"
+        )) { variant.capitalize } %>
+  <% end %>
+</div>
+
+<%= render(Shadcn::Toaster::Component.new) %>
