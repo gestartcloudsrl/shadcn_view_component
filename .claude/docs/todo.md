@@ -353,16 +353,21 @@ noting that it would not have delivered the component that raised the question:
       `accessibility_spec` cannot see it: the sidebar preview is only ever
       exercised at desktop width, where there is no sheet. Whatever fixes it
       should add a mobile case there at the same time.
-- [ ] **`--animate-caret-blink` was left out of the reduced-motion pass.** It is
-      the only `infinite` animation in `shadcn.css` and so the strongest
-      candidate of the lot, and it got neither of the two things the others
-      did: it is still in the `@theme inline` block rather than the plain
-      `@theme` a host can retune at runtime, and no `@media
-      (prefers-reduced-motion: reduce)` collapses it. `reduced_motion_spec`
-      cannot see the gap either — its scan looks for `animate-in`/`animate-out`/
-      `animate-accordion-*` in `app/components`, and nothing there uses this
-      one. Nothing consumes it today: InputOTP, the component it exists for, is
-      unported.
+- [ ] **`--animate-caret-blink` was left out of the reduced-motion pass, and it
+      now ships.** It is the only `infinite` animation in `shadcn.css` and so the
+      strongest candidate of the lot, and it got neither of the two things the
+      others did: it is still in the `@theme inline` block (shadcn.css:137)
+      rather than the plain `@theme` a host can retune at runtime, and no
+      `@media (prefers-reduced-motion: reduce)` collapses it.
+      `reduced_motion_spec` cannot see the gap: its scan is
+      `/animate-(?:in|out|accordion-up|accordion-down)/` over `app/components`,
+      and this name is not in it.
+
+      **This entry used to end "nothing consumes it today: InputOTP, the
+      component it exists for, is unported." InputOTP has since shipped** —
+      `input_otp/slot/component.rb:14` renders `animate-caret-blink` on the fake
+      caret — so a shipped component now blinks forever for a reader who asked
+      for no motion. That moves this from tidiness to a real defect.
 - [ ] **Two previews claim `<label for>` cannot name a `<button>`.**
       `switch/previews/default.html.erb` and `field/previews/default.html.erb`
       both say so, and it is exactly the misconception

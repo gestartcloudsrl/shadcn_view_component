@@ -22,6 +22,16 @@ Three responses, in order of value:
 Parity still runs **one way**: when upstream removes a class the port keeps it
 and nothing fails.
 
+**A false positive is an extractor bug until proved otherwise.** `parity_spec`
+holds an `allowed_missing` list, which is the obvious place to send anything it
+reports wrongly — and the wrong one. Porting the carousel, it named `/>` as a
+class the port had dropped: the string
+`"useCarousel must be used within a <Carousel />"` tokenizes into something with
+a slash in it, and every real Tailwind utility has a letter. The fix went into
+`class_like?` (`spec/support/shadcn_source.rb:91`), not into the list. An entry
+in `allowed_missing` silences one file forever; a tokenizer that admits
+punctuation goes on lying about the rest.
+
 ## What the parity list assertion proves, now that sources arrive early
 
 All 27 unported components are vendored, so `vendor/shadcn/ui` no longer holds
@@ -160,8 +170,10 @@ Four things to know before writing one:
 The suite suppresses animations twice over, and both settings are right for
 every other spec: the driver runs Chrome with `--force-prefers-reduced-motion`,
 and `Capybara.disable_animation` makes Capybara's own server inject
-`*, ::before, ::after { … animation-duration: 0s !important; … }` into every
-page it serves.
+`*, ::before, ::after { transition: none !important; animation-duration: 0s
+!important; animation-delay: 0s !important; scroll-behavior: auto !important }`
+into every page it serves. The first of those four is not the same kind of thing
+as the others and has its own subsection below.
 
 `exit_animation_spec.rb` forces a duration back onto the elements under test
 (`force_animations`) rather than registering a second driver. Only the duration
@@ -230,10 +242,39 @@ Three traps, each of which cost a review round:
   `willEnd` filters it out the same as it would the shipped `animate-out`'s
   own 0s, and `ExitQueue.defer` never sets `data-exiting` at all.
 
+### A transition is not an animation, and the harness deletes it outright
+
+Everything above is about keyframes. Capybara's injected rule
+(`capybara-3.40.0/lib/capybara/server/animation_disabler.rb:64-71`) also carries
+`transition: none !important`, and that is a stronger thing than the `0s` it does
+to animations: `none` removes the transition **property**, so forcing a duration
+back changes nothing — the property has to come back too.
+`spec/system/toaster_spec.rb` sets `transition: all 2s` inline with `!important`,
+which is `force_animations`' trick with one more thing restored.
+
+The consequence is the same as for a zeroed animation and arrives by the same
+route: `getAnimations()` returns transitions as well, so with them removed
+`ExitQueue.defer` finds an empty list and takes its synchronous branch. An
+element whose exit is a *transition* therefore leaves the DOM in the tick it was
+closed, everywhere in this suite except where a spec hands the property back.
+
+One component is affected today: the toaster is the only closing element here
+built on a transition (`data-[state=closed]:opacity-0`) rather than on
+`animate-out`, which the other sixteen use. It shipped with its exit not playing
+at all for an unrelated reason, and nothing noticed — see
+[04-bugs-fixed.md](04-bugs-fixed.md).
+
 ## axe
 
-Runs over every family, at rest and with each layer open, plus contrast in dark
-mode. Worth remembering: three of the first 13 "failures" were my own spec bugs —
+Runs over **every preview**, at rest and with each layer open, plus contrast in
+dark mode. It audited one preview per family until the gallery-filling round
+widened the glob to `*/previews/*.html.erb`, and the difference is not
+cosmetic: a variant only reachable from a second preview was unaudited, and
+widening it caught unnamed inputs, an unlabelled one-time-code field and a
+`role="list"` containing a link on the way in. A family with one preview is a
+family audited once.
+
+Worth remembering: three of the first 13 "failures" were my own spec bugs —
 the rule is `color-contrast` not `color_contrast`, and `button` had no `default`
 preview. **A red axe run is not automatically a product bug.**
 
@@ -434,7 +475,7 @@ the parity pair compares class tokens. **Not one of them renders a picture.** A
 component can be wrong in every way that matters to a person while every
 assertion about it passes.
 
-This has now cost three times, all with a green suite:
+These three were the first, all with a green suite:
 
 - the searchable select's cursor moved but coloured nothing, because the
   highlight moved to an attribute no rule styled;
@@ -445,7 +486,15 @@ This has now cost three times, all with a green suite:
   through the icons.
 
 Every one was found by a person opening the page, and every one had passed
-everything. So: look before calling a component done, and if you have not
+everything. **It has kept happening in every branch since**, so the count is no
+longer worth keeping: the toaster alone was reported three times — the stack that
+did not stack, the flicker between two messages, and the stack that shut when one
+was dismissed — and each report arrived on a suite that was green, including the
+examples written for the previous one.
+
+All three of those were in the component rather than in its preview; the two
+preview-side ones from the same period are the slot-versus-block trap
+`CLAUDE.md` names. So: look before calling a component done, and if you have not
 looked, say so rather than reporting it finished.
 
 ### Assert on what a person would see, not on the element the flag lands on
@@ -468,6 +517,23 @@ asked of a selector instead: **which element did I name, and is it the one a
 person looks at?** A wrapper, a provider and a group root are all things a flag
 naturally lands on and none of them are what anybody sees. Reach one level in —
 `sidebar-container` and its width, not `sidebar` and its visibility.
+
+### A number in a geometry assertion is a claim about today's CSS
+
+`sidebar_spec.rb` asserted the gap between a collapsed rail and the tooltip
+labelling it, against a constant. It went red on the merged tree the day the
+tooltip grew an arrow — because `popper.js` folds an arrow's height into the side
+offset, which is Radix's own rule, and the gap legitimately changed. The
+assertion was about the tooltip *staying on its anchor as the anchor shrinks*,
+and the number was never what it was checking.
+
+It now measures against the arrow's own height. Two things that buys: the
+example keeps testing what it is named after, and it fails the day the arrow
+stops being drawn instead of silently widening.
+
+The rule: **measure against the thing, not against what the thing measured
+last time.** A hardcoded pixel figure in an assertion is either the subject —
+say so — or a snapshot of unrelated CSS that will go red for the wrong reason.
 
 ### Dispatching a key at a chosen element proves the handler, never the focus
 

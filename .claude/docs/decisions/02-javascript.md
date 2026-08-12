@@ -45,6 +45,24 @@ out of flow and the page was drawn over the desktop sidebar from then on.
 `top_layer.disable()` exists for that, and `closeMobile()` is its only caller —
 if a second component ever promotes an in-flow element, it needs the same pairing.
 
+## `popper.js` places arrows, and their height is part of the offset
+
+Radix does not let the component draw its own arrow: Popper positions it, and
+`offset({ mainAxis: sideOffset + arrowHeight })` folds its height into the gap
+so the panel is not flush against what it points at. `popper.js` does both —
+`placeArrow()` pins the wrapper to the resolved side and `offset` adds
+`arrow.offsetHeight` whenever the content holds a `[data-slot$='-arrow']`.
+
+Two things it has to get right that reading a class string does not show:
+
+- **A rotated square needs a `transform-origin` per side**, not one. `ARROW_ORIGIN`
+  has four entries; one origin for four sides spins two of the arrows off their
+  own edge, where nobody sees them.
+- **The gap belongs to every popper-based component**, not to the tooltip. Only
+  the tooltip renders an arrow today, so only the tooltip's offset changes —
+  but a spec that asserted a gap against a hardcoded number went red the day the
+  arrow arrived, which is [a testing rule of its own](03-testing.md).
+
 ## Closing waits for the animation; everything else does not
 
 Closing used to set `hidden` in the same tick as `data-state="closed"`, and
@@ -267,6 +285,30 @@ was not reassigned.
 
 The server wins, which is what a refresh means; `data-turbo-permanent` is the
 application's escape hatch, not the library's decision.
+
+## `focusout` can mean the focus was taken away
+
+A component that stays open while it holds the focus has to answer `focusout`,
+and `focusout` does not mean what the name says: it also fires when the focused
+element **stops existing**. The toaster's close button lives inside the toast it
+closes, so dismissing one takes the focus with it, and the browser reports that
+as focus leaving the stack — which collapsed a stack the pointer was still on.
+
+Two rules came out of it, and both apply to anything else that closes on
+`focusout`:
+
+- **Track the pointer and the keyboard apart.** One `expanded` flag means either
+  event can clear what the other is holding. Two flags, open while *either* is
+  set, and neither has to know about the other.
+- **Focus moving within the component needs no handling.** The `focusin` that
+  follows arrives in the same tick, so a `focusout` that clears only its own half
+  is already correct. A `relatedTarget` check on top of it was written, could not
+  be distinguished by any mutation, and was deleted.
+
+The other half of the same defect is geometric and is written up in
+[features/toaster.md](../features/toaster.md): the box a pointer must stay inside
+was as tall as the stack, so removing a toast pulled it in past the pointer that
+was holding it open.
 
 ## Indicators are rendered hidden, not omitted
 

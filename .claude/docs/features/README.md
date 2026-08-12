@@ -34,9 +34,9 @@ here would create a copy nobody updates. These files carry what a machine cannot
 API.
 
 **Anything unmeasured.** An absent entry means *not yet assessed*, never "1:1".
-The port is around thirty families and four have been examined closely enough to
-write down; claiming the rest match would be exactly the kind of sentence this
-project keeps catching itself in.
+There are 58 families under `app/components/shadcn/` and eight have been
+examined closely enough to write down; claiming the rest match would be exactly the kind of sentence this project
+keeps catching itself in.
 
 ## Index
 

@@ -278,3 +278,66 @@ Fixed by deferring each element on its own animations, which is the rule
 
 Not to reintroduce: "hide it when the close finishes" is only safe where one
 element animates. Where two do, the shorter one must not wait for the longer.
+
+## An inline style silently disabled the class it shared a property with
+
+The toaster's `place()` writes where each toast sits, and among the properties it
+sets is `opacity` — inline, on every toast, on every pass. The toast's own class
+list carries `data-[state=closed]:opacity-0`, which is its exit. An inline style
+beats a class, so that exit **never played**: `ExitQueue.defer` asked for the
+running animations, found none, and took its synchronous branch, taking the toast
+out of the DOM in the same tick it was closed.
+
+Nothing saw it. The snapshot is the markup, not the styles; the system specs run
+under a harness that removes transitions outright, so a toast leaving instantly is
+what they expect either way (see [03-testing.md](03-testing.md)). It was found by
+looking at the page, and it was not what was being looked for.
+
+Fixed by handing the property back — `close()` clears the inline `opacity` before
+deferring, so the class decides again.
+
+Not to reintroduce: a controller that writes an inline style takes that property
+away from every class on the element, including the component's own state
+classes. Before writing one, check what the class list already says about that
+property; where both want it, the controller has to yield it back at the moment
+the class matters.
+
+## The tooltip's arrow was 10px of intent and 0px of box
+
+Four things were wrong at once, and the component had shipped that way. Reported
+by a person opening the docs page beside the gallery, in three rounds, because
+each fix revealed the next.
+
+- **An inline `<span>` takes no size.** Upstream's arrow is an `<svg>` — a
+  replaced element — so `size-2.5` applies to it and not to the span this port
+  rendered. `display: block` on both the wrapper and the square, in a `style`
+  attribute rather than a class, because `reverse_parity_spec` would rightly
+  object to a class no vendored source carries.
+- **Nothing positioned it.** Radix places the arrow through Popper; this one was
+  laid out in the text flow after the label.
+- **The panel sat flush against its trigger**, because Radix folds the arrow's
+  height into the side offset and this did not.
+- **One `transform-origin` for four sides** left the left and right arrows spun
+  off their own edge.
+
+Not to reintroduce: an arrow is Popper's job, not the component's — see
+[02-javascript.md](02-javascript.md). And a `size-*` class on something that is
+not a replaced element is a no-op, which no spec here can see: the class is in
+the markup, so parity and the snapshot are both green.
+
+## `aria-describedby` named an element that was never rendered
+
+Found while writing up the FormBuilder's divergences from `form.tsx`, and it was
+not a divergence at all: upstream has the same shape. `FormControl` set
+`aria-describedby` to the description's id unconditionally, so a field with no
+description pointed a screen reader at an id nothing in the document carried.
+
+`ShadcnViewComponent::FormBuilder` now records which attributes actually rendered
+a description (`form_builder.rb:162`) and names only those.
+
+Not to reintroduce: an id in an ARIA relationship is a promise that the element
+exists. And it was believed *not* to be happening here until the page was
+checked — the claim came first and the verification contradicted it, with the
+broken reference live in the gallery and the whole suite, axe audit included,
+green. Why axe let it through was not established, so do not read that audit as
+covering dangling references.

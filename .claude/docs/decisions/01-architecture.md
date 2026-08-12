@@ -162,6 +162,23 @@ whether upstream lets a caller turn it on. Such options ride on the family root
 next to `side` and `align` — one Stimulus controller owns the family, and the
 root is where it attaches — even where Radix declares them on Content.
 
+**And a keyword sent to the wrong part is not an error — it is an attribute.**
+Every component ends in `**attributes`, so a keyword no component declares does
+not raise: it is rendered, inertly, as HTML. `side:` passed to
+`Tooltip::Content` (which declares no `initialize` at all, so *everything* is an
+attribute) emits `side="left"` and the tooltip stays where it was; a preview
+asked `ToggleGroup` for an `orientation:` it has never taken and got
+`orientation="vertical"` on a horizontal row. Both were written from the API a
+reader assumed, both rendered, and neither did anything.
+
+Three of these landed in two days, which is what makes it worth a rule rather
+than a fix: **grep the component for the keyword before passing it.** The
+third is the neighbouring shape and reads the same from the outside — the
+Slider's `aria-label` was real HTML on an element that could not use it, since
+the roles are on the thumbs (`slider/component.rb:111`) and not on the root.
+Ruby cannot help here: `**attributes` is what makes the caller's HTML pass
+through, and it swallows a typo just as willingly.
+
 ## A component that is ours, not a port
 
 The searchable select — `Select::Component.new(searchable: true)` — is the first

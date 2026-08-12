@@ -169,7 +169,7 @@ These bite while editing, so they are here rather than in the docs.
 | `parity_spec.rb` | did a class upstream emits get dropped or mistyped |
 | `snapshot_spec.rb` | did the rendered HTML change at all |
 | `stimulus_contract_spec.rb` | does every `shadcn--x#action`, target and value exist in the JS |
-| `reduced_motion_spec.rb` | does the *compiled* bundle still collapse each animation under `prefers-reduced-motion` |
+| `reduced_motion_spec.rb` | does the *compiled* bundle still collapse `animate-in`/`animate-out`/`animate-accordion-*` under `prefers-reduced-motion` — those four names only, and no transition |
 | `system/` | does it behave, in headless Chrome |
 | `system/accessibility_spec.rb` | axe, every family, at rest and with each layer open |
 

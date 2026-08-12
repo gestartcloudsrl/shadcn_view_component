@@ -148,6 +148,19 @@ button used to end, 207px out from the icon it names. `FloatingLayer` now
 observes its anchor, which fixes it for every popper-based component rather than
 this one. The measurement is in `spec/system/sidebar_spec.rb`.
 
+## One sidebar per page, and that is upstream's shape rather than this port's
+
+The desktop panel is `fixed inset-y-0 … h-svh` in `sidebar.tsx`, so it is
+measured against the viewport and not against whatever contains it. A page
+cannot show two of them, and it cannot box one inside a card to demonstrate a
+variant: the panel leaves the box and covers the full height of the window.
+
+That is why `floating` and `inset` are pages of their own
+(`sidebar/previews/*.html.erb`) rather than three examples on one. The first
+attempt put them side by side, and it was reported: the first variant's
+description was true of nothing on the screen. Anyone adding a preview, a demo
+route or a host layout inherits the same constraint.
+
 ## Added
 
 Nothing. `collapsible`, `variant`, `side`, `size`, `variant` on the menu button
