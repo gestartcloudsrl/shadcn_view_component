@@ -1,14 +1,19 @@
-<%# Upstream's "Side": the same tooltip on each of the four edges, and the
-    arrow that points back at the trigger from each.
+<%# Upstream's "Side": the same tooltip on each of the four edges, and the arrow
+    that points back at the trigger from each.
 
-    Room on every side on purpose. The popper flips a tooltip that will not fit
-    — collision handling doing its job — so a cramped page shows four tooltips
-    on top and says nothing about `side:`. %>
+    `side:` goes to the *root*, not to the content. Passed to
+    `with_tooltip_content` it is swallowed into the content's attributes and
+    quietly does nothing — which is what the first version of this preview did,
+    leaving all four asking for `top` and looking, correctly, identical.
+
+    Room on every side on purpose: the popper flips a tooltip that will not fit,
+    so a cramped page shows four tooltips on top and says nothing about `side:`
+    either. %>
 <div class="flex h-72 items-center justify-center gap-16 px-24">
   <% %i[top right bottom left].each do |side| %>
-    <%= render(Shadcn::Tooltip::Component.new) do |t| %>
+    <%= render(Shadcn::Tooltip::Component.new(side:)) do |t| %>
       <% t.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { side.to_s.capitalize } %>
-      <% t.with_tooltip_content(side:) { "On the #{side}" } %>
+      <% t.with_tooltip_content { "On the #{side}" } %>
     <% end %>
   <% end %>
 </div>

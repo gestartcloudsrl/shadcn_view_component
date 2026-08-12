@@ -123,6 +123,17 @@ const ARROW_TRANSFORM = {
   right: "translateY(50%) rotate(90deg) translateX(-50%)"
 }
 
+// One origin per side, and they are not decoration: three of these transforms
+// rotate, and a rotation is only as right as the point it turns about. A single
+// origin for all four — which is what this had, and what put the left and right
+// arrows somewhere nobody could see them — spins two of them off their own edge.
+const ARROW_ORIGIN = {
+  top: "",
+  right: "0 0",
+  bottom: "center 0",
+  left: "100% 0"
+}
+
 function placeArrow(arrow, side, anchorRect, size, wrapperX, wrapperY) {
   const width = arrow.offsetWidth || 10
   const height = arrow.offsetHeight || 10
@@ -133,7 +144,7 @@ function placeArrow(arrow, side, anchorRect, size, wrapperX, wrapperY) {
     position: "absolute",
     top: "", right: "", bottom: "", left: "",
     transform: ARROW_TRANSFORM[side],
-    transformOrigin: OPPOSITE[side] === "top" ? "center 0" : ""
+    transformOrigin: ARROW_ORIGIN[side]
   })
 
   if (vertical) {

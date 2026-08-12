@@ -190,6 +190,58 @@ RSpec.describe "Tooltip", :js do
     end
   end
 
+  # The four sides, on the preview built for them. `side:` belongs to the root:
+  # passed to `with_tooltip_content` it is swallowed into the content's
+  # attributes and quietly does nothing, which is how the sides preview shipped
+  # asking for `top` four times and looking, correctly, identical. Nothing here
+  # could see it — a keyword that lands in the attribute splat is valid Ruby,
+  # valid HTML, and invisible to every spec that reads the DOM for what it
+  # expected rather than for what was asked.
+  context "when a side is asked for" do
+    before do
+      visit_preview(:tooltip, :sides)
+      wait_for_stimulus
+    end
+
+    %w[Top Right Bottom Left].each do |label|
+      it "opens on the #{label.downcase} and stands clear of the trigger" do
+        find("[data-slot=tooltip-trigger]", text: label).hover
+        expect(page).to have_css(content)
+
+        measured = page.evaluate_script(<<~JS)
+          (() => {
+            const c = [...document.querySelectorAll("[data-slot=tooltip-content]")].find(e => !e.hidden)
+            const t = c.closest("[data-slot=tooltip]").querySelector("[data-slot=tooltip-trigger]")
+            const cr = c.getBoundingClientRect(), tr = t.getBoundingClientRect()
+            const side = c.dataset.side
+            const clear = side === "top" ? tr.top - cr.bottom
+                        : side === "bottom" ? cr.top - tr.bottom
+                        : side === "left" ? tr.left - cr.right
+                        : cr.left - tr.right
+            const a = c.querySelector("[data-slot=tooltip-arrow]")
+            const ar = a.getBoundingClientRect()
+            // How far the arrow reaches past the panel, on the edge it belongs to.
+            const past = side === "top" ? ar.bottom - cr.bottom
+                       : side === "bottom" ? cr.top - ar.top
+                       : side === "left" ? ar.right - cr.right
+                       : cr.left - ar.left
+            return { side, clear: Math.round(clear),
+                     arrow: [ Math.round(ar.width), Math.round(ar.height) ],
+                     past: Math.round(past) }
+          })()
+        JS
+
+        expect(measured["side"]).to eq(label.downcase)
+        expect(measured["clear"]).to be > 0
+        # The arrow has a box and it leans out of the panel towards the trigger.
+        # Without this the left and right arrows spun about the wrong origin and
+        # landed off their own edge, which four green examples did not notice.
+        expect(measured["arrow"]).to all(be > 0)
+        expect(measured["past"]).to be > 0
+      end
+    end
+  end
+
   context "when focused from the keyboard" do
     before do
       focus_trigger
