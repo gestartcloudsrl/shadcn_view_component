@@ -343,7 +343,7 @@ spinner, kbd, aspect-ratio, progress, table, breadcrumb, pagination, label,
 input, textarea, native-select, field, empty, item, button-group
 
 **Form controls** — checkbox, radio-group, switch, toggle, toggle-group,
-input-group
+input-group, input-otp
 
 **Interactive** — accordion, collapsible, tabs, dialog, alert-dialog, sheet,
 dropdown-menu (including submenus), context-menu, menubar, popover, tooltip,
@@ -384,8 +384,7 @@ model. So that family is a FormBuilder here rather than components, built over
 come from `ActiveModel::Errors` after a round trip rather than as you type, and
 all of an attribute's messages are shown rather than the first.
 
-Not ported: chart, sonner, calendar, resizable, input-otp, command, and
-combobox.
+Not ported: chart, sonner, calendar, resizable, command, and combobox.
 
 ## What is and is not verified
 

@@ -1,0 +1,19 @@
+<%# Upstream's own example: six boxes, one real input over them.
+
+    Type into it and the boxes fill; the caret is drawn by the active box rather
+    than by the input, whose own is transparent. Paste a six-digit code and it
+    lands in one go, because the field the browser sees is an ordinary input.
+
+    Labelled, and that is the caller's job here as it is upstream's: there is one
+    input and it takes a name the way any input does. Unlabelled it fails axe,
+    which is how this preview shipped for about an hour. %>
+<div class="flex flex-col gap-2">
+  <%= render(Shadcn::Label::Component.new(for: "otp-code")) { "Verification code" } %>
+  <%= render(Shadcn::InputOtp::Component.new(max_length: 6, name: "code", input: { id: "otp-code" })) do %>
+    <%= render(Shadcn::InputOtp::Group::Component.new) do %>
+      <% 6.times do %>
+        <%= render(Shadcn::InputOtp::Slot::Component.new) %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

@@ -19,6 +19,7 @@ import DrawerController from "shadcn/controllers/drawer_controller"
 import DropdownMenuController from "shadcn/controllers/dropdown_menu_controller"
 import HoverCardController from "shadcn/controllers/hover_card_controller"
 import InputGroupController from "shadcn/controllers/input_group_controller"
+import InputOtpController from "shadcn/controllers/input_otp_controller"
 import MenubarController from "shadcn/controllers/menubar_controller"
 import MessageScrollerController from "shadcn/controllers/message_scroller_controller"
 import NavigationMenuController from "shadcn/controllers/navigation_menu_controller"
@@ -46,6 +47,7 @@ const CONTROLLERS = {
   "dropdown-menu": DropdownMenuController,
   "hover-card": HoverCardController,
   "input-group": InputGroupController,
+  "input-otp": InputOtpController,
   menubar: MenubarController,
   "message-scroller": MessageScrollerController,
   "navigation-menu": NavigationMenuController,
