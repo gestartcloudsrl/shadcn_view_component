@@ -41,6 +41,7 @@ RSpec.describe "shadcn/ui parity" do
     "hover-card" => "hover_card",
     "input" => "input",
     "input-group" => "input_group",
+    "input-otp" => "input_otp",
     "item" => "item",
     "kbd" => "kbd",
     "label" => "label",
@@ -99,7 +100,6 @@ RSpec.describe "shadcn/ui parity" do
 
   not_yet_ported = %w[
     calendar chart combobox command
-    input-otp
     resizable
     sonner
   ].freeze

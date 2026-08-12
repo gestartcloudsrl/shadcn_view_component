@@ -26,6 +26,7 @@ written.
 | [features/drawer.md](features/drawer.md) | the Drawer: vaul's two release thresholds, the four features deliberately left out, the stylesheet that had to come with it, and the branch no spec here can reach |
 | [features/form.md](features/form.md) | why `form.tsx` is a FormBuilder here rather than components, part by part, and the seven divergences that follow |
 | [features/carousel.md](features/carousel.md) | the Carousel without embla: the six things shadcn asks of it, what a scroller answers instead, and what is left out |
+| [features/input-otp.md](features/input-otp.md) | the one-time-code field: the three values per box, the invisible-but-real input that makes autofill work, and the device workarounds not ported |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
 measured is marked as measured; anything assumed says so.

@@ -794,3 +794,42 @@
     scroll-behavior: smooth;
   }
 }
+
+/* --------------------------------------------------------------------------
+ * The one-time-code field's invisible input
+ *
+ * `input-otp.tsx` gives this element one class, `disabled:cursor-not-allowed`,
+ * and the rest of what makes it work comes from the package it wraps — inline
+ * styles, read here from the rendered demo rather than from the TSX, which
+ * shows none of it.
+ *
+ * It is a technique rather than a look, which is why it is a rule and not a
+ * class string. The input is a real, *opaque* input lying over the boxes: that
+ * is what lets a phone offer a code from a message and a password manager see
+ * a field at all. What is hidden is its text and its caret, not the input. The
+ * negative letter spacing keeps the value from reaching past the boxes, and the
+ * font size is the boxes' own height so a native selection paints across them
+ * rather than across a line of text nobody can see.
+ * -------------------------------------------------------------------------- */
+
+[data-slot="input-otp"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  text-align: left;
+  opacity: 1;
+  color: transparent;
+  background: transparent;
+  caret-color: transparent;
+  border: 0 solid transparent;
+  outline: 0 solid transparent;
+  box-shadow: none;
+  pointer-events: all;
+  line-height: 1;
+  letter-spacing: -0.5em;
+  font-size: var(--shadcn-input-otp-height, 2.25rem);
+  font-family: monospace;
+  font-variant-numeric: tabular-nums;
+}

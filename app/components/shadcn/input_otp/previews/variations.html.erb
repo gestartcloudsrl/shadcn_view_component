@@ -1,0 +1,33 @@
+<%# Upstream's "Separator", "Pattern" and "Disabled".
+
+    The separator is markup rather than an argument — two groups with a minus
+    between them — which is why the component takes no "grouping" option. The
+    pattern and the input mode are the input's own attributes, passed through
+    `input:`: this port has one input and hands the caller its keys rather than
+    inventing arguments for each. %>
+<div class="flex flex-col gap-8">
+  <%= render(Shadcn::InputOtp::Component.new(max_length: 6, name: "grouped", input: { "aria-label": "Grouped code" })) do %>
+    <%= render(Shadcn::InputOtp::Group::Component.new) do %>
+      <% 3.times do %><%= render(Shadcn::InputOtp::Slot::Component.new) %><% end %>
+    <% end %>
+    <%= render(Shadcn::InputOtp::Separator::Component.new) %>
+    <%= render(Shadcn::InputOtp::Group::Component.new) do %>
+      <% 3.times do %><%= render(Shadcn::InputOtp::Slot::Component.new) %><% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::InputOtp::Component.new(
+        max_length: 4, name: "letters",
+        input: { inputmode: "text", pattern: "[A-Za-z]*", "aria-label": "Letters only" }
+      )) do %>
+    <%= render(Shadcn::InputOtp::Group::Component.new) do %>
+      <% 4.times do %><%= render(Shadcn::InputOtp::Slot::Component.new) %><% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::InputOtp::Component.new(max_length: 4, value: "1234", disabled: true, input: { "aria-label": "Disabled code" })) do %>
+    <%= render(Shadcn::InputOtp::Group::Component.new) do %>
+      <% 4.times do %><%= render(Shadcn::InputOtp::Slot::Component.new) %><% end %>
+    <% end %>
+  <% end %>
+</div>
