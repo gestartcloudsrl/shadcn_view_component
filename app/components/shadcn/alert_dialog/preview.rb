@@ -6,6 +6,11 @@ module Shadcn
       def default
         render_with_template
       end
+
+      # Upstream's "Small", "Media", "Small with Media" and "Destructive".
+      def small_with_media
+        render_with_template
+      end
     end
   end
 end

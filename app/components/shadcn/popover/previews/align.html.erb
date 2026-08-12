@@ -1,0 +1,13 @@
+<%# Upstream's "Align": the panel is placed against the trigger's start, centre
+    or end, which is the argument that decides where a menu-like popover lines
+    up under a narrow button. %>
+<div class="flex items-center gap-2">
+  <% %i[start center end].each do |align| %>
+    <%= render(Shadcn::Popover::Component.new) do |p| %>
+      <% p.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { align.to_s.capitalize } %>
+      <% p.with_popover_content(align:, class: "w-56") do %>
+        <p class="text-sm text-muted-foreground">Aligned to the <%= align %>.</p>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

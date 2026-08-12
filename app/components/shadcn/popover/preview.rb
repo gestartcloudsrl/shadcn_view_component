@@ -18,6 +18,11 @@ module Shadcn
       def inside_containing_block
         render_with_template
       end
+
+      # Upstream's "Align".
+      def align
+        render_with_template
+      end
     end
   end
 end

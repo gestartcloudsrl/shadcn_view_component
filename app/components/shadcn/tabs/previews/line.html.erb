@@ -1,0 +1,23 @@
+<%# Upstream's "Line" variant of the list, and its "Vertical" orientation —
+    both of which the list and the root take as their own arguments. %>
+<div class="flex flex-col gap-8">
+  <%= render(Shadcn::Tabs::Component.new(value: "overview", class: "w-[420px]")) do |t| %>
+    <% t.with_list(variant: :line) do |l| %>
+      <% l.with_trigger(value: "overview") { "Overview" } %>
+      <% l.with_trigger(value: "activity") { "Activity" } %>
+      <% l.with_trigger(value: "settings", disabled: true) { "Settings" } %>
+    <% end %>
+    <% t.with_panel(value: "overview") { "What happened this week." } %>
+    <% t.with_panel(value: "activity") { "Everything, in order." } %>
+    <% t.with_panel(value: "settings") { "Not reachable — the trigger is disabled." } %>
+  <% end %>
+
+  <%= render(Shadcn::Tabs::Component.new(value: "account", orientation: :vertical, class: "w-[420px]")) do |t| %>
+    <% t.with_list do |l| %>
+      <% l.with_trigger(value: "account") { "Account" } %>
+      <% l.with_trigger(value: "billing") { "Billing" } %>
+    <% end %>
+    <% t.with_panel(value: "account") { "Names and addresses." } %>
+    <% t.with_panel(value: "billing") { "Cards and invoices." } %>
+  <% end %>
+</div>

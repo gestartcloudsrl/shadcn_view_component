@@ -1,0 +1,18 @@
+<%# Upstream's "Disabled" and "Invalid", together for the same reason as the
+    input's: they are attributes rather than variants. Labelled for the same
+    reason too — axe counts a placeholder as a name, and the invalid one has a
+    value instead of a placeholder. %>
+<div class="flex w-[320px] flex-col gap-4">
+  <div class="flex flex-col gap-2">
+    <%= render(Shadcn::Label::Component.new(for: "ta-ordinary")) { "Ordinary" } %>
+    <%= render(Shadcn::Textarea::Component.new(id: "ta-ordinary", placeholder: "Tell us about it")) %>
+  </div>
+  <div class="flex flex-col gap-2">
+    <%= render(Shadcn::Label::Component.new(for: "ta-disabled")) { "Disabled" } %>
+    <%= render(Shadcn::Textarea::Component.new(id: "ta-disabled", disabled: true)) %>
+  </div>
+  <div class="flex flex-col gap-2">
+    <%= render(Shadcn::Label::Component.new(for: "ta-invalid")) { "Invalid" } %>
+    <%= render(Shadcn::Textarea::Component.new(id: "ta-invalid", "aria-invalid": "true")) { "Too short" } %>
+  </div>
+</div>

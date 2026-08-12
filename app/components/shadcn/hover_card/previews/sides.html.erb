@@ -1,0 +1,15 @@
+<%# Upstream's "Sides" and "Trigger Delays". The delays are the part worth
+    seeing: a hover card that opened instantly would fire on every pointer that
+    crossed it, and one that closed instantly could not be reached. %>
+<div class="flex h-48 items-center justify-center gap-2">
+  <% [[:top, 0, 0], [:right, 700, 300], [:bottom, 0, 0], [:left, 700, 300]].each do |side, open_delay, close_delay| %>
+    <%= render(Shadcn::HoverCard::Component.new(side:, open_delay:, close_delay:)) do |h| %>
+      <% h.with_trigger(as: :button, class: Shadcn::Button::Component.variant_classes(variant: :outline)) { side.to_s.capitalize } %>
+      <% h.with_hover_card_content(class: "w-56") do %>
+        <p class="text-sm">
+          On the <%= side %>, after <%= open_delay %>ms.
+        </p>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

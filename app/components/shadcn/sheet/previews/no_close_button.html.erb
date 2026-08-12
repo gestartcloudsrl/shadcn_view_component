@@ -1,0 +1,14 @@
+<%# Upstream's "No Close Button": the corner dismiss left out, so the panel is
+    closed from its own footer, from Escape, or from outside. %>
+<%= render(Shadcn::Sheet::Component.new) do |s| %>
+  <% s.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open" } %>
+  <% s.with_dialog_content(show_close_button: false) do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "Filters" } %>
+      <% h.with_description { "Narrow the list down." } %>
+    <% end %>
+    <% c.with_footer do %>
+      <%= render(Shadcn::Sheet::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Done" } %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,15 @@
+<%# Upstream's "Image": the picture sits above the header and the card's own
+    padding is taken off it, which is why the content keeps its and the image
+    does not. %>
+<%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm overflow-hidden pt-0")) do |card| %>
+  <div class="flex h-40 items-center justify-center bg-muted text-sm text-muted-foreground">
+    A picture goes here
+  </div>
+  <% card.with_header do |h| %>
+    <% h.with_title { "Lakeside cabin" } %>
+    <% h.with_description { "Two bedrooms, one jetty." } %>
+  <% end %>
+  <% card.with_footer do %>
+    <%= render(Shadcn::Button::Component.new(class: "w-full")) { "Book" } %>
+  <% end %>
+<% end %>

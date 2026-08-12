@@ -6,6 +6,11 @@ module Shadcn
       def default
         render_with_template
       end
+
+      # Upstream's "Line" variant and its "Vertical" orientation.
+      def line
+        render_with_template
+      end
     end
   end
 end

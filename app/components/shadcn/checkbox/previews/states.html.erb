@@ -1,0 +1,23 @@
+<%# Upstream's "Checked State" and "Invalid State". Indeterminate is the one
+    worth seeing beside the other two: it is neither checked nor unchecked, and
+    a parent box summarising a part-ticked list is the whole reason it exists. %>
+<div class="flex flex-col gap-4">
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Checkbox::Component.new(id: "cbs1", indeterminate: true)) %>
+    <%= render(Shadcn::Label::Component.new(for: "cbs1")) { "Some of the below" } %>
+  </div>
+  <div class="ml-6 flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <%= render(Shadcn::Checkbox::Component.new(id: "cbs2", checked: true)) %>
+      <%= render(Shadcn::Label::Component.new(for: "cbs2")) { "Ticked" } %>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= render(Shadcn::Checkbox::Component.new(id: "cbs3")) %>
+      <%= render(Shadcn::Label::Component.new(for: "cbs3")) { "Not ticked" } %>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <%= render(Shadcn::Checkbox::Component.new(id: "cbs4", "aria-invalid": "true")) %>
+    <%= render(Shadcn::Label::Component.new(for: "cbs4")) { "Has to be accepted" } %>
+  </div>
+</div>

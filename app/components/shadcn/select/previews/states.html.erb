@@ -1,0 +1,25 @@
+<%# Upstream's "Disabled" and "Invalid". The first is a *disabled item* as well
+    as a disabled trigger — the two are different things and only the item
+    version shows what a listbox does with one. %>
+<div class="flex items-start gap-4">
+  <%= render(Shadcn::Select::Component.new(name: "plan", placeholder: "Choose a plan")) do |s| %>
+    <% s.with_trigger(class: "w-[200px]", "aria-label": "Plan") do |tr| %>
+      <% tr.with_value(placeholder: "Choose a plan") %>
+    <% end %>
+    <% s.with_select_content do %>
+      <%= render(Shadcn::Select::Item::Component.new(value: "free")) { "Free" } %>
+      <%= render(Shadcn::Select::Item::Component.new(value: "pro")) { "Pro" } %>
+      <%= render(Shadcn::Select::Item::Component.new(value: "enterprise", disabled: true)) { "Enterprise — sales only" } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Select::Component.new(name: "region", placeholder: "Pick a region")) do |s| %>
+    <% s.with_trigger(class: "w-[200px]", "aria-label": "Region", "aria-invalid": "true") do |tr| %>
+      <% tr.with_value(placeholder: "Pick a region") %>
+    <% end %>
+    <% s.with_select_content do %>
+      <%= render(Shadcn::Select::Item::Component.new(value: "eu")) { "Europe" } %>
+      <%= render(Shadcn::Select::Item::Component.new(value: "us")) { "United States" } %>
+    <% end %>
+  <% end %>
+</div>

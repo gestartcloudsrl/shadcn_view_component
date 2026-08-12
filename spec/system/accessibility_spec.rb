@@ -38,18 +38,26 @@ RSpec.describe "Accessibility", :js do
   }.freeze
 
   # Read off disk rather than typed out, so a component added tomorrow is
-  # audited without anyone remembering to add it here.
-  families = Dir[Pathname(__dir__).join("../../app/components/shadcn/*/previews/default.html.erb")]
-             .map { |path| Pathname(path).parent.parent.basename.to_s }
+  # audited without anyone remembering to add it here — and *every* preview,
+  # not only each family's `default`. That was the shape until the gallery grew
+  # a second and third example per family: a variant shown nowhere else was
+  # audited nowhere, while `CLAUDE.md` said adding a preview is what gets it
+  # covered. It says that because this reads them all.
+  previews = Dir[Pathname(__dir__).join("../../app/components/shadcn/*/previews/*.html.erb")]
+             .map { |path|
+               p = Pathname(path)
+               [ p.parent.parent.basename.to_s, p.basename(".html.erb").to_s ]
+             }
              .sort
 
   it "found the previews it audits" do
-    expect(families.size).to be >= 35
+    expect(previews.map(&:first).uniq.size).to be >= 35
+    expect(previews.size).to be > previews.map(&:first).uniq.size
   end
 
-  families.each do |family|
-    it "#{family} has no violations at rest" do
-      visit_preview(family)
+  previews.each do |family, example|
+    it "#{family}/#{example} has no violations at rest" do
+      visit_preview(family, example)
       wait_for_stimulus
 
       audit(excluding: upstream_contrast[family])

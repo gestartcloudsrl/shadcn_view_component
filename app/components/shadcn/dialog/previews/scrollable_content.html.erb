@@ -1,0 +1,21 @@
+<%# Upstream's "Scrollable Content": the body scrolls and the header and footer
+    stay put, which is what a dialog taller than the viewport has to do. %>
+<%= render(Shadcn::Dialog::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open a long dialog" } %>
+  <% d.with_dialog_content(class: "max-h-[80vh] gap-0 p-0") do |c| %>
+    <% c.with_header(class: "border-b p-6") do |h| %>
+      <% h.with_title { "Release notes" } %>
+      <% h.with_description { "Everything that changed in this version." } %>
+    <% end %>
+    <div class="overflow-y-auto px-6 py-4">
+      <% 20.times do |i| %>
+        <p class="border-b py-3 text-sm text-muted-foreground last:border-b-0">
+          Change <%= i + 1 %> — a line long enough to make the body worth scrolling.
+        </p>
+      <% end %>
+    </div>
+    <% c.with_footer(class: "border-t p-6") do %>
+      <%= render(Shadcn::Dialog::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Close" } %>
+    <% end %>
+  <% end %>
+<% end %>

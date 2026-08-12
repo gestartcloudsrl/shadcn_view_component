@@ -1,0 +1,9 @@
+<%# Upstream's "Side": the same tooltip on each of the four edges. %>
+<div class="flex h-40 items-center justify-center gap-2">
+  <% %i[top right bottom left].each do |side| %>
+    <%= render(Shadcn::Tooltip::Component.new) do |t| %>
+      <% t.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { side.to_s.capitalize } %>
+      <% t.with_tooltip_content(side:) { "On the #{side}" } %>
+    <% end %>
+  <% end %>
+</div>
