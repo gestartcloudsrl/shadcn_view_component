@@ -15,6 +15,28 @@ RSpec.describe "Toaster", :js do
 
   def toasts = all(toast, visible: :all)
 
+  def tops
+    page.evaluate_script(<<~JS)
+      Object.fromEntries([...document.querySelectorAll("[data-slot=toast]")]
+        .map((t) => [ t.querySelector("[data-slot=toast-title]").textContent,
+                      Math.round(t.getBoundingClientRect().top) ]))
+    JS
+  end
+
+  # Open means both halves of it: every toast readable rather than a shape
+  # behind the front one, and standing apart rather than piled.
+  def expanded?
+    page.evaluate_script(<<~JS)
+      (() => {
+        const toasts = [...document.querySelectorAll("[data-slot=toast]")]
+        const readable = toasts.every((t) => t.children[0].style.opacity === "1")
+        const boxes = toasts.map((t) => t.getBoundingClientRect()).sort((a, b) => a.top - b.top)
+        const apart = boxes.every((box, i) => i === 0 || boxes[i - 1].bottom <= box.top + 1)
+        return readable && apart
+      })()
+    JS
+  end
+
   def raise_toast(detail)
     page.execute_script(<<~JS)
       document.dispatchEvent(new CustomEvent("shadcn--toast", { detail: #{detail.to_json} }))
@@ -192,6 +214,153 @@ RSpec.describe "Toaster", :js do
       JS
 
       boxes.each_cons(2) { |above, below| expect(above[1]).to be <= below[0] + 1 }
+    end
+
+    # Reported from the gallery: moving the pointer from one toast to the next
+    # collapsed the stack for an instant.
+    #
+    # The region is `pointer-events: none` so the page underneath stays usable
+    # around a toast, and each toast turns them back on for itself — which
+    # leaves the 14px between two toasts as a hole. A pointer crossing one
+    # hit-tests through to the page, leaves the list, and the stack shuts and
+    # reopens as it lands on the next.
+    #
+    # Asked of the page rather than reasoned about: what is under the point
+    # halfway between two toasts?
+    it "keeps the pointer when it crosses from one toast to the next", :aggregate_failures do
+      find(list).hover
+
+      under = page.evaluate_script(<<~JS)
+        (() => {
+          const boxes = [...document.querySelectorAll(#{toast.to_json})]
+            .map((t) => t.getBoundingClientRect())
+            .sort((a, b) => a.top - b.top)
+          const region = document.querySelector("[data-slot=toaster]")
+
+          return boxes.slice(0, -1).map((box, i) => {
+            const y = (box.bottom + boxes[i + 1].top) / 2
+            const x = box.left + box.width / 2
+            const hit = document.elementFromPoint(x, y)
+            return { gap: Math.round(boxes[i + 1].top - box.bottom),
+                     inside: !!hit && region.contains(hit) }
+          })
+        })()
+      JS
+
+      expect(under).not_to be_empty
+      under.each do |gap|
+        expect(gap["gap"]).to be > 0
+        expect(gap["inside"]).to be(true)
+      end
+    end
+
+    # And gives them back when it closes. The region is `pointer-events: none`
+    # so that a corner of the page is not quietly covered by an invisible box;
+    # holding the pointer open all the time would trade the flicker for that.
+    it "lets the page through again once the stack is closed", :aggregate_failures do
+      free = page.evaluate_script(<<~JS)
+        (() => {
+          const list = document.querySelector(#{list.to_json})
+          const box = list.getBoundingClientRect()
+          const region = document.querySelector("[data-slot=toaster]")
+          // The strip the peeking toasts are lifted out of, at the far edge of
+          // the stack from the front one.
+          const hit = document.elementFromPoint(box.left + 2, box.top + 2)
+          return { events: getComputedStyle(list).pointerEvents,
+                   inside: !!hit && region.contains(hit) }
+        })()
+      JS
+
+      expect(free["events"]).to eq("none")
+      expect(free["inside"]).to be(false)
+    end
+
+    it "holds every toast inside the area the pointer has to stay in", :aggregate_failures do
+      find(list).hover
+
+      inside = page.evaluate_script(<<~JS)
+        (() => {
+          const box = document.querySelector(#{list.to_json}).getBoundingClientRect()
+          return [...document.querySelectorAll(#{toast.to_json})].map((t) => {
+            const r = t.getBoundingClientRect()
+            return { above: Math.round(box.top - r.top), below: Math.round(r.bottom - box.bottom) }
+          })
+        })()
+      JS
+
+      inside.each do |toast_box|
+        expect(toast_box["above"]).to be <= 1
+        expect(toast_box["below"]).to be <= 1
+      end
+    end
+
+    # Reported from the gallery: closing one of an open stack shut the whole
+    # thing instead of letting the rest close the gap.
+    #
+    # The stack is anchored at its edge, so it is the ones *behind* the toast
+    # that goes which have somewhere to move — closing the middle one is the
+    # case with something to see.
+    it "closes the gap a dismissed toast leaves, and stays open", :aggregate_failures do
+      find(list).hover
+      before = tops
+
+      all("#{toast} button[aria-label]")[1].click
+      expect(page).to have_css(toast, count: 2)
+
+      expect(tops["Toast 0"]).to be > before["Toast 0"]
+      expect(expanded?).to be(true)
+    end
+
+    # The half of that which the harness hides. A toast leaves on a transition,
+    # not on keyframes, and Capybara's AnimationDisabler removes transitions
+    # outright (`transition: none !important`) — so in every other example here a
+    # dismissed toast is out of the DOM in the tick it was closed, and whether
+    # the rest waited for it cannot be seen. Handing the transition back inline
+    # is the trick `force_animations` plays for keyframes; because what was
+    # removed is the property and not only the duration, both come back.
+    it "closes the gap while the dismissed toast is still fading", :aggregate_failures do
+      all(toast, visible: :all).each do |element|
+        page.execute_script(<<~JS, element)
+          arguments[0].style.setProperty("transition", "all 2s", "important")
+        JS
+      end
+      find(list).hover
+
+      # Where each one is *told* to be, not where it has got to: the move is a
+      # transition too, so the painted position is halfway through it.
+      placed = <<~JS
+        Object.fromEntries([...document.querySelectorAll("[data-slot=toast]")]
+          .map((t) => [ t.querySelector("[data-slot=toast-title]").textContent, t.style.transform ]))
+      JS
+      before = page.evaluate_script(placed)
+
+      all("#{toast} button[aria-label]")[1].click
+
+      expect(page).to have_css("#{toast}[data-state=closed]", visible: :all)
+      expect(page.evaluate_script(placed)["Toast 0"]).not_to eq(before["Toast 0"])
+
+      # And it is fading rather than waiting: `place()` writes an inline opacity
+      # on every toast, and an inline style beats the class that fades this one
+      # out — so unless the property is handed back there is no transition here
+      # at all, and the queue that waits for one takes the toast away at once.
+      leaving = page.evaluate_script(<<~JS)
+        document.querySelector("[data-slot=toast][data-state=closed]")
+          .getAnimations().map((a) => a.transitionProperty)
+      JS
+      expect(leaving).to include("opacity")
+    end
+
+    # And the one where nothing moves is the one that shut it hardest: the box
+    # is as tall as the stack, so the toast furthest from the edge is holding
+    # the far end of it open — the box shrinks past the pointer still on it,
+    # and the browser calls that leaving.
+    it "stays open when the toast the pointer is on is the one dismissed" do
+      find(list).hover
+
+      all("#{toast} button[aria-label]").first.click
+      expect(page).to have_css(toast, count: 2)
+
+      expect(expanded?).to be(true)
     end
 
     it "closes the stack again once the pointer leaves" do

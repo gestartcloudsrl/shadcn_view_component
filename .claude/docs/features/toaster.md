@@ -65,6 +65,40 @@ late is wrong exactly while it matters. The toasts animate; the box does not.
 Measured in a browsing context that runs no animation frames, a transition here
 left it at zero permanently.
 
+## Three defects the page showed and the HTML did not
+
+All three were reported from the gallery, and none of them is visible in
+rendered markup — which is why they are here rather than only in a spec.
+
+**The gaps between toasts were holes.** The region is `pointer-events: none` so
+the page underneath stays usable around a toast, and each toast turns them back
+on for itself — leaving the 14px between two of them belonging to nobody. A
+pointer crossing one hit-tested through to the page, left the list, and the
+stack shut and reopened as it landed on the next. While the stack is open the
+list itself takes the pointer; closed, the holes are the point.
+
+**Dismissing one shut the whole stack**, and for two reasons at once. The close
+button is inside the toast, so taking the toast away takes the focus with it,
+and the browser reports that as focus leaving the stack — a `focusout` that
+collapsed it while the pointer was still there. The pointer and the keyboard are
+now tracked apart, and the stack is open while *either* holds it. And the box is
+as tall as the stack, so the toast furthest from the anchored edge is holding
+the far end of it open: closing that one pulled the box in past the pointer that
+was on it. While the stack is open the box may grow and never shrinks.
+
+**And the rest waited for it.** A closed toast kept its place until the element
+was gone, so the others jumped afterwards rather than closing the gap while it
+faded — `place()` skips a toast that is on its way out. The fade itself was not
+running either: `place()` writes an inline opacity on every toast, and an inline
+style beats `data-[state=closed]:opacity-0`, so the queue that waits for an exit
+animation found none and took the toast away in the same tick. Closing a toast
+hands the property back.
+
+That last one is invisible to the rest of the suite: Capybara's AnimationDisabler
+removes transitions outright, so a dismissed toast normally leaves in the tick it
+was closed. The one example about it hands the transition back inline, the way
+`force_animations` does for keyframes.
+
 ## Two things the specs caught that reading did not
 
 `Number(x) || fallback` reads a `0` as *not given* and returns the default —
