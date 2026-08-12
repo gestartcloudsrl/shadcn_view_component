@@ -148,6 +148,30 @@ RSpec.describe "reverse parity" do
     # port's, and exist in no TSX for that reason. See features/sidebar.md.
     "tooltip-content" => %w[group-data-[mobile=true]:hidden group-data-[state=expanded]:hidden],
 
+    # One of the six utilities in `shadcn.css` that are shadcn's own CSS rather
+    # than Tailwind's, read from the stylesheet ui.shadcn.com serves because no
+    # vendored source defines them. `attachment` reaches for it through a
+    # `data-state` selector, which never puts the word in any markup; the
+    # marker's status preview is the one place the gallery writes it out, and so
+    # the one place it is looked at.
+    "marker-content" => %w[shimmer],
+
+    # The inset preview overriding the wrapper's background, which upstream
+    # paints `bg-sidebar` so the panel and the page read as two cards floating
+    # on the sidebar's colour. Asked for here, and a caller's class rather than
+    # a change to the component: `parity_spec` still finds upstream's string in
+    # the source, and a host that passes nothing gets upstream's look.
+    "sidebar-wrapper" => %w[has-data-[variant=inset]:bg-background],
+
+    # The carousel previews. `basis-1/2` and `basis-1/3` are upstream's own
+    # instruction for its "Sizes" example — the component has no prop for how
+    # many slides are visible, and says so — and the gutter in "Spacing" is the
+    # same arrangement one notch smaller. The width and the height are a preview
+    # deciding how big to be, like every other in this list.
+    "carousel" => %w[max-w-xs],
+    "carousel-content" => %w[-ml-2 h-[240px]],
+    "carousel-item" => %w[basis-1/2 basis-1/3],
+
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
     "native-select-icon" => %w[lucide lucide-chevron-down]

@@ -6,6 +6,11 @@ module Shadcn
       def default
         render_with_template
       end
+
+      # Upstream's "Simple" and "Icons Only".
+      def simple
+        render_with_template
+      end
     end
   end
 end

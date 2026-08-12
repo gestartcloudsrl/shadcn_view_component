@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 module Shadcn
-  module Sidebar
+  module Carousel
     class Preview < ApplicationViewComponentPreview
       def default
         render_with_template
       end
 
-      # Upstream's `floating` variant. Its own page: the panel is `fixed`, so
-      # two of them cannot share one.
-      def floating
+      # Upstream's "Sizes" and "Spacing": both are the caller's classes on the
+      # item, which is why neither is an argument.
+      def sizes
         render_with_template
       end
 
-      # Upstream's `inset` variant, for the same reason.
-      def inset
+      # Upstream's "Orientation".
+      def vertical
         render_with_template
       end
     end

@@ -1,0 +1,48 @@
+<%# Upstream's `inset` variant, which the default preview does not show.
+
+    A page of its own, and that is forced rather than chosen: the desktop panel
+    is `fixed inset-y-0 … h-svh` (sidebar.tsx), so it is measured against the
+    viewport and cannot be put in a box. The first version of this preview put
+    two providers in two bordered `h-64` divs to compare the variants side by
+    side; both panels escaped their boxes, one covered the other, and the label
+    beside each said the wrong thing. Lookbook gives every preview its own
+    iframe, which is the only frame a sidebar can be shown in.
+
+    `inset` leaves the panel flush and pulls the page's container in beside it,
+    which reads `group-data-[variant=inset]` off the provider — so the variant
+    shows on `SidebarInset` as much as on the panel.
+
+    **The wrapper's background is overridden here, and that is a divergence.**
+    Upstream puts `has-data-[variant=inset]:bg-sidebar` on it (sidebar.tsx:142),
+    which is what makes the panel and the page look like two cards floating on
+    the sidebar's own colour — the whole idea of the variant. This preview asks
+    for `bg-background` instead. It is the caller's class, not the component's:
+    `cn` replaces the conflicting one, `parity_spec` still sees upstream's
+    string in the component source, and a host that says nothing still gets
+    upstream's look. `bg-background` rather than a literal white, so it follows
+    the theme instead of turning into a white slab in the dark one. %>
+<%= render(Shadcn::Sidebar::Provider::Component.new(class: "has-data-[variant=inset]:bg-background")) do %>
+  <%= render(Shadcn::Sidebar::Component.new(variant: :inset, collapsible: :icon)) do %>
+    <%= render(Shadcn::Sidebar::Content::Component.new) do %>
+      <%= render(Shadcn::Sidebar::Group::Component.new) do %>
+        <%= render(Shadcn::Sidebar::GroupLabel::Component.new) { "Workspace" } %>
+        <%= render(Shadcn::Sidebar::Menu::Component.new) do %>
+          <% [["search", "Search"], ["circle", "Projects"], ["check", "Done"]].each do |icon, label| %>
+            <%= render(Shadcn::Sidebar::MenuItem::Component.new) do %>
+              <%= render(Shadcn::Sidebar::MenuButton::Component.new(tooltip: label)) do %>
+                <%= render(Shadcn::Icon::Component.new(icon)) %>
+                <span><%= label %></span>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= render(Shadcn::Sidebar::Inset::Component.new) do %>
+    <div class="flex items-center gap-2 border-b p-4">
+      <%= render(Shadcn::Sidebar::Trigger::Component.new) %>
+      <span class="text-sm text-muted-foreground">The page beside a inset panel — the trigger collapses it to a rail.</span>
+    </div>
+  <% end %>
+<% end %>

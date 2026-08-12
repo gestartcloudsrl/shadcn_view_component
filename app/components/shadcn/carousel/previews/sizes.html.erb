@@ -1,0 +1,42 @@
+<%# Upstream's "Sizes" and "Spacing".
+
+    Neither is an argument. A slide is `basis-full` until the caller says
+    `basis-1/2` or `basis-1/3`, and the gutter is the track's negative margin
+    against the item's padding — `-ml-4`/`pl-4` by default, and any matching
+    pair the caller likes. Both are upstream's own instructions rather than this
+    port's: `carousel.tsx` has no prop for either. %>
+<div class="flex flex-col gap-10 px-14">
+  <%= render(Shadcn::Carousel::Component.new(class: "w-full max-w-sm")) do |c| %>
+    <% c.with_carousel_content do |content| %>
+      <% 6.times do |i| %>
+        <% content.with_item(class: "basis-1/2") do %>
+          <div class="p-1">
+            <%= render(Shadcn::Card::Component.new) do |card| %>
+              <% card.with_card_content(class: "flex aspect-square items-center justify-center p-6") do %>
+                <span class="text-3xl font-semibold"><%= i + 1 %></span>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% c.with_previous %>
+    <% c.with_next_control %>
+  <% end %>
+
+  <%= render(Shadcn::Carousel::Component.new(class: "w-full max-w-sm")) do |c| %>
+    <% c.with_carousel_content(class: "-ml-2") do |content| %>
+      <% 6.times do |i| %>
+        <% content.with_item(class: "basis-1/3 pl-2") do %>
+          <%= render(Shadcn::Card::Component.new) do |card| %>
+            <% card.with_card_content(class: "flex aspect-square items-center justify-center p-6") do %>
+              <span class="text-2xl font-semibold"><%= i + 1 %></span>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% c.with_previous %>
+    <% c.with_next_control %>
+  <% end %>
+</div>

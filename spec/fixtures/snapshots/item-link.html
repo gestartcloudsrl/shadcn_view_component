@@ -1,0 +1,33 @@
+<div class="flex w-full max-w-md flex-col gap-4">
+<a data-slot="item" data-variant="outline" data-size="default" href="#" class="group/item flex flex-wrap items-center rounded-md border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 border-border gap-4 p-4">
+<div data-slot="item-media" data-variant="default" class="flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&amp;_svg]:pointer-events-none bg-transparent">
+<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">EW
+</span>
+</span>
+</div>
+<div data-slot="item-content" class="flex flex-1 flex-col gap-1 [&amp;+[data-slot=item-content]]:flex-none">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug font-medium">Evelyn Wood
+</div>
+<p data-slot="item-description" class="line-clamp-2 text-sm leading-normal font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary">The whole row is the link.
+</p>
+</div>
+<div data-slot="item-actions" class="flex items-center gap-2">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right">
+<path d="m9 18 6-6-6-6"/>
+</svg>
+</div>
+</a>
+<div data-slot="item" data-variant="outline" data-size="default" class="group/item flex flex-wrap items-center rounded-md border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 border-border gap-4 p-4">
+<div data-slot="item-media" data-variant="image" class="flex shrink-0 items-center justify-center gap-2 group-has-[[data-slot=item-description]]/item:translate-y-0.5 group-has-[[data-slot=item-description]]/item:self-start [&amp;_svg]:pointer-events-none size-10 overflow-hidden rounded-sm [&amp;_img]:size-full [&amp;_img]:object-cover">
+<div class="flex size-full items-center justify-center bg-muted text-xs text-muted-foreground">IMG
+</div>
+</div>
+<div data-slot="item-content" class="flex flex-1 flex-col gap-1 [&amp;+[data-slot=item-content]]:flex-none">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug font-medium">A picture, cropped to the box
+</div>
+<p data-slot="item-description" class="line-clamp-2 text-sm leading-normal font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary">The image media is size-10, rounded and object-cover.
+</p>
+</div>
+</div>
+</div>

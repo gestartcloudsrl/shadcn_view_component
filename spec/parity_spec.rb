@@ -30,6 +30,7 @@ RSpec.describe "shadcn/ui parity" do
     "button" => "button",
     "button-group" => "button_group",
     "card" => "card",
+    "carousel" => "carousel",
     "checkbox" => "checkbox",
     "collapsible" => "collapsible",
     "context-menu" => "context_menu",
@@ -97,7 +98,7 @@ RSpec.describe "shadcn/ui parity" do
   ported_as_a_form_builder = %w[form].freeze
 
   not_yet_ported = %w[
-    calendar carousel chart combobox command
+    calendar chart combobox command
     input-otp
     resizable
     sonner

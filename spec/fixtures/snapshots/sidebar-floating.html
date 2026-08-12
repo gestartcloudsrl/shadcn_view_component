@@ -1,0 +1,86 @@
+<div data-slot="sidebar-wrapper" style="--sidebar-width: 16rem; --sidebar-width-icon: 3rem; --sidebar-width-mobile: 18rem;" data-controller="shadcn--sidebar" data-shadcn--sidebar-open-value="true" class="group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar">
+<div data-slot="sidebar" data-shadcn--sidebar-target="sidebar" data-state="expanded" data-collapsible="" data-sidebar-collapsible="icon" data-variant="floating" data-side="left" class="group peer hidden text-sidebar-foreground md:block">
+<div data-slot="sheet-overlay" data-state="closed" hidden="hidden" data-shadcn--sidebar-target="overlay" class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+</div>
+<div data-slot="sidebar-gap" class="relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))] group-data-[mobile=true]:w-0">
+</div>
+<div data-slot="sidebar-container" data-shadcn--sidebar-target="container" class="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)] group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile) group-data-[mobile=true]:z-50 group-data-[mobile=true]:shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:duration-500 data-[state=closed]:duration-300 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
+<div data-sidebar="sidebar" data-slot="sidebar-inner" class="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm">
+<div data-slot="sidebar-content" data-sidebar="content" class="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
+<div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col p-2">
+<div data-slot="sidebar-group-label" data-sidebar="group-label" class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0">Workspace
+</div>
+<ul data-slot="sidebar-menu" data-sidebar="menu" class="flex w-full min-w-0 flex-col gap-1">
+<li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+<div data-slot="tooltip" style="display:contents" data-controller="shadcn--tooltip" data-shadcn--tooltip-side-value="right" data-shadcn--tooltip-align-value="center" data-shadcn--tooltip-side-offset-value="0" data-shadcn--tooltip-delay-value="0">
+<button data-slot="sidebar-menu-button" type="button" data-state="closed" data-shadcn--tooltip-target="trigger" data-action="mouseenter-&gt;shadcn--tooltip#show mouseleave-&gt;shadcn--tooltip#hide focus-&gt;shadcn--tooltip#show blur-&gt;shadcn--tooltip#hide" data-sidebar="menu-button" data-size="default" data-active="false" class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+<circle cx="11" cy="11" r="8"/>
+<path d="m21 21-4.3-4.3"/>
+</svg>
+<span>Search
+</span>
+</button>
+<div data-slot="tooltip-content" role="tooltip" data-state="closed" hidden="hidden" data-shadcn--tooltip-target="content" class="z-50 w-fit origin-(--radix-tooltip-content-transform-origin) animate-in rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 group-data-[state=expanded]:hidden group-data-[mobile=true]:hidden">Search
+<span data-slot="tooltip-arrow" style="position:absolute;display:block">
+<span class="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground" style="display:block">
+</span>
+</span>
+</div>
+</div>
+</li>
+<li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+<div data-slot="tooltip" style="display:contents" data-controller="shadcn--tooltip" data-shadcn--tooltip-side-value="right" data-shadcn--tooltip-align-value="center" data-shadcn--tooltip-side-offset-value="0" data-shadcn--tooltip-delay-value="0">
+<button data-slot="sidebar-menu-button" type="button" data-state="closed" data-shadcn--tooltip-target="trigger" data-action="mouseenter-&gt;shadcn--tooltip#show mouseleave-&gt;shadcn--tooltip#hide focus-&gt;shadcn--tooltip#show blur-&gt;shadcn--tooltip#hide" data-sidebar="menu-button" data-size="default" data-active="false" class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+<span>Projects
+</span>
+</button>
+<div data-slot="tooltip-content" role="tooltip" data-state="closed" hidden="hidden" data-shadcn--tooltip-target="content" class="z-50 w-fit origin-(--radix-tooltip-content-transform-origin) animate-in rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 group-data-[state=expanded]:hidden group-data-[mobile=true]:hidden">Projects
+<span data-slot="tooltip-arrow" style="position:absolute;display:block">
+<span class="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground" style="display:block">
+</span>
+</span>
+</div>
+</div>
+</li>
+<li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+<div data-slot="tooltip" style="display:contents" data-controller="shadcn--tooltip" data-shadcn--tooltip-side-value="right" data-shadcn--tooltip-align-value="center" data-shadcn--tooltip-side-offset-value="0" data-shadcn--tooltip-delay-value="0">
+<button data-slot="sidebar-menu-button" type="button" data-state="closed" data-shadcn--tooltip-target="trigger" data-action="mouseenter-&gt;shadcn--tooltip#show mouseleave-&gt;shadcn--tooltip#hide focus-&gt;shadcn--tooltip#show blur-&gt;shadcn--tooltip#hide" data-sidebar="menu-button" data-size="default" data-active="false" class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-8 text-sm">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+<span>Done
+</span>
+</button>
+<div data-slot="tooltip-content" role="tooltip" data-state="closed" hidden="hidden" data-shadcn--tooltip-target="content" class="z-50 w-fit origin-(--radix-tooltip-content-transform-origin) animate-in rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 group-data-[state=expanded]:hidden group-data-[mobile=true]:hidden">Done
+<span data-slot="tooltip-arrow" style="position:absolute;display:block">
+<span class="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground" style="display:block">
+</span>
+</span>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<main data-slot="sidebar-inset" class="relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2">
+<div class="flex items-center gap-2 border-b p-4">
+<button data-slot="sidebar-trigger" type="button" data-sidebar="trigger" data-shadcn--sidebar-target="trigger" data-action="click-&gt;shadcn--sidebar#toggle" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-7">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panel-left">
+<rect width="18" height="18" x="3" y="3" rx="2"/>
+<path d="M9 3v18"/>
+</svg>
+<span class="sr-only">Toggle Sidebar
+</span>
+</button>
+<span class="text-sm text-muted-foreground">The page beside a floating panel — the trigger collapses it to a rail.
+</span>
+</div>
+</main>
+</div>

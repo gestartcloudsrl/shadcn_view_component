@@ -1,0 +1,39 @@
+<%# Upstream's "Link", "Avatar" and "Image".
+
+    An item that is a link is the whole element, not a link inside it: `as: :a`
+    is this port's `asChild`, so the row keeps its slots and its variants and
+    becomes an anchor. The media variants are the other half — `icon` is in the
+    default preview, `image` and the plain `default` are not.
+
+    Not inside an `ItemGroup`, and that is the point rather than an omission.
+    The group is `role="list"`, which may only hold `listitem` children, and
+    neither upstream's `Item` nor this one sets that role — so an item that
+    becomes an anchor becomes a `link` inside a `list`, which axe fails and a
+    screen reader reads as a broken list. A row that is a link belongs outside
+    the group, which is how upstream's own example shows it. %>
+<div class="flex w-full max-w-md flex-col gap-4">
+  <%= render(Shadcn::Item::Component.new(as: :a, href: "#", variant: :outline)) do %>
+    <%= render(Shadcn::Item::Media::Component.new) do %>
+      <%= render(Shadcn::Avatar::Component.new) do |a| %>
+        <% a.with_fallback { "EW" } %>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::Item::Content::Component.new) do %>
+      <%= render(Shadcn::Item::Title::Component.new) { "Evelyn Wood" } %>
+      <%= render(Shadcn::Item::Description::Component.new) { "The whole row is the link." } %>
+    <% end %>
+    <%= render(Shadcn::Item::Actions::Component.new) do %>
+      <%= render(Shadcn::Icon::Component.new("chevron-right")) %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Item::Component.new(variant: :outline)) do %>
+    <%= render(Shadcn::Item::Media::Component.new(variant: :image)) do %>
+      <div class="flex size-full items-center justify-center bg-muted text-xs text-muted-foreground">IMG</div>
+    <% end %>
+    <%= render(Shadcn::Item::Content::Component.new) do %>
+      <%= render(Shadcn::Item::Title::Component.new) { "A picture, cropped to the box" } %>
+      <%= render(Shadcn::Item::Description::Component.new) { "The image media is size-10, rounded and object-cover." } %>
+    <% end %>
+  <% end %>
+</div>

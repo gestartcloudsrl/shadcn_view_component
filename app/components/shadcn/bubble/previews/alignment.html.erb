@@ -1,0 +1,33 @@
+<%# Upstream's "Alignment" and "Links and Buttons".
+
+    `align:` is what makes a conversation read as one: the same bubble on the
+    start edge is what somebody else said, on the end edge is what you said.
+    It moves the bubble and the reactions that hang off its corner together.
+
+    And the content can *be* a link or a button rather than contain one — the
+    variants style for it, `[&>[data-slot=bubble-content]:is(button,a):hover]`
+    in every one of the seven — so the whole bubble is the target rather than a
+    word inside it. %>
+<div class="flex w-[420px] flex-col gap-3">
+  <%= render(Shadcn::Bubble::Group::Component.new) do %>
+    <%= render(Shadcn::Bubble::Component.new(variant: :muted)) do %>
+      <%= render(Shadcn::Bubble::Content::Component.new) { "Where did we land on the pricing page?" } %>
+    <% end %>
+    <%= render(Shadcn::Bubble::Component.new(align: :end)) do %>
+      <%= render(Shadcn::Bubble::Content::Component.new) { "Shipping it on Thursday." } %>
+    <% end %>
+    <%= render(Shadcn::Bubble::Component.new(align: :end, class: "mb-3")) do %>
+      <%= render(Shadcn::Bubble::Content::Component.new) { "The copy is signed off." } %>
+      <%= render(Shadcn::Bubble::Reactions::Component.new) { "🎉 1" } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Bubble::Group::Component.new) do %>
+    <%= render(Shadcn::Bubble::Component.new(variant: :muted)) do %>
+      <%= render(Shadcn::Bubble::Content::Component.new(as: :a, href: "#")) { "The whole bubble is the link" } %>
+    <% end %>
+    <%= render(Shadcn::Bubble::Component.new(align: :end)) do %>
+      <%= render(Shadcn::Bubble::Content::Component.new(as: :button, type: "button")) { "And this one is the button" } %>
+    <% end %>
+  <% end %>
+</div>

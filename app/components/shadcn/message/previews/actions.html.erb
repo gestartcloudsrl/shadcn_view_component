@@ -1,0 +1,51 @@
+<%# Upstream's "Actions" and "Attachment".
+
+    Both live in the content column rather than beside the bubble, which is
+    what makes them line up with it whichever way the message is aligned: the
+    footer holds the row of buttons, and an attachment sits above the bubble as
+    another block in the same column.
+
+    The buttons are `icon-xs` ghosts and each has a name of its own — an
+    icon-only control that says nothing is a control a screen reader cannot
+    offer, which is the thing upstream's own accessibility note on this page is
+    about. %>
+<div class="flex w-[420px] flex-col gap-6">
+  <%= render(Shadcn::Message::Group::Component.new) do %>
+    <%= render(Shadcn::Message::Component.new(align: :end)) do %>
+      <%= render(Shadcn::Message::Content::Component.new) do %>
+        <%= render(Shadcn::Attachment::Component.new(size: :sm)) do %>
+          <%= render(Shadcn::Attachment::Media::Component.new) { "PDF" } %>
+          <%= render(Shadcn::Attachment::Content::Component.new) do %>
+            <%= render(Shadcn::Attachment::Title::Component.new) { "contract.pdf" } %>
+            <%= render(Shadcn::Attachment::Description::Component.new) { "184 KB" } %>
+          <% end %>
+        <% end %>
+        <%= render(Shadcn::Bubble::Component.new(align: :end)) do %>
+          <%= render(Shadcn::Bubble::Content::Component.new) { "Signed and sent back." } %>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <%= render(Shadcn::Message::Component.new) do %>
+      <%= render(Shadcn::Message::Avatar::Component.new) do %>
+        <%= render(Shadcn::Avatar::Component.new(class: "size-8")) do |avatar| %>
+          <% avatar.with_fallback { "SC" } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Message::Content::Component.new) do %>
+        <%= render(Shadcn::Bubble::Component.new(variant: :muted)) do %>
+          <%= render(Shadcn::Bubble::Content::Component.new) { "Got it — filing it now." } %>
+        <% end %>
+        <%= render(Shadcn::Message::Footer::Component.new) do %>
+          <div class="flex items-center gap-1">
+            <% [[ "check", "Copy" ], [ "circle", "Retry" ], [ "x", "Dismiss" ]].each do |icon, label| %>
+              <%= render(Shadcn::Button::Component.new(variant: :ghost, size: :"icon-xs", "aria-label": label)) do %>
+                <%= render(Shadcn::Icon::Component.new(icon)) %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

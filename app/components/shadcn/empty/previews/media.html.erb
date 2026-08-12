@@ -1,0 +1,32 @@
+<%# Upstream's "Avatar" and "Avatar Group": the media slot's *other* variant.
+    `icon` — the one in the default preview — draws the muted rounded box; the
+    default variant draws nothing at all and lets whatever is inside stand on
+    its own, which is what a face or a stack of faces needs. %>
+<div class="flex flex-col gap-8">
+  <%= render(Shadcn::Empty::Component.new(class: "w-full max-w-md border")) do %>
+    <%= render(Shadcn::Empty::Header::Component.new) do %>
+      <%= render(Shadcn::Empty::Media::Component.new) do %>
+        <%= render(Shadcn::Avatar::Component.new(size: :lg)) do |a| %>
+          <% a.with_fallback { "EW" } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Empty::Title::Component.new) { "No messages from Evelyn" } %>
+      <%= render(Shadcn::Empty::Description::Component.new) { "When she writes, it will be here." } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Empty::Component.new(class: "w-full max-w-md border")) do %>
+    <%= render(Shadcn::Empty::Header::Component.new) do %>
+      <%= render(Shadcn::Empty::Media::Component.new) do %>
+        <%= render(Shadcn::Avatar::Group::Component.new) do %>
+          <% %w[AB CD EF].each do |initials| %>
+            <%= render(Shadcn::Avatar::Component.new) do |a| %><% a.with_fallback { initials } %><% end %>
+          <% end %>
+          <%= render(Shadcn::Avatar::GroupCount::Component.new) { "+2" } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Empty::Title::Component.new) { "Nobody has joined yet" } %>
+      <%= render(Shadcn::Empty::Description::Component.new) { "Invite the five people above." } %>
+    <% end %>
+  <% end %>
+</div>

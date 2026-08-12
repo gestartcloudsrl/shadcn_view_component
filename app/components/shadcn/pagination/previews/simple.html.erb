@@ -1,0 +1,39 @@
+<%# Upstream's "Simple", and what its "Icons Only" actually is.
+
+    `Previous` and `Next` render a chevron and a word, and the word carries
+    `hidden sm:block` (pagination.tsx) — so the icons-only example is the same
+    component below the `sm` breakpoint rather than a variant to ask for.
+    Narrow the window and the second row here becomes it. Neither component
+    takes content: the label is theirs, translated, which is also where the
+    accessible name comes from. %>
+<div class="flex flex-col items-center gap-8">
+  <%= render(Shadcn::Pagination::Component.new) do %>
+    <%= render(Shadcn::Pagination::Content::Component.new) do %>
+      <%= render(Shadcn::Pagination::Item::Component.new) do %>
+        <%= render(Shadcn::Pagination::Previous::Component.new(href: "#")) %>
+      <% end %>
+      <%= render(Shadcn::Pagination::Item::Component.new) do %>
+        <span class="px-4 text-sm text-muted-foreground">Page 2 of 10</span>
+      <% end %>
+      <%= render(Shadcn::Pagination::Item::Component.new) do %>
+        <%= render(Shadcn::Pagination::Next::Component.new(href: "#")) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::Pagination::Component.new) do %>
+    <%= render(Shadcn::Pagination::Content::Component.new) do %>
+      <%= render(Shadcn::Pagination::Item::Component.new) do %>
+        <%= render(Shadcn::Pagination::Previous::Component.new(href: "#")) %>
+      <% end %>
+      <% [1, 2, 3].each do |page| %>
+        <%= render(Shadcn::Pagination::Item::Component.new) do %>
+          <%= render(Shadcn::Pagination::Link::Component.new(href: "#", active: page == 2)) { page.to_s } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Pagination::Item::Component.new) do %>
+        <%= render(Shadcn::Pagination::Next::Component.new(href: "#")) %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
