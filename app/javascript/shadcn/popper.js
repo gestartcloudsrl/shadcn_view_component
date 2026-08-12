@@ -162,6 +162,15 @@ export function position(anchor, content, options = {}) {
   const viewport = { width: window.innerWidth, height: window.innerHeight }
   const anchorRect = measure(anchor)
 
+  // An arrow has to fit between the panel and what it points at, so its height
+  // is part of the offset rather than something to subtract later — Radix does
+  // the same, `offset({ mainAxis: sideOffset + arrowHeight })` in
+  // `@radix-ui/react-popper`. Which is why a tooltip whose `sideOffset` is 0,
+  // as shadcn's is (tooltip.tsx:47), still stands clear of its trigger: without
+  // this the panel sits flush and the arrow lies across the thing it came from.
+  const arrow = content.querySelector("[data-slot$='-arrow']")
+  const offset = sideOffset + (arrow ? arrow.offsetHeight : 0)
+
   if (matchAnchorWidth) content.style.minWidth = `${anchorRect.width}px`
 
   // Measure without a stale transform in the way.
@@ -169,21 +178,21 @@ export function position(anchor, content, options = {}) {
   const size = { width: content.offsetWidth, height: content.offsetHeight }
 
   let resolvedSide = side
-  if (!fits(side, anchorRect, size, sideOffset, collisionPadding, viewport)) {
+  if (!fits(side, anchorRect, size, offset, collisionPadding, viewport)) {
     const flipped = OPPOSITE[side]
-    if (fits(flipped, anchorRect, size, sideOffset, collisionPadding, viewport)) {
+    if (fits(flipped, anchorRect, size, offset, collisionPadding, viewport)) {
       resolvedSide = flipped
     } else {
       // Neither fits: take whichever has more room.
       resolvedSide =
-        availableSpace(flipped, anchorRect, sideOffset, collisionPadding, viewport) >
-        availableSpace(side, anchorRect, sideOffset, collisionPadding, viewport)
+        availableSpace(flipped, anchorRect, offset, collisionPadding, viewport) >
+        availableSpace(side, anchorRect, offset, collisionPadding, viewport)
           ? flipped
           : side
     }
   }
 
-  let { x, y } = place(resolvedSide, align, anchorRect, size, sideOffset, alignOffset)
+  let { x, y } = place(resolvedSide, align, anchorRect, size, offset, alignOffset)
 
   // Shift back into the viewport along the cross axis.
   const maxX = viewport.width - size.width - collisionPadding
@@ -193,7 +202,7 @@ export function position(anchor, content, options = {}) {
 
   wrapper.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`
 
-  const available = availableSpace(resolvedSide, anchorRect, sideOffset, collisionPadding, viewport)
+  const available = availableSpace(resolvedSide, anchorRect, offset, collisionPadding, viewport)
   const originX = resolvedSide === "left" ? "100%" : resolvedSide === "right" ? "0%" : "50%"
   const originY = resolvedSide === "top" ? "100%" : resolvedSide === "bottom" ? "0%" : "50%"
   const transformOrigin = `${originX} ${originY}`
@@ -219,7 +228,6 @@ export function position(anchor, content, options = {}) {
   content.dataset.side = resolvedSide
   content.dataset.align = align
 
-  const arrow = content.querySelector("[data-slot$='-arrow']")
   if (arrow) placeArrow(arrow, resolvedSide, anchorRect, size, x, y)
 
   return { side: resolvedSide, align }

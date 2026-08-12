@@ -143,6 +143,28 @@ RSpec.describe "Tooltip", :js do
       expect(box["centred"]).to be(true)
     end
 
+    # And the panel stands clear of the trigger by the arrow's own height, which
+    # is what makes room for it. Radix folds that into the offset —
+    # `offset({ mainAxis: sideOffset + arrowHeight })` — which is why shadcn's
+    # `sideOffset = 0` (tooltip.tsx:47) still leaves a gap. Without it the panel
+    # sits flush and the arrow lies across the thing it points at, which is how
+    # this looked when it was reported.
+    it "stands off the trigger by the height of its own arrow", :aggregate_failures do
+      gap = page.evaluate_script(<<~JS)
+        (() => {
+          const c = document.querySelector("[data-slot=tooltip-content]")
+          const a = c.querySelector("[data-slot=tooltip-arrow]")
+          const t = document.querySelector("[data-slot=tooltip-trigger]")
+          const cr = c.getBoundingClientRect(), ar = a.getBoundingClientRect()
+          return { clear: Math.round(t.getBoundingClientRect().top - cr.bottom),
+                   arrowH: Math.round(ar.height) }
+        })()
+      JS
+
+      expect(gap["arrowH"]).to be > 0
+      expect(gap["clear"]).to be_within(1).of(gap["arrowH"])
+    end
+
     it "never takes focus" do
       expect(page.evaluate_script("document.activeElement.dataset.slot")).not_to eq("tooltip-content")
     end
