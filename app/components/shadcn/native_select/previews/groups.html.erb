@@ -1,0 +1,26 @@
+<%# Upstream's "With Groups", "Disabled" and "Invalid". The optgroup is the one
+    thing the styled Select cannot do with a real element — this is a `<select>`,
+    so the browser draws the grouping itself. %>
+<div class="flex items-start gap-4">
+  <%= render(Shadcn::NativeSelect::Component.new("aria-label": "Timezone")) do %>
+    <%= render(Shadcn::NativeSelect::OptGroup::Component.new(label: "Europe")) do %>
+      <% %w[London Paris Berlin].each do |city| %>
+        <%= render(Shadcn::NativeSelect::Option::Component.new(value: city.downcase)) { city } %>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::NativeSelect::OptGroup::Component.new(label: "Americas")) do %>
+      <% %w[Toronto Chicago].each do |city| %>
+        <%= render(Shadcn::NativeSelect::Option::Component.new(value: city.downcase)) { city } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::NativeSelect::Component.new("aria-label": "Disabled", disabled: true)) do %>
+    <%= render(Shadcn::NativeSelect::Option::Component.new(value: "one")) { "Not available" } %>
+  <% end %>
+
+  <%= render(Shadcn::NativeSelect::Component.new("aria-label": "Invalid", "aria-invalid": "true")) do %>
+    <%= render(Shadcn::NativeSelect::Option::Component.new(value: "")) { "Pick one" } %>
+    <%= render(Shadcn::NativeSelect::Option::Component.new(value: "one")) { "One" } %>
+  <% end %>
+</div>

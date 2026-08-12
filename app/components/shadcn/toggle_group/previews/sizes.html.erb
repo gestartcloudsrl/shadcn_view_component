@@ -1,0 +1,24 @@
+<%# Upstream's "Size", "Vertical" and "Disabled". The size is the group's and
+    reaches the items through it, so a group set to `lg` needs nothing said on
+    each item. %>
+<div class="flex flex-col items-start gap-6">
+  <% %i[sm default lg].each do |size| %>
+    <%= render(Shadcn::ToggleGroup::Component.new(type: :single, variant: :outline, size:, value: "left")) do |g| %>
+      <% %w[Left Center Right].each do |label| %>
+        <% g.with_item(value: label.downcase, pressed: label == "Left") { label } %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::ToggleGroup::Component.new(type: :multiple, variant: :outline, orientation: :vertical)) do |g| %>
+    <% %w[Bold Italic Underline].each do |label| %>
+      <% g.with_item(value: label.downcase) { label } %>
+    <% end %>
+  <% end %>
+
+  <%= render(Shadcn::ToggleGroup::Component.new(type: :single, variant: :outline, disabled: true, value: "b")) do |g| %>
+    <% %w[A B C].each do |label| %>
+      <% g.with_item(value: label.downcase, pressed: label == "B") { label } %>
+    <% end %>
+  <% end %>
+</div>

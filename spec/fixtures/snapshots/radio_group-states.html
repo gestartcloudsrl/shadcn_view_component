@@ -1,0 +1,100 @@
+<div class="flex flex-col gap-8">
+<div class="flex flex-col gap-2">
+<div class="text-sm font-medium">One option is unavailable
+</div>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="standard" data-shadcn--radio-group-disabled-value="false" class="grid gap-3">
+<button data-slot="radio-group-item" type="button" role="radio" value="standard" tabindex="0" aria-checked="true" data-state="checked" data-value="standard" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rs-standard" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<button data-slot="radio-group-item" type="button" role="radio" value="express" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="express" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rs-express" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<button data-slot="radio-group-item" type="button" role="radio" value="same-day" disabled="disabled" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="same-day" data-disabled="true" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rs-same-day" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rs-standard" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Standard
+</label>
+</div>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rs-express" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Express
+</label>
+</div>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rs-same-day" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Same day — sold out
+</label>
+</div>
+<input type="hidden" name="shipping" value="standard" data-shadcn--radio-group-target="input">
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="text-sm font-medium">The whole group is disabled
+</div>
+<div data-slot="radio-group" role="radiogroup" data-disabled="true" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="monthly" data-shadcn--radio-group-disabled-value="true" class="grid gap-3">
+<button data-slot="radio-group-item" type="button" role="radio" value="monthly" tabindex="0" aria-checked="true" data-state="checked" data-value="monthly" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rb-monthly" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<button data-slot="radio-group-item" type="button" role="radio" value="yearly" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="yearly" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rb-yearly" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rb-monthly" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Monthly
+</label>
+</div>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rb-yearly" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Yearly
+</label>
+</div>
+<input type="hidden" name="billing" value="monthly" data-shadcn--radio-group-target="input">
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="text-sm font-medium">Nothing chosen, and something had to be
+</div>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="" data-shadcn--radio-group-disabled-value="false" aria-invalid="true" class="grid gap-3">
+<button data-slot="radio-group-item" type="button" role="radio" value="s" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="s" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rz-s" aria-invalid="true" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<button data-slot="radio-group-item" type="button" role="radio" value="m" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="m" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="rz-m" aria-invalid="true" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rz-s" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Small
+</label>
+</div>
+<div class="flex items-center gap-2">
+<label data-slot="label" for="rz-m" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Medium
+</label>
+</div>
+<input type="hidden" name="size" value="" data-shadcn--radio-group-target="input">
+</div>
+</div>
+</div>

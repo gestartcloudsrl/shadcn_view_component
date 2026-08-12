@@ -11,4 +11,7 @@
     <%= render(Shadcn::Label::Component.new(id: "switch-small-label")) { "Small, on" } %>
   </div>
   <%= render(Shadcn::Switch::Component.new(disabled: true, "aria-label": "Disabled")) %>
+  <%# Upstream's "Invalid". Added here rather than to a page of its own: it is
+      one attribute, and it says more beside the states it is not. %>
+  <%= render(Shadcn::Switch::Component.new("aria-invalid": "true", "aria-label": "Invalid")) %>
 </div>
