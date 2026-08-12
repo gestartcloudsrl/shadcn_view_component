@@ -4,14 +4,14 @@
 <div data-slot="dialog-portal" style="display:contents">
 <div data-slot="dialog-overlay" data-state="closed" hidden="hidden" data-shadcn--dialog-target="overlay" class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
 </div>
-<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-lg border bg-background shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg max-h-[80vh] gap-0 p-0">
+<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] rounded-lg border bg-background shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg grid max-h-[80vh] grid-rows-[auto_1fr_auto] gap-0 p-0">
 <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left border-b p-6">
 <h2 data-slot="dialog-title" class="text-lg leading-none font-semibold">Release notes
 </h2>
 <p data-slot="dialog-description" class="text-sm text-muted-foreground">Everything that changed in this version.
 </p>
 </div>
-<div class="overflow-y-auto px-6 py-4">
+<div class="min-h-0 overflow-y-auto px-6 py-4">
 <p class="border-b py-3 text-sm text-muted-foreground last:border-b-0"> Change 1 — a line long enough to make the body worth scrolling.
 </p>
 <p class="border-b py-3 text-sm text-muted-foreground last:border-b-0"> Change 2 — a line long enough to make the body worth scrolling.

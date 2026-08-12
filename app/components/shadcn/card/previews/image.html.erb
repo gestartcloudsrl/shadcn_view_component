@@ -1,15 +1,30 @@
-<%# Upstream's "Image": the picture sits above the header and the card's own
-    padding is taken off it, which is why the content keeps its and the image
-    does not. %>
+<%# Upstream's "Image": the picture is the card's first child, full width, and
+    the card's top padding comes off so it sits flush against the edge.
+
+    Two things are the caller's here and are upstream's component's there. The
+    Card in the registry this gem ports is
+    `flex flex-col gap-6 rounded-xl border bg-card py-6 …` and nothing more — it
+    carries no `has-[>img:first-child]:pt-0` and no `*:[img:first-child]:rounded-t-xl`,
+    so `pt-0` and `overflow-hidden` are written out. Measured on the docs page
+    on 2026-08-12, where the Card also has `--card-spacing`, `ring-1
+    ring-foreground/10` and a `size` — none of which is in
+    `vendor/shadcn/ui/card.tsx`. That is the other registry, and it is the
+    reason this looks close rather than identical.
+
+    The footer's top padding is not written here: `card-footer` carries
+    `[.border-t]:pt-6`, so giving it a border is what asks for it.
+
+    A block of colour rather than a photograph: the gallery ships no binary
+    assets, and `aspect-video w-full` is the part of the shape that matters. %>
 <%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm overflow-hidden pt-0")) do |card| %>
-  <div class="flex h-40 items-center justify-center bg-muted text-sm text-muted-foreground">
-    A picture goes here
+  <div class="flex aspect-video w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+    Where the picture goes
   </div>
   <% card.with_header do |h| %>
     <% h.with_title { "Lakeside cabin" } %>
     <% h.with_description { "Two bedrooms, one jetty." } %>
   <% end %>
-  <% card.with_footer do %>
+  <% card.with_footer(class: "border-t bg-muted/50") do %>
     <%= render(Shadcn::Button::Component.new(class: "w-full")) { "Book" } %>
   <% end %>
 <% end %>

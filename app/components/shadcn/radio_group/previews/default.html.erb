@@ -1,7 +1,14 @@
-<%= render(Shadcn::RadioGroup::Component.new(name: "plan", value: "comfortable")) do |g| %>
+<%# The items are rendered in the *block*, not through the `item` slot.
+
+    Slot content is emitted before block content, so an item added through the
+    slot is hoisted out of the row it was written in and lands above every
+    label — which is what this preview did until someone looked at the page.
+    `FormBuilder#shadcn_radio_group` renders them in the block for the same
+    reason and says so. %>
+<%= render(Shadcn::RadioGroup::Component.new(name: "plan", value: "comfortable")) do %>
   <% [["default", "Default"], ["comfortable", "Comfortable"], ["compact", "Compact"]].each do |value, text| %>
     <div class="flex items-center gap-2">
-      <% g.with_item(value:, checked: value == "comfortable", id: "r-#{value}") %>
+      <%= render(Shadcn::RadioGroup::Item::Component.new(value:, checked: value == "comfortable", id: "r-#{value}")) %>
       <%= render(Shadcn::Label::Component.new(for: "r-#{value}")) { text } %>
     </div>
   <% end %>

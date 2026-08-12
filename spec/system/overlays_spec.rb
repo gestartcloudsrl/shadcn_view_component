@@ -114,6 +114,35 @@ RSpec.describe "Tooltip", :js do
       expect(inside).to be(true)
     end
 
+    # Reported from the gallery: no triangle. The arrow was in the markup and had
+    # been since the port, so nothing that reads HTML could see it — it was an
+    # inline `<span>`, and `size-2.5` does not apply to one, so it was 10px of
+    # intent and a 0px box. Upstream's is an `<svg>`, which takes a width
+    # because a replaced element does.
+    #
+    # Nothing positioned it either: Radix places the arrow through Popper, and
+    # `popper.js` did not know it existed, so even sized it would have sat in
+    # the text flow after the label.
+    it "draws an arrow, with a box and outside the panel it points from", :aggregate_failures do
+      box = page.evaluate_script(<<~JS)
+        (() => {
+          const c = document.querySelector("[data-slot=tooltip-content]")
+          const a = c.querySelector("[data-slot=tooltip-arrow]")
+          const cr = c.getBoundingClientRect(), ar = a.getBoundingClientRect()
+          return { w: Math.round(ar.width), h: Math.round(ar.height),
+                   below: Math.round(ar.bottom - cr.bottom),
+                   centred: Math.abs((ar.left + ar.width / 2) - (cr.left + cr.width / 2)) < 2 }
+        })()
+      JS
+
+      expect(box["w"]).to be > 0
+      expect(box["h"]).to be > 0
+      # Placed on the tooltip's own side — this one opens on top, so the arrow
+      # hangs below it — and pointed at the middle of the trigger.
+      expect(box["below"]).to be > 0
+      expect(box["centred"]).to be(true)
+    end
+
     it "never takes focus" do
       expect(page.evaluate_script("document.activeElement.dataset.slot")).not_to eq("tooltip-content")
     end

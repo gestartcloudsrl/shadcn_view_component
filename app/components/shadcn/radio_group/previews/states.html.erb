@@ -1,13 +1,14 @@
-<%# Upstream's "Disabled" and "Invalid". Disabled comes in two sizes here — the
+<%# Upstream's "Disabled" and "Invalid". Items rendered in the block rather than
+    through the slot — see the default preview for why. Disabled comes in two sizes here — the
     whole group, and one option of an otherwise usable group — because they are
     different things and only the second is a choice you can see and not make. %>
 <div class="flex flex-col gap-8">
   <div class="flex flex-col gap-2">
     <div class="text-sm font-medium">One option is unavailable</div>
-    <%= render(Shadcn::RadioGroup::Component.new(name: "shipping", value: "standard")) do |g| %>
+    <%= render(Shadcn::RadioGroup::Component.new(name: "shipping", value: "standard")) do %>
       <% [["standard", "Standard", false], ["express", "Express", false], ["same-day", "Same day — sold out", true]].each do |value, text, disabled| %>
         <div class="flex items-center gap-2">
-          <% g.with_item(value:, checked: value == "standard", disabled:, id: "rs-#{value}") %>
+          <%= render(Shadcn::RadioGroup::Item::Component.new(value:, checked: value == "standard", disabled:, id: "rs-#{value}")) %>
           <%= render(Shadcn::Label::Component.new(for: "rs-#{value}")) { text } %>
         </div>
       <% end %>
@@ -16,10 +17,10 @@
 
   <div class="flex flex-col gap-2">
     <div class="text-sm font-medium">The whole group is disabled</div>
-    <%= render(Shadcn::RadioGroup::Component.new(name: "billing", value: "monthly", disabled: true)) do |g| %>
+    <%= render(Shadcn::RadioGroup::Component.new(name: "billing", value: "monthly", disabled: true)) do %>
       <% [["monthly", "Monthly"], ["yearly", "Yearly"]].each do |value, text| %>
         <div class="flex items-center gap-2">
-          <% g.with_item(value:, checked: value == "monthly", id: "rb-#{value}") %>
+          <%= render(Shadcn::RadioGroup::Item::Component.new(value:, checked: value == "monthly", id: "rb-#{value}")) %>
           <%= render(Shadcn::Label::Component.new(for: "rb-#{value}")) { text } %>
         </div>
       <% end %>
@@ -28,10 +29,10 @@
 
   <div class="flex flex-col gap-2">
     <div class="text-sm font-medium">Nothing chosen, and something had to be</div>
-    <%= render(Shadcn::RadioGroup::Component.new(name: "size", "aria-invalid": "true")) do |g| %>
+    <%= render(Shadcn::RadioGroup::Component.new(name: "size", "aria-invalid": "true")) do %>
       <% [["s", "Small"], ["m", "Medium"]].each do |value, text| %>
         <div class="flex items-center gap-2">
-          <% g.with_item(value:, id: "rz-#{value}", "aria-invalid": "true") %>
+          <%= render(Shadcn::RadioGroup::Item::Component.new(value:, id: "rz-#{value}", "aria-invalid": "true")) %>
           <%= render(Shadcn::Label::Component.new(for: "rz-#{value}")) { text } %>
         </div>
       <% end %>

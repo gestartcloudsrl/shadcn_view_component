@@ -1,16 +1,30 @@
-<%# Upstream's "Size", "Vertical" and "Disabled". The size is the group's and
-    reaches the items through it, so a group set to `lg` needs nothing said on
-    each item. %>
-<div class="flex flex-col items-start gap-6">
-  <% %i[sm default lg].each do |size| %>
-    <%= render(Shadcn::ToggleGroup::Component.new(type: :single, variant: :outline, size:, value: "left")) do |g| %>
-      <% %w[Left Center Right].each do |label| %>
-        <% g.with_item(value: label.downcase, pressed: label == "Left") { label } %>
-      <% end %>
-    <% end %>
-  <% end %>
+<%# Upstream's "Size", "Vertical" and "Disabled".
 
-  <%= render(Shadcn::ToggleGroup::Component.new(type: :multiple, variant: :outline, orientation: :vertical)) do |g| %>
+    Icon-only items, because that is where the size shows. The three sizes are
+    `h-8 min-w-8`, `h-9 min-w-9` and `h-10 min-w-10` — with a text label the
+    width comes from the text and only 4px of height separates them, which is
+    what the first version of this preview looked like: three rows the same.
+
+    Vertical is a class the caller adds, not an argument: `toggle-group.tsx`
+    takes no orientation at all, so `orientation:` would land as an inert HTML
+    attribute — which is exactly what it did here before someone looked. %>
+<div class="flex flex-col items-start gap-6">
+  <div class="flex items-center gap-4">
+    <% %i[sm default lg].each do |size| %>
+      <div class="flex flex-col items-center gap-1">
+        <%= render(Shadcn::ToggleGroup::Component.new(type: :single, variant: :outline, size:, value: "check")) do |g| %>
+          <% %w[check circle x].each do |icon| %>
+            <% g.with_item(value: icon, pressed: icon == "check", "aria-label": icon) do %>
+              <%= render(Shadcn::Icon::Component.new(icon)) %>
+            <% end %>
+          <% end %>
+        <% end %>
+        <span class="text-xs text-muted-foreground"><%= size %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <%= render(Shadcn::ToggleGroup::Component.new(type: :multiple, variant: :outline, class: "flex-col")) do |g| %>
     <% %w[Bold Italic Underline].each do |label| %>
       <% g.with_item(value: label.downcase) { label } %>
     <% end %>

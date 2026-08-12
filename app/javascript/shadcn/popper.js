@@ -101,6 +101,52 @@ function availableSpace(side, anchorRect, sideOffset, padding, viewport) {
 // Positions `content` (already inside a wrapper from `createWrapper`) relative
 // to `anchor`, flipping and shifting to stay on screen. Returns the resolved
 // side and align, which callers mirror onto `data-side` / `data-align`.
+// Radix places the arrow itself, through Popper: a wrapper pinned to the side
+// the content ended up on, offset along the cross axis so it points at the
+// anchor's middle (vendor's `@radix-ui/react-popper`, measured on the live
+// tooltip on 2026-08-12 — `position:absolute; bottom:0; transform:translateY(100%);
+// left:43.5px` for a tooltip placed on top).
+//
+// The tooltip's content renders the same two elements Radix does — a bare
+// wrapper and, inside it, the rotated square shadcn styles — because the
+// styling classes set `rotate` and `translate`, which are their own CSS
+// properties in Tailwind v4 and compose with `transform` rather than losing to
+// it. Placement written on the same element fights them; on the wrapper it does
+// not. Without any of this the arrow is laid out in the text flow after the
+// label: rendered, never seen, which is how it shipped.
+// Radix's own, verbatim: the wrapper is pinned to the edge opposite the side
+// the content took, and each side turns it so the same square points outwards.
+const ARROW_TRANSFORM = {
+  top: "translateY(100%)",
+  bottom: "rotate(180deg)",
+  left: "translateY(50%) rotate(-90deg) translateX(50%)",
+  right: "translateY(50%) rotate(90deg) translateX(-50%)"
+}
+
+function placeArrow(arrow, side, anchorRect, size, wrapperX, wrapperY) {
+  const width = arrow.offsetWidth || 10
+  const height = arrow.offsetHeight || 10
+  const vertical = side === "top" || side === "bottom"
+  const padding = 6
+
+  Object.assign(arrow.style, {
+    position: "absolute",
+    top: "", right: "", bottom: "", left: "",
+    transform: ARROW_TRANSFORM[side],
+    transformOrigin: OPPOSITE[side] === "top" ? "center 0" : ""
+  })
+
+  if (vertical) {
+    const centre = anchorRect.left + anchorRect.width / 2 - wrapperX - width / 2
+    arrow.style.left = `${Math.round(Math.min(Math.max(padding, centre), Math.max(padding, size.width - width - padding)))}px`
+    arrow.style[side === "top" ? "bottom" : "top"] = "0px"
+  } else {
+    const centre = anchorRect.top + anchorRect.height / 2 - wrapperY - height / 2
+    arrow.style.top = `${Math.round(Math.min(Math.max(padding, centre), Math.max(padding, size.height - height - padding)))}px`
+    arrow.style[side === "left" ? "right" : "left"] = "0px"
+  }
+}
+
 export function position(anchor, content, options = {}) {
   const {
     side = "bottom",
@@ -172,6 +218,9 @@ export function position(anchor, content, options = {}) {
 
   content.dataset.side = resolvedSide
   content.dataset.align = align
+
+  const arrow = content.querySelector("[data-slot$='-arrow']")
+  if (arrow) placeArrow(arrow, resolvedSide, anchorRect, size, x, y)
 
   return { side: resolvedSide, align }
 }
