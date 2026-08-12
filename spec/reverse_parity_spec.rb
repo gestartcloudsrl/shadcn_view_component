@@ -156,6 +156,13 @@ RSpec.describe "reverse parity" do
     # the one place it is looked at.
     "marker-content" => %w[shimmer],
 
+    # The inset preview overriding the wrapper's background, which upstream
+    # paints `bg-sidebar` so the panel and the page read as two cards floating
+    # on the sidebar's colour. Asked for here, and a caller's class rather than
+    # a change to the component: `parity_spec` still finds upstream's string in
+    # the source, and a host that passes nothing gets upstream's look.
+    "sidebar-wrapper" => %w[has-data-[variant=inset]:bg-background],
+
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
     "native-select-icon" => %w[lucide lucide-chevron-down]

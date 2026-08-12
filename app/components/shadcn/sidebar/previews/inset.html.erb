@@ -8,11 +8,20 @@
     beside each said the wrong thing. Lookbook gives every preview its own
     iframe, which is the only frame a sidebar can be shown in.
 
-    `floating` gives the panel its own rounded border and shadow and stands it
-    off the edge; `inset` leaves the panel flush and pulls the page's container
-    in beside it. Both read `group-data-[variant=…]` off the provider, so the
-    difference is on `SidebarInset` as much as on the panel. %>
-<%= render(Shadcn::Sidebar::Provider::Component.new) do %>
+    `inset` leaves the panel flush and pulls the page's container in beside it,
+    which reads `group-data-[variant=inset]` off the provider — so the variant
+    shows on `SidebarInset` as much as on the panel.
+
+    **The wrapper's background is overridden here, and that is a divergence.**
+    Upstream puts `has-data-[variant=inset]:bg-sidebar` on it (sidebar.tsx:142),
+    which is what makes the panel and the page look like two cards floating on
+    the sidebar's own colour — the whole idea of the variant. This preview asks
+    for `bg-background` instead. It is the caller's class, not the component's:
+    `cn` replaces the conflicting one, `parity_spec` still sees upstream's
+    string in the component source, and a host that says nothing still gets
+    upstream's look. `bg-background` rather than a literal white, so it follows
+    the theme instead of turning into a white slab in the dark one. %>
+<%= render(Shadcn::Sidebar::Provider::Component.new(class: "has-data-[variant=inset]:bg-background")) do %>
   <%= render(Shadcn::Sidebar::Component.new(variant: :inset, collapsible: :icon)) do %>
     <%= render(Shadcn::Sidebar::Content::Component.new) do %>
       <%= render(Shadcn::Sidebar::Group::Component.new) do %>
