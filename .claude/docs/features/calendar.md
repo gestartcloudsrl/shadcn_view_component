@@ -102,6 +102,25 @@ marked a cell `data-today`. Found by a preset landing on the wrong day.
   renders — which is what lets a preset button's `data-action` reach the
   controller.
 
+## A time beside the date
+
+Neither half of upstream's Date-and-Time example is a component here — a time is
+an `<input type="time">` and a list of times is a `<select>` — but which one to
+reach for was measured rather than assumed, and it is the sort of thing a host
+asks:
+
+**`step` is in seconds**, so `step: 900` is a quarter of an hour. Measured in
+Chrome: the field's own arrows then move 09:00 → 09:15 → 09:30, and a typed
+09:07 is refused at submit with the browser's message naming the two nearest
+valid values. What it does **not** do is turn the field into a list — the
+segments still accept any digits, and the complaint arrives afterwards.
+
+So where only a quarter-hour will do, the control is a `<select>` and not a
+stepped time field: a list can only be chosen from, and its options are built
+in Ruby where the opening hours already live. `time_slots` is that preview, and
+the two of them together are what a booking form posts — `booking[on]` from the
+calendar and `booking[at]` from the select.
+
 ## Not reproduced
 
 - **The other calendar systems** — Ethiopic, Hebrew, Hijri, Persian, Jalali,

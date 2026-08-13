@@ -1,7 +1,14 @@
 <%# Upstream's "Date and Time Picker": a date, then the two ends of the day it
     covers. The times are real `<input type="time">` fields, so the browser's own
     picker and validation come with them — the same call the gem makes for
-    `native_select`. %>
+    `native_select`.
+
+    `step` is in *seconds*, so 900 is a quarter of an hour. Measured in Chrome:
+    the field's arrows then move 09:00 → 09:15 → 09:30, and a typed 09:07 is
+    refused at submit with the browser's own message. What it does not do is
+    turn the field into a list — the segments still take any digits, and the
+    complaint comes afterwards. Where only a quarter-hour will do, the control
+    is a select rather than this: see the `time_slots` preview. %>
 <div class="w-fit rounded-md border shadow-sm">
   <%= render(Shadcn::Calendar::Component.new(
         month: Date.new(2026, 8, 1),
@@ -11,13 +18,13 @@
     <%= render(Shadcn::Field::Component.new(class: "flex-1")) do |field| %>
       <% field.with_label(for: "calendar-start-time") { "Start Time" } %>
       <% field.with_field_content do %>
-        <%= render(Shadcn::Input::Component.new(id: "calendar-start-time", type: "time", value: "09:00", step: 60)) %>
+        <%= render(Shadcn::Input::Component.new(id: "calendar-start-time", type: "time", value: "09:00", step: 900)) %>
       <% end %>
     <% end %>
     <%= render(Shadcn::Field::Component.new(class: "flex-1")) do |field| %>
       <% field.with_label(for: "calendar-end-time") { "End Time" } %>
       <% field.with_field_content do %>
-        <%= render(Shadcn::Input::Component.new(id: "calendar-end-time", type: "time", value: "17:00", step: 60)) %>
+        <%= render(Shadcn::Input::Component.new(id: "calendar-end-time", type: "time", value: "17:00", step: 900)) %>
       <% end %>
     <% end %>
   </div>

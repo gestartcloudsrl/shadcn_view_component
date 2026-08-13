@@ -1,0 +1,32 @@
+<%# A date and a time that can only be one of the slots on offer.
+    Ours rather than upstream's, and the difference from the example beside it is
+    the one `step` cannot close: `<input type="time" step="900">` refuses 09:07
+    *after* it is typed, where a `<select>` never offers it. A booking wants the
+    second one, and it wants its own opening hours in it — which is Ruby, where
+    the rule already lives.
+
+    `native_select` and not the styled listbox: it is a real `<select>`, so the
+    keyboard, the browser's own validation and a phone's wheel come with it. %>
+<%
+  slots = (9..17).flat_map { |hour| [ 0, 15, 30, 45 ].map { |minute| format("%02d:%02d", hour, minute) } } + [ "18:00" ]
+%>
+<div class="w-fit rounded-md border shadow-sm">
+  <%= render(Shadcn::Calendar::Component.new(
+        month: Date.new(2026, 8, 1),
+        selected: Date.new(2026, 8, 12),
+        name: "booking[on]"
+      )) %>
+  <div class="border-t p-3">
+    <%= render(Shadcn::Field::Component.new) do |field| %>
+      <% field.with_label(for: "booking-at") { "Time" } %>
+      <% field.with_field_content do %>
+        <%= render(Shadcn::NativeSelect::Component.new(id: "booking-at", name: "booking[at]")) do %>
+          <% slots.each do |slot| %>
+            <%= render(Shadcn::NativeSelect::Option::Component.new(value: slot, selected: slot == "09:30")) { slot } %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <% field.with_description { "Every quarter of an hour, 09:00 to 18:00." } %>
+    <% end %>
+  </div>
+</div>
