@@ -1,0 +1,16 @@
+<%# Upstream's "Pie Chart - Donut": the same slices with the middle taken out.
+    `inner_radius:` is a fraction, so the ring keeps its proportions at any size. %>
+<%
+  config = {
+    chrome: { label: "Chrome", color: "var(--chart-1)" },
+    safari: { label: "Safari", color: "var(--chart-2)" },
+    firefox: { label: "Firefox", color: "var(--chart-3)" },
+    edge: { label: "Edge", color: "var(--chart-4)" }
+  }
+%>
+<%= render(Shadcn::Chart::Component.new(config:, class: "max-w-sm")) do |chart| %>
+  <% chart.with_pie(data: { chrome: 275, safari: 200, firefox: 187, edge: 173 },
+                    inner_radius: 0.6, label: "Visitors by browser") %>
+  <% chart.with_chart_tooltip(hide_label: true) %>
+  <% chart.with_chart_legend %>
+<% end %>

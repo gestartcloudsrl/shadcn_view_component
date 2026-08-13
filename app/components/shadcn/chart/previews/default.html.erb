@@ -1,0 +1,30 @@
+<%# Upstream's "Pie Chart": five browsers, one slice each, coloured from the
+    `--chart-*` tokens the gem's themes already define. The data is a plain Hash
+    of key to number — which is what `group(:browser).sum(:visitors)` returns.
+
+    `hide_label:` because a pie's label and its item name are the same word, and
+    without it the tooltip reads "Chrome / Chrome 275". Upstream's own pie
+    examples pass it for the same reason. %>
+<%
+  config = {
+    chrome: { label: "Chrome", color: "var(--chart-1)" },
+    safari: { label: "Safari", color: "var(--chart-2)" },
+    firefox: { label: "Firefox", color: "var(--chart-3)" },
+    edge: { label: "Edge", color: "var(--chart-4)" },
+    other: { label: "Other", color: "var(--chart-5)" }
+  }
+%>
+<%= render(Shadcn::Card::Component.new(class: "max-w-sm")) do |card| %>
+  <% card.with_header do |header| %>
+    <% header.with_title { "Visitors by browser" } %>
+    <% header.with_description { "January – June 2026" } %>
+  <% end %>
+  <% card.with_card_content do %>
+    <%= render(Shadcn::Chart::Component.new(config:)) do |chart| %>
+      <% chart.with_pie(data: { chrome: 275, safari: 200, firefox: 187, edge: 173, other: 90 },
+                        label: "Visitors by browser") %>
+      <% chart.with_chart_tooltip(hide_label: true) %>
+      <% chart.with_chart_legend %>
+    <% end %>
+  <% end %>
+<% end %>

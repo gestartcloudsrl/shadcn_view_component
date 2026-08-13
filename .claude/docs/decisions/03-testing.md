@@ -28,9 +28,23 @@ reports wrongly — and the wrong one. Porting the carousel, it named `/>` as a
 class the port had dropped: the string
 `"useCarousel must be used within a <Carousel />"` tokenizes into something with
 a slash in it, and every real Tailwind utility has a letter. The fix went into
-`class_like?` (`spec/support/shadcn_source.rb:91`), not into the list. An entry
-in `allowed_missing` silences one file forever; a tokenizer that admits
-punctuation goes on lying about the rest.
+`class_like?`, not into the list. An entry in `allowed_missing` silences one
+file forever; a tokenizer that admits punctuation goes on lying about the rest.
+
+Three rounds have now gone the same way, and each measured the whole corpus
+before changing the rule — the change is only safe if you know everything else
+it admits or drops:
+
+| reported | the real rule | what it moved corpus-wide |
+|---|---|---|
+| `/>` | a utility has a letter | one token |
+| `rtl:**:[.rdp-button\_next>svg]:rotate-180` called invented | a class can live in a backtick literal (`String.raw`), and may contain a backslash | two tokens, both real |
+| `uniqueId.replace(/:/g,` | a utility's brackets balance | one token, junk |
+
+**`allowed_missing` is still right for one thing**, and `chart` is the case: the
+seven `[&_.recharts-*]` variants it lists are real classes that select a
+*library's* DOM, which this port does not render. The list is for "upstream has it and this
+port deliberately does not", never for "the scanner is confused".
 
 ## What the parity list assertion proves, now that sources arrive early
 
@@ -124,6 +138,13 @@ it is the point of the flag.
 Note the shape: the guard is an *example*, not a `raise` in the describe body. A
 raise there kills the run during loading, before anything can report why — the
 mistake `reduced_motion_spec` had already made once.
+
+**A generated id makes a fixture differ from itself.** Anything built with
+`SecureRandom` — the checkbox's, the switch's, the theme selector's, the
+calendar caption's, the chart's — has to be flattened by the normaliser, or the
+snapshot goes red on every run and the obvious response is to regenerate it,
+which is how a golden file stops meaning anything. Both the calendar and the
+chart hit this the day they were added.
 
 **A new generated id makes every snapshot containing it differ per run**, unless
 the normaliser is widened with it. Generated ids follow

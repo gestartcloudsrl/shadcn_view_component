@@ -1,0 +1,61 @@
+<div data-slot="card" class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm max-w-sm">
+<div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+<div data-slot="card-title" class="leading-none font-semibold">Visitors by browser
+</div>
+<div data-slot="card-description" class="text-sm text-muted-foreground">January – June 2026
+</div>
+</div>
+<div data-slot="card-content" class="px-6">
+<div data-slot="chart" data-chart="chart-x" data-controller="shadcn--chart" class="relative flex aspect-video justify-center text-xs">
+<style> [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); --color-other: var(--chart-5); } .dark [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); --color-other: var(--chart-5); }
+</style>
+<div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
+<svg data-slot="chart-pie" viewBox="0 0 250 250" role="img" aria-label="Visitors by browser — Chrome: 275, Safari: 200, Firefox: 187, Edge: 173, Other: 90" class="mx-auto aspect-square max-h-[250px]">
+<path d="M 125.0 125.0 L 125.0 4.0 A 121.0 121.0 0 0 1 240.7 160.43 Z" fill="var(--color-chrome)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="chrome" data-label="Chrome" data-display="275" />
+<path d="M 125.0 125.0 L 240.7 160.43 A 121.0 121.0 0 0 1 114.74 245.56 Z" fill="var(--color-safari)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="safari" data-label="Safari" data-display="200" />
+<path d="M 125.0 125.0 L 114.74 245.56 A 121.0 121.0 0 0 1 6.8 150.89 Z" fill="var(--color-firefox)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="firefox" data-label="Firefox" data-display="187" />
+<path d="M 125.0 125.0 L 6.8 150.89 A 121.0 121.0 0 0 1 55.55 25.92 Z" fill="var(--color-edge)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="edge" data-label="Edge" data-display="173" />
+<path d="M 125.0 125.0 L 55.55 25.92 A 121.0 121.0 0 0 1 125.0 4.0 Z" fill="var(--color-other)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="other" data-label="Other" data-display="90" />
+</svg>
+<div data-slot="chart-legend" class="flex items-center justify-center gap-4 pt-3">
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-chrome)">
+</div>Chrome
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-safari)">
+</div>Safari
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-firefox)">
+</div>Firefox
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-edge)">
+</div>Edge
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-other)">
+</div>Other
+</div>
+</div>
+</div>
+<div data-slot="chart-tooltip" data-shadcn--chart-target="tooltip" hidden="hidden" style="position:absolute;pointer-events:none" class="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+<div class="grid gap-1.5">
+<div class="flex w-full flex-wrap items-stretch gap-2 [&amp;&gt;svg]:h-2.5 [&amp;&gt;svg]:w-2.5 [&amp;&gt;svg]:text-muted-foreground items-center">
+<div class="shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg) h-2.5 w-2.5" data-shadcn--chart-target="indicator">
+</div>
+<div class="flex flex-1 items-center justify-between leading-none">
+<div class="grid gap-1.5">
+<span class="text-muted-foreground" data-shadcn--chart-target="name">
+</span>
+</div>
+<span class="font-mono font-medium text-foreground tabular-nums" data-shadcn--chart-target="value">
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>

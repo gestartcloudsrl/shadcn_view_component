@@ -100,6 +100,11 @@ RSpec.describe "reverse parity" do
     # `modifiersClassNames` there, which this port does not have, so the same
     # cells are reached with a class on the root.
     "calendar" => [ "[--cell-size:--spacing(12)]", "[&_td[data-disabled]>button]:line-through" ],
+    # The height upstream's own pie examples give the container at the call
+    # site — `className="mx-auto aspect-square max-h-[250px]"`. Here the shape
+    # defaults to it, because a pie that fills whatever box it is in is not a
+    # useful default; the other two classes are in the corpus already.
+    "chart-pie" => %w[max-h-[250px]],
     "skeleton" => %w[size-12 w-[200px] w-[250px]],
     "empty" => %w[max-w-md],
     "item" => %w[max-w-md],

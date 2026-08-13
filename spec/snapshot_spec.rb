@@ -42,6 +42,9 @@ RSpec.describe "rendered output snapshots" do
   # about parity, so they are flattened first.
   def self.normalize(html)
     html.gsub(/\b(shadcn-(?:checkbox|switch|theme-selector|calendar-caption)-)[0-9a-f]{8}\b/, '\1x')
+        # The chart's own id, which upstream spells without the gem's prefix
+        # because `chart.tsx` does: `chart-${useId()}`.
+        .gsub(/\bchart-[0-9a-f]{8}\b/, "chart-x")
         .gsub(/\s+/, " ")
         .gsub(/\s*</, "\n<")
         .strip + "\n"

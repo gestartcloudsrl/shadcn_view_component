@@ -101,6 +101,31 @@ Three things were hand-written rather than pulled in:
   one animation rather than a pair, plus `mask-composite: intersect` and a
   different timeline.
 
+### When a package can be dropped, and when it cannot
+
+Five have now been measured before deciding, and the answers split cleanly
+enough to be a rule rather than five anecdotes.
+
+| package | lines | what it was | outcome |
+|---|---|---|---|
+| `input-otp` | 715 | one real input, plus device workarounds | dropped |
+| vaul | 2,292 | a Radix dialog with a drag, and a stylesheet | dropped |
+| embla | 3,170 | six questions a scroll container answers | dropped |
+| `react-day-picker` | 9,744 | a third locale data, a fifth other calendar systems | dropped |
+| recharts | 29,091 over 11 dependencies | scales, layout, shapes, a Redux store | **kept the shape of, drew our own** |
+
+The question that separates them is not size. It is **what the package supplies
+that the platform does not**. Scrolling, `touch-action`, an input's own
+autofill, `Date` and `I18n` are all things a browser or Ruby already has, and
+the package around them is mostly workarounds and locale data. recharts is not:
+`chart.tsx` draws nothing at all, so there was no frame-with-a-hole to fill —
+the frame is 1:1 and the shapes are written here, one at a time.
+
+So: measure what the *component* uses, then ask whether that is a mechanism or
+the work itself. Read the four ported ones as evidence for the first case and
+`chart` as evidence for the second, and see
+[features/chart.md](../features/chart.md).
+
 ## API shape
 
 **The `part` macro** (`app/components/shadcn/parts.rb`) replaced 53 files that
@@ -145,6 +170,14 @@ take down a page it has never seen.** An unknown icon name raises where
 `Rails.env.local?` — development and test, where someone can fix it — and
 renders nothing everywhere else, staging included. That is the trade Rails makes
 with a missing translation.
+
+The same rule decided something upstream does not do. `chart.tsx` interpolates
+its config's colours into a `<style>` element through
+`dangerouslySetInnerHTML`, where a `}` in a colour would close the rule and
+everything after it would be the caller's own CSS running in the host's page.
+The port filters a colour to what a colour is made of before it reaches the
+element. React's escape hatch is named for a reason; a gem that runs inside an
+application it cannot see does not get to take it.
 
 **A behaviour upstream lets you ask for is a keyword here, not a decision made
 for the host.** The dropdown once wrapped around at the ends of the list; that
