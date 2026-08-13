@@ -337,8 +337,8 @@ advantage, click-to-focus, was not buying anything.
 ## What the vendored references are worth
 
 `vendor/shadcn/` is checked on every run: `parity_spec` reads it, so a drifted
-copy fails the suite. **`vendor/radix/`, `vendor/shadcn-react/` and
-`vendor/vaul/` are policed by nobody.** No spec reads any of them — each README
+copy fails the suite. **`vendor/radix/`, `vendor/shadcn-react/`, `vendor/vaul/`
+and `vendor/cmdk/` are policed by nobody.** No spec reads any of them — each README
 says so — and each can go stale the moment upstream ships past the commit in its
 `REVISION`. They are citation sources, not fixtures.
 

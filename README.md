@@ -411,7 +411,13 @@ layout is the browser's and the controller only moves two numbers. The handle is
 a `role="separator"` with the package's own keyboard: five points an arrow, all
 the way on Home and End.
 
-Not ported: command and combobox.
+**Command** — the palette. Upstream wraps `cmdk`; here the items are
+server-rendered and the controller filters, *ranks* and walks them. The ranking
+matters enough that `cmdk`'s own fuzzy scorer is ported rather than replaced
+with a substring match: type `gp` and Group Policy comes before Groups.
+`keywords:` are searched and never shown.
+
+Not ported: combobox.
 
 ## What is and is not verified
 

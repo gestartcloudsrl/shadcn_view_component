@@ -35,6 +35,7 @@ RSpec.describe "shadcn/ui parity" do
     "chart" => "chart",
     "checkbox" => "checkbox",
     "collapsible" => "collapsible",
+    "command" => "command",
     "context-menu" => "context_menu",
     "dialog" => "dialog",
     "dropdown-menu" => "dropdown_menu",
@@ -114,7 +115,7 @@ RSpec.describe "shadcn/ui parity" do
   ported_as_a_form_builder = %w[form].freeze
 
   not_yet_ported = %w[
-    combobox command
+    combobox
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.

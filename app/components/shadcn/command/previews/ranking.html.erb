@@ -1,0 +1,16 @@
+<%# What ranking buys, and filtering does not. Type `gp`: Group Policy comes
+    first, because `cmdk`'s scorer rewards a match at the start of a word — the
+    same file is ported at `app/javascript/shadcn/command_score.js`.
+
+    Then type `settings` and Preferences appears, which has the word nowhere in
+    it: `keywords:` are searched and never shown. %>
+<%= render(Shadcn::Command::Component.new(label: "Search", class: "rounded-lg border shadow-md md:min-w-[450px]")) do |command| %>
+  <% command.with_command_input(placeholder: "Try gp, or settings…") %>
+  <% command.with_command_list do %>
+    <%= render(Shadcn::Command::Empty::Component.new) { "No results found." } %>
+    <% { "Groups" => nil, "Group Policy" => nil, "Grouping rules" => nil,
+         "Preferences" => %w[settings config], "General" => nil }.each do |label, keywords| %>
+      <%= render(Shadcn::Command::Item::Component.new(keywords:)) { label } %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -89,17 +89,17 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (2)
+## Components not ported (1)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Twenty-three have since been ported —
+`not_yet_ported` and fails if the two drift. Twenty-four have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
 `context-menu`, `menubar`, `drawer`, `carousel`, `input-otp`, `calendar`,
-`chart` and `resizable` — leaving 2, with `form` and `sonner` decided rather
-than pending (below).
+`chart`, `resizable` and `command` — leaving 1, with `form` and `sonner`
+decided rather than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -178,8 +178,14 @@ error was mine, and is recorded with the group it belongs to.
   the page, and a `turbo_stream.append`. `parity_spec` holds it in
   `ported_as_ours`. See [features/toaster.md](features/toaster.md).
 
-- **Blocked by a third-party npm package** (2): `command` (cmdk),
-  `combobox` (**@base-ui/react**).
+- **Blocked by a third-party npm package** (1): `combobox`
+  (**@base-ui/react**).
+  *`command` has shipped. `cmdk` is 1,091 lines plus a 162-line fuzzy scorer,
+  and the scorer was **ported rather than replaced**: the ranking is the
+  component, and a palette that filters by substring is not one. Its `cmdk-*`
+  attributes are rendered too, because shadcn's classes select them — the
+  opposite call from the chart, whose `[&_.recharts-*]` classes select a DOM
+  this port does not render. See [features/command.md](features/command.md).*
   *`resizable` has shipped. `react-resizable-panels` is 2,252 lines and no
   dependencies, and what it supplies is a drag, a keyboard and arithmetic over
   `flex-grow` — the layout itself is the browser's, which is the shape the rule
