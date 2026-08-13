@@ -1,0 +1,11 @@
+<%# Upstream's "Custom Cell Size": the whole calendar is sized from one custom
+    property, so a caller changes `--cell-size` and everything follows. %>
+<%= render(Shadcn::Calendar::Component.new(
+      mode: :range,
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 9)..Date.new(2026, 8, 19),
+      caption_layout: :dropdown,
+      start_month: Date.new(2024, 1, 1),
+      end_month: Date.new(2030, 12, 31),
+      class: "rounded-md border shadow-sm [--cell-size:--spacing(12)]"
+    )) %>

@@ -97,6 +97,31 @@ module ShadcnViewComponent
       end
     end
 
+    # A calendar bound to the model, in any of its three modes.
+    #
+    #   f.shadcn_calendar :starts_on
+    #   f.shadcn_calendar :dates, mode: :multiple
+    #   f.shadcn_calendar :starts_on, mode: :range, to: :ends_on
+    #
+    # `to:` is what makes a range Rails-shaped: two dates are usually two
+    # columns, so the two ends are named after two attributes and each comes
+    # back as itself. Without it a range submits `name[from]` and `name[to]`
+    # under one parameter, which suits a form object rather than a record.
+    #
+    # The month shown follows the value rather than today, so reopening a form
+    # lands on the date already chosen.
+    def shadcn_calendar(method, mode: :single, to: nil, **options)
+      selected = calendar_selection(method, mode:, to:)
+
+      @template.render(Shadcn::Calendar::Component.new(
+        mode:,
+        selected:,
+        name: to ? [ field_name(method), field_name(to) ] : field_name(method),
+        month: options.delete(:month) || Array(selected).compact.first,
+        **aria_labelled(method, options)
+      ))
+    end
+
     def shadcn_checkbox(method, **options)
       @template.render(Shadcn::Checkbox::Component.new(
         name: field_name(method),
@@ -171,6 +196,15 @@ module ShadcnViewComponent
 
     def invalid(method)
       "true" if errors_for(method).any?
+    end
+
+    # What is already chosen, in the shape the component takes: one date, a
+    # list of them, or the two ends of a range.
+    def calendar_selection(method, mode:, to:)
+      return [ value_for(method), value_for(to) ].compact if to
+      return Array(value_for(method)).compact if mode == :multiple
+
+      value_for(method)
     end
 
     def value_for(method)

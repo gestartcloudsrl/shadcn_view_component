@@ -21,10 +21,15 @@ import { readDirection } from "shadcn/direction"
 // What it does build is structure, and even that is cloned from what the server
 // rendered rather than written out.
 export default class extends Controller {
-  static targets = [ "grid", "weeks", "caption", "previous", "next", "monthSelect", "yearSelect" ]
+  static targets = [ "grid", "weeks", "caption", "previous", "next", "monthSelect", "yearSelect", "inputs" ]
 
   static values = {
     month: String,
+    // The application's today, not the browser's. `Time.zone` and a laptop's
+    // clock disagree by a day for a few hours out of every twenty-four, and the
+    // server has already marked a cell `data-today` from its own — so a
+    // `new Date()` here would light one day and count presets from another.
+    today: String,
     weekStartsOn: { type: Number, default: 1 },
     fixedWeeks: Boolean,
     showOutsideDays: { type: Boolean, default: true },
@@ -32,6 +37,8 @@ export default class extends Controller {
     startMonth: String,
     endMonth: String,
     mode: { type: String, default: "single" },
+    required: Boolean,
+    inputNames: Array,
     selected: Array,
     disabled: Array,
     dayNames: Array,
@@ -54,14 +61,18 @@ export default class extends Controller {
 
   connect() {
     this.direction = readDirection(this.element)
+    // One nav, one keyboard, and as many grids as `number_of_months` asked
+    // for — so everything below indexes by grid, and the month a grid shows is
+    // the root's month plus its own offset.
     // The prototypes for a re-render, taken from the server's own output: a
     // week row, and a cell with every modifier class stripped back off it. The
     // alternative is markup in a template literal here, which is the thing
     // rule 2 above is about.
-    this.rowPrototype = this.weeksTarget.querySelector("tr").cloneNode(true)
+    this.rowPrototype = this.weeksTargets[0].querySelector("tr").cloneNode(true)
     this.cellPrototype = this.plainCell()
+    this.baseCellClass = this.cellPrototype.className
     this.numberPrototype = this.showWeekNumberValue
-      ? this.weeksTarget.querySelector("th").cloneNode(true)
+      ? this.weeksTargets[0].querySelector("td:not([data-day])").cloneNode(true)
       : null
   }
 
@@ -85,6 +96,88 @@ export default class extends Controller {
     const year = this.month
     year.setFullYear(Number(event.target.value))
     this.goTo(year)
+  }
+
+  // `react-day-picker`'s own three, read from `selection/useSingle.js`,
+  // `selection/useMulti.js` and `utils/addToRange.js` rather than invented:
+  // single toggles off unless it was asked to be `required`, multiple toggles
+  // each day, and a range grows from one end or starts again.
+  select(event) {
+    const cell = event.target.closest("td[data-day]")
+    if (!cell || cell.dataset.disabled) return
+
+    event.preventDefault()
+    const day = cell.dataset.day
+    this.selectedValue = this.selectionWith(day)
+    this.repaint()
+    this.writeInputs()
+    this.dispatch("select", { detail: { selected: this.selectedValue, day } })
+  }
+
+  // A day counted from today, which is what a preset is: upstream's own example
+  // holds five of them in React state, and a Rails app has no state to hold
+  // them in — so the offset rides on the button and the controller does the
+  // arithmetic it is already doing.
+  preset({ params: { offset } }) {
+    const day = this.parse(this.todayValue)
+    day.setDate(day.getDate() + Number(offset || 0))
+
+    this.selectedValue = this.modeValue === "range" ? [ this.iso(day), this.iso(day) ] : [ this.iso(day) ]
+    this.goTo(day)
+    this.repaint()
+    this.writeInputs()
+    this.dispatch("select", { detail: { selected: this.selectedValue, day: this.iso(day) } })
+  }
+
+  selectionWith(day) {
+    if (this.modeValue === "multiple") return this.multipleWith(day)
+    if (this.modeValue === "range") return this.rangeWith(day)
+
+    return this.selectedValue.includes(day) && !this.requiredValue ? [] : [ day ]
+  }
+
+  multipleWith(day) {
+    return this.selectedValue.includes(day)
+      ? this.selectedValue.filter((selected) => selected !== day)
+      : [ ...this.selectedValue, day ].sort()
+  }
+
+  // `addToRange`, with its cases in its order: nothing yet, one end only, or a
+  // finished range that a third click starts over.
+  rangeWith(day) {
+    const [ from, to ] = this.selectedValue
+
+    if (!from) return [ day, day ]
+
+    if (from && !to) return day < from ? [ day, from ] : [ from, day ]
+
+    if (day === from && day === to) return this.requiredValue ? [ from, to ] : []
+    if (day === from || day === to) return [ day, day ]
+    if (day < from) return [ day, to ]
+
+    return [ from, day ]
+  }
+
+  // What a Rails form receives, rewritten from the selection. `<input
+  // type=hidden>` is the one element this file builds rather than clones: it
+  // carries no class, so nothing here is invisible to Tailwind or to parity.
+  writeInputs() {
+    if (!this.hasInputsTarget || !this.inputNamesValue.length) return
+
+    const pairs = this.modeValue === "range"
+      ? this.inputNamesValue.map((name, index) => [ name, this.selectedValue[index] || "" ])
+      : (this.selectedValue.length
+          ? this.selectedValue.map((value) => [ this.inputNamesValue[0], value ])
+          : [ [ this.inputNamesValue[0], "" ] ])
+
+    this.inputsTarget.replaceChildren(...pairs.map(([ name, value ]) => {
+      const input = document.createElement("input")
+      input.type = "hidden"
+      input.autocomplete = "off"
+      input.name = name
+      input.value = value
+      return input
+    }))
   }
 
   // The grid pattern: one day is tabbable and the arrows reach the rest. Radix
@@ -144,7 +237,7 @@ export default class extends Controller {
   // under the focus, and the focus is restored once the new grid is there.
   focusDay(date) {
     const iso = this.iso(date)
-    if (!this.inDisplayedMonth(date)) this.goTo(date)
+    if (!this.isDisplayed(date)) this.goTo(date)
 
     const button = this.buttonFor(iso)
     if (!button) return
@@ -178,39 +271,58 @@ export default class extends Controller {
   // --- rendering ------------------------------------------------------------
 
   render() {
-    const rows = this.weeks()
+    this.weeksTargets.forEach((weeks, index) => {
+      const month = this.monthAt(index)
 
-    this.weeksTarget.replaceChildren(...rows.map((week) => this.row(week)))
-    this.captionTarget.textContent = this.formatMonth(this.month)
-    this.gridTarget.setAttribute("aria-label", this.formatMonth(this.month))
+      weeks.replaceChildren(...this.weeks(month).map((week) => this.row(week, month)))
+      this.captionTargets[index].textContent = this.formatMonth(month)
+      // Only where this port put one: with a caller's own `aria-labelledby` the
+      // grid is named by that and by the caption's id, and neither changes here.
+      if (this.gridTargets[index].hasAttribute("aria-label")) {
+        this.gridTargets[index].setAttribute("aria-label", this.formatMonth(month))
+      }
+    })
+
     this.updateNav()
     this.updateDropdowns()
     this.markInitialFocusTarget()
+  }
+
+  monthAt(index) {
+    return new Date(this.month.getFullYear(), this.month.getMonth() + index, 1)
   }
 
   // The Ruby rule, repeated: the selected day if it is in this grid, otherwise
   // today, otherwise the first of the month — and never a disabled one. Without
   // it a navigated month has no tabbable day at all and the grid leaves the tab
   // order, which is how this first worked.
+  // One tab stop per grid, which is what the server renders too: each grid is a
+  // `role="grid"` of its own.
   markInitialFocusTarget() {
-    const first = new Date(this.month.getFullYear(), this.month.getMonth(), 1)
-    const candidates = [ ...this.selectedValue, this.iso(new Date()), this.iso(first) ]
+    this.weeksTargets.forEach((weeks, index) => {
+      const month = this.monthAt(index)
+      const candidates = [ ...this.selectedValue, this.todayValue, this.iso(month) ]
 
-    for (const iso of candidates) {
-      const button = this.buttonFor(iso)
-      if (button && !button.disabled) return this.markFocusTarget(button)
-    }
+      for (const iso of candidates) {
+        const button = weeks.querySelector(`td[data-day="${iso}"]:not([data-outside]) button`)
+        if (button && !button.disabled) {
+          for (const other of weeks.querySelectorAll("button")) other.tabIndex = -1
+          button.tabIndex = 0
+          return
+        }
+      }
+    })
   }
 
   // The same grid `Calendar::Month#weeks` builds, and it has to stay the same:
   // the first day of the week the month starts in, through the last day of the
   // week it ends in, six rows when a fixed height was asked for.
-  weeks() {
-    const first = new Date(this.month.getFullYear(), this.month.getMonth(), 1)
+  weeks(month) {
+    const first = new Date(month.getFullYear(), month.getMonth(), 1)
     const start = new Date(first)
     start.setDate(start.getDate() - this.offsetInWeek(first))
 
-    const last = new Date(this.month.getFullYear(), this.month.getMonth() + 1, 0)
+    const last = new Date(month.getFullYear(), month.getMonth() + 1, 0)
     const span = Math.round((last - start) / 86400000) + 1
     const rows = this.fixedWeeksValue ? 6 : Math.ceil(span / 7)
 
@@ -222,11 +334,11 @@ export default class extends Controller {
       }))
   }
 
-  row(week) {
+  row(week, month) {
     const row = this.rowPrototype.cloneNode(false)
 
     if (this.numberPrototype) row.appendChild(this.weekNumber(week))
-    for (const day of week) row.appendChild(this.cell(day))
+    for (const day of week) row.appendChild(this.cell(day, month))
 
     return row
   }
@@ -241,15 +353,32 @@ export default class extends Controller {
     return cell
   }
 
-  cell(day) {
+  cell(day, month) {
     const cell = this.cellPrototype.cloneNode(true)
-    const outside = day.getMonth() !== this.month.getMonth()
+    this.applyState(cell, day, month)
+
+    return cell
+  }
+
+  // Selecting repaints rather than rebuilds: replacing the rows would take the
+  // button the pointer or the keyboard is on out of the document, and the focus
+  // with it.
+  repaint() {
+    this.weeksTargets.forEach((weeks, index) => {
+      for (const cell of weeks.querySelectorAll("td[data-day]")) {
+        this.applyState(cell, this.parse(cell.dataset.day), this.monthAt(index))
+      }
+    })
+  }
+
+  applyState(cell, day, month) {
+    const outside = day.getMonth() !== month.getMonth()
     const hidden = outside && !this.showOutsideDaysValue
     const selected = this.isSelected(day)
     const disabled = this.isDisabled(day)
 
     cell.className = [
-      cell.className,
+      this.baseCellClass,
       this.isToday(day) && this.todayClassValue,
       outside && this.outsideClassValue,
       disabled && this.disabledClassValue,
@@ -269,16 +398,14 @@ export default class extends Controller {
     this.set(cell, "aria-selected", selected ? "true" : null)
 
     const button = cell.querySelector("button")
-    if (hidden) button.remove()
-    else this.dayButton(button, day, { selected, disabled })
-
-    return cell
+    if (hidden) button?.remove()
+    else if (button) this.dayButton(button, day, { selected, disabled })
   }
 
   dayButton(button, day, { selected, disabled }) {
     button.textContent = String(day.getDate())
     button.disabled = disabled
-    button.tabIndex = -1
+    if (button.tabIndex !== 0) button.tabIndex = -1
     this.set(button, "data-day", this.format(day, this.dateFormatValue))
     this.set(button, "aria-label", this.dayLabel(day, selected))
     this.set(button, "data-selected-single", this.modeValue === "single" && selected ? "true" : null)
@@ -292,6 +419,13 @@ export default class extends Controller {
   markFocusTarget(button) {
     for (const other of this.buttons) other.tabIndex = -1
     button.tabIndex = 0
+  }
+
+  // A day shown in two grids at once — the last of August is also an outside
+  // day in September's — belongs to the grid it is not outside of.
+  buttonFor(iso) {
+    return this.element.querySelector(`td[data-day="${iso}"]:not([data-outside]) button`) ||
+      this.element.querySelector(`td[data-day="${iso}"] button`)
   }
 
   updateNav() {
@@ -338,7 +472,7 @@ export default class extends Controller {
   // --- what a day is --------------------------------------------------------
 
   isToday(day) {
-    return this.iso(day) === this.iso(new Date())
+    return this.iso(day) === this.todayValue
   }
 
   isSelected(day) {
@@ -380,18 +514,19 @@ export default class extends Controller {
       Boolean(this.endMonthValue && month > this.endMonthValue.slice(0, 7))
   }
 
-  inDisplayedMonth(date) {
-    return date.getFullYear() === this.month.getFullYear() && date.getMonth() === this.month.getMonth()
+  // True of any month on screen, not only the first: with two months shown,
+  // stepping off the end of the first lands in the second and nothing moves.
+  isDisplayed(date) {
+    return this.weeksTargets.some((_, index) => {
+      const month = this.monthAt(index)
+      return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth()
+    })
   }
 
   // --- reading the DOM ------------------------------------------------------
 
   get buttons() {
-    return [ ...this.weeksTarget.querySelectorAll("button") ]
-  }
-
-  buttonFor(iso) {
-    return this.weeksTarget.querySelector(`td[data-day="${iso}"] button`)
+    return this.weeksTargets.flatMap((weeks) => [ ...weeks.querySelectorAll("button") ])
   }
 
   dayOf(element) {
@@ -404,15 +539,19 @@ export default class extends Controller {
   // built from. Taken from a plain day rather than assembled: an outside or a
   // selected one would carry classes this then has to guess at removing.
   plainCell() {
-    const plain = this.weeksTarget.querySelector(
-      "td:not([data-today]):not([data-outside]):not([data-selected]):not([data-disabled])"
+    const plain = this.weeksTargets[0].querySelector(
+      "td[data-day]:not([data-today]):not([data-outside]):not([data-selected]):not([data-disabled])"
     )
-    const cell = (plain || this.weeksTarget.querySelector("td")).cloneNode(true)
+    const cell = (plain || this.weeksTargets[0].querySelector("td[data-day]")).cloneNode(true)
 
     for (const state of [ "day", "month", "outside", "today", "selected", "disabled", "hidden" ]) {
       delete cell.dataset[state]
     }
     cell.removeAttribute("aria-selected")
+    // The cell this was taken from may have been the tabbable one, and every
+    // later cell is a copy of it — one tab stop would have become thirty-five.
+    const button = cell.querySelector("button")
+    if (button) button.tabIndex = -1
 
     return cell
   }

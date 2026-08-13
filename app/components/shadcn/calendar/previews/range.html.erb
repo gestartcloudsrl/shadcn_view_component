@@ -1,0 +1,10 @@
+<%# Upstream's "Range Calendar": two months side by side and one range across
+    both. The two ends are two dates, so in a form they are two attributes —
+    `f.shadcn_calendar :starts_on, mode: :range, to: :ends_on`. %>
+<%= render(Shadcn::Calendar::Component.new(
+      mode: :range,
+      month: Date.new(2026, 1, 1),
+      selected: Date.new(2026, 1, 12)..Date.new(2026, 2, 10),
+      number_of_months: 2,
+      class: "rounded-md border shadow-sm"
+    )) %>

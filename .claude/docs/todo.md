@@ -89,16 +89,16 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (5)
+## Components not ported (4)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Twenty have since been ported —
+`not_yet_ported` and fails if the two drift. Twenty-one have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu`, `menubar`, `drawer`, `carousel` and `input-otp` — leaving 5,
-with `form` and `sonner` decided rather than pending (below).
+`context-menu`, `menubar`, `drawer`, `carousel`, `input-otp` and `calendar` —
+leaving 4, with `form` and `sonner` decided rather than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -177,10 +177,16 @@ error was mine, and is recorded with the group it belongs to.
   the page, and a `turbo_stream.append`. `parity_spec` holds it in
   `ported_as_ours`. See [features/toaster.md](features/toaster.md).
 
-- **Blocked by a third-party npm package** (5): `chart`
+- **Blocked by a third-party npm package** (4): `chart`
   (recharts), `command` (cmdk),
-  `resizable` (react-resizable-panels), `calendar`
-  (react-day-picker), `combobox` (**@base-ui/react**).
+  `resizable` (react-resizable-panels), `combobox` (**@base-ui/react**).
+  *`calendar` has shipped, and it is the fourth time in a row that "blocked by
+  a package" was the wrong reading. `react-day-picker` is 9,744 lines of
+  compiled ESM, of which 3,479 are locale data and 2,046 are the Ethiopic,
+  Hebrew, Hijri, Persian and Jalali calendars — date arithmetic and names, which
+  `Date` and `I18n` already are. It is also the first family here that renders
+  correctly with no JavaScript at all. See
+  [features/calendar.md](features/calendar.md).*
   *`input-otp` has shipped, and it went the same way `carousel` did: 715 lines
   of package, of which the component uses three values per box and a six-line
   rule. What the package mostly is — 21 of its lines name Safari, iOS, a
@@ -231,9 +237,9 @@ error was mine, and is recorded with the group it belongs to.
 The old list said "command/combobox" on one line. They are two files upstream,
 which is why the total was 27 and not 26.
 
-Most wanted in a real Rails app, roughly: command, calendar, sonner, combobox,
-slider — which is, awkwardly, five of the eleven hardest. `sidebar` was on this
-list and has shipped.
+Most wanted in a real Rails app, roughly: command, combobox and the rest of
+that list — `calendar`, `sonner`, `slider` and `sidebar` were on it and have
+shipped.
 
 Filtering is no longer wholly behind them: `Select::Component.new(searchable: true)`
 ships a filterable select, built rather than ported since no Radix-based shadcn

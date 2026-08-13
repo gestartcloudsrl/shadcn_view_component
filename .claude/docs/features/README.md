@@ -34,7 +34,7 @@ here would create a copy nobody updates. These files carry what a machine cannot
 API.
 
 **Anything unmeasured.** An absent entry means *not yet assessed*, never "1:1".
-There are 58 families under `app/components/shadcn/` and eight have been
+There are 59 families under `app/components/shadcn/` and nine have been
 examined closely enough to write down; claiming the rest match would be exactly the kind of sentence this project
 keeps catching itself in.
 
@@ -49,6 +49,7 @@ keeps catching itself in.
 | [form.md](form.md) | **ours** | react-hook-form's field state has no server counterpart; the family is `ShadcnViewComponent::FormBuilder` over `Field` |
 | [carousel.md](carousel.md) | **adapted** | embla's 3,170 lines answer six questions a scroll container already answers; no loop, no plugins, no mouse drag |
 | [input-otp.md](input-otp.md) | **adapted** | one real input under the boxes, which is what the package is; the browser workarounds are not ported |
+| [calendar.md](calendar.md) | **adapted** | `react-day-picker` is mostly date arithmetic and locale data, which Ruby has; the markup is 1:1 and the grid is rendered on both sides |
 | [toaster.md](toaster.md) | **ours** | `sonner.tsx` emits no markup at all, so there is nothing to be 1:1 with; sonner's measurements and stacking, Rails' three ways in |
 
 Components with a known divergence but no file yet — write one before claiming

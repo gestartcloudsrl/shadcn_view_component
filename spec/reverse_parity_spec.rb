@@ -92,6 +92,13 @@ RSpec.describe "reverse parity" do
     # comment for the `min-h-0` that goes with them, which lands on a plain div
     # and so never reaches this spec.
     "dialog-content" => %w[gap-0 grid-rows-[auto_1fr_auto] max-h-[80vh]],
+    # Both from the calendar previews, and both are what upstream's own examples
+    # do at the call site rather than in the component. "Custom Cell Size" is a
+    # calendar sized from one custom property, and "Booked dates" strikes the
+    # taken days through — upstream reaches for `modifiers` and
+    # `modifiersClassNames` there, which this port does not have, so the same
+    # cells are reached with a class on the root.
+    "calendar" => [ "[--cell-size:--spacing(12)]", "[&_td[data-disabled]>button]:line-through" ],
     "skeleton" => %w[size-12 w-[200px] w-[250px]],
     "empty" => %w[max-w-md],
     "item" => %w[max-w-md],

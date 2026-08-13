@@ -1,0 +1,24 @@
+<%# Upstream's "Date and Time Picker": a date, then the two ends of the day it
+    covers. The times are real `<input type="time">` fields, so the browser's own
+    picker and validation come with them — the same call the gem makes for
+    `native_select`. %>
+<div class="w-fit rounded-md border shadow-sm">
+  <%= render(Shadcn::Calendar::Component.new(
+        month: Date.new(2026, 8, 1),
+        selected: Date.new(2026, 8, 12)
+      )) %>
+  <div class="flex gap-3 border-t p-3">
+    <%= render(Shadcn::Field::Component.new(class: "flex-1")) do |field| %>
+      <% field.with_label(for: "calendar-start-time") { "Start Time" } %>
+      <% field.with_field_content do %>
+        <%= render(Shadcn::Input::Component.new(id: "calendar-start-time", type: "time", value: "09:00", step: 60)) %>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::Field::Component.new(class: "flex-1")) do |field| %>
+      <% field.with_label(for: "calendar-end-time") { "End Time" } %>
+      <% field.with_field_content do %>
+        <%= render(Shadcn::Input::Component.new(id: "calendar-end-time", type: "time", value: "17:00", step: 60)) %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

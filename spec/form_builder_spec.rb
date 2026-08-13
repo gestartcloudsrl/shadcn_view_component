@@ -17,12 +17,19 @@ RSpec.describe ShadcnViewComponent::FormBuilder do
       attribute :bio, :string
       attribute :plan, :string
       attribute :newsletter, :boolean
+      attribute :starts_on, :date
+      attribute :ends_on, :date
+      attribute :dates
 
       validates :email, presence: true, format: { with: /@/, message: "must contain @" }
     end
   end
 
-  let(:valid) { model_class.new(email: "a@b.com", plan: "pro", newsletter: true).tap(&:valid?) }
+  let(:valid) do
+    model_class.new(email: "a@b.com", plan: "pro", newsletter: true,
+                    starts_on: Date.new(2026, 8, 10), ends_on: Date.new(2026, 8, 14),
+                    dates: [ Date.new(2026, 8, 3), Date.new(2026, 8, 5) ]).tap(&:valid?)
+  end
   let(:invalid) { model_class.new(plan: "pro").tap(&:valid?) }
 
   def render_form(model, template)
@@ -146,6 +153,70 @@ RSpec.describe ShadcnViewComponent::FormBuilder do
       states = doc.css("[data-slot=native-select-option]").to_h { |o| [ o["value"], o["selected"] ] }
 
       expect(states).to eq("free" => nil, "pro" => "selected")
+    end
+  end
+
+  describe "#shadcn_calendar" do
+    it "posts the chosen date under the attribute's own name" do
+      doc = render_form(valid, "<%= f.shadcn_calendar :starts_on %>")
+
+      expect(doc.at_css("input[type=hidden][name='signup[starts_on]']")["value"]).to eq("2026-08-10")
+    end
+
+    it "opens on the month the value is in rather than on today" do
+      doc = render_form(valid, "<%= f.shadcn_calendar :starts_on %>")
+
+      expect(doc.at_css("[data-slot=calendar]")["data-shadcn--calendar-month-value"]).to eq("2026-08-01")
+    end
+
+    it "marks the value selected in the grid" do
+      doc = render_form(valid, "<%= f.shadcn_calendar :starts_on %>")
+
+      expect(doc.at_css("td[data-day='2026-08-10']")["data-selected"]).to eq("true")
+    end
+
+    # An empty parameter rather than none: a date that vanishes from the post
+    # leaves the old one in the record, which is the trap Rails' own hidden
+    # checkbox field exists to avoid.
+    it "still posts the attribute when nothing is chosen", :aggregate_failures do
+      doc = render_form(model_class.new, "<%= f.shadcn_calendar :starts_on %>")
+      input = doc.at_css("input[type=hidden][name='signup[starts_on]']")
+
+      expect(input).to be_present
+      expect(input["value"]).to eq("")
+    end
+
+    it "posts one parameter per day in multiple mode" do
+      doc = render_form(valid, "<%= f.shadcn_calendar :dates, mode: :multiple %>")
+
+      expect(doc.css("input[name='signup[dates][]']").map { |i| i["value"] })
+        .to eq([ "2026-08-03", "2026-08-05" ])
+    end
+
+    # The Rails shape for a range: two attributes, each named after itself, so
+    # `permit(:starts_on, :ends_on)` is all the controller needs.
+    it "names each end of a range after its own attribute", :aggregate_failures do
+      doc = render_form(valid, "<%= f.shadcn_calendar :starts_on, mode: :range, to: :ends_on %>")
+
+      expect(doc.at_css("input[name='signup[starts_on]']")["value"]).to eq("2026-08-10")
+      expect(doc.at_css("input[name='signup[ends_on]']")["value"]).to eq("2026-08-14")
+    end
+
+    it "paints the days between the two ends as the range" do
+      doc = render_form(valid, "<%= f.shadcn_calendar :starts_on, mode: :range, to: :ends_on %>")
+
+      expect(doc.at_css("td[data-day='2026-08-12'] button")["data-range-middle"]).to eq("true")
+    end
+
+    # A grid is a control, and a control needs a name pointed at it — the same
+    # trap Select, Checkbox and Switch fall into here. The month stays part of
+    # the name rather than being replaced by it.
+    it "names the grid from the field's label, without losing the month", :aggregate_failures do
+      doc = render_form(valid, "<%= f.shadcn_calendar :starts_on %>")
+      ids = doc.at_css("table[role=grid]")["aria-labelledby"].split
+
+      expect(ids.first).to eq("signup_starts_on_label")
+      expect(doc.at_css("##{ids.last}").text).to eq("August 2026")
     end
   end
 

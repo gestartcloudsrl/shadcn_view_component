@@ -27,6 +27,7 @@ written.
 | [features/form.md](features/form.md) | why `form.tsx` is a FormBuilder here rather than components, part by part, and the seven divergences that follow |
 | [features/carousel.md](features/carousel.md) | the Carousel without embla: the six things shadcn asks of it, what a scroller answers instead, and what is left out |
 | [features/input-otp.md](features/input-otp.md) | the one-time-code field: the three values per box, the invisible-but-real input that makes autofill work, and the device workarounds not ported |
+| [features/calendar.md](features/calendar.md) | the calendar without `react-day-picker`: a third of the package is locale data and another fifth is other calendar systems, the grid that now exists twice, and what keeps the two copies honest |
 | [features/toaster.md](features/toaster.md) | the toaster, which is ours rather than a port: why there was nothing to reproduce, what was kept from sonner, and the three ways a Rails app raises one |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything

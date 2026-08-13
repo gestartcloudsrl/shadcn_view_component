@@ -14,6 +14,41 @@ module Shadcn
         render_with_template
       end
 
+      # Upstream's "Range Calendar".
+      def range
+        render_with_template
+      end
+
+      # Upstream's "Presets".
+      def presets
+        render_with_template
+      end
+
+      # Upstream's "Date and Time Picker".
+      def date_and_time
+        render_with_template
+      end
+
+      # Upstream's "Booked dates".
+      def booked
+        render_with_template
+      end
+
+      # Upstream's "Custom Cell Size".
+      def custom_cell_size
+        render_with_template
+      end
+
+      # Upstream's "Week Numbers".
+      def week_numbers
+        render_with_template
+      end
+
+      # The hidden inputs a Rails form posts.
+      def in_a_form
+        render_with_template
+      end
+
       # The month is an argument here so a month can be asked for by URL. That
       # is what `spec/system/calendar_spec.rb` compares the browser's own render
       # against: the grid exists twice — in `Calendar::Month` and in the

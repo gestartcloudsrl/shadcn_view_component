@@ -54,6 +54,7 @@ module Shadcn
 
       def previous = self.class.new(first.prev_month, **options)
       def next = self.class.new(first.next_month, **options)
+      def plus_months(count) = self.class.new(first + count.months, **options)
 
       # Sunday-first `Date::DAYNAMES`, rotated to whichever day the week starts
       # on. The names themselves come from `I18n` at render time, not from here.

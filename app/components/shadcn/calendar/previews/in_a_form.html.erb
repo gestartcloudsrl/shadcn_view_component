@@ -1,0 +1,8 @@
+<%# The half a Rails form sees: the component renders the hidden inputs and the
+    controller rewrites them, so `params[:booking][:on]` is a date the model can
+    take. With a model, `f.shadcn_calendar :on` does all of this. %>
+<%= render(Shadcn::Calendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      name: "booking[on]",
+      class: "rounded-md border shadow-sm"
+    )) %>
