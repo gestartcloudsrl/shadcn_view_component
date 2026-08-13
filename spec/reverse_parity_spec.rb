@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require_relative "support/shadcn_source"
 require "cgi"
 require "set"
 
