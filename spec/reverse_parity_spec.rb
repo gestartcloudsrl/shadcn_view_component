@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require_relative "support/shadcn_source"
 require "cgi"
 require "set"
 
@@ -50,7 +51,11 @@ RSpec.describe "reverse parity" do
   # classes look invented.
   def upstream_corpus
     Dir[Pathname(__dir__).join("../vendor/shadcn/**/*.tsx")].each_with_object(Set.new) do |path, corpus|
-      File.read(path).scan(/"([^"\n]*)"/) { |(literal)| corpus.merge(literal.split(/\s+/)) }
+      # Through `ShadcnSource` rather than a regex of its own: a class written
+      # with `String.raw` lives in a backtick literal, and a scanner that reads
+      # only `"…"` calls it invented. The two directions share one idea of what
+      # a string literal is, so they cannot drift.
+      ShadcnSource.string_literals(File.read(path)).each { |literal| corpus.merge(literal.split(/\s+/)) }
     end
   end
 
@@ -88,6 +93,13 @@ RSpec.describe "reverse parity" do
     # comment for the `min-h-0` that goes with them, which lands on a plain div
     # and so never reaches this spec.
     "dialog-content" => %w[gap-0 grid-rows-[auto_1fr_auto] max-h-[80vh]],
+    # Both from the calendar previews, and both are what upstream's own examples
+    # do at the call site rather than in the component. "Custom Cell Size" is a
+    # calendar sized from one custom property, and "Booked dates" strikes the
+    # taken days through — upstream reaches for `modifiers` and
+    # `modifiersClassNames` there, which this port does not have, so the same
+    # cells are reached with a class on the root.
+    "calendar" => [ "[--cell-size:--spacing(12)]", "[&_td[data-disabled]>button]:line-through" ],
     "skeleton" => %w[size-12 w-[200px] w-[250px]],
     "empty" => %w[max-w-md],
     "item" => %w[max-w-md],

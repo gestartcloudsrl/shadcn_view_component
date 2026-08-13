@@ -1,0 +1,20 @@
+<%# Upstream's "Presets": five shortcuts beside the month. Upstream's own
+    example holds them in React state; here the offset in days rides on the
+    button and the controller does the arithmetic, so a host writes no
+    JavaScript. The buttons are block content, which lands inside the root —
+    which is what lets their `data-action` reach the controller. %>
+<%= render(Shadcn::Calendar::Component.new(
+      month: Date.current,
+      class: "rounded-md border shadow-sm"
+    )) do %>
+  <div class="flex flex-col gap-2 border-t pt-3">
+    <% { "Today" => 0, "Tomorrow" => 1, "In 3 days" => 3, "In a week" => 7, "In 2 weeks" => 14 }.each do |label, offset| %>
+      <%= render(Shadcn::Button::Component.new(
+            variant: :outline,
+            size: :sm,
+            "data-action": "click->shadcn--calendar#preset",
+            "data-shadcn--calendar-offset-param": offset
+          )) { label } %>
+    <% end %>
+  </div>
+<% end %>

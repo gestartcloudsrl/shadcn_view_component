@@ -10,6 +10,12 @@ require_relative "support/component_helpers"
 require_relative "support/system"
 
 RSpec.configure do |config|
+  # `travel_to` for the specs that render a date: the calendar draws today, so
+  # its snapshots and its system examples are only deterministic with the clock
+  # held still. Frozen where it is needed rather than everywhere — the drawer
+  # and the toaster run on real timers.
+  config.include ActiveSupport::Testing::TimeHelpers
+
   config.include ViewComponent::TestHelpers, type: :component
   config.include Capybara::RSpecMatchers, type: :component
   config.include ComponentHelpers, type: :component

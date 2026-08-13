@@ -29,6 +29,7 @@ RSpec.describe "shadcn/ui parity" do
     "bubble" => "bubble",
     "button" => "button",
     "button-group" => "button_group",
+    "calendar" => "calendar",
     "card" => "card",
     "carousel" => "carousel",
     "checkbox" => "checkbox",
@@ -111,8 +112,7 @@ RSpec.describe "shadcn/ui parity" do
   ported_as_a_form_builder = %w[form].freeze
 
   not_yet_ported = %w[
-    calendar chart combobox command
-    resizable
+    chart combobox command resizable
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.

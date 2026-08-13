@@ -114,8 +114,8 @@ module Shadcn
     # The user-visible strings the components render, looked up under
     # `shadcn_view_component.*` with shadcn's English as the default — so the
     # gem works untranslated and a host app can override any key.
-    def shadcn_t(key)
-      I18n.t("shadcn_view_component.#{key}")
+    def shadcn_t(key, **interpolations)
+      I18n.t("shadcn_view_component.#{key}", **interpolations)
     end
 
     # Combines inline styles without dropping whatever the caller passed.

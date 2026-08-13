@@ -1,0 +1,11 @@
+<%# Upstream's "Month and Year Selector": the caption becomes two native
+    `<select>`s laid invisible over the label, so the control is the real one and
+    what you read is the span underneath it. %>
+<%= render(Shadcn::Calendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 12),
+      caption_layout: :dropdown,
+      start_month: Date.new(2020, 1, 1),
+      end_month: Date.new(2030, 12, 31),
+      class: "rounded-md border shadow-sm"
+    )) %>

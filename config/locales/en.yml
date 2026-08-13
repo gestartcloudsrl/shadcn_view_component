@@ -6,6 +6,15 @@ en:
     breadcrumb:
       label: breadcrumb
       more: More
+    calendar:
+      previous: Go to the Previous Month
+      next: Go to the Next Month
+      today_label: "Today, %{date}"
+      selected_label: "%{date}, selected"
+      week_number_header: Week Number
+      week_number: "Week %{number}"
+      choose_month: Choose the Month
+      choose_year: Choose the Year
     carousel:
       previous: Previous slide
       next: Next slide

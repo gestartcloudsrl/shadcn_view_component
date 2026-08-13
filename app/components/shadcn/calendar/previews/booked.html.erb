@@ -1,0 +1,18 @@
+<%# Upstream's "Booked dates": the taken days are refused and struck through.
+    `disabled:` takes anything answering `===` — a Date, a Range, or a list of
+    them — so the booking rule is written where the app already keeps it.
+
+    The line through them is the caller's, not the component's: upstream reaches
+    for `modifiers` and `modifiersClassNames`, which this port does not have, and
+    a class on the root reaches the same cells. %>
+<%
+  booked = [ Date.new(2026, 8, 4), Date.new(2026, 8, 5),
+             Date.new(2026, 8, 11)..Date.new(2026, 8, 13),
+             Date.new(2026, 8, 20), Date.new(2026, 8, 26)..Date.new(2026, 8, 28) ]
+%>
+<%= render(Shadcn::Calendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 17),
+      disabled: booked,
+      class: "rounded-md border shadow-sm [&_td[data-disabled]>button]:line-through"
+    )) %>

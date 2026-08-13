@@ -1,0 +1,8 @@
+<%# Upstream's "Week Numbers". The number is ISO-8601 — `Date#cweek` — where
+    upstream's follows the locale, which is written up in features/calendar.md. %>
+<%= render(Shadcn::Calendar::Component.new(
+      month: Date.new(2026, 1, 1),
+      selected: Date.new(2026, 1, 15),
+      show_week_number: true,
+      class: "rounded-md border shadow-sm"
+    )) %>
