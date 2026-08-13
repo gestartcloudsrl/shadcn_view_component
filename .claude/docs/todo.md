@@ -89,7 +89,7 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (4)
+## Components not ported (3)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
@@ -177,9 +177,14 @@ error was mine, and is recorded with the group it belongs to.
   the page, and a `turbo_stream.append`. `parity_spec` holds it in
   `ported_as_ours`. See [features/toaster.md](features/toaster.md).
 
-- **Blocked by a third-party npm package** (4): `chart`
-  (recharts), `command` (cmdk),
+- **Blocked by a third-party npm package** (3): `command` (cmdk),
   `resizable` (react-resizable-panels), `combobox` (**@base-ui/react**).
+  *`chart` has shipped in part, and it is the one case where "blocked by a
+  package" was **right**: recharts is 29,091 lines over eleven dependencies and
+  it is doing the work — `chart.tsx` draws nothing at all. So the frame is
+  ported 1:1 and the shapes are drawn here, starting with the pie. Bars, lines,
+  areas, radar and radial are not drawn yet, and each needs axes, ticks and a
+  grid that the pie does not. See [features/chart.md](features/chart.md).*
   *`calendar` has shipped, and it is the fourth time in a row that "blocked by
   a package" was the wrong reading. `react-day-picker` is 9,744 lines of
   compiled ESM, of which 3,479 are locale data and 2,046 are the Ethiopic,

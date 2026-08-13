@@ -1,0 +1,46 @@
+<div data-slot="chart" data-chart="chart-x" data-controller="shadcn--chart" class="relative flex aspect-video justify-center text-xs max-w-sm">
+<style> [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); } .dark [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); }
+</style>
+<div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
+<svg data-slot="chart-pie" viewBox="0 0 250 250" role="img" aria-label="Visitors by browser — Chrome: 275, Safari: 200, Firefox: 187, Edge: 173" class="mx-auto aspect-square max-h-[250px]">
+<path d="M 125.0 4.0 A 121.0 121.0 0 0 1 231.27 182.85 L 188.76 159.71 A 72.6 72.6 0 0 0 125.0 52.4 Z" fill="var(--color-chrome)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="chrome" data-label="Chrome" data-display="275" />
+<path d="M 231.27 182.85 A 121.0 121.0 0 0 1 74.26 234.85 L 94.56 190.91 A 72.6 72.6 0 0 0 188.76 159.71 Z" fill="var(--color-safari)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="safari" data-label="Safari" data-display="200" />
+<path d="M 74.26 234.85 A 121.0 121.0 0 0 1 8.35 92.84 L 55.01 105.7 A 72.6 72.6 0 0 0 94.56 190.91 Z" fill="var(--color-firefox)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="firefox" data-label="Firefox" data-display="187" />
+<path d="M 8.35 92.84 A 121.0 121.0 0 0 1 125.0 4.0 L 125.0 52.4 A 72.6 72.6 0 0 0 55.01 105.7 Z" fill="var(--color-edge)" data-shadcn--chart-target="slice" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="edge" data-label="Edge" data-display="173" />
+</svg>
+<div data-slot="chart-legend" class="flex items-center justify-center gap-4 pt-3">
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-chrome)">
+</div>Chrome
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-safari)">
+</div>Safari
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-firefox)">
+</div>Firefox
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-edge)">
+</div>Edge
+</div>
+</div>
+</div>
+<div data-slot="chart-tooltip" data-shadcn--chart-target="tooltip" hidden="hidden" style="position:absolute;pointer-events:none" class="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+<div class="grid gap-1.5">
+<div class="flex w-full flex-wrap items-stretch gap-2 [&amp;&gt;svg]:h-2.5 [&amp;&gt;svg]:w-2.5 [&amp;&gt;svg]:text-muted-foreground items-center">
+<div class="shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg) h-2.5 w-2.5" data-shadcn--chart-target="indicator">
+</div>
+<div class="flex flex-1 items-center justify-between leading-none">
+<div class="grid gap-1.5">
+<span class="text-muted-foreground" data-shadcn--chart-target="name">
+</span>
+</div>
+<span class="font-mono font-medium text-foreground tabular-nums" data-shadcn--chart-target="value">
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>

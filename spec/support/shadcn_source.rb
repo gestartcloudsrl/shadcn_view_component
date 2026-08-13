@@ -100,6 +100,15 @@ module ShadcnSource
       # had dropped. Every Tailwind utility has a letter in it.
       return false unless token.match?(/[a-z]/i)
 
+      # A utility's brackets close. `chart.tsx` interpolates
+      # `uniqueId.replace(/:/g, "")` into a template literal, and the fragment
+      # before the comma is shaped exactly like a class — letters, a dot, a
+      # colon, a slash and an opening parenthesis that never closes. Measured
+      # across the whole corpus before adding this: that fragment is the only
+      # thing it drops, and every real utility with brackets — `bg-(--color-bg)`,
+      # `[&_.recharts-layer]:outline-hidden` — is balanced.
+      return false unless token.count("(") == token.count(")") && token.count("[") == token.count("]")
+
       # Bare words without Tailwind punctuation are prose or attribute values
       # ("button", "vertical", "alert"), not utilities.
       token.match?(PUNCTUATION)

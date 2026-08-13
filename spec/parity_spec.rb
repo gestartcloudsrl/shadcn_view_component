@@ -32,6 +32,7 @@ RSpec.describe "shadcn/ui parity" do
     "calendar" => "calendar",
     "card" => "card",
     "carousel" => "carousel",
+    "chart" => "chart",
     "checkbox" => "checkbox",
     "collapsible" => "collapsible",
     "context-menu" => "context_menu",
@@ -112,7 +113,7 @@ RSpec.describe "shadcn/ui parity" do
   ported_as_a_form_builder = %w[form].freeze
 
   not_yet_ported = %w[
-    chart combobox command resizable
+    combobox command resizable
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.
@@ -131,6 +132,29 @@ RSpec.describe "shadcn/ui parity" do
   # the tokenizer picks out of an inline style, not a utility.
   allowed_missing = {
     "toggle-group" => %w[--gap],
+    # `chart.tsx` is a frame around `recharts`, and two kinds of token in it
+    # belong to the library rather than to any markup this port renders.
+    #
+    # The `[&_.recharts-*]` variants **select recharts' own DOM** — its sectors,
+    # its cartesian grid, its tooltip cursor. Nothing here draws any of that, so
+    # rendering them would compile rules that match nothing in a host's bundle,
+    # while claiming a 1:1 that means nothing. The pie this port draws is styled
+    # by the `--color-<key>` contract instead, which is reproduced.
+    #
+    # `--color-bg` and `--color-border` are custom property *names* written into
+    # an inline style, the same shape as `--gap` above. The port sets them from
+    # the controller and reads them through `bg-(--color-bg)`, which it does
+    # render.
+    "chart" => %w[
+      --color-bg --color-border
+      [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground
+      [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border
+      [&_.recharts-layer]:outline-hidden
+      [&_.recharts-radial-bar-background-sector]:fill-muted
+      [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted
+      [&_.recharts-sector]:outline-hidden
+      [&_.recharts-surface]:outline-hidden
+    ],
     # The `data-slot` on `HoverCardPrimitive.Portal`. Nothing is portalled here
     # — the decision the whole JavaScript layer rests on, in
     # decisions/02-javascript.md — so there is no element to carry it. Every

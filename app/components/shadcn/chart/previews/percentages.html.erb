@@ -1,0 +1,17 @@
+<%# A pie's question is usually "how much of the whole", so `percentage: true`
+    puts the share in the tooltip where the count would be. Doing it in the data
+    rather than in the tooltip keeps that part 1:1 with upstream, which has one
+    cell for a value and no room for a second number. %>
+<%
+  config = {
+    margin: { label: "Margine", color: "var(--chart-1)" },
+    costs: { label: "Costi", color: "var(--chart-2)" },
+    deductions: { label: "Ritenute", color: "var(--chart-3)" }
+  }
+%>
+<%= render(Shadcn::Chart::Component.new(config:, class: "max-w-sm")) do |chart| %>
+  <% chart.with_pie(data: { margin: 42_500, costs: 118_200, deductions: 9_800 },
+                    percentage: true, inner_radius: 0.55, label: "Margine commessa") %>
+  <% chart.with_chart_tooltip(indicator: :line, hide_label: true) %>
+  <% chart.with_chart_legend %>
+<% end %>
