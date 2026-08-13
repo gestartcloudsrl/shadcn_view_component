@@ -10,12 +10,19 @@
 <%
   slots = (9..17).flat_map { |hour| [ 0, 15, 30, 45 ].map { |minute| format("%02d:%02d", hour, minute) } } + [ "18:00" ]
 %>
+<%# The description under the field is wider than a month, so the card is wider
+    than the calendar and the calendar would otherwise sit against its left edge.
+    Centred from a plain wrapper rather than a class on the component: a class
+    there lands on `data-slot="calendar"` and would have to be declared in
+    `reverse_parity_spec`'s `ours` as though the port had invented it. %>
 <div class="w-fit rounded-md border shadow-sm">
-  <%= render(Shadcn::Calendar::Component.new(
-        month: Date.new(2026, 8, 1),
-        selected: Date.new(2026, 8, 12),
-        name: "booking[on]"
-      )) %>
+  <div class="flex justify-center">
+    <%= render(Shadcn::Calendar::Component.new(
+          month: Date.new(2026, 8, 1),
+          selected: Date.new(2026, 8, 12),
+          name: "booking[on]"
+        )) %>
+  </div>
   <div class="border-t p-3">
     <%= render(Shadcn::Field::Component.new) do |field| %>
       <% field.with_label(for: "booking-at") { "Time" } %>
