@@ -107,6 +107,8 @@ vendor/shadcn-react/             # @shadcn/react, the primitive shadcn publishes
                                  # itself — same role, for the message scroller
 vendor/vaul/                     # vaul's stylesheet — the Drawer's `touch-action`
                                  # and slide keyframes, which `drawer.tsx` has not
+vendor/cmdk/                     # the palette shadcn wraps — its `cmdk-*` attributes
+                                 # and the fuzzy scorer ported to command_score.js
 ```
 
 A part that is only an element with a `data-slot` and fixed classes is declared

@@ -1,0 +1,117 @@
+<div data-slot="dialog" style="display:contents" data-controller="shadcn--dialog" data-shadcn--dialog-open-value="false" data-shadcn--dialog-modal-value="true" data-shadcn--dialog-dismissable-value="true">
+<button data-slot="dialog-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" data-state="closed" data-shadcn--dialog-target="trigger" data-action="shadcn--dialog#open" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3"> Open the palette
+</button>
+<div data-slot="dialog-portal" style="display:contents">
+<div data-slot="dialog-overlay" data-state="closed" hidden="hidden" data-shadcn--dialog-target="overlay" class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+</div>
+<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg overflow-hidden p-0">
+<div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left sr-only">
+<h2 data-slot="dialog-title" class="text-lg leading-none font-semibold">Command Palette
+</h2>
+<p data-slot="dialog-description" class="text-sm text-muted-foreground">Search for a command to run...
+</p>
+</div>
+<div data-slot="command" cmdk-root="" data-controller="shadcn--command" class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground **:data-[slot=command-input-wrapper]:h-12 [&amp;_[cmdk-group-heading]]:px-2 [&amp;_[cmdk-group-heading]]:font-medium [&amp;_[cmdk-group-heading]]:text-muted-foreground [&amp;_[cmdk-group]]:px-2 [&amp;_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&amp;_[cmdk-input-wrapper]_svg]:h-5 [&amp;_[cmdk-input-wrapper]_svg]:w-5 [&amp;_[cmdk-input]]:h-12 [&amp;_[cmdk-item]]:px-2 [&amp;_[cmdk-item]]:py-3 [&amp;_[cmdk-item]_svg]:h-5 [&amp;_[cmdk-item]_svg]:w-5">
+<label id="shadcn-command-label-x" for="shadcn-command-input-x" class="sr-only">Command palette
+</label>
+<div class="flex h-9 items-center gap-2 border-b px-3" data-slot="command-input-wrapper" cmdk-input-wrapper="">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search size-4 shrink-0 opacity-50">
+<circle cx="11" cy="11" r="8"/>
+<path d="m21 21-4.3-4.3"/>
+</svg>
+<input data-slot="command-input" cmdk-input="" type="text" role="combobox" autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="true" data-shadcn--command-target="search" data-action="input-&gt;shadcn--command#search keydown-&gt;shadcn--command#keydown" placeholder="Type a command or search..." class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50">
+</div>
+<div data-slot="command-list" cmdk-list="" role="listbox" data-shadcn--command-target="list" class="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto">
+<div data-slot="command-empty" cmdk-empty="" role="presentation" hidden="hidden" data-shadcn--command-target="empty" class="py-6 text-center text-sm">No results found.
+</div>
+<div data-slot="command-group" cmdk-group="" role="presentation" data-shadcn--command-target="group" class="overflow-hidden p-1 text-foreground [&amp;_[cmdk-group-heading]]:px-2 [&amp;_[cmdk-group-heading]]:py-1.5 [&amp;_[cmdk-group-heading]]:text-xs [&amp;_[cmdk-group-heading]]:font-medium [&amp;_[cmdk-group-heading]]:text-muted-foreground">
+<div id="shadcn-command-heading-x" cmdk-group-heading="" aria-hidden="true">Suggestions
+</div>
+<div cmdk-group-items="" role="group" aria-labelledby="shadcn-command-heading-x">
+<div data-slot="command-item" cmdk-item="" id="shadcn-command-item-x" role="option" aria-selected="false" data-disabled="false" data-selected="false" data-shadcn--command-target="item" data-action="click-&gt;shadcn--command#choose pointermove-&gt;shadcn--command#hover" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar">
+<path d="M8 2v3"/>
+<path d="M16 2v3"/>
+<rect x="3" y="3" width="18" height="18" rx="2"/>
+<path d="M3 9h18"/>
+</svg>
+<span>Calendar
+</span>
+</div>
+<div data-slot="command-item" cmdk-item="" id="shadcn-command-item-x" role="option" aria-selected="false" data-disabled="false" data-selected="false" data-shadcn--command-target="item" data-action="click-&gt;shadcn--command#choose pointermove-&gt;shadcn--command#hover" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+<circle cx="11" cy="11" r="8"/>
+<path d="m21 21-4.3-4.3"/>
+</svg>
+<span>Search Emoji
+</span>
+</div>
+<div data-slot="command-item" cmdk-item="" id="shadcn-command-item-x" role="option" aria-selected="false" data-disabled="false" data-selected="false" data-shadcn--command-target="item" data-action="click-&gt;shadcn--command#choose pointermove-&gt;shadcn--command#hover" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator">
+<rect width="16" height="20" x="4" y="2" rx="2"/>
+<line x1="8" x2="16" y1="6" y2="6"/>
+<line x1="16" x2="16" y1="14" y2="18"/>
+<path d="M16 10h.01"/>
+<path d="M12 10h.01"/>
+<path d="M8 10h.01"/>
+<path d="M12 14h.01"/>
+<path d="M8 14h.01"/>
+<path d="M12 18h.01"/>
+<path d="M8 18h.01"/>
+</svg>
+<span>Calculator
+</span>
+</div>
+</div>
+</div>
+<div data-slot="command-separator" cmdk-separator="" aria-hidden="true" data-shadcn--command-target="separator" class="-mx-1 h-px bg-border">
+</div>
+<div data-slot="command-group" cmdk-group="" role="presentation" data-shadcn--command-target="group" class="overflow-hidden p-1 text-foreground [&amp;_[cmdk-group-heading]]:px-2 [&amp;_[cmdk-group-heading]]:py-1.5 [&amp;_[cmdk-group-heading]]:text-xs [&amp;_[cmdk-group-heading]]:font-medium [&amp;_[cmdk-group-heading]]:text-muted-foreground">
+<div id="shadcn-command-heading-x" cmdk-group-heading="" aria-hidden="true">Settings
+</div>
+<div cmdk-group-items="" role="group" aria-labelledby="shadcn-command-heading-x">
+<div data-slot="command-item" cmdk-item="" id="shadcn-command-item-x" role="option" aria-selected="false" data-disabled="false" data-selected="false" data-shadcn--command-target="item" data-action="click-&gt;shadcn--command#choose pointermove-&gt;shadcn--command#hover" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+<circle cx="12" cy="7" r="4"/>
+</svg>
+<span>Profile
+</span>
+<span data-slot="command-shortcut" class="ml-auto text-xs tracking-widest text-muted-foreground">⌘P
+</span>
+</div>
+<div data-slot="command-item" cmdk-item="" id="shadcn-command-item-x" role="option" aria-selected="false" data-disabled="false" data-selected="false" data-shadcn--command-target="item" data-action="click-&gt;shadcn--command#choose pointermove-&gt;shadcn--command#hover" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card">
+<rect width="20" height="14" x="2" y="5" rx="2"/>
+<line x1="2" x2="22" y1="10" y2="10"/>
+</svg>
+<span>Billing
+</span>
+<span data-slot="command-shortcut" class="ml-auto text-xs tracking-widest text-muted-foreground">⌘B
+</span>
+</div>
+<div data-slot="command-item" cmdk-item="" id="shadcn-command-item-x" role="option" aria-selected="false" data-disabled="false" data-selected="false" data-shadcn--command-target="item" data-action="click-&gt;shadcn--command#choose pointermove-&gt;shadcn--command#hover" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings">
+<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/>
+<circle cx="12" cy="12" r="3"/>
+</svg>
+<span>Settings
+</span>
+<span data-slot="command-shortcut" class="ml-auto text-xs tracking-widest text-muted-foreground">⌘S
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<button data-slot="dialog-close" type="button" data-action="shadcn--dialog#close" class="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+<path d="M18 6 6 18"/>
+<path d="m6 6 12 12"/>
+</svg>
+<span class="sr-only">Close
+</span>
+</button>
+</div>
+</div>
+</div>

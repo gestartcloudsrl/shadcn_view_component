@@ -1,0 +1,33 @@
+<%# Upstream's "Dialog": the same palette inside a Dialog, whose title and
+    description are `sr-only` and not optional — a dialog with no accessible
+    name opens into silence.
+
+    The shortcut that opens it is the caller's: any element with the Dialog's
+    own trigger action, or a `keydown@document` of your own. %>
+<%= render(Shadcn::Command::Dialog::Component.new(label: "Command palette")) do |palette| %>
+  <% palette.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) do %>
+    Open the palette
+  <% end %>
+  <%= render(Shadcn::Command::Input::Component.new(placeholder: "Type a command or search...")) %>
+  <%= render(Shadcn::Command::List::Component.new) do %>
+    <%= render(Shadcn::Command::Empty::Component.new) { "No results found." } %>
+    <%= render(Shadcn::Command::Group::Component.new(heading: "Suggestions")) do %>
+      <% [ [ "calendar", "Calendar" ], [ "search", "Search Emoji" ], [ "calculator", "Calculator" ] ].each do |icon, label| %>
+        <%= render(Shadcn::Command::Item::Component.new) do %>
+          <%= render(Shadcn::Icon::Component.new(icon)) %>
+          <span><%= label %></span>
+        <% end %>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::Command::Separator::Component.new) %>
+    <%= render(Shadcn::Command::Group::Component.new(heading: "Settings")) do %>
+      <% [ [ "user", "Profile", "⌘P" ], [ "credit-card", "Billing", "⌘B" ], [ "settings", "Settings", "⌘S" ] ].each do |icon, label, key| %>
+        <%= render(Shadcn::Command::Item::Component.new) do %>
+          <%= render(Shadcn::Icon::Component.new(icon)) %>
+          <span><%= label %></span>
+          <%= render(Shadcn::Command::Shortcut::Component.new) { key } %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

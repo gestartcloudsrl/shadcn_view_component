@@ -1,0 +1,41 @@
+<%# Upstream's own example. The items are ordinary components in the block, in
+    order — the list is server-rendered and the controller only filters, ranks
+    and walks it. %>
+<%= render(Shadcn::Command::Component.new(label: "Command palette", class: "rounded-lg border shadow-md md:min-w-[450px]")) do |command| %>
+  <% command.with_command_input(placeholder: "Type a command or search...") %>
+  <% command.with_command_list do %>
+    <%= render(Shadcn::Command::Empty::Component.new) { "No results found." } %>
+    <%= render(Shadcn::Command::Group::Component.new(heading: "Suggestions")) do %>
+      <%= render(Shadcn::Command::Item::Component.new) do %>
+        <%= render(Shadcn::Icon::Component.new("calendar")) %>
+        <span>Calendar</span>
+      <% end %>
+      <%= render(Shadcn::Command::Item::Component.new) do %>
+        <%= render(Shadcn::Icon::Component.new("search")) %>
+        <span>Search Emoji</span>
+      <% end %>
+      <%= render(Shadcn::Command::Item::Component.new(disabled: true)) do %>
+        <%= render(Shadcn::Icon::Component.new("calculator")) %>
+        <span>Calculator</span>
+      <% end %>
+    <% end %>
+    <%= render(Shadcn::Command::Separator::Component.new) %>
+    <%= render(Shadcn::Command::Group::Component.new(heading: "Settings")) do %>
+      <%= render(Shadcn::Command::Item::Component.new(keywords: %w[account me])) do %>
+        <%= render(Shadcn::Icon::Component.new("user")) %>
+        <span>Profile</span>
+        <%= render(Shadcn::Command::Shortcut::Component.new) { "⌘P" } %>
+      <% end %>
+      <%= render(Shadcn::Command::Item::Component.new(keywords: %w[invoice payment])) do %>
+        <%= render(Shadcn::Icon::Component.new("credit-card")) %>
+        <span>Billing</span>
+        <%= render(Shadcn::Command::Shortcut::Component.new) { "⌘B" } %>
+      <% end %>
+      <%= render(Shadcn::Command::Item::Component.new(keywords: %w[preferences])) do %>
+        <%= render(Shadcn::Icon::Component.new("settings")) %>
+        <span>Settings</span>
+        <%= render(Shadcn::Command::Shortcut::Component.new) { "⌘S" } %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

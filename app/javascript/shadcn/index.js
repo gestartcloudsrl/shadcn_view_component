@@ -14,6 +14,7 @@ import AvatarController from "shadcn/controllers/avatar_controller"
 import CalendarController from "shadcn/controllers/calendar_controller"
 import CarouselController from "shadcn/controllers/carousel_controller"
 import ChartController from "shadcn/controllers/chart_controller"
+import CommandController from "shadcn/controllers/command_controller"
 import CheckboxController from "shadcn/controllers/checkbox_controller"
 import CollapsibleController from "shadcn/controllers/collapsible_controller"
 import DialogController from "shadcn/controllers/dialog_controller"
@@ -47,6 +48,7 @@ const CONTROLLERS = {
   carousel: CarouselController,
   chart: ChartController,
   checkbox: CheckboxController,
+  command: CommandController,
   collapsible: CollapsibleController,
   dialog: DialogController,
   drawer: DrawerController,

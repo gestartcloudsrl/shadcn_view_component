@@ -34,7 +34,7 @@ here would create a copy nobody updates. These files carry what a machine cannot
 API.
 
 **Anything unmeasured.** An absent entry means *not yet assessed*, never "1:1".
-There are 61 families under `app/components/shadcn/` and eleven have been
+There are 62 families under `app/components/shadcn/` and twelve have been
 examined closely enough to write down; claiming the rest match would be exactly the kind of sentence this project
 keeps catching itself in.
 
@@ -49,6 +49,7 @@ keeps catching itself in.
 | [form.md](form.md) | **ours** | react-hook-form's field state has no server counterpart; the family is `ShadcnViewComponent::FormBuilder` over `Field` |
 | [carousel.md](carousel.md) | **adapted** | embla's 3,170 lines answer six questions a scroll container already answers; no loop, no plugins, no mouse drag |
 | [input-otp.md](input-otp.md) | **adapted** | one real input under the boxes, which is what the package is; the browser workarounds are not ported |
+| [command.md](command.md) | **adapted** | `cmdk`'s scorer ported so the ranking survives; its `cmdk-*` attributes rendered because shadcn's classes select them |
 | [resizable.md](resizable.md) | **adapted** | the package is a drag, a keyboard and arithmetic over `flex-grow`; the layout is the browser's |
 | [chart.md](chart.md) | **adapted** / ours | `chart.tsx` is a frame around recharts and draws nothing; the frame is 1:1 and the pie is drawn here |
 | [calendar.md](calendar.md) | **adapted** | `react-day-picker` is mostly date arithmetic and locale data, which Ruby has; the markup is 1:1 and the grid is rendered on both sides |

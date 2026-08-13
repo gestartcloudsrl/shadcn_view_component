@@ -105,6 +105,8 @@ RSpec.describe "reverse parity" do
     # defaults to it, because a pie that fills whatever box it is in is not a
     # useful default; the other two classes are in the corpus already.
     "chart-pie" => %w[max-h-[250px]],
+    # The width upstream's own docs example gives the palette at the call site.
+    "command" => %w[md:min-w-[450px]],
     # The previews' own sizing: a group of panels is as big as its caller makes
     # it, which is the whole point of a layout component.
     "resizable-panel-group" => %w[max-w-md md:min-w-[450px] min-h-[200px]],
