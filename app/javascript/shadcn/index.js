@@ -27,6 +27,7 @@ import MessageScrollerController from "shadcn/controllers/message_scroller_contr
 import NavigationMenuController from "shadcn/controllers/navigation_menu_controller"
 import PopoverController from "shadcn/controllers/popover_controller"
 import RadioGroupController from "shadcn/controllers/radio_group_controller"
+import ResizableController from "shadcn/controllers/resizable_controller"
 import ScrollAreaController from "shadcn/controllers/scroll_area_controller"
 import SelectController from "shadcn/controllers/select_controller"
 import SidebarController from "shadcn/controllers/sidebar_controller"
@@ -58,6 +59,7 @@ const CONTROLLERS = {
   "navigation-menu": NavigationMenuController,
   popover: PopoverController,
   "radio-group": RadioGroupController,
+  resizable: ResizableController,
   "scroll-area": ScrollAreaController,
   select: SelectController,
   sidebar: SidebarController,

@@ -41,7 +41,7 @@ RSpec.describe "rendered output snapshots" do
   # of at one enormous line. Generated ids differ per render and say nothing
   # about parity, so they are flattened first.
   def self.normalize(html)
-    html.gsub(/\b(shadcn-(?:checkbox|switch|theme-selector|calendar-caption)-)[0-9a-f]{8}\b/, '\1x')
+    html.gsub(/\b(shadcn-(?:checkbox|switch|theme-selector|calendar-caption|resizable-panel)-)[0-9a-f]{8}\b/, '\1x')
         # The chart's own id, which upstream spells without the gem's prefix
         # because `chart.tsx` does: `chart-${useId()}`.
         .gsub(/\bchart-[0-9a-f]{8}\b/, "chart-x")

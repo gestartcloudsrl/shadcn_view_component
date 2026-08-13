@@ -1,0 +1,19 @@
+<%# Upstream's "Vertical": the group's orientation decides both the layout and
+    the separator's own, which is the opposite of it — a column of panels is
+    divided by a horizontal line. %>
+<%= render(Shadcn::Resizable::Component.new(
+      orientation: :vertical,
+      class: "min-h-[200px] max-w-md rounded-lg border"
+    )) do %>
+  <%= render(Shadcn::Resizable::Panel::Component.new(default_size: 25)) do %>
+    <div class="flex h-full items-center justify-center p-6">
+      <span class="font-semibold">Header</span>
+    </div>
+  <% end %>
+  <%= render(Shadcn::Resizable::Handle::Component.new(orientation: :vertical)) %>
+  <%= render(Shadcn::Resizable::Panel::Component.new(default_size: 75)) do %>
+    <div class="flex h-full items-center justify-center p-6">
+      <span class="font-semibold">Content</span>
+    </div>
+  <% end %>
+<% end %>

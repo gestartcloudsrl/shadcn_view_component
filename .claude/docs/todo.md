@@ -89,17 +89,17 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (3)
+## Components not ported (2)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Twenty-two have since been ported —
+`not_yet_ported` and fails if the two drift. Twenty-three have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu`, `menubar`, `drawer`, `carousel`, `input-otp`, `calendar` and
-`chart` — leaving 3, with `form` and `sonner` decided rather than pending
-(below).
+`context-menu`, `menubar`, `drawer`, `carousel`, `input-otp`, `calendar`,
+`chart` and `resizable` — leaving 2, with `form` and `sonner` decided rather
+than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -178,8 +178,12 @@ error was mine, and is recorded with the group it belongs to.
   the page, and a `turbo_stream.append`. `parity_spec` holds it in
   `ported_as_ours`. See [features/toaster.md](features/toaster.md).
 
-- **Blocked by a third-party npm package** (3): `command` (cmdk),
-  `resizable` (react-resizable-panels), `combobox` (**@base-ui/react**).
+- **Blocked by a third-party npm package** (2): `command` (cmdk),
+  `combobox` (**@base-ui/react**).
+  *`resizable` has shipped. `react-resizable-panels` is 2,252 lines and no
+  dependencies, and what it supplies is a drag, a keyboard and arithmetic over
+  `flex-grow` — the layout itself is the browser's, which is the shape the rule
+  above predicts. See [features/resizable.md](features/resizable.md).*
   *`chart` has shipped in part, and it is the one case where "blocked by a
   package" was **right**: recharts is 29,091 lines over eleven dependencies and
   it is doing the work — `chart.tsx` draws nothing at all. So the frame is

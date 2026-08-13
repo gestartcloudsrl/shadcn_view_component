@@ -405,7 +405,13 @@ SVG, from the server. The pie is the first — pass a Hash of key to number, whi
 is what `group(:x).sum(:y)` already returns. Bars, lines and areas are not drawn
 yet.
 
-Not ported: resizable, command, and combobox.
+**Resizable** — panels a pointer or the arrow keys can resize. Upstream wraps
+`react-resizable-panels`; here a panel is a share of a flex container, so the
+layout is the browser's and the controller only moves two numbers. The handle is
+a `role="separator"` with the package's own keyboard: five points an arrow, all
+the way on Home and End.
+
+Not ported: command and combobox.
 
 ## What is and is not verified
 
