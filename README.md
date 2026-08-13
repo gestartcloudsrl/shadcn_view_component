@@ -390,7 +390,22 @@ markup of its own, so this one is not a port: it keeps sonner's measurements and
 its stacking, and adds the two ways a Rails app actually raises a notification —
 a flash rendered with the page, and a `turbo_stream.append` onto the list.
 
-Not ported: chart, calendar, resizable, command, and combobox.
+**Calendar** — a month is a `<table role="grid">`, built in Ruby with `Date` and
+`I18n` rather than by `react-day-picker`: a third of that package is locale data
+and another fifth is other calendar systems, both of which a Rails app already
+has. It is the one component here that renders correctly with no JavaScript at
+all; the controller adds the nav, the keyboard and the selection, and takes its
+month names and its idea of *today* from the server rather than from the
+browser's locale and clock.
+
+**Chart** — `chart.tsx` draws nothing: it is a container that publishes
+`--color-<key>` per series, plus the contents of a tooltip and a legend that
+`recharts` fills in. That frame is ported 1:1 and the shapes are drawn here, as
+SVG, from the server. The pie is the first — pass a Hash of key to number, which
+is what `group(:x).sum(:y)` already returns. Bars, lines and areas are not drawn
+yet.
+
+Not ported: resizable, command, and combobox.
 
 ## What is and is not verified
 

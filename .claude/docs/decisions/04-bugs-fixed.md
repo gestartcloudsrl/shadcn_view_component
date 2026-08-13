@@ -341,3 +341,35 @@ checked — the claim came first and the verification contradicted it, with the
 broken reference live in the gallery and the whole suite, axe audit included,
 green. Why axe let it through was not established, so do not read that audit as
 covering dangling references.
+
+## Every pie slice named itself, which ARIA forbids
+
+The first chart gave each `<path>` an `aria-label` and a `tabindex`, so a
+keyboard could reach a slice and a screen reader could read it. axe failed it
+with `aria-prohibited-attr`: **`aria-label` on a `<path>` with no role names
+nothing**, because the element has no role that takes a name.
+
+The fix was not a role per slice. An SVG is one `role="img"`, and everything
+inside a `role="img"` is presentational — so the *name* has to carry the data or
+the data is gone: "Visitors by browser — Chrome: 275, Safari: 200, …". The
+slices are decoration now.
+
+Not to reintroduce: a decorative element that is focusable, or an `aria-*`
+attribute on an element whose role cannot take it. And the cost is written down
+rather than left implicit — a keyboard user gets the name and not the tooltip,
+where upstream's `accessibilityLayer` makes recharts' chart arrow-navigable.
+
+## An SVG `<title>` is a tooltip the browser draws itself
+
+The same chart carried a `<title>` saying exactly what its `aria-label` said —
+belt and braces for the accessible name. Chrome renders `<title>` as a native
+tooltip after about a second of hover, so the component's own tooltip was
+covered by a grey box repeating the whole chart. Reported from a screenshot,
+which is the only way it could have been: it appears on dwell, and nothing in
+the DOM changes.
+
+`role="img"` plus `aria-label` is the name; the `<title>` was removed.
+
+Not to reintroduce: `<title>` inside an SVG a pointer will hover. It is not
+`<title>`'s fault — it is the only element whose *rendered* behaviour differs
+from what a DOM assertion sees, which is why no spec here had a chance.

@@ -19,6 +19,12 @@ last, a tutorial in composing `CartesianGrid`, `XAxis` and `Bar`.
 | its dependencies | 11, including `@reduxjs/toolkit` (5.7 MB), `react-redux`, `immer`, `victory-vendor` (the d3 modules) |
 | what it does | scales, layout, axes, shapes, animation, and a Redux store for chart state |
 
+Those figures were read from the published tarball — `recharts@3.10.1`'s own
+`dist/es6` — and **nothing of recharts is vendored here**, unlike Radix, vaul
+and `@shadcn/react`. Nothing in this port cites it line by line, so there was
+nothing for a vendored copy to keep honest; a future session should not go
+looking for `vendor/recharts`.
+
 The four ports before this one removed a package because the browser already
 had the mechanism — scrolling, `touch-action`, an input, date arithmetic. Here
 the package **is** the component, so "porting chart" had to mean something
@@ -83,7 +89,9 @@ the only way to the numbers.
 
 - **Every other shape**: bars, lines, areas, radar, radial. Axes, grids, ticks
   and legends-inside-the-SVG come with them, and none of it is in `chart.tsx`.
-- **The thirteen `[&_.recharts-*]` variants** on the container. They select
+- **The twelve `[&_.recharts-*]` variants** on the container — seven of them
+  named in `allowed_missing`, the other five never looking like classes to the
+  tokenizer at all. They select
   recharts' own DOM — its sectors, its cartesian grid, its tooltip cursor — so
   rendering them would compile rules that match nothing in a host's bundle while
   claiming a 1:1 that means nothing. `parity_spec` holds them in

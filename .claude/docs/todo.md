@@ -93,12 +93,13 @@ person reads it where they would look for it.
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Twenty-one have since been ported —
+`not_yet_ported` and fails if the two drift. Twenty-two have since been ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
-`context-menu`, `menubar`, `drawer`, `carousel`, `input-otp` and `calendar` —
-leaving 4, with `form` and `sonner` decided rather than pending (below).
+`context-menu`, `menubar`, `drawer`, `carousel`, `input-otp`, `calendar` and
+`chart` — leaving 3, with `form` and `sonner` decided rather than pending
+(below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -436,6 +437,20 @@ noting that it would not have delivered the component that raised the question:
       Both specs disable the 1s expiry that `typeahead.js:32` schedules, so the
       reset is the only thing that can explain an empty buffer rather than the
       example racing Capybara.
+- [ ] **The chart draws one shape, and has no keyboard route to its numbers.**
+      The pie is in; bars, lines and areas each need what the pie did not —
+      scales, ticks, a grid and axis labels that collide — and radar and radial
+      need their own trigonometry. Whoever adds the first cartesian shape should
+      expect the axis, not the shape, to be the work.
+
+      The second half is a decision that can be revisited rather than a defect:
+      an SVG is one `role="img"`, so the accessible name carries every slice and
+      the tooltip is a pointer affordance only. Upstream's `accessibilityLayer`
+      makes recharts' chart arrow-navigable. A `<figure>` with a visually hidden
+      table beside the SVG would close it without touching the 1:1 frame, and
+      would also be read by a screen reader as data rather than as one long
+      sentence. See [features/chart.md](features/chart.md).
+
 - [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
       ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the
       rest at connect; that was deleted once the components were emitting all
