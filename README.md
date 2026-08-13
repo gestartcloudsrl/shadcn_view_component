@@ -417,7 +417,14 @@ matters enough that `cmdk`'s own fuzzy scorer is ported rather than replaced
 with a substring match: type `gp` and Group Policy comes before Groups.
 `keywords:` are searched and never shown.
 
-Not ported: combobox.
+**Combobox** — a field that filters a list and keeps the caret. It is the one
+component shadcn writes against Base UI rather than Radix, so this family alone
+emits `data-open` and reads `--anchor-width`; the port publishes those names
+here and nowhere else. Single selection is complete; the chips markup is there
+and adding one is not wired yet.
+
+Every component in the registry is now ported, adapted or decided against with
+a reason — see [the per-component notes](.claude/docs/features/README.md).
 
 ## What is and is not verified
 

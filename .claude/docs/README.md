@@ -27,6 +27,7 @@ written.
 | [features/form.md](features/form.md) | why `form.tsx` is a FormBuilder here rather than components, part by part, and the seven divergences that follow |
 | [features/carousel.md](features/carousel.md) | the Carousel without embla: the six things shadcn asks of it, what a scroller answers instead, and what is left out |
 | [features/input-otp.md](features/input-otp.md) | the one-time-code field: the three values per box, the invisible-but-real input that makes autofill work, and the device workarounds not ported |
+| [features/combobox.md](features/combobox.md) | the only family answerable to Base UI: its names, the four custom properties published only here, and the three things the rendered example settled that the source would have got wrong |
 | [features/command.md](features/command.md) | the palette: why the `cmdk-*` attributes are part of the contract where the chart's were not, and why the fuzzy scorer was ported rather than replaced with a substring test |
 | [features/resizable.md](features/resizable.md) | panels as flex shares rather than `react-resizable-panels`, and the class upstream renders that reads an attribute upstream stopped rendering |
 | [features/chart.md](features/chart.md) | the one family whose package was doing the work: what `chart.tsx` actually is, why the frame is 1:1 and the pie is ours, and the accessibility model that follows from `role="img"` |

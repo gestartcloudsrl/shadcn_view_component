@@ -15,6 +15,10 @@ en:
       week_number: "Week %{number}"
       choose_month: Choose the Month
       choose_year: Choose the Year
+    combobox:
+      clear: Clear
+      toggle: Show options
+      remove: Remove
     carousel:
       previous: Previous slide
       next: Next slide
