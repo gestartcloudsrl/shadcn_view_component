@@ -1,0 +1,17 @@
+<%# Upstream's "With Handle": the grip a pointer can see. Off by default there
+    too — a handle is a hit area whether or not it is drawn.
+
+    `min_size:` and `max_size:` are percentages, and the drag stops at them. %>
+<%= render(Shadcn::Resizable::Component.new(class: "min-h-[200px] max-w-md rounded-lg border")) do %>
+  <%= render(Shadcn::Resizable::Panel::Component.new(default_size: 25, min_size: 15, max_size: 60)) do %>
+    <div class="flex h-full items-center justify-center p-6">
+      <span class="font-semibold">Sidebar</span>
+    </div>
+  <% end %>
+  <%= render(Shadcn::Resizable::Handle::Component.new(with_handle: true)) %>
+  <%= render(Shadcn::Resizable::Panel::Component.new(default_size: 75)) do %>
+    <div class="flex h-full items-center justify-center p-6">
+      <span class="font-semibold">Content</span>
+    </div>
+  <% end %>
+<% end %>

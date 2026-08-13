@@ -58,6 +58,7 @@ RSpec.describe "shadcn/ui parity" do
     "popover" => "popover",
     "progress" => "progress",
     "radio-group" => "radio_group",
+    "resizable" => "resizable",
     "scroll-area" => "scroll_area",
     "select" => "select",
     "separator" => "separator",
@@ -113,7 +114,7 @@ RSpec.describe "shadcn/ui parity" do
   ported_as_a_form_builder = %w[form].freeze
 
   not_yet_ported = %w[
-    combobox command resizable
+    combobox command
   ].freeze
 
   # Families that reuse parts of another rather than restating their classes.
