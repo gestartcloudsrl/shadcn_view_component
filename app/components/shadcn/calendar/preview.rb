@@ -29,12 +29,6 @@ module Shadcn
         render_with_template
       end
 
-      # Ours: a time that can only be one of the slots on offer, where the
-      # example above takes any time the browser will validate.
-      def time_slots
-        render_with_template
-      end
-
       # Upstream's "Booked dates".
       def booked
         render_with_template

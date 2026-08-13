@@ -8,7 +8,7 @@
     refused at submit with the browser's own message. What it does not do is
     turn the field into a list — the segments still take any digits, and the
     complaint comes afterwards. Where only a quarter-hour will do, the control
-    is a select rather than this: see the `time_slots` preview. %>
+    is a `<select>` rather than this one. %>
 <div class="w-fit rounded-md border shadow-sm">
   <%= render(Shadcn::Calendar::Component.new(
         month: Date.new(2026, 8, 1),
