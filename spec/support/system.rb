@@ -24,7 +24,12 @@ Capybara.register_driver :shadcn_headless_chrome do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome, options:)
 end
 
-Capybara.default_max_wait_time = 5
+# How long Capybara waits for a page to catch up before failing. Five is right
+# on a machine that is not busy; a loaded one — or a CI runner sharing a core —
+# needs more, and raising it there is better than a suite that fails on the
+# machine rather than on the code. `CAPYBARA_WAIT=15 bundle exec rspec` when a
+# run is fighting for the CPU.
+Capybara.default_max_wait_time = Float(ENV.fetch("CAPYBARA_WAIT", 5))
 Capybara.disable_animation = true
 
 module SystemHelpers

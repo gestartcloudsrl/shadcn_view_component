@@ -70,6 +70,8 @@ bin/rubocop                                   # Rails omakase style; -a to autoc
 bin/console                                   # IRB + dummy app; `render`, `slots`, `upstream`, `reload!`
 
 bundle exec rspec spec/system                 # browser specs only (needs Chrome)
+EXAMPLE_TIMEOUT=0 bundle exec rspec …         # off, for a breakpoint (default: 60s an example)
+CAPYBARA_WAIT=15 bundle exec rspec …          # a busy machine; the default 5s is for an idle one
 bundle exec rspec spec/system/dialog_spec.rb
 bundle exec rspec spec/parity_spec.rb -e "card.tsx"
 
