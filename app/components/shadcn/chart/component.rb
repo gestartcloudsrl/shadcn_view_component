@@ -10,9 +10,9 @@ module Shadcn
     # axes — is `recharts`, 29,091 lines of compiled ES6 over eleven packages,
     # and the caller writes it in JSX.
     #
-    # So this family is the frame ported 1:1 and the drawing written here. The
-    # first shape drawn is the pie, because it is the one a Rails application
-    # asks for most and the only one that needs no axes at all. See
+    # So this family is the frame ported 1:1 and the drawing written here: a
+    # pie, and the three cartesian shapes — bar, line, area — over the grid and
+    # axes `Chart::Plot` computes. See
     # [features/chart.md](../../../../.claude/docs/features/chart.md).
     #
     # `config:` is upstream's `ChartConfig`, key for key:
@@ -46,6 +46,9 @@ module Shadcn
       end
 
       renders_one :pie, ->(**options) { Pie::Component.new(config:, **options) }
+      renders_one :bar, ->(**options) { Bar::Component.new(config:, **options) }
+      renders_one :line, ->(**options) { Line::Component.new(config:, **options) }
+      renders_one :area, ->(**options) { Area::Component.new(config:, **options) }
       renders_one :chart_tooltip, ->(**options) { Tooltip::Component.new(**options) }
       renders_one :chart_legend, ->(**options) { Legend::Component.new(config:, **options) }
 
@@ -78,7 +81,7 @@ module Shadcn
       # rather than a class on the container, which stays as `chart.tsx` wrote
       # it.
       def stack
-        tag.div(safe_join([ pie, content, chart_legend ].compact),
+        tag.div(safe_join([ pie, bar, line, area, content, chart_legend ].compact),
                 class: "flex w-full min-w-0 flex-col items-center justify-center gap-2")
       end
 

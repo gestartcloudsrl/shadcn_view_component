@@ -52,7 +52,7 @@ keeps catching itself in.
 | [combobox.md](combobox.md) | **adapted** | Base UI rather than Radix, so this family alone emits `data-open` and reads `--anchor-width`; single selection complete, chips half-wired |
 | [command.md](command.md) | **adapted** | `cmdk`'s scorer ported so the ranking survives; its `cmdk-*` attributes rendered because shadcn's classes select them |
 | [resizable.md](resizable.md) | **adapted** | the package is a drag, a keyboard and arithmetic over `flex-grow`; the layout is the browser's |
-| [chart.md](chart.md) | **adapted** / ours | `chart.tsx` is a frame around recharts and draws nothing; the frame is 1:1 and the pie is drawn here |
+| [chart.md](chart.md) | **adapted** / ours | `chart.tsx` is a frame around recharts and draws nothing; the frame is 1:1 and the pie, bar, line and area are drawn here |
 | [calendar.md](calendar.md) | **adapted** | `react-day-picker` is mostly date arithmetic and locale data, which Ruby has; the markup is 1:1 and the grid is rendered on both sides |
 | [toaster.md](toaster.md) | **ours** | `sonner.tsx` emits no markup at all, so there is nothing to be 1:1 with; sonner's measurements and stacking, Rails' three ways in |
 

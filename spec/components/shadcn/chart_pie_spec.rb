@@ -35,6 +35,19 @@ RSpec.describe Shadcn::Chart::Pie::Component do
       .to eq([ "var(--color-chrome)", "var(--color-safari)" ])
   end
 
+  # What a filtered scope hands back on a quiet week. A `role="img"` with no
+  # name is what axe calls `svg-img-alt`, and there is nothing to name.
+  context "with nothing to draw" do
+    it "announces nothing rather than an unnamed image", :aggregate_failures do
+      render_inline(described_class.new(data: {}, config:))
+
+      svg = page.find("svg", visible: :all)
+
+      expect(svg["aria-hidden"]).to eq("true")
+      expect(svg["role"]).to be_nil
+    end
+  end
+
   context "with one entry" do
     # An arc whose two ends are the same point draws nothing at all, so a lone
     # slice has to be a circle instead — and a pie of one is what a filter

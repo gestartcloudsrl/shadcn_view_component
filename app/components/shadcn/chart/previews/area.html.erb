@@ -1,0 +1,31 @@
+<%# Upstream's "Area Chart": the line with the space beneath it filled in. Flat
+    rather than the gradient the docs show — a gradient needs a `<defs>` with an
+    id per series, and an id unique in a page this gem cannot see is a cost the
+    fill does not repay. %>
+<%
+  config = {
+    desktop: { label: "Desktop", color: "var(--chart-1)" },
+    mobile: { label: "Mobile", color: "var(--chart-2)" }
+  }
+  data = {
+    "January" => { desktop: 186, mobile: 80 },
+    "February" => { desktop: 305, mobile: 200 },
+    "March" => { desktop: 237, mobile: 120 },
+    "April" => { desktop: 73, mobile: 190 },
+    "May" => { desktop: 209, mobile: 130 },
+    "June" => { desktop: 214, mobile: 140 }
+  }
+%>
+<%= render(Shadcn::Card::Component.new(class: "max-w-xl")) do |card| %>
+  <% card.with_header do |header| %>
+    <% header.with_title { "Visitors" } %>
+    <% header.with_description { "January – June 2026" } %>
+  <% end %>
+  <% card.with_card_content do %>
+    <%= render(Shadcn::Chart::Component.new(config:)) do |chart| %>
+      <% chart.with_area(data:, label: "Visitors a month, by device") %>
+      <% chart.with_chart_tooltip %>
+      <% chart.with_chart_legend %>
+    <% end %>
+  <% end %>
+<% end %>

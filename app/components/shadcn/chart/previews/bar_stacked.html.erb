@@ -1,0 +1,30 @@
+<%# Upstream's "Bar Chart - Stacked": the same months asking a different
+    question — not which series is larger, but what the month came to. The axis
+    grows to fit the whole stack rather than its tallest part. %>
+<%
+  config = {
+    desktop: { label: "Desktop", color: "var(--chart-1)" },
+    mobile: { label: "Mobile", color: "var(--chart-2)" }
+  }
+  data = {
+    "January" => { desktop: 186, mobile: 80 },
+    "February" => { desktop: 305, mobile: 200 },
+    "March" => { desktop: 237, mobile: 120 },
+    "April" => { desktop: 73, mobile: 190 },
+    "May" => { desktop: 209, mobile: 130 },
+    "June" => { desktop: 214, mobile: 140 }
+  }
+%>
+<%= render(Shadcn::Card::Component.new(class: "max-w-xl")) do |card| %>
+  <% card.with_header do |header| %>
+    <% header.with_title { "Visitors" } %>
+    <% header.with_description { "Every device, month by month" } %>
+  <% end %>
+  <% card.with_card_content do %>
+    <%= render(Shadcn::Chart::Component.new(config:)) do |chart| %>
+      <% chart.with_bar(data:, stacked: true, label: "Visitors a month, by device") %>
+      <% chart.with_chart_tooltip %>
+      <% chart.with_chart_legend %>
+    <% end %>
+  <% end %>
+<% end %>

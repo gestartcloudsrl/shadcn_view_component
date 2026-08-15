@@ -1,0 +1,85 @@
+<div data-slot="card" class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm max-w-xl">
+<div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+<div data-slot="card-title" class="leading-none font-semibold">Visitors
+</div>
+<div data-slot="card-description" class="text-sm text-muted-foreground">January – June 2026
+</div>
+</div>
+<div data-slot="card-content" class="px-6">
+<div data-slot="chart" data-chart="chart-x" data-controller="shadcn--chart" class="relative flex aspect-video justify-center text-xs">
+<style> [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); } .dark [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); }
+</style>
+<div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
+<svg data-slot="chart-bar" viewBox="0 0 560 240" role="img" aria-label="Visitors a month, by device — January: Desktop 186, Mobile 80; February: Desktop 305, Mobile 200; March: Desktop 237, Mobile 120; April: Desktop 73, Mobile 190; May: Desktop 209, Mobile 130; June: Desktop 214, Mobile 140" class="w-full">
+<line x1="34" x2="552" y1="216.0" y2="216.0" stroke="var(--border)" />
+<line x1="34" x2="552" y1="165.0" y2="165.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<line x1="34" x2="552" y1="114.0" y2="114.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<line x1="34" x2="552" y1="63.0" y2="63.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<line x1="34" x2="552" y1="12.0" y2="12.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<text x="28" y="219.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">0
+</text>
+<text x="28" y="168.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">100
+</text>
+<text x="28" y="117.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">200
+</text>
+<text x="28" y="66.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">300
+</text>
+<text x="28" y="15.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">400
+</text>
+<text x="77.17" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">January
+</text>
+<text x="163.5" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">February
+</text>
+<text x="249.83" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">March
+</text>
+<text x="336.17" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">April
+</text>
+<text x="422.5" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">May
+</text>
+<text x="508.83" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">June
+</text>
+<path d="M 46.95 125.14 A 4 4 0 0 1 50.95 121.14 L 73.17 121.14 A 4 4 0 0 1 77.17 125.14 L 77.17 212.0 A 4 4 0 0 1 73.17 216.0 L 50.95 216.0 A 4 4 0 0 1 46.95 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="January" data-name="Desktop" data-display="186" />
+<path d="M 77.17 179.2 A 4 4 0 0 1 81.17 175.2 L 103.39 175.2 A 4 4 0 0 1 107.39 179.2 L 107.39 212.0 A 4 4 0 0 1 103.39 216.0 L 81.17 216.0 A 4 4 0 0 1 77.17 212.0 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="January" data-name="Mobile" data-display="80" />
+<path d="M 133.28 64.45 A 4 4 0 0 1 137.28 60.45 L 159.5 60.45 A 4 4 0 0 1 163.5 64.45 L 163.5 212.0 A 4 4 0 0 1 159.5 216.0 L 137.28 216.0 A 4 4 0 0 1 133.28 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="February" data-name="Desktop" data-display="305" />
+<path d="M 163.5 118.0 A 4 4 0 0 1 167.5 114.0 L 189.72 114.0 A 4 4 0 0 1 193.72 118.0 L 193.72 212.0 A 4 4 0 0 1 189.72 216.0 L 167.5 216.0 A 4 4 0 0 1 163.5 212.0 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="February" data-name="Mobile" data-display="200" />
+<path d="M 219.62 99.13 A 4 4 0 0 1 223.62 95.13 L 245.84 95.13 A 4 4 0 0 1 249.84 99.13 L 249.84 212.0 A 4 4 0 0 1 245.84 216.0 L 223.62 216.0 A 4 4 0 0 1 219.62 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="March" data-name="Desktop" data-display="237" />
+<path d="M 249.83 158.8 A 4 4 0 0 1 253.83 154.8 L 276.05 154.8 A 4 4 0 0 1 280.05 158.8 L 280.05 212.0 A 4 4 0 0 1 276.05 216.0 L 253.83 216.0 A 4 4 0 0 1 249.83 212.0 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="March" data-name="Mobile" data-display="120" />
+<path d="M 305.95 182.77 A 4 4 0 0 1 309.95 178.77 L 332.17 178.77 A 4 4 0 0 1 336.17 182.77 L 336.17 212.0 A 4 4 0 0 1 332.17 216.0 L 309.95 216.0 A 4 4 0 0 1 305.95 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="April" data-name="Desktop" data-display="73" />
+<path d="M 336.17 123.1 A 4 4 0 0 1 340.17 119.1 L 362.39 119.1 A 4 4 0 0 1 366.39 123.1 L 366.39 212.0 A 4 4 0 0 1 362.39 216.0 L 340.17 216.0 A 4 4 0 0 1 336.17 212.0 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="April" data-name="Mobile" data-display="190" />
+<path d="M 392.28 113.41 A 4 4 0 0 1 396.28 109.41 L 418.5 109.41 A 4 4 0 0 1 422.5 113.41 L 422.5 212.0 A 4 4 0 0 1 418.5 216.0 L 396.28 216.0 A 4 4 0 0 1 392.28 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="May" data-name="Desktop" data-display="209" />
+<path d="M 422.5 153.7 A 4 4 0 0 1 426.5 149.7 L 448.72 149.7 A 4 4 0 0 1 452.72 153.7 L 452.72 212.0 A 4 4 0 0 1 448.72 216.0 L 426.5 216.0 A 4 4 0 0 1 422.5 212.0 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="May" data-name="Mobile" data-display="130" />
+<path d="M 478.62 110.86 A 4 4 0 0 1 482.62 106.86 L 504.84 106.86 A 4 4 0 0 1 508.84 110.86 L 508.84 212.0 A 4 4 0 0 1 504.84 216.0 L 482.62 216.0 A 4 4 0 0 1 478.62 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="June" data-name="Desktop" data-display="214" />
+<path d="M 508.83 148.6 A 4 4 0 0 1 512.83 144.6 L 535.05 144.6 A 4 4 0 0 1 539.05 148.6 L 539.05 212.0 A 4 4 0 0 1 535.05 216.0 L 512.83 216.0 A 4 4 0 0 1 508.83 212.0 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="June" data-name="Mobile" data-display="140" />
+</svg>
+<div data-slot="chart-legend" class="flex items-center justify-center gap-4 pt-3">
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-desktop)">
+</div>Desktop
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-mobile)">
+</div>Mobile
+</div>
+</div>
+</div>
+<div data-slot="chart-tooltip" data-shadcn--chart-target="tooltip" hidden="hidden" style="position:absolute;pointer-events:none" class="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+<div class="font-medium" data-shadcn--chart-target="label">
+</div>
+<div class="grid gap-1.5">
+<div class="flex w-full flex-wrap items-stretch gap-2 [&amp;&gt;svg]:h-2.5 [&amp;&gt;svg]:w-2.5 [&amp;&gt;svg]:text-muted-foreground items-center">
+<div class="shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg) h-2.5 w-2.5" data-shadcn--chart-target="indicator">
+</div>
+<div class="flex flex-1 items-center justify-between leading-none">
+<div class="grid gap-1.5">
+<span class="text-muted-foreground" data-shadcn--chart-target="name">
+</span>
+</div>
+<span class="font-mono font-medium text-foreground tabular-nums" data-shadcn--chart-target="value">
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>

@@ -83,6 +83,20 @@ RSpec.describe "Chart", :js do
     expect(inside["top"]).to be >= 0
   end
 
+  # A pie's label and its series name are the same word; a bar's are the month
+  # it stands in and the device it counts. This is the pair the controller's
+  # fallback exists for, and the only place the two can be told apart.
+  context "with an axis under the shape" do
+    it "names the category and the series" do
+      visit "/lookbook/preview/shadcn/chart/bar"
+      wait_for_stimulus
+
+      page.first("#{chart} path[data-key='mobile']", visible: :all).hover
+
+      expect(tooltip_text).to eq([ "January", "Mobile", "80" ])
+    end
+  end
+
   context "when the share was asked for" do
     it "shows it where the count would be" do
       visit "/lookbook/preview/shadcn/chart/percentages"

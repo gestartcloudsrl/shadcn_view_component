@@ -96,6 +96,8 @@ app/components/shadcn/
   <family>.rb                    # `part` declarations for the trivial sub-components
   <family>/component.rb          # the family root
   <family>/<part>/component.rb   # parts that have behaviour
+  <family>/<thing>.rb            # a plain value object the family's geometry
+                                 # lives in — `calendar/month.rb`, `chart/plot.rb`
   <family>/preview.rb + previews/*.html.erb
 
 app/javascript/shadcn/           # 15 controllers + popper, dismiss, focus,

@@ -19,6 +19,27 @@ module Shadcn
       def percentages
         render_with_template
       end
+
+      # Upstream's "Bar Chart - Multiple", and the first shape here with an axis
+      # under it.
+      def bar
+        render_with_template
+      end
+
+      # Upstream's "Bar Chart - Stacked": one bar a month, split by device.
+      def bar_stacked
+        render_with_template
+      end
+
+      # Upstream's "Line Chart - Multiple".
+      def line
+        render_with_template
+      end
+
+      # Upstream's "Area Chart".
+      def area
+        render_with_template
+      end
     end
   end
 end

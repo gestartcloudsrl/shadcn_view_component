@@ -30,7 +30,7 @@ written.
 | [features/combobox.md](features/combobox.md) | the only family answerable to Base UI: its names, the four custom properties published only here, and the three things the rendered example settled that the source would have got wrong |
 | [features/command.md](features/command.md) | the palette: why the `cmdk-*` attributes are part of the contract where the chart's were not, and why the fuzzy scorer was ported rather than replaced with a substring test |
 | [features/resizable.md](features/resizable.md) | panels as flex shares rather than `react-resizable-panels`, and the class upstream renders that reads an attribute upstream stopped rendering |
-| [features/chart.md](features/chart.md) | the one family whose package was doing the work: what `chart.tsx` actually is, why the frame is 1:1 and the pie is ours, and the accessibility model that follows from `role="img"` |
+| [features/chart.md](features/chart.md) | the one family whose package was doing the work: what `chart.tsx` actually is, why the frame is 1:1 and the four shapes are ours, and the accessibility model that follows from `role="img"` |
 | [features/calendar.md](features/calendar.md) | the calendar without `react-day-picker`: a third of the package is locale data and another fifth is other calendar systems, the grid that now exists twice, and what keeps the two copies honest |
 | [features/toaster.md](features/toaster.md) | the toaster, which is ours rather than a port: why there was nothing to reproduce, what was kept from sonner, and the three ways a Rails app raises one |
 

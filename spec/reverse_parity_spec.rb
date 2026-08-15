@@ -72,6 +72,11 @@ RSpec.describe "reverse parity" do
     # width. Nothing to do with the port.
     "accordion" => %w[w-[420px]],
 
+    # The width the four cartesian chart previews give their card. A pie is
+    # square and fits a narrow one; an axis of six months wants the room, and
+    # `Plot` draws into a 560px box.
+    "card" => %w[max-w-xl],
+
     "field-group" => %w[w-[420px]],
     "tabs" => %w[w-[420px]],
     "dropdown-menu-content" => %w[w-56],

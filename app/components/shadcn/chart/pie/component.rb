@@ -57,11 +57,7 @@ module Shadcn
         # hover — over this component's own. Reported from a screenshot: the
         # grey box covering the panel was Chrome's, not ours.
         def element_attributes(**defaults)
-          super(**{
-            viewBox: "0 0 #{SIZE} #{SIZE}",
-            role: "img",
-            "aria-label" => description
-          }.compact.merge(defaults))
+          super(**{ viewBox: "0 0 #{SIZE} #{SIZE}" }.merge(naming).merge(defaults))
         end
 
         def call
@@ -69,6 +65,14 @@ module Shadcn
         end
 
         private
+
+        # A pie of nothing draws nothing, and a `role="img"` with no name is
+        # what axe calls `svg-img-alt`. A filtered scope reaches this.
+        def naming
+          return { "aria-hidden" => "true" } if description.blank?
+
+          { role: "img", "aria-label" => description }
+        end
 
         def total = @total ||= data.values.sum(&:to_f)
 
@@ -94,7 +98,7 @@ module Shadcn
             tag.path(
               d: path_for(from, angle),
               fill: "var(--color-#{key.parameterize.underscore.dasherize})",
-              "data-shadcn--chart-target": "slice",
+              "data-shadcn--chart-target": "mark",
               "data-action": "pointerenter->shadcn--chart#show pointermove->shadcn--chart#move " \
                              "pointerleave->shadcn--chart#hide",
               "data-key": key,
