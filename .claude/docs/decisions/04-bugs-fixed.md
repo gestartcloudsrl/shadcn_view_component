@@ -62,6 +62,15 @@ trigger with `aria-labelledby` now, to match the FormBuilder; see
 shadcn/Radix have the same gap. The FormBuilder now wires `aria-labelledby`, and
 the previews demonstrate it.
 
+**The correction outlived its own correction.** Two previews went on saying a
+`<label for>` cannot name a button for months after this entry said it can, and
+they had been *written* to work around it. Settled with the accessibility tree
+rather than with the spec text: in Chrome, a `<button role="switch">` carrying
+nothing but a `<label for>` is named by that label, `relatedElement` and all.
+The previews now use it, as upstream's own switch example does. A sentence in a
+decision document does not reach the code that already believed otherwise —
+`grep` for the claim, not for the file you changed.
+
 ## Repositioning forced a synchronous layout per scroll event
 
 `reposition` wrote a transform and immediately read `offsetWidth`, unthrottled,

@@ -8,11 +8,12 @@
   <% end %>
   <%= render(Shadcn::Field::Separator::Component.new) { "Or" } %>
   <%= render(Shadcn::Field::Component.new(orientation: :horizontal)) do |f| %>
-    <%# The Switch is a <button role="switch">, which a <label for> cannot name,
-        so it points at the label instead. %>
-    <% f.with_label(id: "field-news-label", for: "field-news") { "Subscribe to the newsletter" } %>
+    <%# The Switch is a `<button role="switch">`, and a `<label for>` names it:
+        button is a labelable element, and the accessibility tree agrees —
+        measured, after this comment claimed the opposite. %>
+    <% f.with_label(for: "field-news") { "Subscribe to the newsletter" } %>
     <% f.with_field_content do %>
-      <%= render(Shadcn::Switch::Component.new(id: "field-news", "aria-labelledby": "field-news-label")) %>
+      <%= render(Shadcn::Switch::Component.new(id: "field-news")) %>
     <% end %>
   <% end %>
   <%= render(Shadcn::Field::Component.new) do |f| %>

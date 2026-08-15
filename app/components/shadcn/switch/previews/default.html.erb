@@ -1,14 +1,21 @@
-<%# A <label for> does not name a <button>, so a Switch is named with
-    `aria-labelledby` pointing at its label — which is what the FormBuilder
-    does for you. %>
+<%# A `<label for>` *does* name a `<button>` — button is a labelable element,
+    and Chrome's accessibility tree gives this switch the name "Airplane mode"
+    from the label alone (`relatedElement`, measured). This preview said the
+    opposite for as long as it existed, which is the misconception
+    decisions/04-bugs-fixed.md exists to correct.
+
+    So the first two follow upstream's own example and use `<label for>`. The
+    third and fourth have no visible label at all, which is what `aria-label`
+    is for; the FormBuilder wires `aria-labelledby` instead, because it already
+    renders the label and knows its id. All three name the control. %>
 <div class="flex items-center gap-6">
   <div class="flex items-center gap-2">
-    <%= render(Shadcn::Switch::Component.new(name: "airplane", "aria-labelledby": "switch-airplane-label")) %>
-    <%= render(Shadcn::Label::Component.new(id: "switch-airplane-label")) { "Airplane mode" } %>
+    <%= render(Shadcn::Switch::Component.new(name: "airplane", id: "switch-airplane")) %>
+    <%= render(Shadcn::Label::Component.new(for: "switch-airplane")) { "Airplane mode" } %>
   </div>
   <div class="flex items-center gap-2">
-    <%= render(Shadcn::Switch::Component.new(size: :sm, checked: true, "aria-labelledby": "switch-small-label")) %>
-    <%= render(Shadcn::Label::Component.new(id: "switch-small-label")) { "Small, on" } %>
+    <%= render(Shadcn::Switch::Component.new(size: :sm, checked: true, id: "switch-small")) %>
+    <%= render(Shadcn::Label::Component.new(for: "switch-small")) { "Small, on" } %>
   </div>
   <%= render(Shadcn::Switch::Component.new(disabled: true, "aria-label": "Disabled")) %>
   <%# Upstream's "Invalid". Added here rather than to a page of its own: it is

@@ -395,13 +395,19 @@ noting that it would not have delivered the component that raised the question:
       looked, because its pattern named three animations and this was the
       fourth.
 
-- [ ] **Two previews claim `<label for>` cannot name a `<button>`.**
-      `switch/previews/default.html.erb` and `field/previews/default.html.erb`
-      both say so, and it is exactly the misconception
-      [04-bugs-fixed.md](decisions/04-bugs-fixed.md) exists to correct — a
-      button is a labelable element. `checkbox`'s own preview relies on the
-      opposite and passes axe. Previews are documentation, so this is a
-      falsehood the gem ships.
+- [x] **Two previews claimed `<label for>` cannot name a `<button>`.** Fixed, and
+      the claim was settled by measurement rather than by argument: Chrome's
+      accessibility tree gives a bare `<button role="switch">` with nothing but a
+      `<label for>` the name from that label, `relatedElement` and all. So both
+      previews now use `<label for>`, which is also what upstream's own switch
+      example does — the `aria-labelledby` they carried was a workaround for a
+      problem that does not exist. The FormBuilder keeps `aria-labelledby`,
+      which is equally valid and which it can do without the caller managing an
+      id.
+
+      Measured in Chrome only. Firefox and Safari compute names from their own
+      implementations of HTML-AAM, and nothing here has run in either.
+
 - [ ] **`typeahead.js` searches over items where Radix's *menu* searches over
       strings.** The algorithm matches `getNextMatch`
       (vendor/radix/ui/menu.tsx:1336-1347); the input does not — though only in
