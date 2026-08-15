@@ -373,15 +373,16 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
-- [ ] **The Sidebar's mobile sheet has no role and no accessible name.** It
-      traps focus, locks scroll and dims the page behind it — everything a modal
-      does — while announcing nothing. Upstream's is a Radix Dialog, so it
-      carries `role="dialog"`, `aria-modal` and a screen-reader-only
-      `SheetTitle`/`SheetDescription`: *"Sidebar"* and *"Displays the mobile
-      sidebar."* (`vendor/shadcn/ui/sidebar.tsx:198-201`). Nothing here does.
-      `accessibility_spec` cannot see it: the sidebar preview is only ever
-      exercised at desktop width, where there is no sheet. Whatever fixes it
-      should add a mobile case there at the same time.
+- [x] **The Sidebar's mobile sheet has no role and no accessible name.** Fixed:
+      the controller writes `role="dialog"`, `aria-modal` and both relationships
+      while the sheet is open, and takes all four back when it closes — on
+      desktop the panel is not a dialog, and saying it is would be worse than
+      saying nothing. The name and the description are upstream's own strings
+      (`sidebar.tsx:198-201`), rendered `hidden` rather than merely `sr-only` so
+      a desktop screen reader does not read them into a page with no sheet.
+      `accessibility_spec` now has a mobile case — it resizes to 375×667, opens
+      the sheet and audits it — which is the first time that branch has been
+      audited at all.
 - [ ] **`--animate-caret-blink` was left out of the reduced-motion pass, and it
       now ships.** It is the only `infinite` animation in `shadcn.css` and so the
       strongest candidate of the lot, and it got neither of the two things the

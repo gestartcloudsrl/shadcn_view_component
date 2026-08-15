@@ -44,6 +44,8 @@ en:
       scroll_to_start: Scroll to start
     sidebar:
       toggle: Toggle Sidebar
+      title: Sidebar
+      description: Displays the mobile sidebar.
     spinner:
       loading: Loading
     theme:

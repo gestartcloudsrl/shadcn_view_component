@@ -21,7 +21,7 @@ const MOBILE_QUERY = "(max-width: 767px)"
 // The state is small: expanded or collapsed on desktop, and a separate
 // ephemeral flag on mobile that is deliberately never persisted.
 export default class extends Controller {
-  static targets = [ "sidebar", "trigger", "container", "overlay" ]
+  static targets = [ "sidebar", "trigger", "container", "overlay", "sheetHeader" ]
   static values = { open: Boolean, openMobile: Boolean }
 
   connect() {
@@ -145,6 +145,7 @@ export default class extends Controller {
     if (this.hasOverlayTarget) this.exits.cancel(this.overlayTarget)
 
     sidebar.dataset.mobile = "true"
+    this.announceSheet()
     // Undoes upstream's `hidden … md:block`, which is CSS-hidden below the
     // breakpoint because React renders a different tree there rather than
     // showing this one. Inline beats the utility without having to out-specify
@@ -182,6 +183,37 @@ export default class extends Controller {
     })
   }
 
+  // A sheet is a modal dialog, and this one traps focus, locks the page's
+  // scroll and dims what is behind it while announcing nothing at all —
+  // upstream gets `role="dialog"`, `aria-modal` and a name for free by
+  // rendering a real Sheet below `md`, and this port has one tree instead.
+  //
+  // Applied here rather than in the markup because the server cannot know the
+  // viewport: on desktop this panel is not a dialog, and saying it is would be
+  // worse than saying nothing.
+  announceSheet() {
+    if (!this.hasContainerTarget) return
+
+    const panel = this.containerTarget
+
+    panel.setAttribute("role", "dialog")
+    panel.setAttribute("aria-modal", "true")
+    if (panel.dataset.sheetTitle) panel.setAttribute("aria-labelledby", panel.dataset.sheetTitle)
+    if (panel.dataset.sheetDescription) panel.setAttribute("aria-describedby", panel.dataset.sheetDescription)
+    if (this.hasSheetHeaderTarget) this.sheetHeaderTarget.hidden = false
+  }
+
+  silenceSheet() {
+    if (!this.hasContainerTarget) return
+
+    const panel = this.containerTarget
+
+    for (const name of [ "role", "aria-modal", "aria-labelledby", "aria-describedby" ]) {
+      panel.removeAttribute(name)
+    }
+    if (this.hasSheetHeaderTarget) this.sheetHeaderTarget.hidden = true
+  }
+
   closeMobile() {
     if (!this.hasSidebarTarget) return
 
@@ -214,6 +246,7 @@ export default class extends Controller {
     // `group-data-[mobile=true]:flex` reads — so it has to outlast the
     // slide-out rather than start it.
     const finish = () => {
+      this.silenceSheet()
       delete sidebar.dataset.mobile
       sidebar.style.removeProperty("display")
 

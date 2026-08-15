@@ -4,7 +4,13 @@
 </div>
 <div data-slot="sidebar-gap" class="relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))] group-data-[mobile=true]:w-0">
 </div>
-<div data-slot="sidebar-container" data-shadcn--sidebar-target="container" class="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)] group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile) group-data-[mobile=true]:z-50 group-data-[mobile=true]:shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:duration-500 data-[state=closed]:duration-300 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
+<div data-slot="sidebar-container" data-shadcn--sidebar-target="container" data-sheet-title="shadcn-sidebar-title-x" data-sheet-description="shadcn-sidebar-description-x" class="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)] group-data-[mobile=true]:flex group-data-[mobile=true]:w-(--sidebar-width-mobile) group-data-[mobile=true]:z-50 group-data-[mobile=true]:shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:duration-500 data-[state=closed]:duration-300 data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left">
+<div class="sr-only" hidden="hidden" data-slot="sheet-header" data-shadcn--sidebar-target="sheetHeader">
+<h2 id="shadcn-sidebar-title-x" data-slot="sheet-title">Sidebar
+</h2>
+<p id="shadcn-sidebar-description-x" data-slot="sheet-description">Displays the mobile sidebar.
+</p>
+</div>
 <div data-sidebar="sidebar" data-slot="sidebar-inner" class="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm">
 <div data-slot="sidebar-content" data-sidebar="content" class="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden">
 <div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col p-2">

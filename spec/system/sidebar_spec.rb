@@ -167,6 +167,42 @@ RSpec.describe "Sidebar", :js do
       expect(page).to have_css(sidebar, visible: :hidden)
     end
 
+    # A sheet is a modal dialog: it traps focus, locks the page's scroll and
+    # dims what is behind it. Upstream gets the role, `aria-modal` and a name
+    # for free by rendering a real Sheet below `md`; there is one tree here, so
+    # the controller says it — and only while the sheet is open, because on
+    # desktop this panel is not a dialog.
+    it "announces itself as a dialog, with a name and a description", :aggregate_failures do
+      find(trigger).click
+      panel = find("[data-slot=sidebar-container]")
+
+      expect(panel["role"]).to eq("dialog")
+      expect(panel["aria-modal"]).to eq("true")
+      # `text(:all)`: both are `sr-only`, and what a screen reader is handed is
+      # the content rather than what Capybara counts as visible — which for a
+      # clipped element it reports inconsistently.
+      expect(find_by_id(panel["aria-labelledby"], visible: :all).text(:all)).to eq("Sidebar")
+      expect(find_by_id(panel["aria-describedby"], visible: :all).text(:all))
+        .to eq("Displays the mobile sidebar.")
+    end
+
+    # And takes it all back when the sheet goes: a desktop sidebar that says
+    # `role="dialog"` is worse than one that says nothing, and a screen reader
+    # would read the two `sr-only` lines in the middle of a page with no sheet
+    # on it — which is why they are `hidden` rather than merely `sr-only`.
+    it "stops being a dialog once it closes", :aggregate_failures do
+      find(trigger).click
+      expect(page).to have_css("[data-slot=sidebar-container][role=dialog]")
+
+      press(:escape)
+      expect(page).to have_css(sidebar, visible: :hidden)
+
+      panel = find("[data-slot=sidebar-container]", visible: :all)
+      expect(panel["role"]).to be_nil
+      expect(panel["aria-modal"]).to be_nil
+      expect(page).to have_css("[data-slot=sheet-header]", visible: :hidden)
+    end
+
     # `top_layer.enable` sets `popover="manual"`, and the UA gives `[popover]`
     # `position: fixed` whether it is showing or not. `shadcn.css` neutralises
     # the rest of those defaults and deliberately not that one, because every

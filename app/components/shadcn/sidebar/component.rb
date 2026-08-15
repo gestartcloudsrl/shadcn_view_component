@@ -110,14 +110,46 @@ module Shadcn
 
       def container
         tag.div(
-          inner,
+          safe_join([ sheet_header, inner ]),
           "data-slot": "sidebar-container",
           # The element that animates, so the controller has to be able to write
           # `data-state` on it and wait for its animations to settle.
           "data-shadcn--sidebar-target": "container",
+          # Read by the controller when it turns this panel into a sheet: a
+          # dialog needs a name, and the name has to exist before it is pointed
+          # at.
+          "data-sheet-title" => sheet_title_id,
+          "data-sheet-description" => sheet_description_id,
           class: container_classes
         )
       end
+
+      # The name and the description a Sheet gives the mobile sidebar
+      # (sidebar.tsx:198-201), which upstream renders only in its mobile tree.
+      # There is one tree here, so they are always in the markup and `hidden`
+      # until the controller opens the sheet: `hidden` keeps them out of the
+      # accessibility tree entirely, where `sr-only` alone would have a desktop
+      # screen reader read "Sidebar. Displays the mobile sidebar." in the middle
+      # of a page with no sheet on it.
+      #
+      # The ids are here rather than generated in JavaScript because the
+      # elements are: `aria-labelledby` has to point at something the server
+      # rendered.
+      def sheet_header
+        tag.div(
+          safe_join([
+            tag.h2(shadcn_t("sidebar.title"), id: sheet_title_id, "data-slot": "sheet-title"),
+            tag.p(shadcn_t("sidebar.description"), id: sheet_description_id, "data-slot": "sheet-description")
+          ]),
+          class: "sr-only",
+          hidden: true,
+          "data-slot": "sheet-header",
+          "data-shadcn--sidebar-target": "sheetHeader"
+        )
+      end
+
+      def sheet_title_id = @sheet_title_id ||= "shadcn-sidebar-title-#{SecureRandom.hex(4)}"
+      def sheet_description_id = @sheet_description_id ||= "shadcn-sidebar-description-#{SecureRandom.hex(4)}"
 
       def container_classes
         ShadcnViewComponent.cn(
