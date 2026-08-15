@@ -105,6 +105,9 @@ RSpec.describe "reverse parity" do
     # defaults to it, because a pie that fills whatever box it is in is not a
     # useful default; the other two classes are in the corpus already.
     "chart-pie" => %w[max-h-[250px]],
+    # The pair `Icon::Component` stamps wherever upstream mounts a lucide React
+    # component — the same reason the other icon slots are listed here.
+    "combobox-trigger-icon" => %w[lucide lucide-chevron-down],
     # The width upstream's own docs example gives the palette at the call site.
     "command" => %w[md:min-w-[450px]],
     # The previews' own sizing: a group of panels is as big as its caller makes

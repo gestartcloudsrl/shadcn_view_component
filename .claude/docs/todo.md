@@ -89,17 +89,18 @@ nothing.
 Anything added to this list belongs in a preview comment too, so the next
 person reads it where they would look for it.
 
-## Components not ported (1)
+## Components not ported (0)
 
 All 27 unported sources were vendored, so this list is derived from what they
 actually import rather than from memory, and `spec/parity_spec.rb` holds it as
-`not_yet_ported` and fails if the two drift. Twenty-four have since been ported —
+`not_yet_ported` and fails if the two drift. All twenty-five have since been
+ported —
 `empty`, `button-group`, `input-group`, `item`, `sidebar`, the four markup-only
 ones (`message`, `bubble`, `attachment`, `marker`), `message-scroller`,
 `hover-card`, `direction`, `scroll-area`, `navigation-menu`, `slider`,
 `context-menu`, `menubar`, `drawer`, `carousel`, `input-otp`, `calendar`,
-`chart`, `resizable` and `command` — leaving 1, with `form` and `sonner`
-decided rather than pending (below).
+`chart`, `resizable`, `command` and `combobox` — leaving **none**, with `form`
+and `sonner` decided rather than pending (below).
 
 The grouping this replaced was wrong in four ways, each recorded below. A fifth
 error was mine, and is recorded with the group it belongs to.
@@ -178,8 +179,14 @@ error was mine, and is recorded with the group it belongs to.
   the page, and a `turbo_stream.append`. `parity_spec` holds it in
   `ported_as_ours`. See [features/toaster.md](features/toaster.md).
 
-- **Blocked by a third-party npm package** (1): `combobox`
-  (**@base-ui/react**).
+- **Blocked by a third-party npm package** (0): the group is empty.
+  *`combobox` has shipped, and it was the last one. It is the only family
+  answerable to **Base UI** rather than Radix — `data-open` where everything
+  else writes `data-state`, `--anchor-width` where everything else reads
+  `--radix-popper-*` — so those names are emitted here and nowhere else, and
+  `popper.js` publishes the four unprefixed properties only when asked. Adding
+  chips is the one half not wired; see
+  [features/combobox.md](features/combobox.md).*
   *`command` has shipped. `cmdk` is 1,091 lines plus a 162-line fuzzy scorer,
   and the scorer was **ported rather than replaced**: the ranking is the
   component, and a palette that filters by substring is not one. Its `cmdk-*`

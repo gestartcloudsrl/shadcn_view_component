@@ -32,6 +32,11 @@ export class FloatingLayer {
     this.sideOffset = options.sideOffset || 0
     this.alignOffset = options.alignOffset || 0
     this.matchAnchorWidth = options.matchAnchorWidth || false
+    // Base UI's four unprefixed custom properties, for the one family
+    // answerable to Base UI rather than to Radix. Asked for rather than always
+    // published: `--anchor-width` is a name a host could plausibly use for
+    // something of its own, and only the combobox's classes read it.
+    this.publishBaseUiVariables = options.publishBaseUiVariables || false
     this.onOpen = options.onOpen || (() => {})
     this.onClose = options.onClose || (() => {})
     this.onDismiss = options.onDismiss || null
@@ -188,7 +193,8 @@ export class FloatingLayer {
       sideOffset: this.sideOffset,
       alignOffset: this.alignOffset,
       prefix: this.prefix,
-      matchAnchorWidth: this.matchAnchorWidth
+      matchAnchorWidth: this.matchAnchorWidth,
+      publishBaseUiVariables: this.publishBaseUiVariables
     })
   }
 

@@ -1,0 +1,63 @@
+<div class="w-64">
+<div data-slot="combobox" style="display:contents" data-controller="shadcn--combobox">
+<div data-slot="input-group" role="group" data-controller="shadcn--input-group" class="group/input-group relative flex items-center rounded-md border border-input shadow-xs transition-[color,box-shadow] outline-none dark:bg-input/30 h-9 min-w-0 has-[&gt;textarea]:h-auto has-[&gt;[data-align=inline-start]]:[&amp;&gt;input]:pl-2 has-[&gt;[data-align=inline-end]]:[&amp;&gt;input]:pr-2 has-[&gt;[data-align=block-start]]:h-auto has-[&gt;[data-align=block-start]]:flex-col has-[&gt;[data-align=block-start]]:[&amp;&gt;input]:pb-3 has-[&gt;[data-align=block-end]]:h-auto has-[&gt;[data-align=block-end]]:flex-col has-[&gt;[data-align=block-end]]:[&amp;&gt;input]:pt-3 has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-destructive/20 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 w-auto">
+<input data-slot="input-group-control" type="text" placeholder="Search a language…" role="combobox" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" data-shadcn--combobox-target="search" data-action="input-&gt;shadcn--combobox#search click-&gt;shadcn--combobox#open keydown-&gt;shadcn--combobox#keydown" class="h-9 w-full min-w-0 border-input px-3 py-1 text-base transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent">
+<div data-slot="input-group-addon" role="group" data-align="inline-end" data-action="click-&gt;shadcn--input-group#focusControl" class="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 text-sm font-medium text-muted-foreground select-none group-data-[disabled=true]/input-group:opacity-50 [&amp;&gt;kbd]:rounded-[calc(var(--radius)-5px)] [&amp;&gt;svg:not([class*=&#39;size-&#39;])]:size-4 order-last pr-3 has-[&gt;button]:mr-[-0.45rem] has-[&gt;kbd]:mr-[-0.35rem]">
+<button data-slot="input-group-button" data-variant="ghost" data-size="icon-xs" type="button" role="combobox" aria-label="Show options" aria-haspopup="dialog" aria-expanded="false" tabindex="0" data-shadcn--combobox-target="trigger" data-action="click-&gt;shadcn--combobox#toggle" class="inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[&gt;svg]:p-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-slot="combobox-trigger-icon" class="lucide lucide-chevron-down pointer-events-none size-4 text-muted-foreground">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</button>
+</div>
+</div>
+<div data-slot="combobox-content" role="listbox" hidden="hidden" data-closed="" data-side="bottom" data-shadcn--combobox-target="content" data-shadcn--combobox-side-value="bottom" data-shadcn--combobox-align-value="start" data-shadcn--combobox-side-offset-value="6" data-shadcn--combobox-align-offset-value="0" class="isolate z-50 group/combobox-content relative max-h-96 w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) overflow-hidden rounded-md bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[chips=true]:min-w-(--anchor-width) data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-8 *:data-[slot=input-group]:border-input/30 *:data-[slot=input-group]:bg-input/30 *:data-[slot=input-group]:shadow-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+<div data-slot="combobox-list" data-shadcn--combobox-target="list" class="max-h-[min(calc(--spacing(96)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto p-1 data-empty:p-0">
+<div data-slot="combobox-item" id="shadcn-combobox-item-x" role="option" aria-selected="false" data-value="js" data-label="JavaScript" data-shadcn--combobox-target="item" data-action="click-&gt;shadcn--combobox#choose pointermove-&gt;shadcn--combobox#hover" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">JavaScript
+<span class="pointer-events-none absolute right-2 flex size-4 items-center justify-center" data-slot="combobox-item-indicator" hidden="hidden" data-shadcn--combobox-target="indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check pointer-events-none size-4 pointer-coarse:size-5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</div>
+<div data-slot="combobox-item" id="shadcn-combobox-item-x" role="option" aria-selected="false" data-value="rb" data-label="Ruby" data-shadcn--combobox-target="item" data-action="click-&gt;shadcn--combobox#choose pointermove-&gt;shadcn--combobox#hover" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">Ruby
+<span class="pointer-events-none absolute right-2 flex size-4 items-center justify-center" data-slot="combobox-item-indicator" hidden="hidden" data-shadcn--combobox-target="indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check pointer-events-none size-4 pointer-coarse:size-5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</div>
+<div data-slot="combobox-item" id="shadcn-combobox-item-x" role="option" aria-selected="false" data-value="py" data-label="Python" data-shadcn--combobox-target="item" data-action="click-&gt;shadcn--combobox#choose pointermove-&gt;shadcn--combobox#hover" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">Python
+<span class="pointer-events-none absolute right-2 flex size-4 items-center justify-center" data-slot="combobox-item-indicator" hidden="hidden" data-shadcn--combobox-target="indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check pointer-events-none size-4 pointer-coarse:size-5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</div>
+<div data-slot="combobox-item" id="shadcn-combobox-item-x" role="option" aria-selected="false" data-value="go" data-label="Go" data-shadcn--combobox-target="item" data-action="click-&gt;shadcn--combobox#choose pointermove-&gt;shadcn--combobox#hover" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">Go
+<span class="pointer-events-none absolute right-2 flex size-4 items-center justify-center" data-slot="combobox-item-indicator" hidden="hidden" data-shadcn--combobox-target="indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check pointer-events-none size-4 pointer-coarse:size-5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</div>
+<div data-slot="combobox-item" id="shadcn-combobox-item-x" role="option" aria-selected="false" data-value="rs" data-label="Rust" data-shadcn--combobox-target="item" data-action="click-&gt;shadcn--combobox#choose pointermove-&gt;shadcn--combobox#hover" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">Rust
+<span class="pointer-events-none absolute right-2 flex size-4 items-center justify-center" data-slot="combobox-item-indicator" hidden="hidden" data-shadcn--combobox-target="indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check pointer-events-none size-4 pointer-coarse:size-5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</div>
+<div data-slot="combobox-item" id="shadcn-combobox-item-x" role="option" aria-selected="false" data-value="ex" data-label="Elixir" data-shadcn--combobox-target="item" data-action="click-&gt;shadcn--combobox#choose pointermove-&gt;shadcn--combobox#hover" class="relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">Elixir
+<span class="pointer-events-none absolute right-2 flex size-4 items-center justify-center" data-slot="combobox-item-indicator" hidden="hidden" data-shadcn--combobox-target="indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check pointer-events-none size-4 pointer-coarse:size-5">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+</span>
+</div>
+</div>
+<div data-slot="combobox-empty" class="hidden w-full justify-center py-2 text-center text-sm text-muted-foreground group-data-empty/combobox-content:flex">No language found.
+</div>
+</div>
+<input type="hidden" name="project[language]" autocomplete="off" data-shadcn--combobox-target="input">
+</div>
+</div>

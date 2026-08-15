@@ -166,7 +166,8 @@ export function position(anchor, content, options = {}) {
     alignOffset = 0,
     collisionPadding = 8,
     prefix = "popper",
-    matchAnchorWidth = false
+    matchAnchorWidth = false,
+    publishBaseUiVariables = false
   } = options
 
   const wrapper = content.parentElement
@@ -228,7 +229,21 @@ export function position(anchor, content, options = {}) {
     "--radix-popper-anchor-width": `${anchorRect.width}px`,
     "--radix-popper-anchor-height": `${anchorRect.height}px`,
     [`--radix-${prefix}-trigger-width`]: `${anchorRect.width}px`,
-    [`--radix-${prefix}-trigger-height`]: `${anchorRect.height}px`
+    [`--radix-${prefix}-trigger-height`]: `${anchorRect.height}px`,
+    // Base UI spells the same four numbers without a prefix, and
+    // `combobox.tsx` — the one file of the 61 written against Base UI — reads
+    // them: `w-(--anchor-width)`, `max-w-(--available-width)`,
+    // `origin-(--transform-origin)`, and the list's `--available-height`.
+    // Published only where a caller asks, because an unprefixed name in a
+    // host's page is a name a host may already be using.
+    ...(publishBaseUiVariables
+      ? {
+          "--anchor-width": `${anchorRect.width}px`,
+          "--available-width": `${viewport.width - collisionPadding * 2}px`,
+          "--available-height": `${Math.max(0, available)}px`,
+          "--transform-origin": transformOrigin
+        }
+      : {})
   }
 
   for (const [ name, value ] of Object.entries(vars)) {

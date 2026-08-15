@@ -1,0 +1,20 @@
+<%# Upstream's own example. The items are server-rendered and the controller
+    filters them by substring — Base UI's default, and the same call the
+    searchable select makes: a combobox completes a value from a list its caller
+    ordered, where the palette ranks answers. %>
+<%
+  languages = [ %w[js JavaScript], %w[rb Ruby], %w[py Python], %w[go Go], %w[rs Rust], %w[ex Elixir] ]
+%>
+<div class="w-64">
+  <%= render(Shadcn::Combobox::Component.new(name: "project[language]")) do |combobox| %>
+    <% combobox.with_combobox_input(placeholder: "Search a language…") %>
+    <% combobox.with_combobox_content do %>
+      <%= render(Shadcn::Combobox::List::Component.new) do %>
+        <% languages.each do |value, label| %>
+          <%= render(Shadcn::Combobox::Item::Component.new(value:, label:)) { label } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Combobox::Empty::Component.new) { "No language found." } %>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,25 @@
+<%# Groups, their labels and the rule between them — the three parts `part`
+    declares, because each is an element with a `data-slot` and fixed classes. %>
+<div class="w-64">
+  <%= render(Shadcn::Combobox::Component.new(name: "project[stack]")) do |combobox| %>
+    <% combobox.with_combobox_input(placeholder: "Search…") %>
+    <% combobox.with_combobox_content do %>
+      <%= render(Shadcn::Combobox::List::Component.new) do %>
+        <%= render(Shadcn::Combobox::Group::Component.new) do %>
+          <%= render(Shadcn::Combobox::Label::Component.new) { "Languages" } %>
+          <% [ %w[rb Ruby], %w[js JavaScript] ].each do |value, label| %>
+            <%= render(Shadcn::Combobox::Item::Component.new(value:, label:)) { label } %>
+          <% end %>
+        <% end %>
+        <%= render(Shadcn::Combobox::Separator::Component.new) %>
+        <%= render(Shadcn::Combobox::Group::Component.new) do %>
+          <%= render(Shadcn::Combobox::Label::Component.new) { "Databases" } %>
+          <% [ %w[pg PostgreSQL], %w[sqlite SQLite] ].each do |value, label| %>
+            <%= render(Shadcn::Combobox::Item::Component.new(value:, label:)) { label } %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Combobox::Empty::Component.new) { "Nothing found." } %>
+    <% end %>
+  <% end %>
+</div>

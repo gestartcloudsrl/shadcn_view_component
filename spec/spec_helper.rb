@@ -14,6 +14,22 @@ RSpec.configure do |config|
   # its snapshots and its system examples are only deterministic with the clock
   # held still. Frozen where it is needed rather than everywhere — the drawer
   # and the toaster run on real timers.
+  # An example that hangs used to take the whole run with it: a browser that
+  # stops answering leaves Capybara waiting, and the suite crawls instead of
+  # failing. This bounds each example and says which one ran out, which is the
+  # difference between a red line and an afternoon.
+  #
+  # Sixty seconds is generous on purpose — the slowest example here is about
+  # five, and the ones that drive real clocks (the toaster's, the drawer's
+  # release) are seconds by design. `EXAMPLE_TIMEOUT=0` turns it off, for
+  # debugging with a breakpoint.
+  example_timeout = Integer(ENV.fetch("EXAMPLE_TIMEOUT", 60))
+  if example_timeout.positive?
+    config.around do |example|
+      Timeout.timeout(example_timeout, Timeout::Error, "example took longer than #{example_timeout}s") { example.run }
+    end
+  end
+
   config.include ActiveSupport::Testing::TimeHelpers
 
   config.include ViewComponent::TestHelpers, type: :component

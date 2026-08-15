@@ -1,0 +1,16 @@
+<%# Upstream's "Clear". The chevron hides itself while the X is there —
+    `group-has-data-[slot=combobox-clear]/input-group:hidden`, upstream's own
+    class, which works here because the port renders the same `data-slot`. %>
+<div class="w-64">
+  <%= render(Shadcn::Combobox::Component.new(name: "project[framework]", value: "rails", label: "Rails")) do |combobox| %>
+    <% combobox.with_combobox_input(placeholder: "Search a framework…", value: "Rails", show_clear: true) %>
+    <% combobox.with_combobox_content do %>
+      <%= render(Shadcn::Combobox::List::Component.new) do %>
+        <% [ %w[rails Rails], %w[hotwire Hotwire], %w[sinatra Sinatra], %w[hanami Hanami] ].each do |value, label| %>
+          <%= render(Shadcn::Combobox::Item::Component.new(value:, label:, selected: value == "rails")) { label } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Combobox::Empty::Component.new) { "Nothing found." } %>
+    <% end %>
+  <% end %>
+</div>

@@ -62,9 +62,10 @@ RSpec.describe "reduced motion in the compiled bundle" do
     File.read(file).scan(%r{[\w\[\]=:/.^-]*animate-(?:in|out|accordion-up|accordion-down)})
   end.uniq.sort
 
-  # This repo only ever pairs these utilities with a bare class or a
-  # `data-[state=X]:` variant (confirmed by the scan above) — it does not
-  # attempt to handle other variant shapes.
+  # This repo pairs these utilities with a bare class, a `data-[state=X]:`
+  # variant, or — in the combobox alone — Base UI's bare `data-open:` /
+  # `data-closed:`, which is what that one family emits instead of
+  # `data-state`. Anything else raises rather than being guessed at.
   escape = ->(value) { value.gsub(%r{[\[\]=/:^]}) { |char| "\\#{char}" } }
 
   # Two shapes this cannot reconstruct, and does not try to. A variant chain
@@ -81,11 +82,18 @@ RSpec.describe "reduced motion in the compiled bundle" do
     next ".#{token}" unless token.include?(":")
 
     variant, utility = token.split(":", 2)
-    state = variant[/\Adata-\[state=(\w+)\]\z/, 1]
-    raise "unhandled variant shape for reduced_motion_spec: #{variant.inspect}" unless state
-
     escaped_variant = variant.gsub(/[\[\]=]/) { |char| "\\#{char}" }
-    ".#{escaped_variant}\\:#{utility}[data-state=#{state}]"
+
+    # `data-[state=open]:` → `[data-state=open]`, and Base UI's bare
+    # `data-open:` → `[data-open]`, which is Tailwind's own compilation of a
+    # data attribute with no value.
+    state = variant[/\Adata-\[state=(\w+)\]\z/, 1]
+    next ".#{escaped_variant}\\:#{utility}[data-state=#{state}]" if state
+
+    bare = variant[/\Adata-(\w+)\z/, 1]
+    raise "unhandled variant shape for reduced_motion_spec: #{variant.inspect}" unless bare
+
+    ".#{escaped_variant}\\:#{utility}[data-#{bare}]"
   end
 
   # Without this, a broken scan pattern makes every example below vacuously

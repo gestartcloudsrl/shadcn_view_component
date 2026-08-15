@@ -285,6 +285,29 @@ built on a transition (`data-[state=closed]:opacity-0`) rather than on
 at all for an unrelated reason, and nothing noticed — see
 [04-bugs-fixed.md](04-bugs-fixed.md).
 
+## Two clocks, and what each is for
+
+Both are environment variables with a default that suits an idle machine,
+because both failures they answer were the machine rather than the code.
+
+**`EXAMPLE_TIMEOUT`, 60 seconds an example.** An example that hangs used to take
+the whole run with it: a browser that stops answering leaves Capybara waiting,
+and a suite that normally takes twenty minutes crawls past a hundred — measured
+twice, at 112 and at 318 minutes. The bound fails the example by name instead,
+which is the difference between a red line and an afternoon. Sixty is generous
+on purpose: the slowest example here is about five seconds, and the ones that
+drive real clocks are seconds by design. `EXAMPLE_TIMEOUT=0` turns it off for
+debugging with a breakpoint.
+
+**`CAPYBARA_WAIT`, 5 seconds.** How long Capybara waits for the page to catch
+up. Raising it is the *opposite* lever: it makes a loaded machine stop failing
+on timing it would pass with a free core. Two flaky reds in this repo were
+exactly that, both in `exit_animation_spec`, both green when the file was run on
+its own.
+
+Neither hides a slow test — the timeout names the example, and the wait is per
+assertion rather than per example.
+
 ## axe
 
 Runs over **every preview**, at rest and with each layer open, plus contrast in

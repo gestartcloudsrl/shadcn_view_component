@@ -35,6 +35,7 @@ RSpec.describe "shadcn/ui parity" do
     "chart" => "chart",
     "checkbox" => "checkbox",
     "collapsible" => "collapsible",
+    "combobox" => "combobox",
     "command" => "command",
     "context-menu" => "context_menu",
     "dialog" => "dialog",
@@ -114,9 +115,7 @@ RSpec.describe "shadcn/ui parity" do
   # form emits `form-*`, so a class comparison would only restate that.
   ported_as_a_form_builder = %w[form].freeze
 
-  not_yet_ported = %w[
-    combobox
-  ].freeze
+  not_yet_ported = [].freeze
 
   # Families that reuse parts of another rather than restating their classes.
   # Families layered on another's parts. The context menu is the largest case:
@@ -147,6 +146,18 @@ RSpec.describe "shadcn/ui parity" do
     # an inline style, the same shape as `--gap` above. The port sets them from
     # the controller and reads them through `bg-(--color-bg)`, which it does
     # render.
+    # Two names `combobox.tsx` writes that its own rendered output does not
+    # carry, both checked on the page rather than reasoned about.
+    #
+    # `combobox-trigger` is set by `ComboboxTrigger` and then *overridden*: the
+    # wrapper renders it with `asChild` and sets `data-slot="input-group-button"`
+    # last, so that is the name the button ends up with — upstream's own DOM
+    # says so, and this port renders the same one.
+    #
+    # `combobox-collection` is Base UI's render-prop helper: it takes an array
+    # and renders an item per entry. In ERB that is a loop, and a loop has no
+    # element to put a slot on.
+    "combobox" => %w[combobox-trigger combobox-collection],
     "chart" => %w[
       --color-bg --color-border
       [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground
