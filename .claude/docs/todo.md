@@ -408,25 +408,22 @@ noting that it would not have delivered the component that raised the question:
       Measured in Chrome only. Firefox and Safari compute names from their own
       implementations of HTML-AAM, and nothing here has run in either.
 
-- [ ] **`typeahead.js` searches over items where Radix's *menu* searches over
-      strings.** The algorithm matches `getNextMatch`
-      (vendor/radix/ui/menu.tsx:1336-1347); the input does not — though only in
-      the menu. `findNextItem`, the select's copy this was ported from
-      (select.tsx:1906-1921), is handed items and compares them by identity,
-      which is what the gem does. The menu passes `values: string[]` and maps the
-      winner back with `items.find(i => i.textValue === nextMatch)`
-      (menu.tsx:451-454), so two items sharing a label are *one* candidate to
-      it. With `["Copy", "Copy", "Delete"]` and the second Copy current,
-      `values.indexOf(currentMatch)` resolves to index 0, the
-      single-character filter drops both Copies, and Radix does not move; the
-      gem compares element identity and cycles to the first Copy. Arguably the
-      better behaviour — deciding that is the work here, not writing the code.
-      Either match Radix (search over `textContent` strings, then map back) or
-      keep the divergence and say so where it is asserted: the comment in
-      `typeahead.js` and the one above "cycles to the next match when a
-      character repeats" in `spec/system/dropdown_menu_spec.rb` now
-      claim only that the two Radix *bodies* agree, which is all that was ever
-      verified.
+- [x] **`typeahead.js` searches over items where Radix's *menu* searches over
+      strings.** Decided: the divergence is **kept**, and it is now pinned by an
+      example rather than left to be rediscovered.
+
+      What Radix's menu does with `["Copy", "Copy", "Delete"]` and the second
+      Copy highlighted: `values.indexOf("Copy")` finds the *first*, then the
+      single-character filter drops every value equal to the current match, so
+      both leave the candidates and the highlight does not move — the duplicate
+      cannot be reached by typing at all. This port compares elements, so `c`
+      walks from one to the other, which is what a typeahead is for.
+
+      Nothing else diverges: Radix's own *select* compares by identity, and this
+      is a port of that file. The reasoning is at the top of `typeahead.js` and
+      the case is `spec/system/dropdown_menu_spec.rb` — mutating the search back
+      to strings turns it red.
+
 - [ ] **An aliased icon name cannot be registered over.** `icon/component.rb:54`
       resolves `ALIASES` in the constructor, so `#name` is already `"ellipsis"`
       or `"loader-circle"` by the time `#path` reads the registry:

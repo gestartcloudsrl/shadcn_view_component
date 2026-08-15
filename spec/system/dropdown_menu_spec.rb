@@ -68,6 +68,49 @@ RSpec.describe "DropdownMenu", :js do
       expect(highlighted).to eq("Support")
     end
 
+    # Two items with the same label are two destinations here and one in Radix's
+    # *menu*, and that difference is deliberate — see the comment at the top of
+    # `typeahead.js`. Radix hands `getNextMatch` an array of label *strings*
+    # (menu.tsx:451-454), so with the second Copy highlighted `indexOf` finds
+    # the first, the single-character filter drops both, and the highlight does
+    # not move: the duplicate cannot be reached by typing at all. This port
+    # compares elements, so it walks from one to the other.
+    #
+    # The labels are renamed here rather than in a preview: a gallery page with
+    # two identical commands in it would be documentation of something nobody
+    # should write, and what is being pinned is the algorithm, not the menu.
+    it "walks between two items that share a label, where Radix's menu cannot" do
+      # Scoped to the preview's own menu, as `highlighted` is: the gallery
+      # layout carries a ModeToggle and a ThemeSelector, so an unscoped lookup
+      # renames somebody else's items — which is exactly what it did first.
+      renamed = page.evaluate_script(<<~JS)
+        (() => {
+          const menu = [...document.querySelectorAll("[data-slot=dropdown-menu]")].pop()
+          const items = [...menu.querySelectorAll("[data-slot=dropdown-menu-item]")]
+          // Replaced wholesale rather than by first child: the first item
+          // carries a shortcut beside its label, and renaming only the label
+          // left "Copy⌘P" — which starts with the same letter and would have
+          // passed the assertions below while measuring something else.
+          items[0].textContent = "Copy"
+          items[1].textContent = "Copy"
+          return items.slice(0, 2).map((item) => item.textContent.trim())
+        })()
+      JS
+      expect(renamed).to eq([ "Copy", "Copy" ])
+
+      press("c")
+      first = highlighted
+      press("c")
+
+      expect(first).to eq("Copy")
+      expect(highlighted).to eq("Copy")
+      expect(page.evaluate_script(<<~JS)).to eq(1)
+        [...[...document.querySelectorAll("[data-slot=dropdown-menu]")].pop()
+          .querySelectorAll("[data-slot=dropdown-menu-item]")]
+          .findIndex((item) => item.dataset.highlighted !== undefined)
+      JS
+    end
+
     # Radix's menu drops the buffer when focus leaves the content
     # (vendor/radix/ui/menu.tsx:585-590), which for this gem is the moment the
     # layer closes and hands focus back to the trigger.

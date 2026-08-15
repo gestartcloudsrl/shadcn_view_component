@@ -12,7 +12,20 @@
 // is handed an array of label strings and the winner mapped back to an item
 // (vendor/radix/ui/menu.tsx:451-454), so two items sharing a label are one
 // candidate there and two here. `findNextItem`'s own callers pass items and
-// compare by identity, exactly as this does. See `.claude/docs/todo.md`.
+// compare by identity, exactly as this does.
+//
+// **That difference is kept, and it is a decision rather than an oversight.**
+// With `["Copy", "Copy", "Delete"]` and the second Copy highlighted, Radix's
+// menu takes `values.indexOf("Copy")` — which is 0, the *first* one — then the
+// single-character filter drops every value equal to the current match, so both
+// Copies leave the candidates and the highlight does not move: the second
+// duplicate is unreachable by typing. Here the two are separate elements, so
+// pressing `c` walks from one to the other, which is what a typeahead is for
+// and what a person with two identically named commands in a menu expects.
+//
+// Nothing else diverges: Radix's own *select* compares by identity too, and
+// this is a port of that file. `spec/system/dropdown_menu_spec.rb` pins the
+// duplicate-label case so the choice cannot be undone by accident.
 //
 // Deliberately does not know how the caller moves focus — that stays in each
 // controller, which owns its own item list and highlighting. The current

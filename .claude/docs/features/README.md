@@ -64,6 +64,13 @@ anything about them:
   matches, including the typeahead.
 - **dropdown-menu** — *extended*: `loop:` exposes what Radix has as a prop and
   shadcn does not pass.
+
+  *One deliberate divergence in the typeahead*: two items sharing a label are
+  two destinations here and one in Radix's menu, which hands its matcher an
+  array of label strings and cannot reach the duplicate at all. This port
+  compares elements, as Radix's own **select** does — and `typeahead.js` is a
+  port of that file. Pinned by an example; the reasoning is in that file's
+  header.
 - **attachment** — *1:1 in markup, with a caveat a host should know*. Three of
   its classes are shadcn's own CSS rather than Tailwind's and are reproduced in
   `shadcn.css` from the served stylesheet, with no vendored source to diff
