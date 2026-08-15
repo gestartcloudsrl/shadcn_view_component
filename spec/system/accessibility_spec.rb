@@ -64,6 +64,24 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
+  # The audit runs every preview at 1400×900, where the sidebar renders its
+  # desktop tree and the sheet does not exist — so for as long as this spec has
+  # existed it has never seen the one branch that is a modal. It is also the
+  # branch that shipped with no role and no name.
+  context "with the sidebar's mobile sheet open" do
+    before { page.driver.browser.manage.window.resize_to(375, 667) }
+    after { page.driver.browser.manage.window.resize_to(1400, 900) }
+
+    it "has no violations" do
+      visit "/sidebar"
+      wait_for_stimulus
+      find("[data-slot=sidebar-trigger]").click
+      expect(page).to have_css("[data-slot=sidebar-container][role=dialog]")
+
+      audit
+    end
+  end
+
   context "with the dialog open" do
     it "has no violations" do
       visit_preview(:dialog)

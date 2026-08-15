@@ -70,6 +70,16 @@ attribute has to come back off on close (`top_layer.disable`). Left on, the pane
 stays out of flow and the page is drawn straight over the desktop sidebar from
 the first time the sheet is opened.
 
+**And what the one tree costs in ARIA.** A sheet is a modal dialog; a desktop
+sidebar is not. Upstream gets `role="dialog"`, `aria-modal` and a name for free
+by rendering a real Sheet below `md`, and here the same element is both things
+at different widths — so the controller says it while the sheet is open and
+takes it back when it closes. The name and description are upstream's own
+strings, and they sit in the markup `hidden` rather than `sr-only`: hidden keeps
+them out of the accessibility tree, where `sr-only` alone would have a desktop
+screen reader read "Sidebar. Displays the mobile sidebar." into a page with no
+sheet on it.
+
 **What it costs you:** on a phone, before JavaScript runs, there is no sidebar.
 The gem already requires Stimulus for every floating layer, so this adds no new
 dependency, but it is a real difference: upstream's server sends the Sheet
