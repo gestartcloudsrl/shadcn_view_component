@@ -1,11 +1,16 @@
 <%# Upstream's "Orientation". The axis reaches three places — the track becomes
     a column, the items pad from the top, and the controls move above and below
-    and turn — so it is the root's argument and each part reads it. %>
+    and turn — so it is the root's argument and each part reads it.
+
+    `basis-1/2` is upstream's own example and it is the caller's, not the
+    component's: two slides in the window rather than one. Without it a card
+    sized by its own text floats in the middle of a 240px slot, which is what
+    this preview shipped as and what a person reported. %>
 <div class="py-14">
   <%= render(Shadcn::Carousel::Component.new(orientation: :vertical, class: "w-full max-w-xs")) do |c| %>
-    <% c.with_carousel_content(orientation: :vertical, class: "h-[240px]") do |content| %>
+    <% c.with_carousel_content(orientation: :vertical, class: "h-[340px]") do |content| %>
       <% 5.times do |i| %>
-        <% content.with_item(orientation: :vertical) do %>
+        <% content.with_item(orientation: :vertical, class: "basis-1/2") do %>
           <div class="p-1">
             <%= render(Shadcn::Card::Component.new) do |card| %>
               <% card.with_card_content(class: "flex items-center justify-center p-6") do %>

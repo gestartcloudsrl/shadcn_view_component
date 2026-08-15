@@ -337,5 +337,30 @@ RSpec.describe "Carousel", :js do
       find(nxt).click
       expect(resting_position("down")).to be_positive
     end
+
+    # Reported from the gallery: the preview showed one card floating in a slot
+    # twice its height, where upstream's example shows two whole ones. The
+    # component was right — the classes match `vendor/` — and the call site was
+    # not, which is a distinction no other spec here can draw: the sizes come
+    # from the caller, so only the rendered box says whether they add up.
+    it "shows whole slides rather than a clipped one", :aggregate_failures do
+      measured = page.evaluate_script(<<~JS)
+        (() => {
+          const window_ = document.querySelector(#{viewport.to_json}).getBoundingClientRect()
+          // The card rather than the item: an item's box includes the padding
+          // the track's negative margin pulls above the window, so the first
+          // one legitimately starts outside it. What a person sees is the card.
+          const cards = [...document.querySelectorAll("[data-slot=card]")]
+            .map((item) => item.getBoundingClientRect())
+            .filter((box) => box.top < window_.bottom - 1 && box.bottom > window_.top + 1)
+
+          return { visible: cards.length,
+                   clipped: cards.some((box) => box.top < window_.top - 1 || box.bottom > window_.bottom + 1) }
+        })()
+      JS
+
+      expect(measured["visible"]).to eq(2)
+      expect(measured["clipped"]).to be(false)
+    end
   end
 end
