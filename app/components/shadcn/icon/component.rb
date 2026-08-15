@@ -47,12 +47,6 @@ module Shadcn
         "x" => %(<path d="M18 6 6 18"/><path d="m6 6 12 12"/>)
       }.freeze
 
-      # lucide-react aliases kept so call sites read like the TSX imports.
-      ALIASES = {
-        "loader-2" => "loader-circle",
-        "more-horizontal" => "ellipsis"
-      }.freeze
-
       SVG_ATTRIBUTES = {
         "xmlns" => "http://www.w3.org/2000/svg",
         "width" => "24",
@@ -68,7 +62,11 @@ module Shadcn
       default_tag :svg
 
       def initialize(name, **attributes)
-        @name = ALIASES.fetch(name.to_s, name.to_s)
+        # Resolved through the registry, which owns the alias table: a host
+        # registering `"more-horizontal"` and this rendering `"ellipsis"` have
+        # to meet somewhere, and the file that stores the drawings is the only
+        # place both can.
+        @name = ShadcnViewComponent::IconRegistry.canonical(name)
 
         # Loud where it can be fixed, silent where it cannot. An icon is
         # decorative, and a gem should not be able to take down a page in an

@@ -15,6 +15,59 @@ RSpec.describe Shadcn::Icon::Component, type: :component do
     end
   end
 
+  # An alias is a second spelling of one icon, so a host registering either
+  # must reach both — and for as long as the aliases existed, neither reached
+  # anything: the component resolved the alias in its constructor, so
+  # `register("more-horizontal", …)` was stored under a key nothing looked up
+  # and the bundled drawing kept rendering. The gem's own pagination and
+  # breadcrumb render `"more-horizontal"`, and the spinner renders `"loader-2"`.
+  describe ".register, under an alias" do
+    ShadcnViewComponent::IconRegistry::ALIASES.each do |from, to|
+      context "when a host registers #{from}" do
+        before { Shadcn::Icon.register(from, %(<path d="M1 1h2"/>)) }
+
+        after { Shadcn::Icon.registered.delete(to) }
+
+        it "renders under the name it registered" do
+          render_inline(described_class.new(from))
+
+          expect(page).to have_css(%(path[d="M1 1h2"]), visible: :all)
+        end
+
+        it "renders under #{to}, which is the same icon" do
+          render_inline(described_class.new(to))
+
+          expect(page).to have_css(%(path[d="M1 1h2"]), visible: :all)
+        end
+      end
+
+      context "when a host registers #{to}" do
+        before { Shadcn::Icon.register(to, %(<path d="M3 3h2"/>)) }
+
+        after { Shadcn::Icon.registered.delete(to) }
+
+        it "renders under #{from} too" do
+          render_inline(described_class.new(from))
+
+          expect(page).to have_css(%(path[d="M3 3h2"]), visible: :all)
+        end
+      end
+    end
+
+    # One entry per icon, not one per spelling: two keys would let a host
+    # register both and leave which one wins to the order they are read in.
+    it "keeps one entry however it was spelled", :aggregate_failures do
+      Shadcn::Icon.register("more-horizontal", %(<path d="M1 1h2"/>))
+      Shadcn::Icon.register("ellipsis", %(<path d="M3 3h2"/>))
+
+      expect(Shadcn::Icon.registered.keys).to include("ellipsis")
+      expect(Shadcn::Icon.registered.keys).not_to include("more-horizontal")
+      expect(Shadcn::Icon.registered["ellipsis"]).to eq(%(<path d="M3 3h2"/>))
+    ensure
+      Shadcn::Icon.registered.delete("ellipsis")
+    end
+  end
+
   describe ".register, over a bundled name" do
     before { Shadcn::Icon.register("check", %(<path d="M4 4h16"/>)) }
 

@@ -424,37 +424,22 @@ noting that it would not have delivered the component that raised the question:
       the case is `spec/system/dropdown_menu_spec.rb` — mutating the search back
       to strings turns it red.
 
-- [ ] **An aliased icon name cannot be registered over.** `icon/component.rb:54`
-      resolves `ALIASES` in the constructor, so `#name` is already `"ellipsis"`
-      or `"loader-circle"` by the time `#path` reads the registry:
-      `register("more-horizontal", …)` and `register("loader-2", …)` are stored
-      under keys nothing ever looks up, and the bundled drawing renders. That
-      is the same shape as the override bug fixed in the same wave — a host
-      instructed the gem and the gem carried on — narrowed to the two aliases.
-      It is not hypothetical from the inside either: the gem itself renders
-      `Icon::Component.new("more-horizontal")` in
-      `pagination/ellipsis/component.rb:21` and
-      `breadcrumb/ellipsis/component.rb:21`, and `Spinner::Component` passes
-      `"loader-2"` to `super`. The fix is to try the unaliased name in the
-      registry before aliasing, or to alias on write in `IconRegistry.register`
-      — the second also makes `registered` reflect what a host asked for, and
-      wants a spec for each alias.
-- [x] **The typeahead buffer survived a close.** `Typeahead#reset` now exists and
-      each controller calls it at *its own* moment, because Radix does not use
-      one: the select resets **on open** — its own comment reads "reset typeahead
-      when we open" (vendor/radix/ui/select.tsx:331-336) — while the menu clears
-      **on blur**, when focus leaves the content
-      (vendor/radix/ui/menu.tsx:585-590). This entry used to claim
-      `resetTypeahead` existed "for the same purpose" as the menu's blur; it did
-      not, and following that would have put the select's call on the wrong
-      event. `handleOpen` is its only caller.
-      The gem's menu resets in `onClose`, which is where the focus it owns
-      actually leaves — nothing listens for `focusout`, so a menu losing focus
-      *without* closing would keep its buffer where Radix's would not. No path
-      in the gem does that: Tab, Escape and an outside click all close first.
-      Both specs disable the 1s expiry that `typeahead.js:32` schedules, so the
-      reset is the only thing that can explain an empty buffer rather than the
-      example racing Capybara.
+- [x] **An aliased icon name cannot be registered over.** Fixed on the *write*
+      side: `IconRegistry.register` stores under the canonical name, so
+      registering `"more-horizontal"` or `"ellipsis"` reaches every call site
+      using either — one icon, one entry. The alias table moved to
+      `IconRegistry` with it, which is the file that has to know: the component
+      resolved the alias in its constructor and the registry never saw the
+      spelling a host used.
+
+      An example per alias, both directions, plus one that pins the single
+      entry. Mutating either half — `register` not canonicalising, the component
+      not resolving — turns five and four of them red.
+
+      A `fetch` that canonicalised on read was written and then deleted: no
+      mutation could distinguish it, because the component resolves the name
+      before asking.
+
 - [ ] **The chart draws one shape, and has no keyboard route to its numbers.**
       The pie is in; bars, lines and areas each need what the pie did not —
       scales, ticks, a grid and axis labels that collide — and radar and radial

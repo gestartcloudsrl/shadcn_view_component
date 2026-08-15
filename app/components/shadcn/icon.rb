@@ -20,6 +20,14 @@ module Shadcn
       ShadcnViewComponent::IconRegistry.registered
     end
 
+    # Every lucide alias this gem knows — `more-horizontal` for `ellipsis`,
+    # `loader-2` for `loader-circle`. Registering under either spelling reaches
+    # both, because the registry stores one entry per icon rather than one per
+    # name.
+    def self.aliases
+      ShadcnViewComponent::IconRegistry::ALIASES
+    end
+
     # The ported components import eleven lucide icons; lucide has about 1,500.
     # A host reaches this pair from a view, a component or anywhere else
     # autoloading has already run — not from an initializer, which is what
