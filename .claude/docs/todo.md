@@ -383,21 +383,18 @@ noting that it would not have delivered the component that raised the question:
       `accessibility_spec` now has a mobile case — it resizes to 375×667, opens
       the sheet and audits it — which is the first time that branch has been
       audited at all.
-- [ ] **`--animate-caret-blink` was left out of the reduced-motion pass, and it
-      now ships.** It is the only `infinite` animation in `shadcn.css` and so the
-      strongest candidate of the lot, and it got neither of the two things the
-      others did: it is still in the `@theme inline` block (shadcn.css:137)
-      rather than the plain `@theme` a host can retune at runtime, and no
-      `@media (prefers-reduced-motion: reduce)` collapses it.
-      `reduced_motion_spec` cannot see the gap: its scan is
-      `/animate-(?:in|out|accordion-up|accordion-down)/` over `app/components`,
-      and this name is not in it.
+- [x] **`--animate-caret-blink` was left out of the reduced-motion pass.** Fixed,
+      and the fix is not the one the other animations got: an `infinite`
+      animation does not stop when its duration collapses to `0.01ms` — it runs
+      the cycle a hundred thousand times a second, which is a flicker rather
+      than stillness. It is `animation: none` under
+      `prefers-reduced-motion: reduce`, which leaves the caret visible, which is
+      what a caret is for. The token also moved out of `@theme inline` into the
+      plain `@theme` beside the accordion's, so a host can retune it without
+      rebuilding, and `reduced_motion_spec` now scans for it — it had never
+      looked, because its pattern named three animations and this was the
+      fourth.
 
-      **This entry used to end "nothing consumes it today: InputOTP, the
-      component it exists for, is unported." InputOTP has since shipped** —
-      `input_otp/slot/component.rb:14` renders `animate-caret-blink` on the fake
-      caret — so a shipped component now blinks forever for a reader who asked
-      for no motion. That moves this from tidiness to a real defect.
 - [ ] **Two previews claim `<label for>` cannot name a `<button>`.**
       `switch/previews/default.html.erb` and `field/previews/default.html.erb`
       both say so, and it is exactly the misconception

@@ -46,8 +46,17 @@ RSpec.describe "reduced motion in the compiled bundle" do
     "animate-in" => false,
     "animate-out" => false,
     "animate-accordion-up" => true,
-    "animate-accordion-down" => true
+    "animate-accordion-down" => true,
+    "animate-caret-blink" => true
   }.freeze
+
+  # What "collapsed" means, which is not the same sentence for every animation.
+  # An `infinite` one does not stop when its duration goes to `0.01ms` — it
+  # runs the cycle a hundred thousand times a second, which is a flicker rather
+  # than the stillness the setting asked for. The one-time-code field's caret is
+  # the only one of those here, and `animation: none` leaves it at its own
+  # opacity: visible, which is what a caret is for.
+  collapsed = Hash.new("animation-duration:.01ms").merge("animate-caret-blink" => "animation:none")
 
   # The exact classes the components apply, so a new variant shape gets picked
   # up automatically rather than drifting from a hand-maintained list.
@@ -59,7 +68,7 @@ RSpec.describe "reduced motion in the compiled bundle" do
   # every example below green without asserting anything — the failure
   # `.claude/docs/decisions/03-testing.md` records happening twice already.
   classes = Dir[root.join("app/components/**/*.rb")].flat_map do |file|
-    File.read(file).scan(%r{[\w\[\]=:/.^-]*animate-(?:in|out|accordion-up|accordion-down)})
+    File.read(file).scan(%r{[\w\[\]=:/.^-]*animate-(?:in|out|accordion-up|accordion-down|caret-blink)})
   end.uniq.sort
 
   # This repo pairs these utilities with a bare class, a `data-[state=X]:`
@@ -100,8 +109,8 @@ RSpec.describe "reduced motion in the compiled bundle" do
   # green — `parity_spec.rb` and `stimulus_contract_spec.rb` both went green
   # this way once, see `.claude/docs/decisions/03-testing.md`.
   it "found classes to check" do
-    expect(classes).not_to be_empty, "no animate-in/animate-out/animate-accordion-* " \
-                                      "classes found under app/components"
+    expect(classes).not_to be_empty, "no animate-in/animate-out/animate-accordion-*/" \
+                                      "animate-caret-blink classes found under app/components"
   end
 
   classes.each do |token|
@@ -121,7 +130,8 @@ RSpec.describe "reduced motion in the compiled bundle" do
       # `include` against the whole bundle, so a failure prints this one rule
       # instead of the entire compiled file.
       actual = css[/@media \(prefers-reduced-motion:reduce\)\{#{Regexp.escape(selector)}\{[^}]*\}/]
-      expected = "@media (prefers-reduced-motion:reduce){#{selector}{animation-duration:.01ms" \
+      utility = token.split(":").last
+      expected = "@media (prefers-reduced-motion:reduce){#{selector}{#{collapsed[utility]}" \
                  "#{important ? '!important' : ''}}"
 
       expect(actual).to eq(expected)
