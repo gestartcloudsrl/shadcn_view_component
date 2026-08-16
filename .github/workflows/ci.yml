@@ -54,9 +54,11 @@ jobs:
           path: test/dummy/tmp/capybara
           if-no-files-found: ignore
 
-      # The generated theme files are committed; regenerating must be a no-op,
-      # or someone edited them by hand instead of the source JSON.
+      # The generated theme and icon files are committed; regenerating must be a
+      # no-op, or someone edited them by hand instead of the source JSON and the
+      # vendored SVGs.
       - name: Generated files are up to date
         run: |
           bundle exec rake themes:build
+          bundle exec rake icons:build
           git diff --exit-code

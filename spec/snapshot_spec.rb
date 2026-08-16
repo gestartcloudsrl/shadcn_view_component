@@ -67,6 +67,20 @@ RSpec.describe "rendered output snapshots" do
     expect(all - families).to eq(%w[icon])
   end
 
+  # The other direction, which nothing checked: a preview is renamed or split
+  # and its golden file stays behind, compared against nothing, quietly
+  # carrying markup no page produces any more. `sidebar-variants.html` had
+  # outlived its preview and was still holding an icon that had been redrawn.
+  it "has a preview behind every snapshot" do
+    expected = templates.map do |template|
+      Pathname(template).relative_path_from(previews).to_s.sub("/previews/", "-").sub(".html.erb", "")
+    end
+
+    orphans = Dir[fixtures.join("*.html")].map { |file| File.basename(file, ".html") } - expected
+
+    expect(orphans).to be_empty
+  end
+
   templates.each do |template|
     name = Pathname(template).relative_path_from(previews).to_s.sub("/previews/", "-").sub(".html.erb", "")
     fixture = fixtures.join("#{name}.html")

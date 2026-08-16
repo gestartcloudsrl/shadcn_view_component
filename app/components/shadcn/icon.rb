@@ -28,10 +28,13 @@ module Shadcn
       ShadcnViewComponent::IconRegistry::ALIASES
     end
 
-    # The ported components import eleven lucide icons; lucide has about 1,500.
+    # The ported components import a couple of dozen lucide icons; lucide has
+    # about 1,500. The exact set is `ShadcnViewComponent::Icons::PATHS`, and a
+    # spec keeps it equal to what the components render — no number is written
+    # in prose here, because that is what went stale last time.
     # A host reaches this pair from a view, a component or anywhere else
     # autoloading has already run — not from an initializer, which is what
-    # `ShadcnViewComponent::IconRegistry` is for. Registering one of the eleven
+    # `ShadcnViewComponent::IconRegistry` is for. Registering a bundled name
     # replaces it.
     def self.register(name, path)
       ShadcnViewComponent::IconRegistry.register(name, path)

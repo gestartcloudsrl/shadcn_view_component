@@ -5,6 +5,7 @@ require "tailwind_merge"
 
 require "shadcn_view_component/version"
 require "shadcn_view_component/icon_registry"
+require "shadcn_view_component/icons"
 require "shadcn_view_component/themes"
 require "shadcn_view_component/engine" if defined?(Rails::Engine)
 
