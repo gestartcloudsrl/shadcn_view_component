@@ -163,6 +163,12 @@ These bite while editing, so they are here rather than in the docs.
   system specs a preview's dropdown or select is not the only one on the page —
   scope lookups (`all("[data-slot=select]").last`).
 
+- **The system specs run with `prefers-color-scheme: light` emulated**, because
+  otherwise headless Chrome takes it from the desktop and the answer changes
+  with the machine — which is how the accessibility suite audited one palette
+  for a year and CI found eleven contrast violations in the other on its first
+  run. The dark palette is audited by adding `.dark`, in the same page load.
+
 - **A comment written one scope wider than the line you checked.** Twelve
   findings across one branch were all this shape: "Radix" written after reading
   `menu.tsx`, "byte-identical" after comparing two function bodies, "at boot"
@@ -184,7 +190,7 @@ These bite while editing, so they are here rather than in the docs.
 | `install_generator_spec.rb` | does what the installer writes into a host's Tailwind entrypoint actually compile |
 | `reduced_motion_spec.rb` | does the *compiled* bundle still collapse `animate-in`/`animate-out`/`animate-accordion-*` under `prefers-reduced-motion` — those four names only, and no transition |
 | `system/` | does it behave, in headless Chrome |
-| `system/accessibility_spec.rb` | axe, every family, at rest and with each layer open |
+| `system/accessibility_spec.rb` | axe, every preview, in both palettes, at rest and with each layer open |
 
 Each of these has a real blind spot — parity is family-granular and one-way, axe
 is not a screen reader. [testing](.claude/docs/decisions/03-testing.md) says

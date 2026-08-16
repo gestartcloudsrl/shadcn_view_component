@@ -488,7 +488,7 @@ earns.
 | `snapshot_spec.rb` | anything that changes rendered HTML: wrong part, wrong variant, attribute drift, extra classes |
 | `stimulus_contract_spec.rb` | a controller action, target or value a component names but the JavaScript does not define |
 | `system/` | the behaviour, in a real browser: open/close, keyboard navigation, focus trapping, positioning, persistence, Turbo Drive and morph refreshes |
-| `system/accessibility_spec.rb` | axe over every family, at rest and with each layer open, plus contrast in dark mode |
+| `system/accessibility_spec.rb` | axe over every preview, **in both palettes**, at rest and with each layer open |
 | `form_builder_spec.rb`, `theming_spec.rb` | the Rails form wiring, the generated palettes and the switchers |
 
 The system specs drive headless Chrome against the gallery, so they exercise the
@@ -499,10 +499,38 @@ Two things remain unverified:
 
 - **Parity runs one way.** When upstream *removes* a class, the port keeps it
   and nothing fails. Read the TSX diff when you re-sync.
-- **Accessibility is audited by axe, not by a person.** Every family is checked
-  against WCAG 2.1 AA, at rest and with its layer open, plus contrast in dark
-  mode. axe catches names, roles, required parents and contrast; it does not
-  replace a screen reader, and nothing here has been through one.
+- **Accessibility is audited by axe, not by a person.** Every preview is checked
+  against WCAG 2.1 AA, at rest and with its layer open, in the light palette and
+  the dark one. axe catches names, roles, required parents and contrast; it does
+  not replace a screen reader, and nothing here has been through one.
+
+  The colour scheme the audit runs in is pinned, and that is not housekeeping:
+  headless Chrome follows the desktop it runs on, so the suite spent this
+  project's life auditing whichever palette the author was sitting in front of.
+  The first run on a Linux CI runner audited the other one and found eleven real
+  contrast violations.
+
+### One thing to know if you have to meet AA
+
+**shadcn's light palette puts `text-muted-foreground` on `bg-muted` at 4.34:1**,
+where WCAG AA wants 4.5:1 — its own tokens, `muted: oklch(0.97 0 0)` against
+`muted-foreground: oklch(0.556 0 0)`, and its own class string on the avatar
+fallback (`avatar.tsx:49`). The same pair measures 5.85:1 in the dark palette.
+`text-destructive` on `bg-destructive/10`, which the attachment's error state
+and the destructive bubble use, comes to 4.00:1.
+
+This port renders them unchanged, because upstream wins on markup and altering
+them would put classes in your bundle that upstream does not emit. If you need
+AA, override the token in your own CSS — one line, and it reaches every
+component at once:
+
+```css
+:root { --muted-foreground: oklch(0.52 0 0); } /* measured: 5.04:1 on --muted */
+```
+
+That is the smallest step off upstream's `0.556` that clears AA — measured in
+Chrome by painting both colours and computing the WCAG ratio, the same
+arithmetic axe does.
 
 ## Known differences from the React DOM
 

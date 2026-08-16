@@ -131,5 +131,22 @@ RSpec.configure do |config|
 
   config.before(:each, type: :system) do
     driven_by :shadcn_headless_chrome
+
+    # Pin the colour scheme, because otherwise the *machine* picks it. Headless
+    # Chrome follows the desktop it runs on: on a developer's Mac in dark mode
+    # it reports `dark`, on a Linux CI runner with no preference it reports
+    # `light`. So the accessibility suite spent this project's whole life
+    # auditing whichever palette the author happened to be sitting in front of —
+    # and the first run on CI found eleven contrast violations in the other one,
+    # every one of them real.
+    #
+    # Light, because it is what a host gets with no cookie and no preference,
+    # and because the spec that audits the dark class does so by adding it: it
+    # was adding `.dark` to a page that was already dark, checking one mode
+    # twice.
+    page.driver.browser.execute_cdp(
+      "Emulation.setEmulatedMedia",
+      features: [ { name: "prefers-color-scheme", value: "light" } ]
+    )
   end
 end
