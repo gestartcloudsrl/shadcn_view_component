@@ -10,7 +10,12 @@
 # is not checked in — the CI matrix would otherwise all run the same one.
 /Gemfile.lock
 
-/test/dummy/log/*.log
+# Everything but the directory itself. `*.log` was not enough: Rails rotates
+# to `test.log.0`, which that glob does not match, and one of those reached the
+# history at 100 MiB *plus four bytes* — GitHub's limit is 100 MiB, so the very
+# first push was rejected and the history had to be rewritten.
+/test/dummy/log/*
+!/test/dummy/log/.keep
 /test/dummy/tmp/
 /test/dummy/.tailwindcss-*
 
