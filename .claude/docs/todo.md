@@ -9,6 +9,15 @@ scroller's load behaviour is asserted, because it is the realistic case.
 
 ## Before publishing
 
+- [ ] **Nothing exercises the install path end to end.**
+      `spec/install_generator_spec.rb` now compiles the CSS block the generator
+      writes, which is what caught `@import "shadcn.css"` resolving nowhere.
+      What is still unexercised is the rest of a first install: the Stimulus
+      line, the importmap pin and the layout tags are asserted by no spec, and
+      the only application this repo can see is the dummy — whose entrypoint
+      reaches the engine with `../../../../..`, a relationship no host has.
+      A generated throwaway app in CI would close it.
+
 - [ ] **Create the GitHub repository and push.** The gemspec already points at
       `github.com/sirion1987/shadcn_view_component`; the URLs are dead until it
       exists. `git remote add origin … && git push -u origin main`.

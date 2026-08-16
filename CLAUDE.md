@@ -181,6 +181,7 @@ These bite while editing, so they are here rather than in the docs.
 | `snapshot_spec.rb` | did the rendered HTML change at all |
 | `stimulus_contract_spec.rb` | does every `shadcn--x#action`, target and value exist in the JS |
 | `icons_spec.rb` | is the bundled icon set exactly what the components draw, in both directions |
+| `install_generator_spec.rb` | does what the installer writes into a host's Tailwind entrypoint actually compile |
 | `reduced_motion_spec.rb` | does the *compiled* bundle still collapse `animate-in`/`animate-out`/`animate-accordion-*` under `prefers-reduced-motion` — those four names only, and no transition |
 | `system/` | does it behave, in headless Chrome |
 | `system/accessibility_spec.rb` | axe, every family, at rest and with each layer open |
