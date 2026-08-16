@@ -23,24 +23,36 @@ bin/rails generate shadcn_view_component:install
 ```
 
 The generator adds the imports to your Tailwind entrypoint and the Stimulus
-registration to `application.js`. The `@source` line is the reason it exists:
-it has to point at the gem's components inside whatever directory bundler chose,
-which differs between a system gem, `bundle config set path`, and a `path:` or
-`git:` source — and a wrong path fails silently, as a completely unstyled app.
+registration to `application.js`. Those three CSS lines are the reason it
+exists: each one names a path into the gem, and that path differs between a
+system gem, `bundle config set path`, and a `path:` or `git:` source.
 
-Doing it by hand:
+**They are filesystem paths, not asset-pipeline names.** `tailwindcss-rails`
+runs the Tailwind CLI with `-i` and `-o` and no load path, so the CLI resolves
+a bare `@import "shadcn.css"` the way Node would — beside the file, then in
+`node_modules` — and a Rails app has neither. It stops the build with
+`Can't resolve 'shadcn.css'`.
+
+Doing it by hand, with `PATH` from `bundle show shadcn_view_component`:
 
 ```css
 /* app/assets/tailwind/application.css */
 @import "tailwindcss";
-@import "shadcn.css";
-@import "shadcn-themes.css"; /* optional: the swappable colour palettes */
+@import "PATH/app/assets/stylesheets/shadcn.css";
+@import "PATH/app/assets/stylesheets/shadcn-themes.css"; /* optional: the swappable palettes */
 
-@source "<the gem's app/components — `bundle show shadcn_view_component`>";
+@source "PATH/app/components";
 ```
 
 `shadcn-themes.css` has to come after `shadcn.css`: `.theme-*` and `:root` have
 the same specificity, so source order is what decides.
+
+**Prefer a relative path where you can.** An absolute one is correct on the
+machine that wrote it and wrong on every other, and the CSS is built on all of
+them. With `bundle config set path vendor/bundle` — what CI and most containers
+do — the gem lives inside the application and the three lines can be written
+relative to the entrypoint, which then holds everywhere. That is what the
+generator writes when it can.
 
 ```js
 // app/javascript/application.js
