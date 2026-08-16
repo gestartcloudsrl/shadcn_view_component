@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require "tmpdir"
 
 RSpec.describe Shadcn::Icon::Component, type: :component do
   describe ".register" do
@@ -12,6 +13,45 @@ RSpec.describe Shadcn::Icon::Component, type: :component do
       render_inline(described_class.new("star"))
 
       expect(page).to have_css("svg.lucide.lucide-star path")
+    end
+  end
+
+  # A host adds icons the way it gets them: as files. The two halves are read
+  # apart because they fail apart — an extractor that keeps too much, and a
+  # loader that names things wrong.
+  describe ".load_directory" do
+    # A real lucide file, laid out the way lucide lays them out: a licence
+    # comment, the attributes one to a line, and the drawing indented inside.
+    let(:file) { ShadcnViewComponent::Engine.root.join("vendor/lucide/icons/check.svg") }
+
+    after { Shadcn::Icon.registered.delete("check") }
+
+    it "names each icon after its file, not its path" do
+      Dir.mktmpdir do |dir|
+        FileUtils.cp(file, File.join(dir, "check.svg"))
+        ShadcnViewComponent::IconRegistry.load_directory(dir)
+
+        expect(Shadcn::Icon.registered.keys).to include("check")
+      end
+    end
+
+    # Only what the `<svg>` contains: the outer element is the component's, and
+    # a file's own would arrive as a second opinion about the width, the stroke
+    # and the classes it already owns.
+    it "keeps the drawing and drops the element around it" do
+      expect(ShadcnViewComponent::IconRegistry.drawing(File.read(file)))
+        .to eq(%(<path d="M20 6 9 17l-5-5"/>))
+    end
+
+    it "takes out the whitespace the file was laid out with" do
+      drawing = ShadcnViewComponent::IconRegistry.drawing(<<~SVG)
+        <svg viewBox="0 0 24 24">
+          <path d="M1 1h2" />
+          <circle cx="1" cy="1" r="2" />
+        </svg>
+      SVG
+
+      expect(drawing).to eq(%(<path d="M1 1h2"/><circle cx="1" cy="1" r="2"/>))
     end
   end
 
@@ -87,7 +127,7 @@ RSpec.describe Shadcn::Icon::Component, type: :component do
     it "includes the magnifier the searchable select needs" do
       render_inline(described_class.new("search"))
 
-      expect(page).to have_css('svg.lucide-search path[d="m21 21-4.3-4.3"]')
+      expect(page).to have_css('svg.lucide-search path[d="m21 21-4.34-4.34"]')
     end
   end
 

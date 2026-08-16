@@ -105,6 +105,9 @@ app/javascript/shadcn/           # 15 controllers + popper, dismiss, focus,
 lib/shadcn_view_component/       # engine, form_builder, generated themes registry
 lib/tasks/themes.rake            # the theme generator
 vendor/shadcn/                   # upstream TSX + themes.json, the parity reference
+vendor/lucide/                   # the SVG files lucide publishes, for the icons
+                                 # the components render — `rake icons:build`
+                                 # turns them into lib/…/icons.rb
 vendor/radix/                    # the Radix primitives shadcn wraps — what the
                                  # controllers are answerable to on behaviour
 vendor/shadcn-react/             # @shadcn/react, the primitive shadcn publishes
@@ -129,9 +132,11 @@ These bite while editing, so they are here rather than in the docs.
 - **Never split a class string across a `\` line continuation.** Tailwind scans
   source text, so half a token generates no CSS. `parity_spec` catches it.
 - **Generated files are not hand-edited**: `lib/shadcn_view_component/themes.rb`,
-  `app/assets/stylesheets/shadcn-themes.css`, and the `shadcn-tokens` block
-  inside `shadcn.css`. Edit `vendor/shadcn/themes.json`, run `rake themes:build`.
-  CI fails if regenerating produces a diff.
+  `app/assets/stylesheets/shadcn-themes.css`, the `shadcn-tokens` block inside
+  `shadcn.css`, and `lib/shadcn_view_component/icons.rb`. Edit
+  `vendor/shadcn/themes.json` or drop an SVG in `vendor/lucide/icons`, then run
+  `rake themes:build` / `rake icons:build`. CI fails if regenerating produces a
+  diff.
 - **Attribute precedence is `data-slot` < component defaults < caller.** What a
   subclass passes to `super` in `#element_attributes` is a *default*, despite
   arriving as a keyword splat. `class` and `data-action` concatenate rather than
@@ -175,6 +180,7 @@ These bite while editing, so they are here rather than in the docs.
 | `parity_spec.rb` | did a class upstream emits get dropped or mistyped |
 | `snapshot_spec.rb` | did the rendered HTML change at all |
 | `stimulus_contract_spec.rb` | does every `shadcn--x#action`, target and value exist in the JS |
+| `icons_spec.rb` | is the bundled icon set exactly what the components draw, in both directions |
 | `reduced_motion_spec.rb` | does the *compiled* bundle still collapse `animate-in`/`animate-out`/`animate-accordion-*` under `prefers-reduced-motion` — those four names only, and no transition |
 | `system/` | does it behave, in headless Chrome |
 | `system/accessibility_spec.rb` | axe, every family, at rest and with each layer open |

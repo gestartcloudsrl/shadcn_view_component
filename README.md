@@ -227,11 +227,28 @@ render Shadcn::Select::Trigger::Component.new
 #            aria-expanded="false" aria-autocomplete="none" …>
 ```
 
-Eleven lucide icons are bundled — the ones the ported components themselves
-use, out of lucide's ~1,500. Register another through
-`ShadcnViewComponent::IconRegistry` — the same place `cache_size` above
-lives — so it works from `config/initializers/`, where nothing autoloadable
-resolves yet, `Shadcn::` included:
+21 lucide icons are bundled — exactly the ones the ported components render,
+out of lucide's ~1,500, and a spec fails if that stops being exactly true in
+either direction. Their drawings are not typed into Ruby: they are the files lucide publishes,
+vendored in the repository under `vendor/lucide/icons`, and `rake icons:build`
+turns them into the registry the component reads. Only that registry ships in
+the gem — the SVGs are a build-time source, like the upstream TSX.
+
+**To add your own**, put SVG files in a directory and point the registry at it
+from an initializer — that is where `cache_size` lives too, and the reason both
+go through `ShadcnViewComponent::IconRegistry` is that nothing autoloadable
+resolves there, `Shadcn::` included:
+
+```ruby
+# config/initializers/shadcn_view_component.rb
+ShadcnViewComponent::IconRegistry.load_directory(Rails.root.join("app/assets/icons"))
+```
+
+The file's basename is the icon's name, and only what the `<svg>` element
+contains is kept — the outer element is the component's, so lucide's own
+attributes and yours never end up arguing. No asset pipeline is involved: the
+files are read once, by you, when you call this. A single drawing can still be
+registered by hand:
 
 ```ruby
 # config/initializers/shadcn_view_component.rb
@@ -243,8 +260,8 @@ ShadcnViewComponent::IconRegistry.register("star", %(<path d="M12 2 15 9l7 .5-5 
 ```
 
 Registering a name the gem already bundles replaces it — `register("check", …)`
-changes the tick in every checkbox, select and dropdown item — so the eleven are
-defaults, not a fixed set.
+changes the tick in every checkbox, select and dropdown item — so what ships is
+a set of defaults, not a fixed set.
 
 `Shadcn::Icon.register` / `.registered` delegate to the same registry and read
 more naturally from a view or another component — anywhere autoloading has
