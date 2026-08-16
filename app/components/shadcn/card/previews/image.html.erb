@@ -24,7 +24,7 @@
     A block of colour rather than a photograph: the gallery ships no binary
     assets, and `aspect-video w-full` is the part of the shape that matters. %>
 <%= render(Shadcn::Card::Component.new(class: "w-full max-w-sm overflow-hidden pt-0")) do %>
-  <div class="flex aspect-video w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+  <div class="flex aspect-video w-full items-center justify-center bg-muted text-sm text-foreground/70">
     Where the picture goes
   </div>
   <%= render(Shadcn::Card::Header::Component.new) do |h| %>

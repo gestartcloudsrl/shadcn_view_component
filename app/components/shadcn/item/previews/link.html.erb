@@ -29,7 +29,7 @@
 
   <%= render(Shadcn::Item::Component.new(variant: :outline)) do %>
     <%= render(Shadcn::Item::Media::Component.new(variant: :image)) do %>
-      <div class="flex size-full items-center justify-center bg-muted text-xs text-muted-foreground">IMG</div>
+      <div class="flex size-full items-center justify-center bg-muted text-xs text-foreground/70">IMG</div>
     <% end %>
     <%= render(Shadcn::Item::Content::Component.new) do %>
       <%= render(Shadcn::Item::Title::Component.new) { "A picture, cropped to the box" } %>

@@ -310,13 +310,36 @@ assertion rather than per example.
 
 ## axe
 
-Runs over **every preview**, at rest and with each layer open, plus contrast in
-dark mode. It audited one preview per family until the gallery-filling round
+Runs over **every preview**, at rest and with each layer open, **in both
+palettes** — one page load, two audits, since the palette is a class on the
+root and the page load is what costs. It audited one preview per family until
+the gallery-filling round
 widened the glob to `*/previews/*.html.erb`, and the difference is not
 cosmetic: a variant only reachable from a second preview was unaudited, and
 widening it caught unnamed inputs, an unlabelled one-time-code field and a
 `role="list"` containing a link on the way in. A family with one preview is a
 family audited once.
+
+### The palette was never pinned, so the audit read the machine
+
+For the whole life of this spec, *which* palette it audited was decided by the
+desktop the browser ran on: headless Chrome follows `prefers-color-scheme`, so
+on a Mac in dark mode it audited dark, and nothing audited light. The first run
+on a Linux CI runner audited light and found eleven real contrast violations —
+the same two colour pairs each time.
+
+`spec/support/system.rb` now emulates `prefers-color-scheme: light` for every
+system spec, so the result depends on the code rather than on the machine, and
+the audit adds `.dark` itself for the second pass. What went with it: a curated
+"when the dark class is on" block that had been adding `.dark` to a page that
+was already dark — one mode, checked twice, while the other was checked never.
+
+Two of the pairs it found are upstream's own and stay, documented with their
+measurements in the spec: `text-muted-foreground` on `bg-muted` at 4.34:1
+(`avatar.tsx:49`) and `text-destructive` on `bg-destructive/10` at 4.00:1
+(`attachment.tsx:49`). Four were the gallery's own markup — a grey label on a
+grey placeholder — and those were fixed rather than excluded. The line to hold
+is that one: **a preview is ours to fix, a component's class string is not.**
 
 Worth remembering: three of the first 13 "failures" were my own spec bugs —
 the rule is `color-contrast` not `color_contrast`, and `button` had no `default`

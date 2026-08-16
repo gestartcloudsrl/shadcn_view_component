@@ -5,7 +5,7 @@
   <% [[1, "1 / 1"], [3.0 / 4, "3 / 4"], [16.0 / 9, "16 / 9"]].each do |ratio, label| %>
     <div class="w-[180px]">
       <%= render(Shadcn::AspectRatio::Component.new(ratio:, class: "rounded-lg bg-muted")) do %>
-        <div class="flex size-full items-center justify-center text-sm text-muted-foreground"><%= label %></div>
+        <div class="flex size-full items-center justify-center text-sm text-foreground/70"><%= label %></div>
       <% end %>
     </div>
   <% end %>

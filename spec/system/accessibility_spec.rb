@@ -21,21 +21,50 @@ RSpec.describe "Accessibility", :js do
   end
 
   # Nodes this port renders that axe fails and that the port is not free to
-  # change, because the colours are upstream's own. One entry, and it is here
-  # rather than fixed for the reason the whole project turns on: upstream wins
-  # on markup.
-  #
-  # `attachment-description` takes `text-destructive/80` while the attachment is
-  # in its error state (vendor/shadcn/ui/attachment.tsx:119). Measured by axe in
-  # the theme this suite runs: 4.36:1 at 12px, where AA wants 4.5:1. Raising the
-  # opacity would fix it and would put a class in the bundle that upstream does
+  # change, because the colours are upstream's own — the rule the whole project
+  # turns on is that upstream wins on markup. Each entry carries the measurement
+  # and the line it comes from, so raising an opacity or darkening a token can
+  # be recognised for what it would be: a class in the bundle that upstream does
   # not emit, which `parity_spec` exists to catch.
   #
-  # Scoped to the error state rather than to the slot, so the same element is
-  # still audited everywhere else it appears.
+  # Everything here failed in the *light* palette, which nothing audited until
+  # the colour scheme was pinned — see `spec/support/system.rb`. The suite had
+  # been reading whichever palette the machine preferred.
   upstream_contrast = {
-    "attachment" => "[data-state=error] [data-slot=attachment-description]"
+    # `text-destructive` on `bg-destructive/10` while the attachment is in its
+    # error state (attachment.tsx:49 for the pair, :119 for the description).
+    # 4.00:1 at 10px on the file-type badge, 4.36:1 at 12px on the description,
+    # where AA wants 4.5:1. Scoped to the error state, so the same elements are
+    # still audited everywhere else they appear.
+    "attachment" => "[data-state=error] [data-slot=attachment-description], " \
+                    "[data-state=error] [data-slot=attachment-media]",
+    # The same pair, in the bubble's destructive variant (bubble.tsx:27-31).
+    "bubble" => "[data-variant=destructive] [data-slot=bubble-content]"
   }.freeze
+
+  # `text-muted-foreground` on `bg-muted` — 4.34:1 at 14px, and 4.34:1 at 12px
+  # for the small avatar. Upstream's own string, character for character
+  # (avatar.tsx:49 for the fallback, :94 for the group count), out of upstream's
+  # own tokens: `muted: oklch(0.97 0 0)` against `muted-foreground:
+  # oklch(0.556 0 0)` in `vendor/shadcn/themes.json`.
+  #
+  # Light only, and that is the point of keeping it apart: in the dark palette
+  # the same two elements measure 5.85:1 and are audited normally. A host that
+  # has to meet AA overrides `--muted-foreground`; the README says so.
+  #
+  # It is not keyed by family because an avatar turns up inside six of them.
+  light_contrast = "[data-slot=avatar-fallback], [data-slot=avatar-group-count]"
+
+  # The palette is a class on the root, so both themes can be audited in one
+  # visit — the page load is what costs, not the second axe run.
+  def in_dark_mode
+    page.execute_script("document.documentElement.classList.add('dark')")
+    yield
+  ensure
+    page.execute_script("document.documentElement.classList.remove('dark')")
+  end
+
+  def excluding(*selectors) = selectors.compact.join(", ").presence
 
   # Read off disk rather than typed out, so a component added tomorrow is
   # audited without anyone remembering to add it here — and *every* preview,
@@ -55,12 +84,16 @@ RSpec.describe "Accessibility", :js do
     expect(previews.size).to be > previews.map(&:first).uniq.size
   end
 
+  # Both palettes, because contrast is measured against what is on the screen
+  # and there are two of them. This is the pass that was auditing one palette by
+  # accident — whichever one the machine reported — for the life of the project.
   previews.each do |family, example|
-    it "#{family}/#{example} has no violations at rest" do
+    it "#{family}/#{example} has no violations at rest, in either theme", :aggregate_failures do
       visit_preview(family, example)
       wait_for_stimulus
 
-      audit(excluding: upstream_contrast[family])
+      audit(excluding: excluding(upstream_contrast[family], light_contrast))
+      in_dark_mode { audit(excluding: excluding(upstream_contrast[family])) }
     end
   end
 
@@ -174,22 +207,8 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
-  # Contrast is the one thing that genuinely differs between the two modes, so
-  # this is a curated handful rather than every family again.
-  context "when the dark class is on" do
-    def expect_contrast(family, example = :default)
-      visit_preview(family, example)
-      wait_for_stimulus
-      page.execute_script("document.documentElement.classList.add('dark')")
-
-      expect(page).to be_axe_clean.checking_only(:"color-contrast")
-    end
-
-    it("keeps the button variants readable") { expect_contrast("button", :variants) }
-    it("keeps the badge readable") { expect_contrast("badge") }
-    it("keeps the alert readable") { expect_contrast("alert") }
-    it("keeps the card readable") { expect_contrast("card") }
-    it("keeps the field readable") { expect_contrast("field") }
-    it("keeps the table readable") { expect_contrast("table") }
-  end
+  # The curated dark-mode contrast block that used to live here is gone: every
+  # preview is now audited in both palettes by the loop above, so it was a
+  # subset. It was also not doing what it said — it added `.dark` to a page that
+  # was already dark on the machine that wrote it, and checked one mode twice.
 end
