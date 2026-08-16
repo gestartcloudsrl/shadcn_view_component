@@ -38,51 +38,49 @@ module Shadcn
           super(**attributes)
         end
 
-        # One image with one text alternative, for the reason the pie carries
-        # the same pair: everything inside a `role="img"` is presentational, so
-        # a mark cannot name itself. This is where the numbers live for anyone
-        # not using a pointer — and a visually hidden table beside the SVG is
-        # still the better answer, which is open in `.claude/docs/todo.md`.
+        # The graphic says nothing at all, because the table beside it says all
+        # of it. Everything inside an SVG is presentational to a screen reader
+        # unless it is given a role and a name, and giving the marks either one
+        # would make the chart speak twice — once as an image and once as data.
+        #
+        # `aria-hidden` is only safe while nothing inside can take focus: the
+        # pair is what axe calls `aria-hidden-focus`, and it is the thing to
+        # check first if a keyboard cursor over the marks is ever added.
         def element_attributes(**defaults)
-          super(**{ viewBox: "0 0 #{plot.width} #{plot.height}" }.merge(naming).merge(defaults))
+          super(**{
+            viewBox: "0 0 #{plot.width} #{plot.height}",
+            "aria-hidden" => "true"
+          }.merge(defaults))
         end
 
         # The grid goes down first so the shapes are drawn over it, which is the
-        # one thing SVG's painter order decides for us.
+        # one thing SVG's painter order decides for us. The table follows the
+        # graphic it describes, which is the order a reader meets them in.
         def call
-          render_element(body: safe_join([ grid, tick_labels, category_labels, *shapes ]))
+          safe_join([ render_element(body: safe_join([ grid, tick_labels, category_labels, *shapes ])), table ])
         end
 
         private
 
-        # A `role="img"` has to have a name, and a chart of no rows has nothing
-        # to say — an empty scope on a quiet week, which is a thing a host's
-        # data does and not an odd case. Announcing it as an unnamed image is
-        # what axe calls `svg-img-alt`; announcing nothing is the truth.
-        def naming
-          return { "aria-hidden" => "true" } if description.blank?
+        # No rows, no table: an empty scope on a quiet week is a thing a host's
+        # data does, and a table of nothing announces a name and then leaves a
+        # reader in an empty grid.
+        def table
+          return if plot.categories.empty?
 
-          { role: "img", "aria-label" => description }
+          render(Table::Component.new(caption: label, columns: plot.series.map { |key| label_for(key) },
+                                      rows: table_rows))
+        end
+
+        def table_rows
+          plot.data.map do |category, values|
+            [ category, *plot.series.map { |key| number(values[key]) } ]
+          end
         end
 
         def plot = @plot ||= Plot.new(data: @data, series: @series)
 
         def shapes = raise NotImplementedError, "#{self.class} draws no shape"
-
-        # The whole chart in one sentence: each category, then every series with
-        # its number. Long by the time a year of months is in it, and still the
-        # only way the data reaches a screen reader today.
-        def description
-          @description ||= build_description
-        end
-
-        def build_description
-          rows = plot.data.map do |category, values|
-            "#{category}: #{plot.series.map { |key| "#{label_for(key)} #{number(values[key])}" }.join(', ')}"
-          end
-
-          [ label, rows.join("; ") ].compact.reject(&:empty?).join(" — ").presence
-        end
 
         def grid
           safe_join(plot.ticks.map do |value|

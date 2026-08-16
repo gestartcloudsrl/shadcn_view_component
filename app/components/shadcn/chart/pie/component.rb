@@ -46,44 +46,47 @@ module Shadcn
           super(**attributes)
         end
 
-        # One image with one text alternative, which is what `role="img"`
-        # means: everything inside it is presentational to a screen reader, so
-        # the name has to carry the data or the data is gone. A slice cannot
-        # carry its own — `aria-label` on a `<path>` with no role is prohibited,
-        # and axe says so.
+        # The graphic says nothing: the table beside it carries every slice.
+        # Everything inside an SVG is presentational to a screen reader unless
+        # given a role and a name, and a slice cannot be given either without
+        # the chart then speaking twice — `aria-label` on a `<path>` with no
+        # role is prohibited outright, which axe caught here once already.
         #
-        # `aria-label` and **not** an SVG `<title>`, which would say the same
-        # thing and then be drawn by the browser as a native tooltip on every
-        # hover — over this component's own. Reported from a screenshot: the
-        # grey box covering the panel was Chrome's, not ours.
+        # Nor an SVG `<title>`, which would say it again and then be drawn by
+        # the browser as a native tooltip on every hover, over this component's
+        # own. Reported from a screenshot: the grey box covering the panel was
+        # Chrome's, not ours.
         def element_attributes(**defaults)
-          super(**{ viewBox: "0 0 #{SIZE} #{SIZE}" }.merge(naming).merge(defaults))
+          super(**{ viewBox: "0 0 #{SIZE} #{SIZE}", "aria-hidden" => "true" }.merge(defaults))
         end
 
+        # The table follows the graphic it describes, which is the order a
+        # reader meets them in.
         def call
-          render_element(body: safe_join(slices))
+          safe_join([ render_element(body: safe_join(slices)), table ])
         end
 
         private
 
-        # A pie of nothing draws nothing, and a `role="img"` with no name is
-        # what axe calls `svg-img-alt`. A filtered scope reaches this.
-        def naming
-          return { "aria-hidden" => "true" } if description.blank?
+        # A pie of nothing draws nothing, and a table of nothing announces a
+        # name and then leaves a reader in an empty grid. A filtered scope
+        # reaches this.
+        def table
+          return if data.empty?
 
-          { role: "img", "aria-label" => description }
+          render(Table::Component.new(caption: label, columns: [ value_heading ], rows: table_rows))
         end
+
+        def table_rows
+          data.map { |key, value| [ label_for(key), display_for(value, value.to_f / total) ] }
+        end
+
+        # One column, and it needs a name: a pie's numbers are counts, or the
+        # shares `percentage:` turns them into. The chart's own label heads it
+        # where there is one, since "Visitors" says more than "Value".
+        def value_heading = label.presence || shadcn_t("chart.value")
 
         def total = @total ||= data.values.sum(&:to_f)
-
-        # The whole chart in one sentence: its name, then every slice with the
-        # number it stands for. A pie with fifty slices would read badly, and a
-        # pie with fifty slices reads badly to everyone.
-        def description
-          slices = data.map { |key, value| "#{label_for(key)}: #{display_for(value, value.to_f / total)}" }
-
-          [ label, slices.join(", ") ].compact.reject(&:empty?).join(" — ").presence
-        end
 
         # Each slice carries what the tooltip needs, so the controller reads the
         # DOM rather than being handed the series a second time as JSON.

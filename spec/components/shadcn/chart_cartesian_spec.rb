@@ -15,6 +15,10 @@ RSpec.describe Shadcn::Chart::Cartesian::Component, type: :component do
 
   def marks = page.all("[data-shadcn--chart-target=mark]", visible: :all)
 
+  # A row's own header, then a cell per column — read apart, the way a screen
+  # reader in table mode meets them.
+  def cells(row) = row.all("th, td", visible: :all).map(&:text)
+
   # The four corner radii of a bar's outline, in the order the path draws them:
   # top-left, top-right, bottom-right, bottom-left.
   def radii(bar) = bar["d"].scan(/A (\S+)/).flatten.map(&:to_f)
@@ -22,12 +26,35 @@ RSpec.describe Shadcn::Chart::Cartesian::Component, type: :component do
   shared_examples "a chart with an axis" do
     before { render_inline(described_class.new(data:, config:, label: "Visitors")) }
 
-    # The name is the only route to the numbers for anyone not using a pointer:
-    # inside a `role="img"` every mark is presentational, so a mark cannot name
-    # itself.
-    it "carries every number in its accessible name" do
-      expect(page.find("svg", visible: :all)["aria-label"])
-        .to eq("Visitors — January: Desktop 186, Mobile 80; February: Desktop 305, Mobile 200")
+    # The route to the numbers for anyone not using a pointer. A table rather
+    # than a sentence: a screen reader enters it in table mode and moves by row
+    # and column, where one long name can only be heard start to finish.
+    it "puts every number in a table beside the graphic", :aggregate_failures do
+      table = page.find("[data-slot=chart-table]", visible: :all)
+
+      expect(table.find("caption", visible: :all).text).to eq("Visitors")
+      expect(table.all("th[scope=col]", visible: :all).map(&:text)).to eq(%w[Desktop Mobile])
+      # `th[scope=row]` and not a plain cell: it is what makes a screen reader
+      # say "January" again as the reader moves along the row.
+      expect(table.all("tbody th[scope=row]", visible: :all).map(&:text)).to eq(%w[January February])
+      expect(table.all("tbody tr", visible: :all).map { |row| cells(row) })
+        .to eq([ %w[January 186 80], %w[February 305 200] ])
+    end
+
+    # The graphic and the table must not both speak, and the graphic is the one
+    # with nothing navigable in it.
+    it "says nothing as a graphic", :aggregate_failures do
+      svg = page.find("svg", visible: :all)
+
+      expect(svg["aria-hidden"]).to eq("true")
+      expect(svg["aria-label"]).to be_nil
+    end
+
+    # `aria-hidden` holds only while nothing inside can take focus — the pair is
+    # what axe calls `aria-hidden-focus`, and it is what a keyboard cursor over
+    # the marks would break.
+    it "leaves nothing focusable inside the hidden graphic" do
+      expect(page.all("svg [tabindex]", visible: :all)).to be_empty
     end
 
     it "draws a line per tick" do
@@ -198,18 +225,16 @@ RSpec.describe Shadcn::Chart::Cartesian::Component, type: :component do
   end
 
   # An empty scope on a quiet week, which is a thing a host's data does. The
-  # SVG still renders — the card around it should not collapse — but it says
-  # nothing, where a `role="img"` with no name is what axe calls `svg-img-alt`.
+  # SVG still renders — the card around it should not collapse — and a table
+  # would announce a name and then leave a reader in an empty grid.
   context "with nothing to draw" do
     let(:data) { {} }
 
-    it "announces nothing rather than an unnamed image", :aggregate_failures do
+    it "renders no table rather than an empty one", :aggregate_failures do
       render_inline(Shadcn::Chart::Bar::Component.new(data:, config:))
 
-      svg = page.find("svg", visible: :all)
-
-      expect(svg["aria-hidden"]).to eq("true")
-      expect(svg["role"]).to be_nil
+      expect(page).to have_no_css("[data-slot=chart-table]", visible: :all)
+      expect(page.find("svg", visible: :all)["aria-hidden"]).to eq("true")
     end
   end
 
@@ -222,8 +247,7 @@ RSpec.describe Shadcn::Chart::Cartesian::Component, type: :component do
     it "reads it as nothing rather than as blank" do
       render_inline(Shadcn::Chart::Bar::Component.new(data:, config:))
 
-      expect(page.find("svg", visible: :all)["aria-label"])
-        .to eq("January: Desktop 186, Mobile 0; February: Desktop 305, Mobile 200")
+      expect(cells(page.first("tbody tr", visible: :all))).to eq(%w[January 186 0])
     end
   end
 end

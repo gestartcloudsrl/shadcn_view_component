@@ -114,30 +114,58 @@ rule and everything after it would be the caller's own CSS running in the host's
 page. A library that runs inside an application it cannot see does not get to be
 exposed to that, so a colour has to look like one.
 
-## Accessibility, decided rather than patched
+## Accessibility: the table is the chart
 
-The SVG is one `role="img"` with a name that carries the whole chart: *"Visitors
-by browser — Chrome: 275, Safari: 200, …"*. Everything inside a `role="img"` is
-presentational, so the name has to be the data or the data is gone.
+**The graphic says nothing, and a visually hidden table beside it says all of
+it.** Every shape renders `<svg aria-hidden="true">` followed by a `sr-only`
+`<table>`: a `<caption>` with the chart's label, a column per series, a row per
+category, `th[scope=col]` and `th[scope=row]` on both.
 
-**A chart of no rows announces nothing.** `role="img"` demands a name and an
-empty scope has none to give, so with nothing to draw the SVG is `aria-hidden`
-instead — an unnamed image is what axe calls `svg-img-alt`, and a filtered
-scope on a quiet week reaches it. Every preview has data, so no spec in
-`system/` can see this; it is asserted on the components directly.
+Three earlier versions of this are worth knowing, because each was wrong in a
+way the next one fixed:
 
-The first version gave each slice its own `aria-label` and a `tabindex`, and axe
-was right to fail it: `aria-label` on a `<path>` with no role is prohibited. The
-slices are decoration now, and the tooltip is a pointer affordance rather than
-the only way to the numbers.
+1. **Each slice with its own `aria-label` and a `tabindex`.** axe was right to
+   fail it: `aria-label` on a `<path>` with no role is prohibited.
+2. **One `role="img"` whose name was the whole chart** — *"Visitors — January:
+   Desktop 186, Mobile 80; February: …"*. Correct, and unusable past a handful
+   of numbers: a name is one utterance, so it cannot be navigated, cannot be
+   reread in pieces, and a year of months is a paragraph read start to finish
+   before the reader can do anything else.
+3. **The table, with the name still on the SVG.** Then the data is announced
+   twice, once as an image and once as rows.
 
-**What that costs:** a keyboard user gets the name, not the tooltip. Upstream's
-`accessibilityLayer` makes recharts' chart arrow-navigable, and this does not.
-The cartesian shapes inherit the same model unchanged — one `role="img"` whose
-name reads *"Visitors — January: Desktop 186, Mobile 80; February: …"* — and by
-the time a year of months is in it, that sentence is long. A `<figure>` with a
-visually hidden table beside the SVG is still the better answer, and is still
-open in [todo.md](../todo.md).
+So it is one or the other, and the same object emits both — the shape renders
+its own table, rather than the container rendering one from data it would have
+to be handed again. A shape rendered on its own is complete, and the two can
+never disagree about who carries the data.
+
+What that buys, and it is the whole point: a screen reader enters a table in
+table mode. It moves by row and by column, rereads the column header on demand,
+and says "January" again as the reader moves along the row. None of that exists
+for a name.
+
+**Two rules decide the rest of it:**
+
+- **`aria-hidden` holds only while nothing inside can take focus.** The pair is
+  what axe calls `aria-hidden-focus`, and it is the first thing to check if a
+  keyboard cursor over the marks is ever added — which is the open half of this,
+  and a different user: someone who sees the screen and has no pointer, and
+  today cannot summon the tooltip.
+- **A chart of no rows renders no table.** An empty scope on a quiet week is a
+  thing a host's data does, and a table of nothing announces a name and then
+  leaves a reader in an empty grid. The SVG stays hidden and the chart says
+  nothing at all, which is the truth.
+
+**Where it is measured.** axe passes every preview, but axe checks rules — it is
+not a screen reader. So `spec/system/chart_spec.rb` reads Chrome's own
+accessibility tree and asserts that exactly one node carries the chart's name
+and that node is the `table`, with `rowheader "January"` and `cell "186"` in it.
+With the name back on the SVG that list reads `["SvgRoot", "table"]`, which is
+the double announcement, caught.
+
+**Not `Shadcn::Table`.** That family's classes are all visual — borders,
+padding, hover — and every one of them would be dead CSS on an element no one
+sees.
 
 ## Not reproduced
 

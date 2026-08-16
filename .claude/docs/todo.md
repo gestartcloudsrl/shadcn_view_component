@@ -459,15 +459,30 @@ noting that it would not have delivered the component that raised the question:
       no cumulative points — which is why `stacked:` is a `Bar` option rather
       than a frame one that the other two would accept and ignore.
 
-- [ ] **The chart has no keyboard route to its numbers.** A decision that can be
-      revisited rather than a defect: an SVG is one `role="img"`, so the
-      accessible name carries every mark and the tooltip is a pointer affordance
-      only. Upstream's `accessibilityLayer` makes recharts' chart
-      arrow-navigable. A `<figure>` with a visually hidden table beside the SVG
-      would close it without touching the 1:1 frame, and would also be read as
-      data rather than as one long sentence — which the cartesian shapes make
-      worse, since their name lists every series of every category. See
-      [features/chart.md](features/chart.md).
+- [x] **The chart has no route to its numbers except the pointer.** Every shape
+      now renders a `sr-only` table beside its graphic — caption, column per
+      series, row per category, `scope` on both — and the graphic is
+      `aria-hidden`, because the two must not both speak. A table is navigable
+      where a name is one utterance: a screen reader moves by row and column and
+      rereads the header, which is what a year of months needs.
+
+      Measured against Chrome's accessibility tree rather than against axe,
+      since axe checks rules and this is a question about what a reader is
+      handed: exactly one node carries the chart's name and it is the table.
+
+- [ ] **A sighted keyboard user still cannot summon the tooltip.** The other
+      half of the same problem and a different person: the marks are inside an
+      `aria-hidden` graphic, so they cannot simply be given `tabindex` —
+      focusable inside `aria-hidden` is what axe calls `aria-hidden-focus`.
+
+      The shape that works is upstream's own, which recharts spells
+      `accessibilityLayer`: **the container** takes the focus, arrow keys move a
+      cursor from mark to mark, and the controller reuses `fill()` unchanged —
+      it already reads `data-label`, `data-name` and `data-display` off the DOM.
+      The only real addition is that `place()` has to anchor to a mark's box
+      instead of to the pointer. The numbers stay in the table; nothing new
+      speaks. Nothing of recharts is vendored here, so its DOM would have to be
+      read from the rendered example before its shape is copied.
 
 - [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
       ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the

@@ -2,10 +2,12 @@
 
 require "spec_helper"
 
-# The chart is drawn by the server and every number is already in the document;
-# this is the half a static SVG cannot do. So what is asserted here is only the
-# tooltip — the geometry is `spec/components/shadcn/chart_pie_spec.rb`, without
-# a browser.
+# The chart is drawn by the server and every number is already in the document,
+# so most of what it does needs no browser: the geometry is asserted in
+# `spec/components/shadcn/chart_plot_spec.rb` and the markup in the two chart
+# component specs. What is left here is the tooltip — the half a static SVG
+# cannot do — and one measurement of Chrome's accessibility tree, which is the
+# question axe does not answer.
 RSpec.describe "Chart", :js do
   let(:chart) { "[data-slot=chart]" }
   let(:tooltip) { "[data-slot=chart-tooltip]" }
@@ -81,6 +83,39 @@ RSpec.describe "Chart", :js do
     expect(inside["left"]).to be >= 0
     expect(inside["right"]).to be >= 0
     expect(inside["top"]).to be >= 0
+  end
+
+  # The one thing axe cannot answer: axe checks rules, and what matters here is
+  # what a screen reader is actually handed. Chrome's own accessibility tree
+  # says it — the same measurement the select's name uses.
+  #
+  # One node carries the chart's name and it is the table. If the graphic still
+  # named itself there would be two, and a reader would meet the same data
+  # twice: once as an image and once as rows.
+  context "with a screen reader on it" do
+    let(:label) { "Visitors a month, by device" }
+
+    def ax_nodes
+      page.driver.browser.execute_cdp("Accessibility.enable")
+      page.driver.browser.execute_cdp("Accessibility.getFullAXTree")["nodes"]
+    end
+
+    before do
+      visit "/lookbook/preview/shadcn/chart/bar"
+      wait_for_stimulus
+    end
+
+    it "hands the numbers over as a table and nothing else", :aggregate_failures do
+      nodes = ax_nodes
+      # Minus the caption's own text nodes, which are how the table's name is
+      # drawn rather than a second thing saying it.
+      named = nodes.map { |node| node.dig("role", "value") if node.dig("name", "value") == label }
+                   .compact - %w[StaticText InlineTextBox]
+
+      expect(named).to eq([ "table" ])
+      expect(nodes.map { |node| [ node.dig("role", "value"), node.dig("name", "value") ] })
+        .to include([ "rowheader", "January" ], [ "cell", "186" ])
+    end
   end
 
   # A pie's label and its series name are the same word; a bar's are the month
