@@ -144,13 +144,40 @@ table mode. It moves by row and by column, rereads the column header on demand,
 and says "January" again as the reader moves along the row. None of that exists
 for a name.
 
-**Two rules decide the rest of it:**
+## The keyboard reaches the tooltip
 
-- **`aria-hidden` holds only while nothing inside can take focus.** The pair is
-  what axe calls `aria-hidden-focus`, and it is the first thing to check if a
-  keyboard cursor over the marks is ever added — which is the open half of this,
-  and a different user: someone who sees the screen and has no pointer, and
-  today cannot summon the tooltip.
+A second person, and a different need: someone who sees the chart and has no
+pointer. **Upstream's own shape, read from the rendered example** at
+`/view/new-york-v4/chart-bar-interactive` — nothing of recharts is vendored
+here, so its source could not be read: `accessibilityLayer` puts
+`role="application" tabindex="0"` on the surface itself. `application` is not
+decoration; it is what stops a screen reader from taking the arrow keys before
+the page sees them.
+
+**Where this port diverges, and why.** Upstream leaves the graphic exposed, so
+its axis labels reach the accessibility tree as loose text — *"400 300 200 100
+0 January February …"*, which is the noise the table exists to replace. Here
+the drawing sits inside an `aria-hidden` group: the element that takes focus is
+not itself hidden, so the pair axe calls `aria-hidden-focus` never forms, and
+nothing inside is read at all. The marks could not simply take `tabindex`
+themselves for exactly that reason.
+
+The keys are `←`/`→`/`↑`/`↓` to walk the marks in the order they were drawn,
+`Home` and `End` for the two ends, `Escape` to dismiss, and blur to dismiss.
+**Clamped rather than wrapped** — an edge you can feel is how you know the
+series ended — and which end you enter by is the key you pressed, the way a
+menu opened with `↑` starts at its last item.
+
+Nothing new is announced by any of it: the controller reuses `fill()`
+unchanged, reading `data-label`, `data-name` and `data-display` off the mark,
+and the numbers stay in the table. The only addition was anchoring the tooltip
+to a mark's box instead of to a pointer.
+
+**A chart of nothing takes no focus.** A tab stop that answers no key is worse
+than no tab stop, so `tabindex` and the table appear on the same condition.
+
+**One more rule:**
+
 - **A chart of no rows renders no table.** An empty scope on a quiet week is a
   thing a host's data does, and a table of nothing announces a name and then
   leaves a reader in an empty grid. The SVG stays hidden and the chart says
@@ -158,10 +185,11 @@ for a name.
 
 **Where it is measured.** axe passes every preview, but axe checks rules — it is
 not a screen reader. So `spec/system/chart_spec.rb` reads Chrome's own
-accessibility tree and asserts that exactly one node carries the chart's name
-and that node is the `table`, with `rowheader "January"` and `cell "186"` in it.
-With the name back on the SVG that list reads `["SvgRoot", "table"]`, which is
-the double announcement, caught.
+accessibility tree and asserts two things: the nodes carrying the chart's name
+are exactly `application` and `table` — the graphic says only *you can put the
+keyboard here*, the table carries the numbers — and the axis tick `"400"`
+reaches the tree nowhere. Put the data back on the SVG and the first list gains
+an entry; expose the drawing and the second assertion fails.
 
 **Not `Shadcn::Table`.** That family's classes are all visual — borders,
 padding, hover — and every one of them would be dead CSS on an element no one

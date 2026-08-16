@@ -470,19 +470,17 @@ noting that it would not have delivered the component that raised the question:
       since axe checks rules and this is a question about what a reader is
       handed: exactly one node carries the chart's name and it is the table.
 
-- [ ] **A sighted keyboard user still cannot summon the tooltip.** The other
-      half of the same problem and a different person: the marks are inside an
-      `aria-hidden` graphic, so they cannot simply be given `tabindex` —
-      focusable inside `aria-hidden` is what axe calls `aria-hidden-focus`.
+- [x] **A sighted keyboard user cannot summon the tooltip.** Done, and upstream's
+      shape was read from the rendered example rather than guessed at: it is the
+      *surface* that takes `role="application" tabindex="0"`, not a wrapper —
+      which is not what this entry predicted when it said the container.
 
-      The shape that works is upstream's own, which recharts spells
-      `accessibilityLayer`: **the container** takes the focus, arrow keys move a
-      cursor from mark to mark, and the controller reuses `fill()` unchanged —
-      it already reads `data-label`, `data-name` and `data-display` off the DOM.
-      The only real addition is that `place()` has to anchor to a mark's box
-      instead of to the pointer. The numbers stay in the table; nothing new
-      speaks. Nothing of recharts is vendored here, so its DOM would have to be
-      read from the rendered example before its shape is copied.
+      One divergence, deliberate: upstream leaves its graphic exposed, so the
+      axis labels reach the accessibility tree as loose text. Here the drawing
+      is inside an `aria-hidden` group, so the focusable element is not the
+      hidden one and nothing is read twice. Arrows walk the marks, Home and End
+      take the ends, Escape and blur dismiss, and the cursor clamps rather than
+      wraps.
 
 - [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
       ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the

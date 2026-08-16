@@ -21,6 +21,8 @@ module Shadcn
       # `data:` is a Hash of key to number, which is what `group(:x).sum(:y)`
       # already hands back.
       class Component < ApplicationViewComponent
+        include Focusable
+
         SIZE = 250
         PADDING = 4
         # Twelve o'clock, where a reader starts. SVG angles start at three.
@@ -46,33 +48,29 @@ module Shadcn
           super(**attributes)
         end
 
-        # The graphic says nothing: the table beside it carries every slice.
-        # Everything inside an SVG is presentational to a screen reader unless
-        # given a role and a name, and a slice cannot be given either without
-        # the chart then speaking twice — `aria-label` on a `<path>` with no
-        # role is prohibited outright, which axe caught here once already.
-        #
-        # Nor an SVG `<title>`, which would say it again and then be drawn by
-        # the browser as a native tooltip on every hover, over this component's
-        # own. Reported from a screenshot: the grey box covering the panel was
-        # Chrome's, not ours.
+        # No SVG `<title>`: it would say what the table says and then be drawn
+        # by the browser as a native tooltip on every hover, over this
+        # component's own. Reported from a screenshot — the grey box covering
+        # the panel was Chrome's, not ours.
         def element_attributes(**defaults)
-          super(**{ viewBox: "0 0 #{SIZE} #{SIZE}", "aria-hidden" => "true" }.merge(defaults))
+          super(**{ viewBox: "0 0 #{SIZE} #{SIZE}" }.merge(keyboard).merge(defaults))
         end
 
         # The table follows the graphic it describes, which is the order a
         # reader meets them in.
         def call
-          safe_join([ render_element(body: safe_join(slices)), table ])
+          safe_join([ render_element(body: tag.g(safe_join(slices), "aria-hidden": "true")), table ])
         end
 
         private
+
+        def drawn? = data.any?
 
         # A pie of nothing draws nothing, and a table of nothing announces a
         # name and then leaves a reader in an empty grid. A filtered scope
         # reaches this.
         def table
-          return if data.empty?
+          return unless drawn?
 
           render(Table::Component.new(caption: label, columns: [ value_heading ], rows: table_rows))
         end

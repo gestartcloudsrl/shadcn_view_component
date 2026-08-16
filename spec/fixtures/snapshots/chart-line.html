@@ -10,7 +10,8 @@
 <style> [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); } .dark [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); }
 </style>
 <div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
-<svg data-slot="chart-line" viewBox="0 0 560 240" aria-hidden="true" class="w-full">
+<svg data-slot="chart-line" viewBox="0 0 560 240" tabindex="0" role="application" aria-label="Visitors a month, by device" data-action="keydown-&gt;shadcn--chart#navigate blur-&gt;shadcn--chart#hide" class="w-full">
+<g aria-hidden="true">
 <line x1="34" x2="552" y1="216.0" y2="216.0" stroke="var(--border)" />
 <line x1="34" x2="552" y1="165.0" y2="165.0" stroke="var(--border)" stroke-dasharray="3 3" />
 <line x1="34" x2="552" y1="114.0" y2="114.0" stroke="var(--border)" stroke-dasharray="3 3" />
@@ -64,6 +65,7 @@
 <circle cx="448.4" cy="149.7" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="May" data-name="Mobile" data-display="130" />
 <circle cx="552.0" cy="144.6" r="4" fill="var(--color-mobile)" />
 <circle cx="552.0" cy="144.6" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="June" data-name="Mobile" data-display="140" />
+</g>
 </svg>
 <table data-slot="chart-table" class="sr-only">
 <caption>Visitors a month, by device

@@ -10,7 +10,8 @@
 <style> [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); } .dark [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); }
 </style>
 <div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
-<svg data-slot="chart-bar" viewBox="0 0 560 240" aria-hidden="true" class="w-full">
+<svg data-slot="chart-bar" viewBox="0 0 560 240" tabindex="0" role="application" aria-label="Visitors a month, by device" data-action="keydown-&gt;shadcn--chart#navigate blur-&gt;shadcn--chart#hide" class="w-full">
+<g aria-hidden="true">
 <line x1="34" x2="552" y1="216.0" y2="216.0" stroke="var(--border)" />
 <line x1="34" x2="552" y1="165.0" y2="165.0" stroke="var(--border)" stroke-dasharray="3 3" />
 <line x1="34" x2="552" y1="114.0" y2="114.0" stroke="var(--border)" stroke-dasharray="3 3" />
@@ -50,6 +51,7 @@
 <path d="M 392.28 104.74 A 4 4 0 0 1 396.28 100.74 L 448.71 100.74 A 4 4 0 0 1 452.71 104.74 L 452.71 144.94 A 0 0 0 0 1 452.71 144.94 L 392.28 144.94 A 0 0 0 0 1 392.28 144.94 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="May" data-name="Mobile" data-display="130" />
 <path d="M 478.62 143.24 A 0 0 0 0 1 478.62 143.24 L 539.05 143.24 A 0 0 0 0 1 539.05 143.24 L 539.05 212.0 A 4 4 0 0 1 535.05 216.0 L 482.62 216.0 A 4 4 0 0 1 478.62 212.0 Z" fill="var(--color-desktop)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="June" data-name="Desktop" data-display="214" />
 <path d="M 478.62 99.64 A 4 4 0 0 1 482.62 95.64 L 535.05 95.64 A 4 4 0 0 1 539.05 99.64 L 539.05 143.24 A 0 0 0 0 1 539.05 143.24 L 478.62 143.24 A 0 0 0 0 1 478.62 143.24 Z" fill="var(--color-mobile)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="June" data-name="Mobile" data-display="140" />
+</g>
 </svg>
 <table data-slot="chart-table" class="sr-only">
 <caption>Visitors a month, by device

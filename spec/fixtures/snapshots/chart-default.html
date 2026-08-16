@@ -10,12 +10,14 @@
 <style> [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); --color-other: var(--chart-5); } .dark [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); --color-other: var(--chart-5); }
 </style>
 <div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
-<svg data-slot="chart-pie" viewBox="0 0 250 250" aria-hidden="true" class="mx-auto aspect-square max-h-[250px]">
+<svg data-slot="chart-pie" viewBox="0 0 250 250" tabindex="0" role="application" aria-label="Visitors by browser" data-action="keydown-&gt;shadcn--chart#navigate blur-&gt;shadcn--chart#hide" class="mx-auto aspect-square max-h-[250px]">
+<g aria-hidden="true">
 <path d="M 125.0 125.0 L 125.0 4.0 A 121.0 121.0 0 0 1 240.7 160.43 Z" fill="var(--color-chrome)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="chrome" data-label="Chrome" data-display="275" />
 <path d="M 125.0 125.0 L 240.7 160.43 A 121.0 121.0 0 0 1 114.74 245.56 Z" fill="var(--color-safari)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="safari" data-label="Safari" data-display="200" />
 <path d="M 125.0 125.0 L 114.74 245.56 A 121.0 121.0 0 0 1 6.8 150.89 Z" fill="var(--color-firefox)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="firefox" data-label="Firefox" data-display="187" />
 <path d="M 125.0 125.0 L 6.8 150.89 A 121.0 121.0 0 0 1 55.55 25.92 Z" fill="var(--color-edge)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="edge" data-label="Edge" data-display="173" />
 <path d="M 125.0 125.0 L 55.55 25.92 A 121.0 121.0 0 0 1 125.0 4.0 Z" fill="var(--color-other)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="other" data-label="Other" data-display="90" />
+</g>
 </svg>
 <table data-slot="chart-table" class="sr-only">
 <caption>Visitors by browser

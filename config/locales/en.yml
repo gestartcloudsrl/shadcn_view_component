@@ -16,6 +16,7 @@ en:
       choose_month: Choose the Month
       choose_year: Choose the Year
     chart:
+      label: Chart
       value: Value
     combobox:
       clear: Clear

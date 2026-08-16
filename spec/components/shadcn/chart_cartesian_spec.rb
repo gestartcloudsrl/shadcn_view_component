@@ -41,20 +41,29 @@ RSpec.describe Shadcn::Chart::Cartesian::Component, type: :component do
         .to eq([ %w[January 186 80], %w[February 305 200] ])
     end
 
-    # The graphic and the table must not both speak, and the graphic is the one
-    # with nothing navigable in it.
-    it "says nothing as a graphic", :aggregate_failures do
-      svg = page.find("svg", visible: :all)
-
-      expect(svg["aria-hidden"]).to eq("true")
-      expect(svg["aria-label"]).to be_nil
+    # The graphic and the table must not both speak: the drawing is hidden, so
+    # the axis labels never reach a reader as loose text, and only the name of
+    # the thing you are focused on does.
+    it "hides everything it draws", :aggregate_failures do
+      expect(page.find("svg > g", visible: :all)["aria-hidden"]).to eq("true")
+      expect(page.all("svg text[aria-hidden]", visible: :all)).to be_empty
     end
 
-    # `aria-hidden` holds only while nothing inside can take focus — the pair is
-    # what axe calls `aria-hidden-focus`, and it is what a keyboard cursor over
-    # the marks would break.
-    it "leaves nothing focusable inside the hidden graphic" do
-      expect(page.all("svg [tabindex]", visible: :all)).to be_empty
+    # Upstream's own shape — `role="application" tabindex="0"` on the surface —
+    # and `application` is what stops a screen reader from taking the arrow keys
+    # before the controller sees them.
+    it "takes the focus itself, so the arrow keys have somewhere to arrive", :aggregate_failures do
+      svg = page.find("svg", visible: :all)
+
+      expect([ svg["tabindex"], svg["role"], svg["aria-label"] ]).to eq([ "0", "application", "Visitors" ])
+      expect(svg["data-action"]).to include("keydown->shadcn--chart#navigate")
+    end
+
+    # The focusable element must not be the hidden one: the pair is what axe
+    # calls `aria-hidden-focus`, and it is exactly what putting `tabindex` on
+    # the marks would have done.
+    it "leaves nothing focusable inside what it hid" do
+      expect(page.all("svg [aria-hidden=true] [tabindex]", visible: :all)).to be_empty
     end
 
     it "draws a line per tick" do
@@ -230,11 +239,13 @@ RSpec.describe Shadcn::Chart::Cartesian::Component, type: :component do
   context "with nothing to draw" do
     let(:data) { {} }
 
-    it "renders no table rather than an empty one", :aggregate_failures do
+    # And no tab stop either: a chart of nothing has nowhere for a cursor to
+    # go, and a tab stop that answers no key is worse than no tab stop.
+    it "renders no table and takes no focus", :aggregate_failures do
       render_inline(Shadcn::Chart::Bar::Component.new(data:, config:))
 
       expect(page).to have_no_css("[data-slot=chart-table]", visible: :all)
-      expect(page.find("svg", visible: :all)["aria-hidden"]).to eq("true")
+      expect(page.find("svg", visible: :all)["tabindex"]).to be_nil
     end
   end
 

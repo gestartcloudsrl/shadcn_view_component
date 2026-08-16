@@ -38,11 +38,11 @@ RSpec.describe Shadcn::Chart::Pie::Component do
   # What a filtered scope hands back on a quiet week: a table of nothing
   # announces a name and then leaves a reader in an empty grid.
   context "with nothing to draw" do
-    it "renders no table rather than an empty one", :aggregate_failures do
+    it "renders no table and takes no focus", :aggregate_failures do
       render_inline(described_class.new(data: {}, config:))
 
       expect(page).to have_no_css("[data-slot=chart-table]", visible: :all)
-      expect(page.find("svg", visible: :all)["aria-hidden"]).to eq("true")
+      expect(page.find("svg", visible: :all)["tabindex"]).to be_nil
     end
   end
 
@@ -99,11 +99,8 @@ RSpec.describe Shadcn::Chart::Pie::Component do
       render_inline(described_class.new(data: { chrome: 275, safari: 200 }, config:, label: "Visitors"))
     end
 
-    it "says nothing as a graphic", :aggregate_failures do
-      svg = page.find("svg", visible: :all)
-
-      expect(svg["aria-hidden"]).to eq("true")
-      expect(svg["aria-label"]).to be_nil
+    it "hides everything it draws" do
+      expect(page.find("svg > g", visible: :all)["aria-hidden"]).to eq("true")
     end
 
     it "names the chart and every slice in the table", :aggregate_failures do

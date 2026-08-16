@@ -89,9 +89,11 @@ RSpec.describe "Chart", :js do
   # what a screen reader is actually handed. Chrome's own accessibility tree
   # says it — the same measurement the select's name uses.
   #
-  # One node carries the chart's name and it is the table. If the graphic still
-  # named itself there would be two, and a reader would meet the same data
-  # twice: once as an image and once as rows.
+  # Two nodes carry the chart's name, and they say different things: the
+  # graphic announces itself as something you can put the keyboard into, and
+  # the table carries the numbers. What must not happen is the *data* arriving
+  # twice — which is what the axis labels reaching the tree as loose text would
+  # be, and what upstream's own chart does.
   context "with a screen reader on it" do
     let(:label) { "Visitors a month, by device" }
 
@@ -105,16 +107,93 @@ RSpec.describe "Chart", :js do
       wait_for_stimulus
     end
 
-    it "hands the numbers over as a table and nothing else", :aggregate_failures do
+    it "hands the numbers over as a table", :aggregate_failures do
       nodes = ax_nodes
       # Minus the caption's own text nodes, which are how the table's name is
       # drawn rather than a second thing saying it.
       named = nodes.map { |node| node.dig("role", "value") if node.dig("name", "value") == label }
                    .compact - %w[StaticText InlineTextBox]
 
-      expect(named).to eq([ "table" ])
+      expect(named).to eq(%w[application table])
       expect(nodes.map { |node| [ node.dig("role", "value"), node.dig("name", "value") ] })
         .to include([ "rowheader", "January" ], [ "cell", "186" ])
+    end
+
+    # The drawing is hidden, so an axis tick is a number on a screen and
+    # nothing in the tree. Left exposed — which is what upstream does — a
+    # reader meets "400 300 200 100 0 January February …" before reaching
+    # anything that explains it.
+    it "leaves the axis out of it" do
+      expect(ax_nodes.map { |node| node.dig("name", "value") }).not_to include("400")
+    end
+  end
+
+  # The other way to the tooltip, for someone who sees the chart and has no
+  # pointer. Upstream's own shape: the surface takes the focus, and the arrows
+  # walk the marks in the order they were drawn — every series of a category
+  # before the next category.
+  context "with a keyboard on it" do
+    let(:graphic) { "#{chart} [data-slot=chart-bar]" }
+
+    before do
+      visit "/lookbook/preview/shadcn/chart/bar"
+      wait_for_stimulus
+    end
+
+    it "walks the marks and says what each one says", :aggregate_failures do
+      page.find(graphic, visible: :all).send_keys(:arrow_right)
+
+      expect(tooltip_text).to eq([ "January", "Desktop", "186" ])
+
+      page.find(graphic, visible: :all).send_keys(:arrow_right)
+
+      expect(tooltip_text).to eq([ "January", "Mobile", "80" ])
+    end
+
+    # Clamped rather than wrapped: an edge you can feel is how you know the
+    # series ended, where wrapping reads as a chart starting over.
+    it "stops at the end instead of wrapping round" do
+      page.find(graphic, visible: :all).send_keys(:home)
+      2.times { page.find(graphic, visible: :all).send_keys(:arrow_left) }
+
+      expect(tooltip_text).to eq([ "January", "Desktop", "186" ])
+    end
+
+    # Which end you enter by is the key you pressed: a left arrow means you
+    # were reaching for the far end, the way a menu opened with ArrowUp starts
+    # at its last item.
+    it "enters from the far end when the first key is a left arrow" do
+      page.find(graphic, visible: :all).send_keys(:arrow_left)
+
+      expect(tooltip_text).to eq([ "June", "Mobile", "140" ])
+    end
+
+    it "goes to the end and back to the start" do
+      page.find(graphic, visible: :all).send_keys(:end)
+
+      expect(tooltip_text).to eq([ "June", "Mobile", "140" ])
+
+      page.find(graphic, visible: :all).send_keys(:home)
+
+      expect(tooltip_text).to eq([ "January", "Desktop", "186" ])
+    end
+
+    it "dismisses on Escape", :aggregate_failures do
+      page.find(graphic, visible: :all).send_keys(:arrow_right)
+
+      expect(page).to have_css(tooltip)
+
+      page.find(graphic, visible: :all).send_keys(:escape)
+
+      expect(page).to have_no_css(tooltip)
+    end
+
+    # A tooltip left behind on a chart nobody is looking at any more.
+    it "goes away when the focus does" do
+      page.find(graphic, visible: :all).send_keys(:arrow_right)
+      page.find("body").click
+
+      expect(page).to have_no_css(tooltip)
     end
   end
 

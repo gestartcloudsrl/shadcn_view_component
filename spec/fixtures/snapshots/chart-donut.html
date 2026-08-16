@@ -2,11 +2,13 @@
 <style> [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); } .dark [data-chart=chart-x] { --color-chrome: var(--chart-1); --color-safari: var(--chart-2); --color-firefox: var(--chart-3); --color-edge: var(--chart-4); }
 </style>
 <div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
-<svg data-slot="chart-pie" viewBox="0 0 250 250" aria-hidden="true" class="mx-auto aspect-square max-h-[250px]">
+<svg data-slot="chart-pie" viewBox="0 0 250 250" tabindex="0" role="application" aria-label="Visitors by browser" data-action="keydown-&gt;shadcn--chart#navigate blur-&gt;shadcn--chart#hide" class="mx-auto aspect-square max-h-[250px]">
+<g aria-hidden="true">
 <path d="M 125.0 4.0 A 121.0 121.0 0 0 1 231.27 182.85 L 188.76 159.71 A 72.6 72.6 0 0 0 125.0 52.4 Z" fill="var(--color-chrome)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="chrome" data-label="Chrome" data-display="275" />
 <path d="M 231.27 182.85 A 121.0 121.0 0 0 1 74.26 234.85 L 94.56 190.91 A 72.6 72.6 0 0 0 188.76 159.71 Z" fill="var(--color-safari)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="safari" data-label="Safari" data-display="200" />
 <path d="M 74.26 234.85 A 121.0 121.0 0 0 1 8.35 92.84 L 55.01 105.7 A 72.6 72.6 0 0 0 94.56 190.91 Z" fill="var(--color-firefox)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="firefox" data-label="Firefox" data-display="187" />
 <path d="M 8.35 92.84 A 121.0 121.0 0 0 1 125.0 4.0 L 125.0 52.4 A 72.6 72.6 0 0 0 55.01 105.7 Z" fill="var(--color-edge)" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="edge" data-label="Edge" data-display="173" />
+</g>
 </svg>
 <table data-slot="chart-table" class="sr-only">
 <caption>Visitors by browser

@@ -19,6 +19,8 @@ module Shadcn
       # way: a class here would be one no vendored source contains, and every
       # such class has to be listed with its reason.
       class Component < ApplicationViewComponent
+        include Focusable
+
         default_tag :svg
         # No `slot_name` of its own: this class is never rendered, and a
         # `data-slot="chart-cartesian"` would name an element no page contains.
@@ -38,35 +40,28 @@ module Shadcn
           super(**attributes)
         end
 
-        # The graphic says nothing at all, because the table beside it says all
-        # of it. Everything inside an SVG is presentational to a screen reader
-        # unless it is given a role and a name, and giving the marks either one
-        # would make the chart speak twice — once as an image and once as data.
-        #
-        # `aria-hidden` is only safe while nothing inside can take focus: the
-        # pair is what axe calls `aria-hidden-focus`, and it is the thing to
-        # check first if a keyboard cursor over the marks is ever added.
         def element_attributes(**defaults)
-          super(**{
-            viewBox: "0 0 #{plot.width} #{plot.height}",
-            "aria-hidden" => "true"
-          }.merge(defaults))
+          super(**{ viewBox: "0 0 #{plot.width} #{plot.height}" }.merge(keyboard).merge(defaults))
         end
 
         # The grid goes down first so the shapes are drawn over it, which is the
         # one thing SVG's painter order decides for us. The table follows the
         # graphic it describes, which is the order a reader meets them in.
         def call
-          safe_join([ render_element(body: safe_join([ grid, tick_labels, category_labels, *shapes ])), table ])
+          drawing = tag.g(safe_join([ grid, tick_labels, category_labels, *shapes ]), "aria-hidden": "true")
+
+          safe_join([ render_element(body: drawing), table ])
         end
 
         private
+
+        def drawn? = plot.categories.any?
 
         # No rows, no table: an empty scope on a quiet week is a thing a host's
         # data does, and a table of nothing announces a name and then leaves a
         # reader in an empty grid.
         def table
-          return if plot.categories.empty?
+          return unless drawn?
 
           render(Table::Component.new(caption: label, columns: plot.series.map { |key| label_for(key) },
                                       rows: table_rows))
