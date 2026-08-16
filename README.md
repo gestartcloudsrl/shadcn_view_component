@@ -202,8 +202,30 @@ records where it deliberately differs.
 | `data-slot="card-header"` | `slot_name :"card-header"` |
 | `{...props}` | `**attributes`, splatted through Rails' tag builder |
 | `asChild` | `as:` |
-| Radix primitives | Stimulus controllers under `shadcn--*` emitting the same `data-state`, `role`, `aria-*` and `--radix-*` custom properties |
+| Radix primitives | Stimulus controllers under `shadcn--*`, keeping the same `data-state`, `aria-*` and `--radix-*` custom properties in step with what the user does |
 | `lucide-react` icons | `Shadcn::Icon::Component`, with the lucide SVGs inlined |
+
+**The ARIA is the component's, not the controller's.** Whatever a part needs to
+be what it is — its `role`, its `aria-haspopup`, a `tabindex`, the
+`aria-expanded` it starts closed with — is rendered by the Ruby, so the markup
+is right before any JavaScript runs and a `turbo:morph` cannot undo it. The
+controllers only write what changes as the user acts — `aria-expanded` on open,
+`aria-activedescendant` as the cursor moves, `aria-controls` once it knows
+which element to point at. Four of them used to re-set the static half on
+connect, and that was deliberately removed (commit `4e88573`): two places to
+write one attribute is two places to drift.
+
+The consequence, if you write your own markup: **`data-controller` and a
+`data-shadcn--*-target` are not enough.** Hang them on a bare `<div>` and you
+get a div — no role, no `aria-haspopup`, nothing for a screen reader to
+announce, and no error to tell you. Render the component, or copy every
+attribute it emits — `bin/console` prints them:
+
+```ruby
+render Shadcn::Select::Trigger::Component.new
+# => <button data-slot="select-trigger" type="button" role="combobox"
+#            aria-expanded="false" aria-autocomplete="none" …>
+```
 
 Eleven lucide icons are bundled — the ones the ported components themselves
 use, out of lucide's ~1,500. Register another through
@@ -455,7 +477,7 @@ Two things remain unverified:
 
 ## Known differences from the React DOM
 
-Three deliberate ones, all documented at the point where they happen:
+Four deliberate ones, all documented at the point where they happen:
 
 1. **Context-only roots render an element.** Radix's `Dialog.Root`,
    `Popover.Root`, `Select.Root` and friends render no DOM at all. Stimulus

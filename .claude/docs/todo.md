@@ -482,16 +482,19 @@ noting that it would not have delivered the component that raised the question:
       take the ends, Escape and blur dismiss, and the cursor clamps rather than
       wraps.
 
-- [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
-      ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the
-      rest at connect; that was deleted once the components were emitting all
-      of it server-side (commit `4e88573`). The components remain correct — but
-      a host who writes their own trigger markup with the target attribute
-      instead of rendering the component now silently gets an element with no
-      role and no `aria-expanded`. Nothing in the README says the attributes
-      are the component's job rather than the controller's. One sentence under
-      the JavaScript section closes it; the alternative, backfilling again,
-      is what that commit deliberately undid.
+- [x] **A hand-written element carrying a `data-shadcn--*-target` gets no
+      ARIA.** The README now says so, under "How the mapping works": the ARIA
+      is the component's and the controllers only write what changes as the
+      user acts, so `data-controller` plus a target attribute on a bare `<div>`
+      is a div — with no error to say so. It shows what to copy instead, from
+      `bin/console`.
+
+      What the entry did not know: the mapping table was **asserting the
+      opposite**, in the row that said the controllers emit "the same
+      `data-state`, `role`, `aria-*`". That is what `4e88573` deleted, so the
+      README had been carrying the pre-`4e88573` claim ever since. The row is
+      corrected, and the count above the differences list said "Three" over
+      four items.
 - [x] **Nothing routed a reader to `vendor/radix/`.**
       `decisions/03-testing.md` now carries "What the two vendored references
       are worth": `vendor/shadcn/` is policed by `parity_spec` on every run,
