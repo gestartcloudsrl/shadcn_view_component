@@ -200,9 +200,10 @@ error was mine, and is recorded with the group it belongs to.
   *`chart` has shipped in part, and it is the one case where "blocked by a
   package" was **right**: recharts is 29,091 lines over eleven dependencies and
   it is doing the work — `chart.tsx` draws nothing at all. So the frame is
-  ported 1:1 and the shapes are drawn here, starting with the pie. Bars, lines,
-  areas, radar and radial are not drawn yet, and each needs axes, ticks and a
-  grid that the pie does not. See [features/chart.md](features/chart.md).*
+  ported 1:1 and the shapes are drawn here: pie, bar, line and area. Radar and
+  radial are not drawn yet — they need their own trigonometry rather than the
+  cartesian axis the other three share. See
+  [features/chart.md](features/chart.md).*
   *`calendar` has shipped, and it is the fourth time in a row that "blocked by
   a package" was the wrong reading. `react-day-picker` is 9,744 lines of
   compiled ESM, of which 3,479 are locale data and 2,046 are the Ethiopic,
@@ -440,19 +441,46 @@ noting that it would not have delivered the component that raised the question:
       mutation could distinguish it, because the component resolves the name
       before asking.
 
-- [ ] **The chart draws one shape, and has no keyboard route to its numbers.**
-      The pie is in; bars, lines and areas each need what the pie did not —
-      scales, ticks, a grid and axis labels that collide — and radar and radial
-      need their own trigonometry. Whoever adds the first cartesian shape should
-      expect the axis, not the shape, to be the work.
+- [x] **The chart draws one shape.** Bar, line and area have shipped over a
+      shared `Chart::Plot` — the nice maximum, the ticks, the bands, the points
+      and how many category labels fit — and the prediction held: the axis was
+      the work and the shapes were an afternoon. `Plot` is a plain object, so
+      the arithmetic is asserted without a browser.
 
-      The second half is a decision that can be revisited rather than a defect:
-      an SVG is one `role="img"`, so the accessible name carries every slice and
-      the tooltip is a pointer affordance only. Upstream's `accessibilityLayer`
-      makes recharts' chart arrow-navigable. A `<figure>` with a visually hidden
-      table beside the SVG would close it without touching the 1:1 frame, and
-      would also be read by a screen reader as data rather than as one long
-      sentence. See [features/chart.md](features/chart.md).
+      Three of the four decisions in it were made by looking at the gallery, not
+      by a spec: a line's axis is a point scale where a bar's is a band one, the
+      labels at the two ends of a point scale would be clipped by the `viewBox`
+      unless they anchor `start` and `end`, and a stacked bar has to be a
+      `<path>` because `rx` cannot leave a seam square. Each of those renders
+      HTML that is exactly what the code meant to produce.
+
+      Still not drawn: radar and radial, which need their own trigonometry
+      rather than this axis; and stacked lines and areas, since `Plot` computes
+      no cumulative points — which is why `stacked:` is a `Bar` option rather
+      than a frame one that the other two would accept and ignore.
+
+- [x] **The chart has no route to its numbers except the pointer.** Every shape
+      now renders a `sr-only` table beside its graphic — caption, column per
+      series, row per category, `scope` on both — and the graphic is
+      `aria-hidden`, because the two must not both speak. A table is navigable
+      where a name is one utterance: a screen reader moves by row and column and
+      rereads the header, which is what a year of months needs.
+
+      Measured against Chrome's accessibility tree rather than against axe,
+      since axe checks rules and this is a question about what a reader is
+      handed: exactly one node carries the chart's name and it is the table.
+
+- [x] **A sighted keyboard user cannot summon the tooltip.** Done, and upstream's
+      shape was read from the rendered example rather than guessed at: it is the
+      *surface* that takes `role="application" tabindex="0"`, not a wrapper —
+      which is not what this entry predicted when it said the container.
+
+      One divergence, deliberate: upstream leaves its graphic exposed, so the
+      axis labels reach the accessibility tree as loose text. Here the drawing
+      is inside an `aria-hidden` group, so the focusable element is not the
+      hidden one and nothing is read twice. Arrows walk the marks, Home and End
+      take the ends, Escape and blur dismiss, and the cursor clamps rather than
+      wraps.
 
 - [ ] **A hand-written element carrying a `data-shadcn--*-target` gets no
       ARIA.** The controllers used to backfill `role`, `aria-haspopup` and the

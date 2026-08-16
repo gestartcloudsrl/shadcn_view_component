@@ -1,0 +1,165 @@
+<div data-slot="card" class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm max-w-xl">
+<div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+<div data-slot="card-title" class="leading-none font-semibold">Visitors
+</div>
+<div data-slot="card-description" class="text-sm text-muted-foreground">January – June 2026
+</div>
+</div>
+<div data-slot="card-content" class="px-6">
+<div data-slot="chart" data-chart="chart-x" data-controller="shadcn--chart" class="relative flex aspect-video justify-center text-xs">
+<style> [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); } .dark [data-chart=chart-x] { --color-desktop: var(--chart-1); --color-mobile: var(--chart-2); }
+</style>
+<div class="flex w-full min-w-0 flex-col items-center justify-center gap-2">
+<svg data-slot="chart-line" viewBox="0 0 560 240" tabindex="0" role="application" aria-label="Visitors a month, by device" data-action="keydown-&gt;shadcn--chart#navigate blur-&gt;shadcn--chart#hide" class="w-full">
+<g aria-hidden="true">
+<line x1="34" x2="552" y1="216.0" y2="216.0" stroke="var(--border)" />
+<line x1="34" x2="552" y1="165.0" y2="165.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<line x1="34" x2="552" y1="114.0" y2="114.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<line x1="34" x2="552" y1="63.0" y2="63.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<line x1="34" x2="552" y1="12.0" y2="12.0" stroke="var(--border)" stroke-dasharray="3 3" />
+<text x="28" y="219.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">0
+</text>
+<text x="28" y="168.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">100
+</text>
+<text x="28" y="117.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">200
+</text>
+<text x="28" y="66.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">300
+</text>
+<text x="28" y="15.0" text-anchor="end" fill="var(--muted-foreground)" font-size="10">400
+</text>
+<text x="34.0" y="232" text-anchor="start" fill="var(--muted-foreground)" font-size="10">January
+</text>
+<text x="137.6" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">February
+</text>
+<text x="241.2" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">March
+</text>
+<text x="344.8" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">April
+</text>
+<text x="448.4" y="232" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">May
+</text>
+<text x="552.0" y="232" text-anchor="end" fill="var(--muted-foreground)" font-size="10">June
+</text>
+<polyline points="34.0,121.14 137.6,60.45 241.2,95.13 344.8,178.77 448.4,109.41 552.0,106.86" fill="none" stroke="var(--color-desktop)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="34.0" cy="121.14" r="4" fill="var(--color-desktop)" />
+<circle cx="34.0" cy="121.14" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="January" data-name="Desktop" data-display="186" />
+<circle cx="137.6" cy="60.45" r="4" fill="var(--color-desktop)" />
+<circle cx="137.6" cy="60.45" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="February" data-name="Desktop" data-display="305" />
+<circle cx="241.2" cy="95.13" r="4" fill="var(--color-desktop)" />
+<circle cx="241.2" cy="95.13" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="March" data-name="Desktop" data-display="237" />
+<circle cx="344.8" cy="178.77" r="4" fill="var(--color-desktop)" />
+<circle cx="344.8" cy="178.77" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="April" data-name="Desktop" data-display="73" />
+<circle cx="448.4" cy="109.41" r="4" fill="var(--color-desktop)" />
+<circle cx="448.4" cy="109.41" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="May" data-name="Desktop" data-display="209" />
+<circle cx="552.0" cy="106.86" r="4" fill="var(--color-desktop)" />
+<circle cx="552.0" cy="106.86" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="desktop" data-label="June" data-name="Desktop" data-display="214" />
+<polyline points="34.0,175.2 137.6,114.0 241.2,154.8 344.8,119.1 448.4,149.7 552.0,144.6" fill="none" stroke="var(--color-mobile)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="34.0" cy="175.2" r="4" fill="var(--color-mobile)" />
+<circle cx="34.0" cy="175.2" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="January" data-name="Mobile" data-display="80" />
+<circle cx="137.6" cy="114.0" r="4" fill="var(--color-mobile)" />
+<circle cx="137.6" cy="114.0" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="February" data-name="Mobile" data-display="200" />
+<circle cx="241.2" cy="154.8" r="4" fill="var(--color-mobile)" />
+<circle cx="241.2" cy="154.8" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="March" data-name="Mobile" data-display="120" />
+<circle cx="344.8" cy="119.1" r="4" fill="var(--color-mobile)" />
+<circle cx="344.8" cy="119.1" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="April" data-name="Mobile" data-display="190" />
+<circle cx="448.4" cy="149.7" r="4" fill="var(--color-mobile)" />
+<circle cx="448.4" cy="149.7" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="May" data-name="Mobile" data-display="130" />
+<circle cx="552.0" cy="144.6" r="4" fill="var(--color-mobile)" />
+<circle cx="552.0" cy="144.6" r="10" fill="transparent" data-shadcn--chart-target="mark" data-action="pointerenter-&gt;shadcn--chart#show pointermove-&gt;shadcn--chart#move pointerleave-&gt;shadcn--chart#hide" data-key="mobile" data-label="June" data-name="Mobile" data-display="140" />
+</g>
+</svg>
+<table data-slot="chart-table" class="sr-only">
+<caption>Visitors a month, by device
+</caption>
+<thead>
+<tr>
+<td>
+</td>
+<th scope="col">Desktop
+</th>
+<th scope="col">Mobile
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">January
+</th>
+<td>186
+</td>
+<td>80
+</td>
+</tr>
+<tr>
+<th scope="row">February
+</th>
+<td>305
+</td>
+<td>200
+</td>
+</tr>
+<tr>
+<th scope="row">March
+</th>
+<td>237
+</td>
+<td>120
+</td>
+</tr>
+<tr>
+<th scope="row">April
+</th>
+<td>73
+</td>
+<td>190
+</td>
+</tr>
+<tr>
+<th scope="row">May
+</th>
+<td>209
+</td>
+<td>130
+</td>
+</tr>
+<tr>
+<th scope="row">June
+</th>
+<td>214
+</td>
+<td>140
+</td>
+</tr>
+</tbody>
+</table>
+<div data-slot="chart-legend" class="flex items-center justify-center gap-4 pt-3">
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-desktop)">
+</div>Desktop
+</div>
+<div class="flex items-center gap-1.5 [&amp;&gt;svg]:h-3 [&amp;&gt;svg]:w-3 [&amp;&gt;svg]:text-muted-foreground">
+<div class="h-2 w-2 shrink-0 rounded-[2px]" style="background-color: var(--color-mobile)">
+</div>Mobile
+</div>
+</div>
+</div>
+<div data-slot="chart-tooltip" data-shadcn--chart-target="tooltip" hidden="hidden" style="position:absolute;pointer-events:none" class="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+<div class="font-medium" data-shadcn--chart-target="label">
+</div>
+<div class="grid gap-1.5">
+<div class="flex w-full flex-wrap items-stretch gap-2 [&amp;&gt;svg]:h-2.5 [&amp;&gt;svg]:w-2.5 [&amp;&gt;svg]:text-muted-foreground items-center">
+<div class="shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg) h-2.5 w-2.5" data-shadcn--chart-target="indicator">
+</div>
+<div class="flex flex-1 items-center justify-between leading-none">
+<div class="grid gap-1.5">
+<span class="text-muted-foreground" data-shadcn--chart-target="name">
+</span>
+</div>
+<span class="font-mono font-medium text-foreground tabular-nums" data-shadcn--chart-target="value">
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>

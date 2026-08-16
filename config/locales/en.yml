@@ -15,6 +15,9 @@ en:
       week_number: "Week %{number}"
       choose_month: Choose the Month
       choose_year: Choose the Year
+    chart:
+      label: Chart
+      value: Value
     combobox:
       clear: Clear
       toggle: Show options
