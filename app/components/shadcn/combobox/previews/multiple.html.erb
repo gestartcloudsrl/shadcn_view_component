@@ -1,0 +1,28 @@
+<%# Multiple selection: the chips box in place of the field, one chip per chosen
+    value, and `multiple: true` on the root.
+
+    Two of the values start chosen, so the preview covers the server-rendered
+    side as well as the controller's — the ticks in the list, the hidden inputs
+    and the chips all have to agree before a single click happens. %>
+<%
+  languages = [ %w[js JavaScript], %w[rb Ruby], %w[py Python], %w[go Go], %w[rs Rust], %w[ex Elixir] ]
+  chosen = %w[rb go]
+%>
+<div class="w-80">
+  <%= render(Shadcn::Combobox::Component.new(name: "project[languages]", value: chosen, multiple: true)) do |combobox| %>
+    <% combobox.with_combobox_chips do %>
+      <% chosen.each do |value| %>
+        <%= render(Shadcn::Combobox::Chip::Component.new(value:)) { languages.to_h[value] } %>
+      <% end %>
+      <%= render(Shadcn::Combobox::ChipInput::Component.new(placeholder: "Add a language…")) %>
+    <% end %>
+    <% combobox.with_combobox_content do %>
+      <%= render(Shadcn::Combobox::List::Component.new) do %>
+        <% languages.each do |value, label| %>
+          <%= render(Shadcn::Combobox::Item::Component.new(value:, label:, selected: chosen.include?(value))) { label } %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::Combobox::Empty::Component.new) { "No language found." } %>
+    <% end %>
+  <% end %>
+</div>

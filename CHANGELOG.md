@@ -6,6 +6,53 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `data-controller` from a caller now concatenates onto the component's own
+  instead of being emitted twice. `data-action` was given this treatment
+  already; `data-controller` was missed, and its failure is quieter — two
+  attributes is invalid HTML, the browser keeps the first, which is the
+  component's, so the *caller's* controller never connects with nothing logged
+  and the component still working. Found in a host app wiring a dependent
+  select: `data: { controller: "set-location" }` on a Select, and choosing a
+  client silently stopped reloading its locations.
+
+## [0.2.0] — 2026-08-17
+
+### Added
+
+- **Multiple selection in `Combobox`.** `multiple: true` takes an array in
+  `value:` and renders the chips box in place of the field, through a new
+  `combobox_chips` slot. Choosing an option adds a chip, taking it again puts it
+  back, and Backspace on an empty field removes the last one. It submits as a
+  Rails collection — `name` gains `[]`, one hidden input per value, plus an
+  empty one so clearing every chip still sends the parameter. The chips markup
+  was already ported; adding one is what was missing. Two of the rules are ours
+  rather than upstream's, because Base UI documents neither and is not vendored
+  here to check against; both are named as such in the system spec. See
+  [features/combobox.md](.claude/docs/features/combobox.md).
+
+- `bin/eslint`, and a lint step for it in CI. It covers the one thing Ruby
+  tooling cannot see: whether the JavaScript refers to something that exists.
+  `stimulus_contract_spec` checks the other direction, from the components in.
+  Node is a development dependency and only that — the gem ships no npm package
+  and needs none at runtime.
+
+### Fixed
+
+- `shadcn_t` did not fall back to the bundled English, though the comment above
+  it had claimed it did since it was written. Every string the components render
+  went through a bare `I18n.t`, so a host whose locale was not `en` got
+  `I18n::MissingTranslationData` — and with `config.i18n.raise_on_missing_translations`,
+  which the Rails generators turn on in development and test, a raised page
+  rather than a fallback string. Found by installing the gem in an Italian app,
+  where the searchable select took the page down.
+
+- `MessageScroller`'s controller called `getContentBottom`, which is exported by
+  `scroll_geometry.js` and was never imported there. The method around it was
+  called by nothing, so it is gone rather than repaired — it would have thrown
+  for the first caller. Found by eslint's first run.
+
 ## [0.1.0] — 2026-08-17
 
 The first release. shadcn/ui ported to Rails ViewComponent 1:1 — the same part

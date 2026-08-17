@@ -112,10 +112,24 @@ module Shadcn
     end
 
     # The user-visible strings the components render, looked up under
-    # `shadcn_view_component.*` with shadcn's English as the default — so the
+    # `shadcn_view_component.*` and falling back to the bundled English — so the
     # gem works untranslated and a host app can override any key.
+    #
+    # The fallback is the `locale: :en` default below, and it has to be there.
+    # This method used to be a bare `I18n.t` while the comment above it already
+    # claimed the English was a default; it was not, and the gem only looked
+    # untranslatable-proof because every app it had been tried in ran in
+    # English. A host running `it` got `I18n::MissingTranslationData` out of a
+    # searchable select — and with `config.i18n.raise_on_missing_translations`,
+    # which the Rails generators turn on in development and test, a raised page
+    # rather than a fallback string.
+    #
+    # A lambda, so the second lookup only happens when the first misses.
     def shadcn_t(key, **interpolations)
-      I18n.t("shadcn_view_component.#{key}", **interpolations)
+      full_key = "shadcn_view_component.#{key}"
+
+      I18n.t(full_key, **interpolations,
+             default: ->(*) { I18n.t(full_key, locale: :en, **interpolations) })
     end
 
     # Combines inline styles without dropping whatever the caller passed.
@@ -152,6 +166,8 @@ module Shadcn
             acc["class"] = [ acc["class"], value ].compact
           when "data-action"
             append_action(acc, value)
+          when "data-controller"
+            append_controller(acc, value)
           else
             acc[name] = value
           end
@@ -172,11 +188,15 @@ module Shadcn
         if name == "data" && value.is_a?(Hash)
           data = value.transform_keys(&:to_s)
           action = data.delete("action")
+          controller = data.delete("controller")
 
           append_action(normalized, action) if action
+          append_controller(normalized, controller) if controller
           normalized["data"] = data unless data.empty?
         elsif name == "data-action"
           append_action(normalized, value)
+        elsif name == "data-controller"
+          append_controller(normalized, value)
         else
           normalized[name] = value
         end
@@ -185,6 +205,21 @@ module Shadcn
 
     def append_action(hash, value)
       hash["data-action"] = [ hash["data-action"], value ].compact.join(" ")
+    end
+
+    # The same treatment `data-action` gets, and for the same reason: Stimulus
+    # reads a space-separated list, so a controller a caller attaches has to add
+    # to the component's own rather than replace it.
+    #
+    # This was missed when `data-action` was fixed, and the failure is quieter.
+    # A host writing `data: { controller: "my-thing" }` got two `data-controller`
+    # attributes — invalid HTML, and the browser keeps the first, which is the
+    # component's. So `my-thing` never connected, with nothing logged and the
+    # component still working perfectly. Found in a host app wiring a dependent
+    # select: choosing a client was supposed to reload its locations, and simply
+    # stopped doing so.
+    def append_controller(hash, value)
+      hash["data-controller"] = [ hash["data-controller"], value ].compact.join(" ")
     end
   end
 end

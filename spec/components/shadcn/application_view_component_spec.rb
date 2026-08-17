@@ -88,6 +88,40 @@ RSpec.describe Shadcn::ApplicationViewComponent do
     end
   end
 
+  # Same contract as `data-action`, and it was missed when that one was fixed.
+  # The failure is quieter: two `data-controller` attributes is invalid HTML, the
+  # browser keeps the first — the component's — and the caller's controller never
+  # connects, with nothing logged and the component still working.
+  describe "data-controller" do
+    context "with the attribute spelling" do
+      it "concatenates onto the component's own controller" do
+        render_inline(Shadcn::Select::Component.new("data-controller": "my-thing"))
+
+        expect(root["data-controller"]).to eq("shadcn--select my-thing")
+      end
+    end
+
+    context "with the idiomatic data: hash" do
+      before do
+        render_inline(
+          Shadcn::Select::Component.new(data: { controller: "my-thing", testid: "t" })
+        )
+      end
+
+      it "concatenates onto the component's own controller" do
+        expect(root["data-controller"]).to eq("shadcn--select my-thing")
+      end
+
+      it "emits the attribute exactly once" do
+        expect(rendered_content.scan("data-controller=").size).to eq(1)
+      end
+
+      it "keeps the rest of the data hash" do
+        expect(root["data-testid"]).to eq("t")
+      end
+    end
+  end
+
   describe "as: (shadcn's asChild)" do
     it "swaps the rendered element while keeping slot and classes", :aggregate_failures do
       render_inline(Shadcn::Badge::Component.new(as: :a, href: "/x")) { "New" }

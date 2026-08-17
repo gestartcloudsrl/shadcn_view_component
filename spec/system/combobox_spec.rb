@@ -167,4 +167,145 @@ RSpec.describe "Combobox", :js do
 
     expect(find_by_id(pointed).text).to eq("Ruby")
   end
+
+  # Multiple selection. What upstream settles — that the panel stays open across
+  # choices and the field empties — is covered here; the two rules that are
+  # *ours*, because Base UI's documentation is silent and Base UI is not
+  # vendored, are marked as such in the example names.
+  describe "multiple" do
+    let(:chip) { "[data-slot=combobox-chip]" }
+
+    def chips
+      all(chip).map { |token| token.text.delete("\n").strip }
+    end
+
+    def posted_values
+      page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("#{combobox} input[type=hidden]")]
+          .map((input) => input.value).filter((value) => value !== "")
+      JS
+    end
+
+    before do
+      visit "/lookbook/preview/shadcn/combobox/multiple"
+      wait_for_stimulus
+    end
+
+    it "starts from what the server rendered", :aggregate_failures do
+      expect(chips).to eq(%w[Ruby Go])
+      expect(posted_values).to eq(%w[rb go])
+    end
+
+    # Both of these were shipped broken and found by looking at the rendered
+    # box, not by reading the controller — the same way most of this family's
+    # corrections were found.
+    it "keeps the field last, whoever added the chip" do
+      find(field).click
+      find("#{item}[data-value=py]").click
+      find("#{item}[data-value=rs]").click
+
+      order = page.evaluate_script(<<~JS)
+        [...document.querySelector("[data-slot=combobox-chips]").children]
+          .filter((node) => node.tagName !== "TEMPLATE")
+          .map((node) => node.dataset.slot || node.tagName.toLowerCase())
+      JS
+
+      # Inserting before the `<template>` instead put every new chip after the
+      # field, with the server-rendered ones still before it.
+      expect(order.last).to eq("combobox-chip-input")
+      expect(order.count("combobox-chip")).to eq(4)
+    end
+
+    # The placeholder was this field's only name, so blanking it left a
+    # `role="combobox"` with none — axe failed it as `label`, critical. The name
+    # is read at render time and never touched again.
+    it "keeps its name while the placeholder comes and goes", :aggregate_failures do
+      expect(find(field)["aria-label"]).to eq("Add a language…")
+
+      all("[data-slot=combobox-chip-remove]").each(&:click)
+
+      expect(find(field)["aria-label"]).to eq("Add a language…")
+    end
+
+    it "drops the placeholder once there is a chip, and puts it back", :aggregate_failures do
+      # Two chips are rendered by the server, so this one is wrong on load —
+      # before anything is clicked.
+      expect(find(field)["placeholder"]).to eq("")
+
+      all("[data-slot=combobox-chip-remove]").each(&:click)
+
+      expect(find(field)["placeholder"]).to eq("Add a language…")
+    end
+
+    it "adds a chip and keeps the panel open", :aggregate_failures do
+      find(field).click
+      find("#{item}[data-value=py]").click
+
+      expect(chips).to eq(%w[Ruby Go Python])
+      expect(posted_values).to eq(%w[rb go py])
+      # Upstream's own multiple example shows both of these.
+      expect(page).to have_css(content)
+      expect(find(field).value).to eq("")
+    end
+
+    it "submits every chip under one bracketed name" do
+      names = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("#{combobox} input[type=hidden]")].map((input) => input.name)
+      JS
+
+      expect(names.uniq).to eq([ "project[languages][]" ])
+    end
+
+    it "keeps the parameter present when the last chip goes" do
+      all("[data-slot=combobox-chip-remove]").each(&:click)
+
+      expect(page).to have_no_css(chip)
+      # The empty sentinel input, so the parameter still arrives and the
+      # association is emptied rather than left alone.
+      expect(page).to have_css("#{combobox} input[type=hidden][value='']", visible: :all)
+    end
+
+    it "takes a chip back off by its X", :aggregate_failures do
+      within(first(chip)) { find("[data-slot=combobox-chip-remove]").click }
+
+      expect(chips).to eq(%w[Go])
+      expect(posted_values).to eq(%w[go])
+    end
+
+    it "ticks every chosen option in the list" do
+      find(field).click
+
+      ticked = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("#{item}[aria-selected=true]")].map((option) => option.dataset.value)
+      JS
+
+      expect(ticked).to eq(%w[rb go])
+    end
+
+    # Ours: the documentation does not say whether re-taking a chosen option
+    # deselects it. This keeps the list and the chips describing one set.
+    it "puts an option back when it is taken twice (ours)", :aggregate_failures do
+      find(field).click
+      find("#{item}[data-value=rb]").click
+
+      expect(chips).to eq(%w[Go])
+      expect(posted_values).to eq(%w[go])
+    end
+
+    # Ours: no documented Backspace behaviour, and the X is a pointer target, so
+    # this is the only way to undo a chip from the keyboard.
+    it "removes the last chip on Backspace in an empty field (ours)" do
+      find(field).send_keys(:backspace)
+
+      expect(chips).to eq(%w[Ruby])
+    end
+
+    it "leaves the field's own text alone while there is any" do
+      find(field).send_keys("ru")
+      find(field).send_keys(:backspace)
+
+      expect(chips).to eq(%w[Ruby Go])
+      expect(find(field).value).to eq("r")
+    end
+  end
 end
