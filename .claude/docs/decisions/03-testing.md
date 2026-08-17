@@ -308,6 +308,16 @@ its own.
 Neither hides a slow test — the timeout names the example, and the wait is per
 assertion rather than per example.
 
+**What a full local run of `spec/system` looks like on a loaded laptop:** three
+to five reds, in a *different* file each time — combobox on one run, the context
+menu's submenu hover on the next — every one of them green when its file is run
+on its own, and the same commit green on CI. They are the pointer-timing specs
+paying for a shared core, not a bug that hides. Two things that make it worse
+and are worth checking before believing a red: another Rails server left running
+(the gallery, or a scratch app), and `bin/rails tailwindcss:watch`. Raise
+`CAPYBARA_WAIT` before concluding anything; if a file is green alone and red in
+the suite, the suite is measuring the machine.
+
 ## axe
 
 Runs over **every preview**, at rest and with each layer open, **in both

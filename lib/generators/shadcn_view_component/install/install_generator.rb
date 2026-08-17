@@ -22,6 +22,19 @@ module ShadcnViewComponent
     class InstallGenerator < Rails::Generators::Base
       source_root File.expand_path("templates", __dir__)
 
+      # Where a Stimulus application is in scope. `controllers/index.js` is the
+      # file importmap-rails generates, and it opens with
+      # `import { application } from "controllers/application"` — so a line
+      # appended there can register onto the app's own instance.
+      #
+      # `app/javascript/application.js` is not that file. It imports
+      # `"controllers"` for the side effect and defines no `application`
+      # binding, which is where this generator used to append: a stock Rails 8
+      # app got `ReferenceError: application is not defined`, no controllers
+      # registered, and every dialog, select and menu inert — with the CSS
+      # working, so it looked installed.
+      JAVASCRIPT_ENTRYPOINT = "app/javascript/controllers/index.js"
+
       TAILWIND_ENTRYPOINTS = [
         "app/assets/tailwind/application.css",
         "app/assets/stylesheets/application.tailwind.css",
@@ -49,18 +62,17 @@ module ShadcnViewComponent
       def add_javascript
         return say_status :skip, "no importmap; import \"shadcn\" yourself", :yellow unless importmap?
 
-        entrypoint = "app/javascript/application.js"
-        return say_status :skip, "#{entrypoint} not found", :yellow unless File.exist?(Rails.root.join(entrypoint))
-
-        if File.read(Rails.root.join(entrypoint)).include?("registerShadcnControllers")
-          return say_status :identical, entrypoint
+        unless File.exist?(Rails.root.join(JAVASCRIPT_ENTRYPOINT))
+          say_status :skip, "#{JAVASCRIPT_ENTRYPOINT} not found; register the controllers yourself", :yellow
+          say javascript_block
+          return
         end
 
-        append_to_file entrypoint, <<~JS
+        if File.read(Rails.root.join(JAVASCRIPT_ENTRYPOINT)).include?("registerShadcnControllers")
+          return say_status :identical, JAVASCRIPT_ENTRYPOINT
+        end
 
-          import { registerShadcnControllers } from "shadcn"
-          registerShadcnControllers(application)
-        JS
+        append_to_file JAVASCRIPT_ENTRYPOINT, "\n#{javascript_block}"
       end
 
       def show_layout_hint
@@ -109,6 +121,17 @@ module ShadcnViewComponent
       rescue ArgumentError
         # Different volumes: no relative path exists at all.
         false
+      end
+
+      # `application` is the binding `controllers/index.js` already has. Adding
+      # an `Application.start()` here instead would start a *second* Stimulus
+      # instance beside the app's own, and two instances fight over every
+      # element they both claim.
+      def javascript_block
+        <<~JS
+          import { registerShadcnControllers } from "shadcn"
+          registerShadcnControllers(application)
+        JS
       end
 
       def tailwind_block(entrypoint)
