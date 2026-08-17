@@ -18,14 +18,35 @@ scroller's load behaviour is asserted, because it is the realistic case.
       reaches the engine with `../../../../..`, a relationship no host has.
       A generated throwaway app in CI would close it.
 
-- [ ] **Create the GitHub repository and push.** The gemspec already points at
-      `github.com/sirion1987/shadcn_view_component`; the URLs are dead until it
-      exists. `git remote add origin … && git push -u origin main`.
+- [x] **Create the GitHub repository and push.** Done, at
+      `github.com/gestartcloudsrl/shadcn_view_component` — **not** the
+      `sirion1987/…` the gemspec named, which made its `homepage`,
+      `source_code_uri`, `changelog_uri` and `bug_tracker_uri` four links to a
+      repository that does not exist. Corrected; they all derive from
+      `spec.homepage`, so it was one line.
+
+      The first push was rejected: `test/dummy/log/test.log.0` had been in the
+      history since the initial commit at 100 MiB *plus four bytes*, against
+      GitHub's hard limit of exactly 100 MiB. `.gitignore` said
+      `/test/dummy/log/*.log` and Rails rotates to `test.log.0`, which that glob
+      does not match. Removed with `git filter-repo`; the repository went from
+      23 MB to 1.9 MB.
 - [ ] **Decide the version.** Still `0.1.0`. The API is stable enough to mean it,
       but `part`, the FormBuilder and the `Shadcn::` namespace are all recent.
-- [ ] **Check the CI actually passes on GitHub.** It has only ever run locally.
-      The browser specs need `browser-actions/setup-chrome`, which is configured
-      but unproven.
+- [x] **Check the CI actually passes on GitHub.** It runs, and it is green —
+      `browser-actions/setup-chrome` and the whole browser suite included.
+
+      It earned its keep on the first red run, and the lesson is worth more than
+      the item: **it audited a palette this machine never had.** Headless Chrome
+      takes `prefers-color-scheme` from the desktop it runs on, so a Mac in dark
+      mode and a Linux runner with no preference audit different halves of the
+      themes — and eleven real contrast violations had been sitting in the half
+      nobody ran. The suite now pins the scheme and audits both; see
+      [decisions/03-testing.md](decisions/03-testing.md).
+
+      What CI is still not proving is anything a *host* does: it runs this
+      repository's own suite, against the dummy, which is the one application
+      arranged unlike every other. That is the entry above.
 
 ## Coverage gaps worth closing
 

@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.version     = ShadcnViewComponent::VERSION
   spec.authors     = [ "sirion1987" ]
   spec.email       = [ "sirion1987@gmail.com" ]
-  spec.homepage    = "https://github.com/sirion1987/shadcn_view_component"
+  spec.homepage    = "https://github.com/gestartcloudsrl/shadcn_view_component"
   spec.summary     = "shadcn/ui components, ported 1:1 to Rails ViewComponent."
   spec.description = "A 1:1 port of the shadcn/ui component registry to Rails ViewComponent. " \
                      "Same part names, same variants, same Tailwind classes and data-slot " \
