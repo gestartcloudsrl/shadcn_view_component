@@ -4,9 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] — 2026-08-17
 
 ### Added
+
+- **Multiple selection in `Combobox`.** `multiple: true` takes an array in
+  `value:` and renders the chips box in place of the field, through a new
+  `combobox_chips` slot. Choosing an option adds a chip, taking it again puts it
+  back, and Backspace on an empty field removes the last one. It submits as a
+  Rails collection — `name` gains `[]`, one hidden input per value, plus an
+  empty one so clearing every chip still sends the parameter. The chips markup
+  was already ported; adding one is what was missing. Two of the rules are ours
+  rather than upstream's, because Base UI documents neither and is not vendored
+  here to check against; both are named as such in the system spec. See
+  [features/combobox.md](.claude/docs/features/combobox.md).
 
 - `bin/eslint`, and a lint step for it in CI. It covers the one thing Ruby
   tooling cannot see: whether the JavaScript refers to something that exists.

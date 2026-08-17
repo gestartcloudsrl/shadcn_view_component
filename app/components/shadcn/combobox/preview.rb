@@ -19,6 +19,13 @@ module Shadcn
       def grouped
         render_with_template
       end
+
+      # Multiple selection: the chips box in place of the field. Two values
+      # start chosen, so the server-rendered half — the ticks, the chips and the
+      # hidden inputs agreeing before anything is clicked — is covered too.
+      def multiple
+        render_with_template
+      end
     end
   end
 end

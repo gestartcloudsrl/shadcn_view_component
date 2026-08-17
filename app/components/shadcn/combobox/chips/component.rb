@@ -24,6 +24,30 @@ module Shadcn
             "dark:has-aria-invalid:ring-destructive/40"
           }
         end
+
+        def element_attributes(**defaults)
+          super(**{ "data-shadcn--combobox-target" => "chips" }.merge(defaults))
+        end
+
+        def call
+          render_element(body: safe_join([ content, template ]))
+        end
+
+        private
+
+        # One blank chip in a `<template>`, which the controller clones when a
+        # value is taken.
+        #
+        # The alternative was building the chip's markup in JavaScript, and that
+        # would put this library's class strings in two places — a `.js` file
+        # Tailwind does scan but `parity_spec` does not read, so the copy would
+        # drift from the component silently and upstream would never be checked
+        # against it. Cloning keeps one source: the Chip component.
+        def template
+          tag.template("data-shadcn--combobox-target": "chipTemplate") do
+            render(Shadcn::Combobox::Chip::Component.new)
+          end
+        end
       end
     end
   end

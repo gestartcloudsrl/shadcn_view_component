@@ -58,13 +58,52 @@ them wrong until the page was opened:
 pointer opens it by clicking and a keyboard by pressing Down, which is what both
 do anyway.
 
+## Multiple selection
+
+`multiple: true` is Base UI's own prop, and as there `value:` then takes an
+array. The chips box replaces the field — `combobox_chips` rather than
+`combobox_input`, because upstream renders `ComboboxChips` where the
+single-selection examples render `ComboboxInput`, with the field moving inside
+it as `ComboboxChipsInput`.
+
+**It submits the way Rails reads a collection**: `name` gains `[]` and there is
+one hidden input per value, so `params[:project][:languages]` is an array with
+nothing to parse. An empty one is rendered first, so removing every chip still
+sends the parameter and empties the association rather than leaving it alone —
+the same trick `collection_select ... include_hidden: true` plays.
+
+New chips are **cloned from a `<template>`** the Chips component renders, not
+built in JavaScript. Building them there would put this library's class strings
+in a `.js` file — one Tailwind scans but `parity_spec` does not read, so the
+copy would drift from the component in silence and upstream would never be
+checked against it.
+
+**The chips field carries its own `aria-label`**, and that is ours in the same
+way the trigger's name is. Its only name was the `placeholder`, and the
+controller blanks that once there are chips — which upstream's example does
+too — leaving a `role="combobox"` with no name and a critical axe `label`
+violation. The caller's placeholder is read at render time and kept as the
+name, so it stays put while the placeholder comes and goes.
+
+The order of finding it is worth keeping: the placeholder was blanked to fix a
+bug visible in a screenshot, the whole suite was green on the run *before* that
+change, and the accessibility spec failed on the run after. Neither run was
+wrong; the interaction did not exist until the first fix created it.
+
+Two of the rules are **ours**, and marked as such in the system spec's example
+names, because Base UI's documentation does not describe either and Base UI is
+not vendored here to check against:
+
+- **Taking a chosen option puts it back.** It is what the tick in the list
+  invites, and it keeps the list and the chips describing one set.
+- **Backspace on an empty field removes the last chip.** The X is a pointer
+  target, so without this there is no keyboard way to undo one.
+
+What upstream *does* settle, from its own multiple example, is covered rather
+than invented: the panel stays open across choices and the field empties.
+
 ## Not reproduced
 
-- **Adding chips.** The chips markup is ported — the box, the token, the X, the
-  field that sits among them — and *removing* one works. What is not wired is
-  the other half: choosing an option while in chips mode should add a token and
-  extend a multi-valued parameter, and it does not yet. Single selection is
-  complete.
 - **`ComboboxCollection`**, Base UI's render-prop helper: it takes an array and
   renders an item per entry. In ERB that is a loop, and a loop has no element to
   put a slot on. Also in `allowed_missing`.

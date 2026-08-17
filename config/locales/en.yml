@@ -22,6 +22,9 @@ en:
       clear: Clear
       toggle: Show options
       remove: Remove
+      # The chips field's accessible name, when the caller gave it no
+      # placeholder to borrow one from.
+      add: Add an item
     carousel:
       previous: Previous slide
       next: Next slide
