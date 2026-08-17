@@ -112,10 +112,24 @@ module Shadcn
     end
 
     # The user-visible strings the components render, looked up under
-    # `shadcn_view_component.*` with shadcn's English as the default — so the
+    # `shadcn_view_component.*` and falling back to the bundled English — so the
     # gem works untranslated and a host app can override any key.
+    #
+    # The fallback is the `locale: :en` default below, and it has to be there.
+    # This method used to be a bare `I18n.t` while the comment above it already
+    # claimed the English was a default; it was not, and the gem only looked
+    # untranslatable-proof because every app it had been tried in ran in
+    # English. A host running `it` got `I18n::MissingTranslationData` out of a
+    # searchable select — and with `config.i18n.raise_on_missing_translations`,
+    # which the Rails generators turn on in development and test, a raised page
+    # rather than a fallback string.
+    #
+    # A lambda, so the second lookup only happens when the first misses.
     def shadcn_t(key, **interpolations)
-      I18n.t("shadcn_view_component.#{key}", **interpolations)
+      full_key = "shadcn_view_component.#{key}"
+
+      I18n.t(full_key, **interpolations,
+             default: ->(*) { I18n.t(full_key, locale: :en, **interpolations) })
     end
 
     # Combines inline styles without dropping whatever the caller passed.

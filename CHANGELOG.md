@@ -16,6 +16,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- `shadcn_t` did not fall back to the bundled English, though the comment above
+  it had claimed it did since it was written. Every string the components render
+  went through a bare `I18n.t`, so a host whose locale was not `en` got
+  `I18n::MissingTranslationData` — and with `config.i18n.raise_on_missing_translations`,
+  which the Rails generators turn on in development and test, a raised page
+  rather than a fallback string. Found by installing the gem in an Italian app,
+  where the searchable select took the page down.
+
 - `MessageScroller`'s controller called `getContentBottom`, which is exported by
   `scroll_geometry.js` and was never imported there. The method around it was
   called by nothing, so it is gone rather than repaired — it would have thrown
