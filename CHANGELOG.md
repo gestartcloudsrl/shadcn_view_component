@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `data-controller` from a caller now concatenates onto the component's own
+  instead of being emitted twice. `data-action` was given this treatment
+  already; `data-controller` was missed, and its failure is quieter — two
+  attributes is invalid HTML, the browser keeps the first, which is the
+  component's, so the *caller's* controller never connects with nothing logged
+  and the component still working. Found in a host app wiring a dependent
+  select: `data: { controller: "set-location" }` on a Select, and choosing a
+  client silently stopped reloading its locations.
+
 ## [0.2.0] — 2026-08-17
 
 ### Added

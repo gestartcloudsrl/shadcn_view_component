@@ -166,6 +166,8 @@ module Shadcn
             acc["class"] = [ acc["class"], value ].compact
           when "data-action"
             append_action(acc, value)
+          when "data-controller"
+            append_controller(acc, value)
           else
             acc[name] = value
           end
@@ -186,11 +188,15 @@ module Shadcn
         if name == "data" && value.is_a?(Hash)
           data = value.transform_keys(&:to_s)
           action = data.delete("action")
+          controller = data.delete("controller")
 
           append_action(normalized, action) if action
+          append_controller(normalized, controller) if controller
           normalized["data"] = data unless data.empty?
         elsif name == "data-action"
           append_action(normalized, value)
+        elsif name == "data-controller"
+          append_controller(normalized, value)
         else
           normalized[name] = value
         end
@@ -199,6 +205,21 @@ module Shadcn
 
     def append_action(hash, value)
       hash["data-action"] = [ hash["data-action"], value ].compact.join(" ")
+    end
+
+    # The same treatment `data-action` gets, and for the same reason: Stimulus
+    # reads a space-separated list, so a controller a caller attaches has to add
+    # to the component's own rather than replace it.
+    #
+    # This was missed when `data-action` was fixed, and the failure is quieter.
+    # A host writing `data: { controller: "my-thing" }` got two `data-controller`
+    # attributes — invalid HTML, and the browser keeps the first, which is the
+    # component's. So `my-thing` never connected, with nothing logged and the
+    # component still working perfectly. Found in a host app wiring a dependent
+    # select: choosing a client was supposed to reload its locations, and simply
+    # stopped doing so.
+    def append_controller(hash, value)
+      hash["data-controller"] = [ hash["data-controller"], value ].compact.join(" ")
     end
   end
 end
