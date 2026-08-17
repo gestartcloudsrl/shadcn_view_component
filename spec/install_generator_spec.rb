@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "tailwindcss/ruby"
+require "tmpdir"
 # `rails/generators` before the generator itself: its own `require
 # "rails/generators/base"` is not enough on its own, and the failure names
 # `Rails::Generators::Actions` rather than anything about generators being
@@ -63,6 +64,53 @@ RSpec.describe ShadcnViewComponent::Generators::InstallGenerator do
     expect(css).to include("--radius")
     expect(css).to include("theme-blue")
     expect(css).to include("bg-primary")
+  end
+
+  # The other half of the install, and the half that was broken: the generator
+  # appended `registerShadcnControllers(application)` to
+  # `app/javascript/application.js`, where a stock Rails 8 app defines no
+  # `application` — it imports `"controllers"` for the side effect. The browser
+  # said `ReferenceError: application is not defined`, no controllers were
+  # registered, and every dialog, select and menu was inert while the CSS
+  # worked, so it looked installed.
+  #
+  # Found by generating a throwaway Rails app and clicking the dialog, because
+  # the dummy is not arranged like a host: it has no `controllers/` directory at
+  # all and starts Stimulus in its own `application.js`. So this builds the tree
+  # a host actually has.
+  describe "the Stimulus registration" do
+    let(:app) { Pathname(Dir.mktmpdir) }
+
+    def index = app.join("app/javascript/controllers/index.js")
+
+    before do
+      index.dirname.mkpath
+      index.write(<<~JS)
+        import { application } from "controllers/application"
+        import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
+        eagerLoadControllersFrom("controllers", application)
+      JS
+      app.join("config").mkpath
+      app.join("config/importmap.rb").write("")
+
+      allow(Rails).to receive(:root).and_return(app)
+    end
+
+    after { FileUtils.remove_entry(app) }
+
+    it "registers onto the application the app already has", :aggregate_failures do
+      described_class.new([], {}, destination_root: app.to_s).invoke(:add_javascript)
+      written = index.read
+
+      expect(written).to include("registerShadcnControllers(application)")
+      # The binding it uses has to be one the file defines, which is the whole
+      # of the bug: this file imports `application`, and `application.js` does
+      # not.
+      expect(written).to include("import { application }")
+      # And not a second Stimulus instance beside the app's own — two of them
+      # fight over every element they both claim.
+      expect(written).not_to include("Application.start")
+    end
   end
 
   # A path that starts at the root of a filesystem is right on the machine that

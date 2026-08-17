@@ -9,14 +9,27 @@ scroller's load behaviour is asserted, because it is the realistic case.
 
 ## Before publishing
 
-- [ ] **Nothing exercises the install path end to end.**
-      `spec/install_generator_spec.rb` now compiles the CSS block the generator
-      writes, which is what caught `@import "shadcn.css"` resolving nowhere.
-      What is still unexercised is the rest of a first install: the Stimulus
-      line, the importmap pin and the layout tags are asserted by no spec, and
-      the only application this repo can see is the dummy — whose entrypoint
-      reaches the engine with `../../../../..`, a relationship no host has.
-      A generated throwaway app in CI would close it.
+- [ ] **Nothing exercises the install path end to end, in CI.**
+      It has now been exercised *by hand*, once, and it found the second half of
+      the install broken: the generator appended
+      `registerShadcnControllers(application)` to `app/javascript/application.js`,
+      where a stock Rails 8 app defines no such binding. `ReferenceError:
+      application is not defined`, nothing registered, every dialog and select
+      inert — while the CSS worked, so it looked installed. Fixed, and
+      `spec/install_generator_spec.rb` now covers both halves.
+
+      **How it was found, because it is the only way this class of bug is
+      found:** `rails new` in a scratch directory, the gem added with `path:`,
+      the generator run, a page with a Button and a Dialog, and a click. The
+      dummy cannot stand in for that — it has no `controllers/` directory at
+      all and starts Stimulus in its own `application.js`, and its Tailwind
+      entrypoint reaches the engine with `../../../../..`. It is the one
+      application arranged unlike every host.
+
+      What is still missing is doing that *in CI*, on every commit: generate a
+      throwaway app, install into it, boot it, click one component. Until then
+      the install is verified by the two specs plus whoever remembers to try it
+      by hand.
 
 - [x] **Create the GitHub repository and push.** Done, at
       `github.com/gestartcloudsrl/shadcn_view_component` — **not** the

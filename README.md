@@ -55,12 +55,22 @@ relative to the entrypoint, which then holds everywhere. That is what the
 generator writes when it can.
 
 ```js
-// app/javascript/application.js
-import { Application } from "@hotwired/stimulus"
+// app/javascript/controllers/index.js
 import { registerShadcnControllers } from "shadcn"
-
-registerShadcnControllers(Application.start())
+registerShadcnControllers(application)
 ```
+
+**That file, and not `app/javascript/application.js`.** `controllers/index.js`
+is where importmap-rails puts `import { application } from
+"controllers/application"`, so the registration has an instance to attach to.
+`application.js` imports `"controllers"` for the side effect and defines no
+such binding: register there and the browser says `ReferenceError: application
+is not defined`, nothing is registered, and every dialog, select and menu is
+inert — with the CSS working, so it looks installed. Starting a second
+`Application.start()` instead is worse in a subtler way: two Stimulus instances
+then fight over every element they both claim.
+
+If your app has no Stimulus yet, start one and pass it that same way.
 
 The engine contributes its own importmap pins, so `shadcn` resolves with no
 further configuration when the host app uses `importmap-rails`.
