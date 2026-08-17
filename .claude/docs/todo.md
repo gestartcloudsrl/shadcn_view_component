@@ -44,8 +44,16 @@ scroller's load behaviour is asserted, because it is the realistic case.
       `/test/dummy/log/*.log` and Rails rotates to `test.log.0`, which that glob
       does not match. Removed with `git filter-repo`; the repository went from
       23 MB to 1.9 MB.
-- [ ] **Decide the version.** Still `0.1.0`. The API is stable enough to mean it,
-      but `part`, the FormBuilder and the `Shadcn::` namespace are all recent.
+- [x] **Decide the version.** `0.1.0`, tagged. Not because the API is unsettled
+      — `part`, the FormBuilder and the `Shadcn::` namespace have held through
+      every family since — but because nothing has been used by an application
+      that is not this repository's own dummy, and three days of leaving this
+      machine produced three real defects (a 100 MiB blob, a palette never
+      audited, controllers never registered). A first release says *this is
+      complete and unproven in the field*, which is the truth.
+
+      What 0.1.0 contains is written in the CHANGELOG rather than here: every
+      family in the vendored registry, `not_yet_ported` empty.
 - [x] **Check the CI actually passes on GitHub.** It runs, and it is green —
       `browser-actions/setup-chrome` and the whole browser suite included.
 

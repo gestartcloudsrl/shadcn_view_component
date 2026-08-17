@@ -100,8 +100,10 @@ app/components/shadcn/
                                  # lives in — `calendar/month.rb`, `chart/plot.rb`
   <family>/preview.rb + previews/*.html.erb
 
-app/javascript/shadcn/           # 15 controllers + popper, dismiss, focus,
-                                 # floating, top_layer, theme, id
+app/javascript/shadcn/           # one controller per family with behaviour,
+                                 # over popper, dismiss, focus, floating,
+                                 # top_layer, theme, id (no count here: the
+                                 # last one went stale at 15 of what are now 32)
 lib/shadcn_view_component/       # engine, form_builder, generated themes registry
 lib/tasks/themes.rake            # the theme generator
 vendor/shadcn/                   # upstream TSX + themes.json, the parity reference

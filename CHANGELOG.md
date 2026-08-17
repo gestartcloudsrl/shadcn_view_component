@@ -6,7 +6,36 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-08-17
+
+The first release. shadcn/ui ported to Rails ViewComponent 1:1 — the same part
+names, variants, Tailwind classes and `data-slot` attributes — with Radix UI's
+behaviour reimplemented in Stimulus, and no React and no npm at runtime.
+
 ### Added
+
+- **Every component in the vendored registry.** 64 families under `Shadcn::`,
+  from `Accordion` to `Tooltip`, with `parity_spec`'s `not_yet_ported` list
+  empty. `form` is the one deliberate exception: it is answered by a Rails
+  FormBuilder rather than transcribed, since Rails already owns ids, names and
+  errors.
+- **32 Stimulus controllers**, one per family with behaviour, over shared
+  modules for positioning (`popper.js`, `floating.js`), the dismiss stack, the
+  focus trap, the browser's top layer, typeahead and exit animations.
+- **Shapes drawn on the server where the React version reaches for a package.**
+  The calendar builds its own months, the carousel its own track, the OTP input
+  its own boxes, and the chart draws pie, bar, line and area over a `Chart::Plot`
+  that computes the scale, the ticks and the bands — because `chart.tsx` draws
+  nothing at all, and recharts is 29,091 lines. Where a package *is* the work,
+  that is recorded rather than pretended away.
+- **The icons are lucide's own files**, vendored under `vendor/lucide/icons` and
+  generated into the registry the component reads. A host adds its own with
+  `IconRegistry.load_directory`, a directory of SVGs and one line — no asset
+  pipeline involved.
+- **An accessibility audit in both palettes**, over every preview, at rest and
+  with each layer open. The colour scheme is pinned, because headless Chrome
+  otherwise takes it from the desktop it runs on and audits whichever palette
+  the author is sitting in front of.
 
 - RuboCop, on [Rails omakase](https://github.com/rails/rubocop-rails-omakase) —
   which is the style the codebase was already written in — with `bin/rubocop`
