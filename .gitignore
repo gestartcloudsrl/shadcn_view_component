@@ -22,3 +22,9 @@
 # Compiled by `bin/rails tailwindcss:build`.
 /test/dummy/app/assets/builds/*
 !/test/dummy/app/assets/builds/.keep
+# Development tooling only — eslint. `package-lock.json` *is* committed, unlike
+# `Gemfile.lock` above: that one stays out so the CI matrix resolves against a
+# range of Rails and Ruby, and a linter has no matrix. It has one job, and a
+# new minor of it turning CI red on an unrelated commit is the failure to
+# avoid.
+node_modules/

@@ -445,17 +445,6 @@ export default class extends Controller {
     return this.hasSpacerTarget ? this.spacerTarget : null
   }
 
-  // Kept because `getContentBottom` and `getTailSpacerHeight` are what the
-  // anchoring slice will size the spacer from, and importing them here is what
-  // will make that a change to one method rather than to the import list.
-  contentBottom() {
-    return getContentBottom({
-      content: this.contentTarget,
-      spacer: this.spacer,
-      viewport: this.viewportTarget
-    })
-  }
-
   tailSpacerFor(scrollTop) {
     return getTailSpacerHeight({
       content: this.contentTarget,
