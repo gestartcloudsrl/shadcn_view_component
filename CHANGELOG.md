@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `bin/eslint`, and a lint step for it in CI. It covers the one thing Ruby
+  tooling cannot see: whether the JavaScript refers to something that exists.
+  `stimulus_contract_spec` checks the other direction, from the components in.
+  Node is a development dependency and only that — the gem ships no npm package
+  and needs none at runtime.
+
+### Fixed
+
+- `MessageScroller`'s controller called `getContentBottom`, which is exported by
+  `scroll_geometry.js` and was never imported there. The method around it was
+  called by nothing, so it is gone rather than repaired — it would have thrown
+  for the first caller. Found by eslint's first run.
+
 ## [0.1.0] — 2026-08-17
 
 The first release. shadcn/ui ported to Rails ViewComponent 1:1 — the same part
