@@ -3,13 +3,21 @@
 ```sh
 bin/setup                                  # bundle install + build Tailwind
 bundle exec rake                           # the whole suite
-bin/rubocop                                # style, `-a` to autocorrect
+bin/rubocop                                # Ruby style, `-a` to autocorrect
+bin/eslint                                 # the controllers, `--fix` likewise
 cd test/dummy && bin/rails s               # the gallery at /lookbook
 ```
 
 Style is [Rails omakase](https://github.com/rails/rubocop-rails-omakase), which
 is what the codebase was already written in. Nothing polices line length or
 method size — the point is to keep reviews about the code.
+
+`bin/eslint` is there for one class of bug rather than for style: a reference
+to something that does not exist. `stimulus_contract_spec` checks that every
+action, target and value a *component* names exists in the JavaScript, and says
+nothing about whether the JavaScript itself calls a function nobody defined.
+It found one on the first run. Node is a development dependency and only that —
+the gem ships no npm package and needs none at runtime.
 
 ## Adding a component
 

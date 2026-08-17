@@ -1,0 +1,13 @@
+{
+  "name": "shadcn_view_component",
+  "private": true,
+  "type": "module",
+  "description": "Development tooling only. The gem ships no JavaScript dependencies and needs no npm at runtime — the controllers are plain ES modules served by importmap-rails.",
+  "scripts": {
+    "lint": "eslint app/javascript"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0",
+    "globals": "^16.5.0"
+  }
+}

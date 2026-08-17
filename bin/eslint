@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+# The JavaScript half of `bin/rubocop`. Node is a *development* dependency and
+# nothing else: the gem ships no npm package and needs none at runtime — the
+# controllers are plain ES modules that importmap-rails serves as they are.
+#
+# `npm install` on the first run, so a fresh checkout does not fail with a
+# missing binary and no hint as to why.
+cd "$(dirname "$0")/.." || exit 1
+
+[ -d node_modules/eslint ] || npm install --silent || exit 1
+
+# Default to the only directory worth linting; anything passed wins, so
+# `bin/eslint --fix app/javascript/shadcn/popper.js` works.
+[ $# -eq 0 ] && set -- app/javascript
+
+exec npx --no-install eslint "$@"

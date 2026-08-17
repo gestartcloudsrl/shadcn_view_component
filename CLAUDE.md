@@ -67,6 +67,7 @@ alternatives were already measured and rejected.
 bin/setup                                     # bundle install + build Tailwind
 bundle exec rake                              # everything (rspec)
 bin/rubocop                                   # Rails omakase style; -a to autocorrect
+bin/eslint                                    # the JavaScript half; --fix to autocorrect
 bin/console                                   # IRB + dummy app; `render`, `slots`, `upstream`, `reload!`
 
 bundle exec rspec spec/system                 # browser specs only (needs Chrome)
@@ -128,6 +129,13 @@ The family file `<family>.rb` is a *sibling* of `<family>/`, not inside it —
 see [architecture](.claude/docs/decisions/01-architecture.md#api-shape).
 
 ## Traps
+
+- **Node is a development dependency and only that.** `package.json` exists for
+  eslint; the gem ships no npm package and needs none at runtime. `bin/eslint`
+  runs `npm install` on a fresh checkout by itself. `package-lock.json` *is*
+  committed, where `Gemfile.lock` is not — the lock is out so the CI matrix
+  resolves a range of Rails and Ruby, and a linter has no matrix.
+
 
 These bite while editing, so they are here rather than in the docs.
 

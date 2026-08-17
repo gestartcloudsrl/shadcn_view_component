@@ -19,6 +19,17 @@ jobs:
 
       - run: bin/rubocop --format github
 
+      # The JavaScript half. Node is a development dependency only — the gem
+      # ships no npm package — so it is installed here and nowhere else.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx eslint app/javascript
+
   test:
     runs-on: ubuntu-latest
 
