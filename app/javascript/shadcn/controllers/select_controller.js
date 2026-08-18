@@ -35,14 +35,9 @@ export default class extends Controller {
     this.triggerTarget.setAttribute("aria-controls", this.contentTarget.id)
     this.triggerTarget.dataset.state = "closed"
 
-    // `aria-activedescendant` needs something to point at, and the server
-    // cannot know these ids. Generated here for the same reason the content's
-    // is, and with the same helper: `crypto.randomUUID()` is secure-context
-    // only, so it is `undefined` over plain HTTP.
     if (this.searchableValue && this.hasSearchTarget && this.hasListTarget) {
       this.listTarget.id ||= uniqueId("shadcn-select-list")
       this.searchTarget.setAttribute("aria-controls", this.listTarget.id)
-      this.itemTargets.forEach((item) => (item.id ||= uniqueId("shadcn-select-item")))
     }
 
     this.layer = new FloatingLayer({
@@ -270,6 +265,16 @@ export default class extends Controller {
     // Moving DOM focus would take it out of the search field and typing would
     // stop, so a searchable select points at the item instead of focusing it.
     if (this.searchableValue) {
+      // Assigned here rather than in `connect`, which only ever saw the items
+      // the server rendered. Anything added afterwards — a dependent select
+      // refilling its options when another one changes — arrived without an id,
+      // and `aria-activedescendant` then pointed at nothing: the highlight moved
+      // on screen and a screen reader followed none of it. Silent, and invisible
+      // to anyone not listening.
+      //
+      // `uniqueId` rather than `crypto.randomUUID()`, which is secure-context
+      // only and `undefined` over plain HTTP.
+      item.id ||= uniqueId("shadcn-select-item")
       this.searchTarget.setAttribute("aria-activedescendant", item.id)
     } else {
       item.focus({ preventScroll: true })

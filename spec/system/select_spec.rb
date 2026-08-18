@@ -450,6 +450,39 @@ RSpec.describe "Select", :js do
       JS
     end
 
+    # The id is assigned where it is read rather than in `connect`, which only
+    # ever saw the options the server rendered. A host refilling the list — a
+    # dependent select, the case this came from — left the new items without
+    # one, and `aria-activedescendant` pointed at nothing: the highlight moved
+    # on screen and a screen reader followed none of it.
+    it "points at an option added after the controller connected" do
+      page.execute_script(<<~JS)
+        // Scoped to the open panel: the gallery layout carries its own
+        // ThemeSelector and ModeToggle, so this preview's select is not the only
+        // one on the page.
+        const list = document.querySelector("[data-slot=select-content]:not([hidden]) [data-slot=select-list]")
+        const original = list.querySelector("[data-slot=select-item]")
+        const clone = original.cloneNode(true)
+        clone.removeAttribute("id")
+        delete clone.dataset.highlighted
+        clone.dataset.value = "damson"
+        clone.textContent = "Damson"
+        list.appendChild(clone)
+      JS
+
+      # Filtering rather than arrowing: it leaves exactly one visible option, so
+      # the highlight lands on the new item whatever the list order is.
+      fill_in_search("damson")
+
+      expect(page.evaluate_script(<<~JS)).to be(true)
+        (() => {
+          const field = document.querySelector("[data-slot=select-input-wrapper] input")
+          const id = field.getAttribute("aria-activedescendant")
+          return !!id && document.getElementById(id).dataset.value === "damson"
+        })()
+      JS
+    end
+
     # Substring, not prefix — which is what shadcn's aria variant does, and what
     # makes a filter worth having over the typeahead the plain select already
     # has. "err" is in the middle of Blueberry.

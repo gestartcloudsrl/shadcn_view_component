@@ -330,7 +330,13 @@ export default class extends Controller {
       else delete other.dataset.highlighted
     }
 
-    if (item) this.searchTarget.setAttribute("aria-activedescendant", item.id)
+    // The Item component gives every server-rendered option an id, so this only
+    // catches the ones a host adds later — but that is exactly the case that was
+    // broken, and it failed without a sound.
+    if (item) {
+      item.id ||= uniqueId("shadcn-combobox-item")
+      this.searchTarget.setAttribute("aria-activedescendant", item.id)
+    }
     else this.searchTarget.removeAttribute("aria-activedescendant")
 
     item?.scrollIntoView({ block: "nearest" })
