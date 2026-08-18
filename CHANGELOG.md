@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- An option added to a `Select`, `Combobox` or `Command` after its controller
+  connected now gets an id, so `aria-activedescendant` has something to point
+  at. The ids were handed out once in `connect`, which only ever saw what the
+  server rendered — anything appended later arrived without one, the attribute
+  pointed at nothing, and the highlight moved on screen while a screen reader
+  followed none of it. Silent, and invisible to anyone not listening.
+
+  The id is assigned where it is read instead, so it no longer matters when or
+  by whom the option was created. Found wiring a dependent select in a host app:
+  choosing a client refills the sites beside it.
+
 ## [0.3.0] — 2026-08-18
 
 ### Added

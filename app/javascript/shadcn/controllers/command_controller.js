@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { commandScore } from "shadcn/command_score"
+import { uniqueId } from "shadcn/id"
 
 // The palette. Items are rendered by the server and this filters, ranks and
 // walks them — which is what `cmdk` does, minus the part where it also owns the
@@ -136,7 +137,12 @@ export default class extends Controller {
     for (const element of [ this.hasSearchTarget && this.searchTarget, this.hasListTarget && this.listTarget ]) {
       if (!element) continue
 
-      if (item) element.setAttribute("aria-activedescendant", item.id)
+      if (item) {
+        // As in the select and the combobox: the id is assigned where it is
+        // read, so an item added after `connect` still has one to point at.
+        item.id ||= uniqueId("shadcn-command-item")
+        element.setAttribute("aria-activedescendant", item.id)
+      }
       else element.removeAttribute("aria-activedescendant")
     }
   }
