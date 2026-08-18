@@ -7,6 +7,7 @@ module Shadcn
     # React passes variant/size/spacing down through context; here the group
     # exposes them to its items through the slot, which is the same idea.
     class Component < ApplicationViewComponent
+      include Concerns::SubmitsValue
       renders_many :items, ->(**kwargs, &block) {
         Item::Component.new(variant:, size:, spacing:, **kwargs, &block)
       }
@@ -54,12 +55,7 @@ module Shadcn
       def hidden_input
         return unless name
 
-        tag.input(
-          type: "hidden",
-          name: name,
-          value: value,
-          "data-shadcn--toggle-group-target": "input"
-        )
+        tag.input(**hidden_input_attributes("data-shadcn--toggle-group-target" => "input"))
       end
     end
   end

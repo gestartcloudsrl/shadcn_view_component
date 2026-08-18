@@ -4,6 +4,26 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`input_attributes:` on `Select`, `RadioGroup` and `ToggleGroup`**, reaching
+  the hidden input that carries the control's value into the form and nothing
+  else. That input is the library's own invention — Radix bubbles a native
+  control instead — and a host had no way to name it. `id`, which a
+  `<label for>` or an external script needs, and `form`, which is how HTML lets
+  a control submit with a form it does not sit inside, had no workaround at all.
+  `name` and `value` stay the component's.
+
+  Not offered on Combobox in `multiple` mode, Slider with several thumbs or
+  Calendar in `range`/`multiple`: those render several inputs, and copying a
+  caller's attributes onto each would duplicate `id` and connect a
+  `data-controller` once per input. Those take their attributes on the root.
+
+  Every rendered snapshot is unchanged: the attribute order the components
+  emitted before is preserved.
+
 ## [0.2.1] — 2026-08-17
 
 ### Fixed

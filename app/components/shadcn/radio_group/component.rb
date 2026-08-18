@@ -4,6 +4,7 @@ module Shadcn
   module RadioGroup
     # Port of registry/new-york-v4/ui/radio-group.tsx
     class Component < ApplicationViewComponent
+      include Concerns::SubmitsValue
       renders_many :items, "Shadcn::RadioGroup::Item::Component"
 
       slot_name :"radio-group"
@@ -43,12 +44,7 @@ module Shadcn
       def hidden_input
         return unless name
 
-        tag.input(
-          type: "hidden",
-          name: name,
-          value: value,
-          "data-shadcn--radio-group-target": "input"
-        )
+        tag.input(**hidden_input_attributes("data-shadcn--radio-group-target" => "input"))
       end
     end
   end

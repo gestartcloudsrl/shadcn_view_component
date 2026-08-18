@@ -8,6 +8,7 @@ module Shadcn
     # is given a hidden input mirrors the selection, the way Radix's BubbleSelect
     # does, so the control submits with the form.
     class Component < ApplicationViewComponent
+      include Concerns::SubmitsValue
       # Lambda slots so `searchable` reaches the two parts that change shape
       # because of it — the same way ToggleGroup feeds variant and size to its
       # items, and for the same reason React would use context.
@@ -59,12 +60,7 @@ module Shadcn
       def hidden_input
         return unless name
 
-        tag.input(
-          type: "hidden",
-          name: name,
-          value: value,
-          "data-shadcn--select-target": "input"
-        )
+        tag.input(**hidden_input_attributes("data-shadcn--select-target" => "input"))
       end
     end
   end
