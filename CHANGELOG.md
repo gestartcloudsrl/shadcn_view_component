@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] — 2026-08-19
+
+### Fixed
+
+- A button inside a `Drawer` now receives its click. `press` captured the
+  pointer on the panel at every press inside it, whatever the press had landed
+  on; capture retargets `pointerup` — and the compatibility `mouseup` with it —
+  at the panel, and a click is dispatched at the common ancestor of down and up.
+  So the click landed on the panel and the button got nothing. Every button in
+  every drawer, the footer's own Close included.
+
+  A press landing on `a`, `button`, `input`, `select`, `textarea`, `label` or
+  inside `[data-vaul-no-drag]` is no longer a drag, so nothing is captured. That
+  attribute is vaul's own way of saying "not from here" and was already
+  honoured — but only in `shouldDrag`, which runs on the first *move*, by which
+  time the capture has happened. The cost is dragging the panel by pressing on a
+  control, which is not a gesture anyone makes deliberately.
+
+  It hid because the two obvious ways of checking both work: typing in a field
+  is fine, since focus follows `pointerdown`, and so is submitting with Enter,
+  since no pointer is involved. It also survives a JavaScript `.click()`, which
+  skips the pointer path — so no test driving the page that way could see it.
+  Found in a host app, by a person: a form in a side drawer submitted with the
+  keyboard and did nothing with the mouse.
+
 ## [0.3.1] — 2026-08-18
 
 ### Fixed
