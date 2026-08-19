@@ -69,6 +69,21 @@ RSpec.describe "Drawer", :js do
     sleep 0.6
   end
 
+  # A press inside the panel used to capture the pointer on the panel itself, so
+  # `pointerup` — and the compatibility `mouseup` with it — was retargeted away
+  # from whatever the press had landed on. The click is dispatched at the common
+  # ancestor of the two, which made it the panel: a button inside a drawer never
+  # received one. Typing still worked, because focus follows `pointerdown`, and
+  # so did Enter, because no pointer is involved — which is exactly how it was
+  # reported, and why it survived a JavaScript `.click()` in every earlier test.
+  it "lets a real click reach a button inside it" do
+    open_drawer
+
+    click_on "Cancel"
+
+    expect(page).to have_css("#{content}[data-state=closed]", visible: :all)
+  end
+
   it "opens from its trigger, bottom-anchored, with the handle showing" do
     open_drawer
 

@@ -19,6 +19,12 @@ const dampen = (value) => 8 * (Math.log(value + 1) - 2)
 
 const VERTICAL = new Set([ "top", "bottom" ])
 
+// A press that lands on one of these means the control, not the panel. Vaul's
+// own `[data-vaul-no-drag]` is the escape hatch for anything else — it was
+// already honoured, but only in `shouldDrag`, which runs on the first *move*,
+// and by then the capture below has already happened.
+const CONTROLS = "a, button, input, select, textarea, label, [data-vaul-no-drag]"
+
 // The drag half of vaul's Drawer, which is the only half that is vaul's: the
 // rest of this component is Radix's Dialog, and runs on `shadcn--dialog`, whose
 // controller this one reaches for when a release means close.
@@ -63,6 +69,14 @@ export default class extends Controller {
 
   press(event) {
     if (!this.hasContentTarget || event.button !== 0) return
+    // Not a drag, and not merely "not worth dragging": the capture below
+    // retargets `pointerup` — and the compatibility `mouseup` with it — at the
+    // panel, and a click is dispatched at the common ancestor of down and up.
+    // Capturing on a button's press therefore means that button never gets a
+    // click at all. Typing kept working, because focus follows `pointerdown`,
+    // and so did Enter, because no pointer is involved: which is how this
+    // arrived — "with the keyboard it submits, with the mouse nothing happens".
+    if (event.target.closest?.(CONTROLS)) return
 
     this.dragging = true
     this.allowed = false
