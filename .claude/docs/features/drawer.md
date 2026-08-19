@@ -99,6 +99,32 @@ handler, and it was the same shape as a piece of machinery the menubar shipped
 and then removed for the same reason. `elementUnder` survives that test only
 because the branch it feeds is the unreachable one below.
 
+### And what it cost, until it was found
+
+Capturing on *every* press meant a button inside a drawer never received a
+click. `pointerup` is retargeted at the panel, the compatibility `mouseup` with
+it, and a click is dispatched at the common ancestor of down and up — so the
+click landed on the panel and the button got nothing. Every button in every
+drawer: the footer's own Close included.
+
+It hid for a while because the two obvious ways of checking both work. Typing in
+a field is fine, since focus follows `pointerdown`, which arrives; and submitting
+with Enter is fine, since no pointer is involved. It also survives a JavaScript
+`.click()`, which skips the pointer path altogether — so it is invisible to any
+test that drives the page that way. What reported it was a person: *"with the
+keyboard it submits, with the mouse nothing happens."*
+
+The fix is one line at the top of `press`: a press that lands on `a, button,
+input, select, textarea, label` or inside `[data-vaul-no-drag]` is not a drag,
+so nothing is captured. The attribute is vaul's own way of saying "not from
+here" and was already honoured — but only in `shouldDrag`, which runs on the
+first *move*, and by then the capture has happened. It needed answering in both
+places.
+
+What it costs is dragging the panel by pressing on a control, which is not a
+gesture anyone makes deliberately. `spec/system/drawer_spec.rb` covers it with a
+real click, and the drag specs above it still pass unchanged.
+
 ## The exit starts where the finger left it
 
 vaul's `closeDrawer` cancels the drag and does not touch the transform
