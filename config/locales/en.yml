@@ -30,6 +30,28 @@ en:
       next: Next slide
     dialog:
       close: Close
+    event_calendar:
+      previous: Go to the Previous Month
+      next: Go to the Next Month
+      today: Today
+      empty: Nothing scheduled.
+      all_day: All day
+      agenda_label: Events on the selected day
+      # The "+2" a cell shows when it has more events than lanes. A template
+      # rather than a sentence: the controller re-renders it for a month the
+      # server never drew.
+      more: "+%{count}"
+      day_label: "%{date}, %{events}"
+      event_count:
+        one: 1 event
+        other: "%{count} events"
+      # Read by the controller's `strftime` shim as well as by `I18n.l`, so it
+      # is limited to the date tokens that shim knows: %A %a %B %b %d %-d %e
+      # %m %-m %Y %y.
+      agenda_format: "%A, %B %-d"
+      # Times never reach the shim — the server formats every one of them and
+      # ships it with the event — so this may use any token `strftime` has.
+      time_format: "%-l:%M %p"
     pagination:
       label: pagination
       previous: Previous

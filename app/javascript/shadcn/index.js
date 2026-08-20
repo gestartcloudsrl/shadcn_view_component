@@ -21,6 +21,7 @@ import CollapsibleController from "shadcn/controllers/collapsible_controller"
 import DialogController from "shadcn/controllers/dialog_controller"
 import DrawerController from "shadcn/controllers/drawer_controller"
 import DropdownMenuController from "shadcn/controllers/dropdown_menu_controller"
+import EventCalendarController from "shadcn/controllers/event_calendar_controller"
 import HoverCardController from "shadcn/controllers/hover_card_controller"
 import InputGroupController from "shadcn/controllers/input_group_controller"
 import InputOtpController from "shadcn/controllers/input_otp_controller"
@@ -55,6 +56,7 @@ const CONTROLLERS = {
   dialog: DialogController,
   drawer: DrawerController,
   "dropdown-menu": DropdownMenuController,
+  "event-calendar": EventCalendarController,
   "hover-card": HoverCardController,
   "input-group": InputGroupController,
   "input-otp": InputOtpController,
