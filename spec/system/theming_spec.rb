@@ -119,6 +119,23 @@ RSpec.describe "Theming", :js do
       expect(body_theme).to eq("theme-stone")
     end
 
+    # The regression this covers: `getTheme` fell back to the literal "neutral"
+    # when storage was empty, and `applyTheme` runs on every boot — so a palette
+    # only the *server* knew about was visible until the JavaScript loaded and
+    # then swapped away, with nothing to explain it. That is every host that
+    # sets a default with `shadcn_theme_class(default:)` and has no selector to
+    # write storage with.
+    it "keeps a palette the server rendered when storage has none" do
+      choose_theme(:stone)
+      page.execute_script("localStorage.removeItem('shadcn-ui-theme')")
+
+      visit_preview(:card)
+      wait_for_stimulus
+
+      expect(stored("shadcn-ui-theme")).to be_nil
+      expect(body_theme).to eq("theme-stone")
+    end
+
     it "keeps the mode and the palette independent" do
       choose_mode(:dark)
       choose_theme(:zinc)
