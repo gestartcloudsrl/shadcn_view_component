@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- A palette the **server** rendered now survives the boot. `getTheme` fell back
+  to the literal `"neutral"` whenever `localStorage` held nothing, and
+  `applyTheme` runs on every connect — so a host that sets a default with
+  `shadcn_theme_class(default: "sky")` saw its palette until the JavaScript
+  loaded and then watched it swap back, with nothing to explain it. That is
+  every host without a `ThemeSelector`, since only the selector writes storage.
+
+  The fallback now reads what the document already says: the `theme-*` class the
+  server rendered, then the `data-shadcn-theme` the theme script tag stamps on
+  `<html>`. The class comes first because it is resolved from the cookie this
+  module mirrors every choice into, so it still knows the visitor's answer when
+  storage has been cleared.
+
+  Two bugs deep, and the second only showed once the first was fixed:
+  `applyTheme` asked for the theme *after* removing the `theme-*` classes, so
+  the fallback read a body it had just erased. It resolves before the loop now.
+
+  `spec/system/theming_spec.rb` covers it with a palette chosen, storage
+  cleared, and a fresh page — which was neutral before and is the chosen one
+  after.
+
 ## [0.3.2] — 2026-08-19
 
 ### Fixed
