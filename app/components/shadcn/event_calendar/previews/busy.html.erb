@@ -1,0 +1,19 @@
+<%
+  crowded = 5.times.map do |offset|
+    { title: "Slot #{offset + 1}",
+      starts_at: Time.zone.local(2026, 8, 12, 9 + offset, 0),
+      color: Shadcn::EventCalendar::Event::COLORS[offset % Shadcn::EventCalendar::Event::COLORS.size] }
+  end
+%>
+
+<div class="flex flex-col gap-8">
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 12), events: crowded
+      )) %>
+
+  <%# One lane: the smallest a cell can be and still say that something is
+      happening. Everything else is read underneath. %>
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 12), events: crowded, max_events: 1
+      )) %>
+</div>

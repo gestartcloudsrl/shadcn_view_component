@@ -217,7 +217,76 @@ RSpec.describe "reverse parity" do
 
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
-    "native-select-icon" => %w[lucide lucide-chevron-down]
+    "native-select-icon" => %w[lucide lucide-chevron-down],
+
+    # The whole event-calendar family, and — like the toaster's above — listed
+    # one slot at a time rather than waved through. There is no upstream event
+    # calendar at all: `calendar.tsx` is the day picker, so nothing this family
+    # renders can be a copy of anything, and a blanket exemption would make the
+    # newest component the one nobody checks.
+    #
+    # Most of what is listed is the same two kinds as everywhere else — a size
+    # upstream never needed (`min-h-14`, `h-5.5`, `top-8`, `auto-rows-…`), and a
+    # breakpoint upstream never has to write because React renders the phone and
+    # the desktop as two trees where this renders one. Three are judgements:
+    #
+    # 1. `group/event-calendar` and its `sm:group-data-[overflow]` partner. A
+    #    cell reserves a row for its "+2" line only in a month that has one, and
+    #    whether the month has one is not knowable from inside a cell.
+    # 2. The colour custom properties. An event's colour is *data*, so it cannot
+    #    be a Tailwind class — Tailwind never sees a string built at runtime —
+    #    and it cannot be a hex either, because a hex has no answer for the dark
+    #    palette. Two properties per name, declared once on the root, is what is
+    #    left. See `Component::COLOR_TOKENS`.
+    # 3. `bg-[var(--event-color)]/12` and `text-(--event-ink)`, which read them.
+    "event-calendar" => %w[
+      group/event-calendar
+      [&_[data-color=default]]:[--event-color:var(--primary)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
+      [&_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&_[data-color=blue]]:[--event-ink:var(--color-blue-800)]
+      dark:[&_[data-color=blue]]:[--event-ink:var(--color-blue-300)]
+      [&_[data-color=green]]:[--event-color:var(--color-emerald-500)] [&_[data-color=green]]:[--event-ink:var(--color-emerald-800)]
+      dark:[&_[data-color=green]]:[--event-ink:var(--color-emerald-300)]
+      [&_[data-color=amber]]:[--event-color:var(--color-amber-500)] [&_[data-color=amber]]:[--event-ink:var(--color-amber-800)]
+      dark:[&_[data-color=amber]]:[--event-ink:var(--color-amber-300)]
+      [&_[data-color=rose]]:[--event-color:var(--color-rose-500)] [&_[data-color=rose]]:[--event-ink:var(--color-rose-800)]
+      dark:[&_[data-color=rose]]:[--event-ink:var(--color-rose-300)]
+      [&_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&_[data-color=violet]]:[--event-ink:var(--color-violet-800)]
+      dark:[&_[data-color=violet]]:[--event-ink:var(--color-violet-300)]
+    ],
+    "event-calendar-title" => %w[sm:text-lg],
+    "event-calendar-weekdays" => %w[grid-cols-7],
+    "event-calendar-weekday" => %w[sm:text-xs text-[0.7rem]],
+    # The 1px rules between cells, drawn as gaps over a `bg-border` parent
+    # rather than as borders on each cell — borders double up where two cells
+    # meet, and a month grid cannot have lines of two widths.
+    "event-calendar-weeks" => %w[gap-px],
+    "event-calendar-days" => %w[gap-px grid-cols-7],
+    "event-calendar-day" => %w[
+      data-[selected]:bg-accent focus-visible:ring-inset hover:bg-accent/50 min-h-14 pb-1 pt-1.5
+      sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)
+      sm:items-start sm:min-h-(--event-calendar-cell) sm:px-1.5
+    ],
+    "event-calendar-day-number" => %w[
+      group-data-[outside]/day:text-muted-foreground
+      group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold
+      group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]
+    ],
+    # `top-8` clears the day number, and the row height is one bar plus its gap
+    # — the two figures `Component#cell_height` derives a cell's height from.
+    "event-calendar-segments" => %w[auto-rows-[1.625rem] gap-x-px grid-cols-7 px-px sm:grid top-8],
+    "event-calendar-day-dots" => %w[sm:hidden],
+    "event-calendar-day-dot" => %w[bg-(--event-color) size-1.5],
+    "event-calendar-day-more" => %w[text-[0.7rem]],
+    "event-calendar-event" => %w[
+      bg-[var(--event-color)]/12 data-[continues-after]:rounded-r-none data-[continues-before]:rounded-l-none
+      h-5.5 mx-px text-(--event-ink) text-[0.7rem]
+    ],
+    "event-calendar-event-dot" => %w[bg-(--event-color) size-1.5],
+    "event-calendar-agenda" => %w[mt-3],
+    "event-calendar-agenda-title" => %w[pb-1.5],
+    "event-calendar-agenda-row" => %w[focus-visible:outline-none],
+    "event-calendar-agenda-mark" => %w[bg-(--event-color)],
+    "event-calendar-agenda-empty" => %w[py-8]
   }.freeze
 
   it "renders no class that has disappeared from every vendored source", :aggregate_failures do

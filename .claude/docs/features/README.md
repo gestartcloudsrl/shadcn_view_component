@@ -34,7 +34,7 @@ here would create a copy nobody updates. These files carry what a machine cannot
 API.
 
 **Anything unmeasured.** An absent entry means *not yet assessed*, never "1:1".
-There are 63 families under `app/components/shadcn/` and thirteen have been
+There are 64 families under `app/components/shadcn/` and fourteen have been
 examined closely enough to write down; claiming the rest match would be exactly the kind of sentence this project
 keeps catching itself in.
 
@@ -55,6 +55,7 @@ keeps catching itself in.
 | [chart.md](chart.md) | **adapted** / ours | `chart.tsx` is a frame around recharts and draws nothing; the frame is 1:1 and the pie, bar, line and area are drawn here |
 | [calendar.md](calendar.md) | **adapted** | `react-day-picker` is mostly date arithmetic and locale data, which Ruby has; the markup is 1:1 and the grid is rendered on both sides |
 | [toaster.md](toaster.md) | **ours** | `sonner.tsx` emits no markup at all, so there is nothing to be 1:1 with; sonner's measurements and stacking, Rails' three ways in |
+| [event-calendar.md](event-calendar.md) | **ours** | shadcn has the day picker and no event calendar; FullCalendar's `dayGridMonth` as the reference, with the lane packing in Ruby and two readings rather than one scaled down |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:

@@ -1,0 +1,14 @@
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 12),
+      events: [
+        { title: "Default", starts_at: Date.new(2026, 8, 3) },
+        { title: "Blue", starts_at: Date.new(2026, 8, 4), color: :blue },
+        { title: "Green", starts_at: Date.new(2026, 8, 5), color: :green },
+        { title: "Amber", starts_at: Date.new(2026, 8, 6), color: :amber },
+        { title: "Rose", starts_at: Date.new(2026, 8, 7), color: :rose },
+        { title: "Violet", starts_at: Date.new(2026, 8, 8), color: :violet },
+        { title: "Retrospective", starts_at: Time.zone.local(2026, 8, 12, 14, 0),
+          ends_at: Time.zone.local(2026, 8, 12, 15, 0), color: :blue, url: "#retrospective" }
+      ]
+    )) %>
