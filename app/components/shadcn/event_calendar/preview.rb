@@ -84,9 +84,9 @@ module Shadcn
       # @param most number
       # @param colored toggle
       # @param show_all toggle
-      # @param group select [assignees, events]
+      # @param group select [events, assignees]
       # @param arrangement select [auto, rows]
-      def workload_density(most: 30, colored: false, show_all: false, group: "assignees",
+      def workload_density(most: 30, colored: false, show_all: false, group: "events",
                            arrangement: "auto")
         cast = ActiveModel::Type::Boolean.new
         here = lambda do |all: cast.cast(show_all), cut: group, laid: arrangement|
@@ -127,13 +127,17 @@ module Shadcn
       # @param colored toggle
       # @param from number
       # @param to number
-      # @param as select [bars, chips]
-      def hours_density(most: 8, colored: true, from: 0, to: 24, as: "bars")
+      # @param as select [chips, bars]
+      def hours_density(most: 8, colored: true, from: 0, to: 24, as: "chips")
         cast = ActiveModel::Type::Boolean.new
+        shape_here = lambda do |form|
+          "/lookbook/preview/shadcn/event_calendar/hours_density" \
+            "?most=#{most}&colored=#{cast.cast(colored)}&from=#{from}&to=#{to}&as=#{form}"
+        end
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
                          reading: :hours,
-                         window: (from.to_i..to.to_i), shape: as.to_sym,
+                         window: (from.to_i..to.to_i), shape: as.to_sym, shape_url: shape_here,
                          hours_url: lambda { |_on|
                            "/lookbook/preview/shadcn/event_calendar/workload_density" \
                              "?most=#{most}&colored=#{cast.cast(colored)}&arrangement=rows"

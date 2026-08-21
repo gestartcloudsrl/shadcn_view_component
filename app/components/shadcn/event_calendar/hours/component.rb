@@ -37,7 +37,6 @@ module Shadcn
           "[&_[data-slot=event-calendar-grid]]:overflow-x-auto " \
           "[&_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track) " \
           "[&_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track) " \
-          "[&_[data-slot=event-calendar-day]]:h-auto " \
           "[&_[data-slot=event-calendar-day]]:min-h-14 " \
           "[&_[data-slot=event-calendar-day]]:items-start " \
           "[&_[data-slot=event-calendar-day-head]]:sticky " \
@@ -89,7 +88,7 @@ module Shadcn
         # Measured too: a chip renders 51px — a clock line, a gap and a title —
         # so a 2.9rem lane overlapped the next by five pixels and clipped the
         # bottom row of every busy day.
-        LANE_HEIGHTS = { bars: 0.9, chips: 3.4 }.freeze
+        LANE_HEIGHTS = { chips: 3.4, bars: 0.9 }.freeze
 
         # The scale, drawn once above the month rather than once per row: it is
         # the same hours on every row, and forty-two copies would be forty-two
@@ -100,7 +99,7 @@ module Shadcn
         RULER_BODY_CLASS = "relative h-4 grow"
         HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
 
-        attr_reader :window, :shape
+        attr_reader :window, :shape, :shape_url
 
         # @param window [Range] the hours the axis shows. A calendar of field
         #   work spent thirty per cent of its width on midnight-to-seven —
@@ -113,9 +112,14 @@ module Shadcn
         # Not `as:`: that name is already the gem's, for the tag an element
         # renders as, and taking it here made every bar ask `LANE_HEIGHTS` for
         # a key of `nil`.
-        def initialize(window: (0..24), shape: :bars, **attributes)
+        # @param shape_url [#call, nil] given the wanted shape, the URL of that
+        #   state. Present, the menu is links; absent, it dispatches. A shape is
+        #   different markup, not a class toggle — drawing both and hiding one
+        #   is the trade this reading spent a whole round removing.
+        def initialize(window: (0..24), shape: :chips, shape_url: nil, **attributes)
           @window = window
-          @shape = LANE_HEIGHTS.key?(shape&.to_sym) ? shape.to_sym : :bars
+          @shape_url = shape_url
+          @shape = LANE_HEIGHTS.key?(shape&.to_sym) ? shape.to_sym : :chips
           super(**attributes)
         end
 
@@ -153,7 +157,35 @@ module Shadcn
 
         def reading_attributes = { "data-rows" => "true", "data-arrangement" => :rows }
 
-        def reading_controls = [ hours_toggle ]
+        # The one choice this reading has, in the slot the `Rows` toggle would
+        # have had — which in an hours month could change nothing, because an
+        # hours month *is* rows. A menu rather than a two-state toggle for the
+        # same reason the grouping is one: a third shape is the obvious next
+        # question, and a toggle would have to become this anyway.
+        def reading_controls = [ view_panel ]
+
+        def reading_label = shadcn_t("event_calendar.hours.#{shape}")
+
+        def reading_options = [ shape_items ]
+
+        def shape_items
+          safe_join([
+            render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.hours.label") },
+            render(DropdownMenu::Separator::Component.new),
+            render(DropdownMenu::RadioGroup::Component.new) do
+              safe_join(LANE_HEIGHTS.keys.map { |name| shape_item(name) })
+            end
+          ])
+        end
+
+        def shape_item(name)
+          href = shape_url&.call(name)
+
+          render(DropdownMenu::RadioItem::Component.new(
+            value: name, checked: name == shape,
+            **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#reshape" })
+          )) { shadcn_t("event_calendar.hours.#{name}") }
+        end
 
         # Position is a percentage of the window rather than a pixel, so the
         # marks stay aligned at every width without anything measuring anything.

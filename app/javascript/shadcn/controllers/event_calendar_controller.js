@@ -136,6 +136,15 @@ export default class extends Controller {
     this.dispatch("arrange", { detail: { arrangement: wanted } })
   }
 
+  // A shape is different markup, so this is the server's to answer: it
+  // announces the ask, and a host that gave `shape_url:` never gets here.
+  reshape(event) {
+    const chosen = event.currentTarget.dataset.value
+    if (!chosen) return
+
+    this.dispatch("reshape", { detail: { shape: chosen } })
+  }
+
   // SPIKE — the hour axis. What a cell is made of changes, so this is the
   // server's to answer: it announces the ask, and a host that gave `track_url:`
   // never gets here.

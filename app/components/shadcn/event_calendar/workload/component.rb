@@ -17,8 +17,9 @@ module Shadcn
 
         attr_reader :group, :group_url, :show_all, :show_all_url, :arrangement, :arrangement_url
 
-        # @param group [Symbol] `:assignees` — a chip per operator with their
-        #   count — or `:events`, a chip per intervention.
+        # @param group [Symbol] `:events` — a chip per intervention, which is
+        #   what a day's work actually is — or `:assignees`, a chip per operator
+        #   with their count.
         # @param show_all [Boolean] render every chip rather than the first
         #   `CAP` and a "+N". Server state, not a class toggle: rendering them
         #   all and hiding the rest cost 1157 KB and 131 ms on 447 events.
@@ -27,9 +28,9 @@ module Shadcn
         # @param group_url [#call, nil] given a grouping, the URL of that state
         # @param show_all_url [#call, nil] given the wanted `show_all`, its URL
         # @param arrangement_url [#call, nil] given an arrangement, its URL
-        def initialize(group: :assignees, group_url: nil, show_all: false, show_all_url: nil,
+        def initialize(group: :events, group_url: nil, show_all: false, show_all_url: nil,
                        arrangement: :auto, arrangement_url: nil, **attributes)
-          @group = GROUPINGS.include?(group&.to_sym) ? group.to_sym : :assignees
+          @group = GROUPINGS.include?(group&.to_sym) ? group.to_sym : :events
           @group_url = group_url
           @show_all = show_all
           @show_all_url = show_all_url
@@ -75,9 +76,11 @@ module Shadcn
           { "data-group" => group, "data-rows" => "true", "data-arrangement" => arrangement }
         end
 
-        def reading_controls
-          [ grouping_menu, arrangement_toggle, (hours_toggle if hours_url), show_all_toggle ].compact
-        end
+        def reading_controls = [ view_panel, arrangement_toggle, show_all_toggle ]
+
+        def reading_label = shadcn_t("event_calendar.group.#{group}")
+
+        def reading_options = [ grouping_items ]
 
         style do
           base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
@@ -264,22 +267,6 @@ module Shadcn
         # bars and "+79" is not — the three are an arbitrary sample, the number is
         # the only information on the cell, and the events it is counting are
         # invisible until you open the day. The marks say all eighty-two.
-
-        # Which way the cells are cut. A radio group rather than a toggle
-        # because a third cut is the obvious next question, and a toggle would
-        # have to become this anyway.
-        def grouping_menu
-          render(DropdownMenu::Component.new(align: :start)) do |dropdown|
-            dropdown.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :sm)) do
-              safe_join([
-                tag.span(shadcn_t("event_calendar.group.#{group}"),
-                         "data-shadcn--event-calendar-target": "groupLabel"),
-                render(Icon::Component.new("chevron-down", class: CHEVRON_CLASS))
-              ])
-            end
-            dropdown.with_menu_content(class: "w-52") { grouping_items }
-          end
-        end
 
         # A toggle, and a link when the caller can name the URL of the other
         # state — the shape `#nav_button` has for the months, and for the same

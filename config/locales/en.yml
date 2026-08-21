@@ -54,6 +54,18 @@ en:
       arrangement:
         rows: Rows
         hours: Hours
+      # The options panel: which view, and then the one question that view has.
+      view:
+        label: Show the month as
+        rows: Rows
+        hours: Hours
+      # The hours reading's shape menu — see `Hours::Component::LANE_HEIGHTS`.
+      # A bar is as wide as the job lasts and says nothing else; a chip says who
+      # and for whom, and is as wide as that takes.
+      hours:
+        label: Show each job as
+        bars: Bars
+        chips: Chips
       # The workload reading's grouping menu — see
       # `EventCalendar::Component::WORKLOAD_GROUPINGS`.
       group:

@@ -17,6 +17,10 @@ RSpec.describe "Event calendar", :js do
   let(:title) { "#{calendar} [data-slot=event-calendar-title]" }
   let(:agenda) { "#{calendar} [data-slot=event-calendar-agenda]" }
 
+  def open_panel
+    find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]").click
+  end
+
   def nav_button(label) = find("#{calendar} [data-slot=event-calendar-nav] button[aria-label='#{label}']")
 
   def day(date) = find("#{calendar} [data-day='#{date}']")
@@ -210,24 +214,43 @@ RSpec.describe "Event calendar", :js do
 
   # Both cuts of a cell used to be rendered with one hidden, which made the menu
   # free and everything else twice as expensive. A cell renders the grouping it
-  # is showing now, and the menu is links to the other state.
-  describe "the grouping menu, as links" do
+  # is showing now, and the panel is links to the other state.
+  describe "the options panel, as links" do
     before do
       visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=8&colored=true"
       wait_for_stimulus
     end
 
     it "renders one grouping, not both", :aggregate_failures do
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-item]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-assignee]", visible: :all)
+    end
+
+    it "swaps which one on the server", :aggregate_failures do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=assignees]").click
+
       expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-assignee]")
       expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-item]", visible: :all)
     end
 
-    it "swaps which one on the server", :aggregate_failures do
-      find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]").click
-      find("[data-slot=dropdown-menu-radio-item][data-value=events]").click
+    # One panel, two questions: which view, and the only question that view has.
+    # The toolbar used to carry a control per answer, and two of them were
+    # always about a view you were not in.
+    it "asks which view first, then the question that view has", :aggregate_failures do
+      open_panel
 
-      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-item]")
-      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-assignee]", visible: :all)
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show the month as", "Group cells by" ])
+      expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
+        .to eq([ "Rows", "Hours", "By assignee", "By event" ])
+    end
+
+    it "carries the month across to the hours view" do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=hours]").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
     end
   end
 
