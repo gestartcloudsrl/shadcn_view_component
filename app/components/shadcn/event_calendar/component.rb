@@ -86,6 +86,13 @@ module Shadcn
       # seven columns onto a phone is the thing rows were built to avoid, so
       # the toggle only exists where it has something to change.
       ARRANGEMENTS = %i[auto rows].freeze
+
+      # The three views the options panel offers, which is one list because a
+      # person picking one is answering one question. Two of them are the
+      # workload reading at two arrangements and the third is a different
+      # reading entirely — a distinction that matters to this file and to
+      # nobody using it, which is why `view_url:` is one callback and not two.
+      VIEWS = %i[grid rows hours].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
       # How a day *sits* in a row is each reading's own, and is deliberately not
@@ -260,7 +267,7 @@ module Shadcn
 
       attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :hours_url
+                  :view_url
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -326,7 +333,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     hours_url: nil, **attributes)
+                     view_url: nil, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -342,7 +349,7 @@ module Shadcn
         @agenda_attributes = agenda_attributes
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
         @reading = :auto if @reading == :events
-        @hours_url = hours_url
+        @view_url = view_url
         super(**attributes)
       end
 
@@ -501,26 +508,30 @@ module Shadcn
           render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.view.label") },
           render(DropdownMenu::Separator::Component.new),
           render(DropdownMenu::RadioGroup::Component.new) do
-            safe_join(%i[rows hours].map { |name| view_option(name) })
+            safe_join(VIEWS.map { |name| view_option(name) })
           end
         ])
       end
 
       def view_option(name)
-        wanted = name == :hours
-        href = hours_url&.call(wanted)
+        href = view_url&.call(name)
 
         render(DropdownMenu::RadioItem::Component.new(
-          value: name, checked: wanted == hours?,
-          **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#retrack" })
+          value: name, checked: name == view,
+          **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#changeView" })
         )) { shadcn_t("event_calendar.view.#{name}") }
       end
+
+      # `:grid` is `arrangement: :auto`, not a third arrangement: below `lg` it
+      # is rows anyway, because forcing seven columns onto a phone is what rows
+      # were built to avoid. The name is what a person picks; `ARRANGEMENTS` is
+      # what the stylesheet reads.
+      def view = :grid
 
       # The trigger says where you are and what you are seeing — the two things
       # the panel decides, so it can be read without opening it.
       def view_label
-        safe_join([ shadcn_t("event_calendar.view.#{hours? ? 'hours' : 'rows'}"), reading_label ].compact,
-                  " · ")
+        safe_join([ shadcn_t("event_calendar.view.#{view}"), reading_label ].compact, " · ")
       end
 
       def reading_label = nil

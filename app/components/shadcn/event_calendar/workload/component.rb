@@ -15,7 +15,7 @@ module Shadcn
       class Component < EventCalendar::Component
         include Chips
 
-        attr_reader :group, :group_url, :show_all, :show_all_url, :arrangement, :arrangement_url
+        attr_reader :group, :group_url, :show_all, :show_all_url, :arrangement
 
         # @param group [Symbol] `:events` — a chip per intervention, which is
         #   what a day's work actually is — or `:assignees`, a chip per operator
@@ -27,15 +27,13 @@ module Shadcn
         #   below `lg`, the grid above; `:rows` keeps the rows at every width.
         # @param group_url [#call, nil] given a grouping, the URL of that state
         # @param show_all_url [#call, nil] given the wanted `show_all`, its URL
-        # @param arrangement_url [#call, nil] given an arrangement, its URL
         def initialize(group: :events, group_url: nil, show_all: false, show_all_url: nil,
-                       arrangement: :auto, arrangement_url: nil, **attributes)
+                       arrangement: :auto, **attributes)
           @group = GROUPINGS.include?(group&.to_sym) ? group.to_sym : :events
           @group_url = group_url
           @show_all = show_all
           @show_all_url = show_all_url
           @arrangement = EventCalendar::Component::ARRANGEMENTS.include?(arrangement&.to_sym) ? arrangement.to_sym : :auto
-          @arrangement_url = arrangement_url
           super(**attributes)
         end
 
@@ -76,7 +74,13 @@ module Shadcn
           { "data-group" => group, "data-rows" => "true", "data-arrangement" => arrangement }
         end
 
-        def reading_controls = [ view_panel, arrangement_toggle, show_all_toggle ]
+        # `:grid` and `:rows` are this reading at its two arrangements, and the
+        # panel offers them beside the hours view because a person is picking
+        # one thing. The standalone toggle that used to do it is gone with the
+        # button: two controls for one question is what the panel replaced.
+        def view = arrangement == :rows ? :rows : :grid
+
+        def reading_controls = [ view_panel, show_all_toggle ]
 
         def reading_label = shadcn_t("event_calendar.group.#{group}")
 
@@ -288,37 +292,6 @@ module Shadcn
         # "leave it alone", is what a toggle is for. The grouping next to it is a
         # menu because a third cut is the obvious next question; a third
         # *arrangement* is not — see `ARRANGEMENTS`.
-
-        # A toggle, and a link when the caller can name the URL of the other
-        # state — the shape `#nav_button` has for the months, and for the same
-        # reason: what it changes is what the *server* renders, now that the cap
-        # is applied there rather than by a class.
-        #
-        # It was a `Switch` while it was a class toggle. A switch hardcodes its
-        # own `type="button"` and its own controller, so it cannot become a link
-        # without fighting both, and a control whose job is to change server state
-        # should be the thing that can.
-        # Rows at a width that would otherwise get the grid.
-        #
-        # `max-lg:hidden` rather than a condition in Ruby: below `lg` the rows
-        # are already what is drawn, so the button has nothing to change, and the
-        # server cannot know which side of the breakpoint it is rendering for.
-        # Hiding it in CSS is the only place that knows.
-        #
-        # `aria-pressed` and not a second radio menu: two states, one of which is
-        # "leave it alone", is what a toggle is for. The grouping next to it is a
-        # menu because a third cut is the obvious next question; a third
-        # *arrangement* is not — see `ARRANGEMENTS`.
-        def arrangement_toggle
-          wanted = arrangement == :rows ? :auto : :rows
-
-          nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#arrange",
-                     href: arrangement_url&.call(wanted),
-                     pressed: arrangement == :rows, classes: "max-lg:hidden",
-                     value: wanted) do
-            shadcn_t("event_calendar.arrangement.rows")
-          end
-        end
 
         # SPIKE — the hour axis on or off. Named for what it shows rather than
         # for the shape it makes, the way `Show all` is: a person reading the

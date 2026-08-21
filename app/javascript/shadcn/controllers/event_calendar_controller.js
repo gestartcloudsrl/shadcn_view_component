@@ -110,30 +110,15 @@ export default class extends Controller {
     this.goTo(shiftMonths(parse(this.todayValue), 0), this.todayValue)
   }
 
-  // The one toolbar control this can actually carry out. Grouping and the cap
-  // change what a cell is made of, so they belong to whoever renders it; the
-  // arrangement changes only how the cells that are already here lay out, and
-  // that is a stylesheet away — so flip the attribute and the CSS does the
-  // rest, with no round trip.
-  //
-  // It still dispatches, and a host that gave `arrangement_url:` still gets a
-  // link instead: the workload month is drawn by the server, so a flip made
-  // here is gone the next time the month is.
-  //
-  // `aria-pressed` is set from the same place rather than left to the server,
-  // because the button did not navigate. The label is untouched — it names
-  // what the button does, not which state it is in, which is why it can be
-  // written in Ruby and left alone here.
-  arrange(event) {
-    const button = event.currentTarget
-    const wanted = button.dataset.value
-    if (!wanted) return
+  // Which of the three views the month is drawn as. A view is a different
+  // render — a different arrangement, or a different reading altogether — so
+  // this announces the ask rather than answering it, and a host that gave
+  // `view_url:` never gets here because the items are links.
+  changeView(event) {
+    const chosen = event.currentTarget.dataset.value
+    if (!chosen) return
 
-    this.element.setAttribute("data-arrangement", wanted)
-    button.setAttribute("aria-pressed", String(wanted === "rows"))
-    button.dataset.value = wanted === "rows" ? "auto" : "rows"
-
-    this.dispatch("arrange", { detail: { arrangement: wanted } })
+    this.dispatch("view", { detail: { view: chosen } })
   }
 
   // A shape is different markup, so this is the server's to answer: it
@@ -143,13 +128,6 @@ export default class extends Controller {
     if (!chosen) return
 
     this.dispatch("reshape", { detail: { shape: chosen } })
-  }
-
-  // SPIKE — the hour axis. What a cell is made of changes, so this is the
-  // server's to answer: it announces the ask, and a host that gave `track_url:`
-  // never gets here.
-  retrack(event) {
-    this.dispatch("retrack", { detail: { track: event.currentTarget.dataset.value === "true" } })
   }
 
   // A cell renders the grouping it is showing, so there is nothing here to

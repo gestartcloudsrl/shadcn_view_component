@@ -51,12 +51,10 @@ en:
       agenda_format: "%A, %B %-d"
       # The workload reading's arrangement toggle. It names what pressing it
       # does, not the state it is in, so the controller never has to write it.
-      arrangement:
-        rows: Rows
-        hours: Hours
       # The options panel: which view, and then the one question that view has.
       view:
         label: Show the month as
+        grid: Grid
         rows: Rows
         hours: Hours
       # The hours reading's shape menu — see `Hours::Component::LANE_HEIGHTS`.
