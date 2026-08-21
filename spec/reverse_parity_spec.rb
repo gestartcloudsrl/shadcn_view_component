@@ -459,7 +459,15 @@ RSpec.describe "reverse parity" do
     "dropdown-menu-content" => %w[w-52 w-56],
     "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
     "event-calendar-day-assignee" => %w[border-border/40],
-    "event-calendar-day-item" => %w[bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)],
+    # The chip, and — in the hours reading — where the clock puts it. An all-day
+    # chip is the one whose width means something: it has no hour to be placed
+    # at, so it is the whole axis rather than as wide as its own text, and
+    # `max-w-none` because the cap that keeps a late-evening chip from running
+    # off the end is exactly what this one is allowed to do.
+    "event-calendar-day-item" => %w[
+      bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)
+      left-(--at) top-(--lane) max-w-[13rem] max-w-none w-(--for)
+    ],
     "event-calendar-day-time" => %w[pe-2 text-[0.65rem]],
     "event-calendar-day-text" => %w[text-[0.65rem]],
     # The cap is a rule about the fourth chip onwards, scoped by slot so it

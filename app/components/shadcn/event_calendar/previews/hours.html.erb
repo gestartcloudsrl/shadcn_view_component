@@ -8,6 +8,10 @@
     fixture for it and no spec had ever read a bar or a chip it draws: it was
     passing `reverse_parity` by being invisible to it, not by being clean.
 
+    Left at the shipped shape — chips — so the golden covers what a host gets
+    without asking, and with it the one chip whose width means something: an
+    all-day job has no hour to be placed at, so it is the whole axis.
+
     Windowed to working hours on purpose. On a 00–24 axis the bars of a month
     of field work ran from 29.2% to 95.6%, so nearly a third of the width drew
     nothing — which is why the window is an argument. `hours_density` is where
@@ -17,7 +21,6 @@
       selected: Date.new(2026, 8, 20),
       reading: :hours,
       window: (7..19),
-      shape: :bars,
       events: Shadcn::EventCalendar::Preview.workload_events(per_day: 0..3, crew: 1..3,
-                                                             colored: true, durations: true)
+                                                             colored: true, durations: true, all_day: 1)
     )) %>

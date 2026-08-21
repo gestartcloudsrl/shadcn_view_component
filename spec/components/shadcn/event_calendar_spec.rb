@@ -466,6 +466,17 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(bars.first[:style]).to include("--at:0.0%", "--for:100.0%")
     end
 
+    it "runs the whole width as a chip too" do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :hours, window: (0..24), shape: :chips,
+        events: [ { title: "Depot closed", starts_at: Date.new(2026, 8, 20) } ]
+      ))
+      chip = page.first("[data-slot=event-calendar-day][data-day='2026-08-20'] " \
+                        "[data-slot=event-calendar-day-item]")
+
+      expect(chip[:style]).to include("--at:0.0%", "--for:100.0%")
+    end
+
     it "takes the top lane, above what has a clock", :aggregate_failures do
       expect(bars.first[:style]).to include("--lane:calc(0 *")
       expect(bars.last[:title]).to start_with("9:00 AM")
