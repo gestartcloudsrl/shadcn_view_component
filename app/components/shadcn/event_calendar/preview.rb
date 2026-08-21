@@ -102,7 +102,7 @@ module Shadcn
                          arrangement: arrangement.to_sym,
                          arrangement_url: ->(laid) { here.call(laid:) },
                          # SPIKE — the way across to `workload_track`.
-                         track_url: lambda { |_on|
+                         hours_url: lambda { |_on|
                            "/lookbook/preview/shadcn/event_calendar/hours_density" \
                              "?most=#{most}&colored=#{cast.cast(colored)}&from=7&to=23"
                          },
@@ -133,8 +133,8 @@ module Shadcn
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
                          reading: :hours,
-                         track_hours: (from.to_i..to.to_i), track_as: as.to_sym,
-                         track_url: lambda { |_on|
+                         window: (from.to_i..to.to_i), shape: as.to_sym,
+                         hours_url: lambda { |_on|
                            "/lookbook/preview/shadcn/event_calendar/workload_density" \
                              "?most=#{most}&colored=#{cast.cast(colored)}&arrangement=rows"
                          },
