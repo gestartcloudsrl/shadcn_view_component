@@ -109,7 +109,12 @@ module Shadcn
       # Two ways to cut the same day. Both are rendered and one is hidden, so
       # switching is a `data-group` on the root and no round trip — a spike can
       # afford the duplicate because both lists are capped at three chips.
-      READINGS = %i[auto workload].freeze
+      # Three ways of reading a month, and they are three different questions
+      # about what a day *is*: a list of events, a quantity of work, or a
+      # timeline. `:events` is the name; `:auto` is what it was called before
+      # the other two existed and stays a synonym, because the gem is published
+      # and a host's `reading: :auto` must keep working.
+      READINGS = %i[auto events workload hours].freeze
 
       # How the workload month is laid out. `:auto` is the breakpoint doing the
       # deciding — rows below `lg`, the seven-column grid above it — and
@@ -573,7 +578,7 @@ module Shadcn
 
       attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :show_all, :show_all_url, :group_url, :arrangement, :arrangement_url, :track, :track_hours, :track_url, :track_as
+                  :show_all, :show_all_url, :group_url, :arrangement, :arrangement_url, :track_hours, :track_url, :track_as
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -623,7 +628,7 @@ module Shadcn
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
                      show_all: false, show_all_url: nil, group_url: nil,
-                     arrangement: :auto, arrangement_url: nil, track: false,
+                     arrangement: :auto, arrangement_url: nil,
                      track_hours: (0..24), track_url: nil, track_as: :bars, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
@@ -642,10 +647,10 @@ module Shadcn
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
+        @reading = :auto if @reading == :events
         @group = WORKLOAD_GROUPINGS.include?(group&.to_sym) ? group.to_sym : :assignees
         @arrangement = ARRANGEMENTS.include?(arrangement&.to_sym) ? arrangement.to_sym : :auto
         @arrangement_url = arrangement_url
-        @track = track
         @track_hours = track_hours
         @track_url = track_url
         @track_as = TRACK_LANE_HEIGHTS.key?(track_as&.to_sym) ? track_as.to_sym : :bars
@@ -658,7 +663,7 @@ module Shadcn
           "style" => merged_style("--event-calendar-cell:#{cell_height}rem",
                                   "--event-calendar-cell-more:#{cell_height(more: true)}rem",
                                   "--event-calendar-tick:#{tick_size}",
-                                  ("--event-calendar-track:#{track_width}" if track?)),
+                                  ("--event-calendar-track:#{track_width}" if hours?)),
           # Read by the `sm:group-data-[overflow]` rule on the cells, and reset
           # by the controller when it draws a month with a different answer.
           "data-overflow" => ("true" if labelled? && schedule.overflow?),
@@ -667,7 +672,7 @@ module Shadcn
           # cell is made of.
           "data-labelled" => ("true" if labelled?),
           "data-group" => (group if workload?),
-          "data-rows" => ("true" if workload?),
+          "data-rows" => ("true" if rows_reading?),
           # What the `rows:` variant reads at `lg` and above. `auto` is not the
           # absence of a value: the toggle flips between two named states, and
           # a controller that had to distinguish "unset" from "chosen" would be
@@ -679,9 +684,9 @@ module Shadcn
           # the toggle took `data-arrangement` back to `auto`, the rows rules
           # stopped applying above `lg`, and what was left was a hybrid: weeks
           # still `contents`, cells no longer rows.
-          "data-arrangement" => ((track? ? :rows : arrangement) if workload?),
+          "data-arrangement" => (hours? ? :rows : (arrangement if workload?)),
           # SPIKE
-          "data-track" => ("true" if track?),
+          "data-track" => ("true" if hours?),
           "data-shadcn--event-calendar-month-value" => month.first.iso8601,
           # The application's today, not the browser's — the same reason the
           # calendar crosses one: `Time.zone` and a laptop's clock disagree by a
@@ -741,6 +746,13 @@ module Shadcn
 
       def workload? = reading == :workload
 
+      def hours? = reading == :hours
+
+      # The two readings the server draws whole: a row per day, no client-side
+      # redraw, and a cell that is not a list of bars. What they share is the
+      # shape of the month, not what goes in it.
+      def rows_reading? = workload? || hours?
+
       def default_selection
         Date.current.between?(month.first, month.last) ? Date.current : month.first
       end
@@ -787,11 +799,11 @@ module Shadcn
             # to change there — but the slot must not go empty either, because
             # then there is no way out of the track. It gets its own toggle
             # instead, and the two are never both useful at once.
-            (track? ? track_toggle : arrangement_toggle if workload?),
+            (hours? ? track_toggle : (arrangement_toggle if workload?)),
             # The way *into* the track, offered only to a caller that named its
             # URL — so the shipped readings gain no control they did not ask
             # for while the spike is being looked at.
-            (track_toggle if workload? && !track? && track_url),
+            (track_toggle if workload? && track_url),
             (show_all_toggle if workload?),
             nav_button(Date.current, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
@@ -855,8 +867,8 @@ module Shadcn
       # toolbar is choosing between crews and clock, not between two layouts.
       def track_toggle
         nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#retrack",
-                   href: track_url&.call(!track?),
-                   pressed: track?, value: (!track?).to_s) do
+                   href: track_url&.call(!hours?),
+                   pressed: hours?, value: (!hours?).to_s) do
           shadcn_t("event_calendar.arrangement.hours")
         end
       end
@@ -934,7 +946,7 @@ module Shadcn
       # --- the month ------------------------------------------------------------
 
       def grid
-        tag.div(safe_join([ (track_ruler if track?), weekdays, weeks ].compact),
+        tag.div(safe_join([ (track_ruler if hours?), weekdays, weeks ].compact),
                 "data-slot": "event-calendar-grid", class: FRAME_CLASS)
       end
 
@@ -999,11 +1011,11 @@ module Shadcn
         href = day_url&.call(day)
 
         tag.public_send(href ? :a : :button,
-          safe_join(workload? ? workload_cell(day, on_day, assignees) : [ day_marker(day), ticks(on_day), more(hidden) ].compact),
+          safe_join(rows_reading? ? workload_cell(day, on_day, assignees) : [ day_marker(day), ticks(on_day), more(hidden) ].compact),
           **(href ? { href: } : { type: "button", "data-action": "click->shadcn--event-calendar#select" }),
           **day_attributes,
           "data-slot": "event-calendar-day",
-          class: [ DAY_CLASS, (WORKLOAD_CELL_CLASS if workload?) ].compact.join(" "),
+          class: [ DAY_CLASS, (WORKLOAD_CELL_CLASS if rows_reading?) ].compact.join(" "),
           "data-day": day.iso8601,
           "data-today": ("true" if day == Date.current),
           "data-selected": ("true" if day == selected),
@@ -1032,14 +1044,12 @@ module Shadcn
         [
           tag.span(safe_join([ day_marker(day), workload_count(on_day.size) ].compact),
                    "data-slot": "event-calendar-day-head", class: WORKLOAD_HEAD_CLASS),
-          if track? then workload_track(day)
+          if hours? then workload_track(day)
           elsif group == :assignees then workload_assignees(assignees)
           else workload_items(on_day)
           end
         ].compact
       end
-
-      def track? = workload? && @track
 
       # SPIKE — a day as a 24-hour track.
       #
