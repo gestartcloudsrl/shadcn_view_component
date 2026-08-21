@@ -39,9 +39,19 @@ RSpec.describe "reverse parity" do
     Dir[Pathname(__dir__).join("fixtures/snapshots/*.html")].each_with_object(
       Hash.new { |hash, key| hash[key] = Set.new }
     ) do |path, slots|
-      File.read(path).scan(/data-slot="([^"]+)"([^>]*)/) do |slot, attributes|
-        classes = attributes[/\sclass="([^"]*)"/, 1]
-        slots[slot].merge(CGI.unescapeHTML(classes).split(/\s+/)) if classes
+      # The whole tag, not what follows `data-slot`. Reading forward only meant
+      # an element that wrote its class *first* was silently unchecked — and
+      # nothing said so, because an unchecked slot looks exactly like a clean
+      # one. Sixty-eight elements were, across eight slots, `toast-title` and
+      # `toast-description` among them: the very family whose exemption block
+      # this spec cites as its precedent.
+      #
+      # `[^>]*` is safe because every `>` a Rails-rendered attribute can hold —
+      # `click->…`, `[&>span]:…` — arrives here as `&gt;`.
+      File.read(path).scan(/<[a-zA-Z][^>]*>/) do |element|
+        slot = element[/\sdata-slot="([^"]*)"/, 1]
+        classes = element[/\sclass="([^"]*)"/, 1]
+        slots[slot].merge(CGI.unescapeHTML(classes).split(/\s+/)) if slot && classes
       end
     end
   end
