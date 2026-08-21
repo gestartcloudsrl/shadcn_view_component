@@ -241,13 +241,12 @@ module Shadcn
       # than an inline row of faces because the tally has to line up down the
       # column — that is what makes two days comparable at a glance, and a
       # wrapped row of avatar-and-number pairs never lines up with anything.
-      # No `nth-child` cap here any more — the server renders what a cell shows.
-      # The two `hidden` rules stay: both groupings are still rendered, and the
-      # menu picks between them without a round trip.
-      WORKLOAD_ASSIGNEES_CLASS = "flex w-full flex-col gap-0.5 " \
-                                 "group-data-[group=events]/event-calendar:hidden"
-      WORKLOAD_ITEMS_CLASS = "flex w-full flex-col gap-0.5 " \
-                             "group-data-[group=assignees]/event-calendar:hidden"
+      # One class for both columns, and no `hidden` rule on either: a cell
+      # renders the grouping it is showing and not the other one. Rendering both
+      # and hiding one made switching free and everything else twice as
+      # expensive — the same bargain `show_all:` stopped making, and the last
+      # one left in this reading.
+      WORKLOAD_CHIPS_CLASS = "flex w-full flex-col gap-0.5"
       # Shrinkable, not fixed: with the title hidden below `sm` there is
       # no flexible element left in the chip, and a `shrink-0` clock pushes the
       # crew size out of a 46px cell entirely. The clock truncating is a worse
@@ -458,7 +457,7 @@ module Shadcn
 
       attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :show_all, :show_all_url
+                  :show_all, :show_all_url, :group_url
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -473,6 +472,8 @@ module Shadcn
       #   a button and the controller redraws the agenda in place.
       # @param day_attributes [Hash] merged onto every day cell — where a
       #   `data: { turbo_frame: … }` goes
+      # @param group_url [#call, nil] given a grouping, the URL of that
+      #   grouping. Present, the menu is links; absent, it dispatches.
       # @param show_all [Boolean] render every chip in a cell rather than the
       #   first `WORKLOAD_CAP` and a "+N"
       # @param show_all_url [#call, nil] given the desired `show_all`, the URL
@@ -498,7 +499,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto, group: :assignees,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     show_all: false, show_all_url: nil, **attributes)
+                     show_all: false, show_all_url: nil, group_url: nil, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -511,6 +512,7 @@ module Shadcn
         @day_attributes = day_attributes
         @show_all = show_all
         @show_all_url = show_all_url
+        @group_url = group_url
         @agenda = agenda
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
@@ -693,9 +695,11 @@ module Shadcn
       # Only the extra action goes here: the radio item already carries the
       # dropdown's own, and `data-action` is concatenated rather than replaced.
       def grouping_item(name)
+        href = group_url&.call(name)
+
         render(DropdownMenu::RadioItem::Component.new(
           value: name, checked: name == group,
-          "data-action": "click->shadcn--event-calendar#regroup"
+          **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#regroup" })
         )) { shadcn_t("event_calendar.group.#{name}") }
       end
 
@@ -831,8 +835,7 @@ module Shadcn
         [
           tag.span(safe_join([ day_marker(day), workload_count(on_day.size) ].compact),
                    "data-slot": "event-calendar-day-head", class: WORKLOAD_HEAD_CLASS),
-          workload_assignees(assignees),
-          workload_items(on_day)
+          (group == :assignees ? workload_assignees(assignees) : workload_items(on_day))
         ].compact
       end
 
@@ -883,7 +886,7 @@ module Shadcn
         tag.span(
           safe_join(shown.map { |assignee, count| workload_assignee(assignee, count) } +
                     [ workload_rest(tallies.size) ].compact),
-          "data-slot": "event-calendar-day-assignees", class: WORKLOAD_ASSIGNEES_CLASS
+          "data-slot": "event-calendar-day-assignees", class: WORKLOAD_CHIPS_CLASS
         )
       end
 
@@ -912,7 +915,7 @@ module Shadcn
         tag.span(
           safe_join(shown.map { |item| workload_item(item) } +
                     [ workload_rest(items.size) ].compact),
-          "data-slot": "event-calendar-day-items", class: WORKLOAD_ITEMS_CLASS
+          "data-slot": "event-calendar-day-items", class: WORKLOAD_CHIPS_CLASS
         )
       end
 

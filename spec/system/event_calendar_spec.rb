@@ -208,6 +208,29 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # Both cuts of a cell used to be rendered with one hidden, which made the menu
+  # free and everything else twice as expensive. A cell renders the grouping it
+  # is showing now, and the menu is links to the other state.
+  describe "the grouping menu, as links" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=8&colored=true"
+      wait_for_stimulus
+    end
+
+    it "renders one grouping, not both", :aggregate_failures do
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-assignee]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-item]", visible: :all)
+    end
+
+    it "swaps which one on the server", :aggregate_failures do
+      find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]").click
+      find("[data-slot=dropdown-menu-radio-item][data-value=events]").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-item]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-assignee]", visible: :all)
+    end
+  end
+
   # The workload reading is server-drawn — its cells hold crews and clients the
   # payload does not carry — so its nav dispatches and leaves the DOM alone.
   # Redrawing anyway is what put August's people on September's dates, and

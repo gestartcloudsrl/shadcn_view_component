@@ -137,7 +137,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -171,44 +171,6 @@
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+1
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Katherine Johnson">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">1:04 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Marie Curie, Ada Lovelace, Grace Hopper">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">3:25 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-02" role="gridcell" tabindex="-1" aria-label="Sunday, August 02, 2026, 2 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -221,7 +183,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -240,40 +202,6 @@
 <span class="min-w-0 flex-1 truncate text-[0.65rem]">Katherine Johnson
 </span>
 <span class="ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums">1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Delta Clinic — Katherine Johnson, Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:59 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="rose" title="Orsini &amp; Co — Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">12:56 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Orsini &amp; Co
 </span>
 </span>
 </span>
@@ -305,7 +233,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -337,58 +265,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="blue" title="Acme Foods — Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">8:00 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Acme Foods
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="blue" title="Acme Foods — Katherine Johnson">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:23 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Acme Foods
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Linus Pauling, Ada Lovelace, Katherine Johnson">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:23 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-05" role="gridcell" tabindex="-1" aria-label="Wednesday, August 05, 2026, 3 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -401,7 +277,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -435,72 +311,6 @@
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+2
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="amber" title="Bellini SpA — Alan Turing, Grace Hopper">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:12 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Marie Curie, Linus Pauling, Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">9:19 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Grace Hopper, Marie Curie, Alan Turing, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">10:33 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-06" role="gridcell" tabindex="-1" aria-label="Thursday, August 06, 2026, 2 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -513,7 +323,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Linus Pauling: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
@@ -545,44 +355,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:53 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Alan Turing, Linus Pauling, Katherine Johnson">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">6:08 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-07" role="gridcell" tabindex="-1" aria-label="Friday, August 07, 2026">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -605,7 +377,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Linus Pauling: 3">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
@@ -627,62 +399,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="amber" title="Bellini SpA — Marie Curie, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:22 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Linus Pauling, Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">8:42 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Linus Pauling, Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:41 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-09" role="gridcell" tabindex="-1" aria-label="Sunday, August 09, 2026, 2 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -695,7 +411,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -717,44 +433,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="amber" title="Bellini SpA — Linus Pauling, Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">8:05 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Fabbri Srl — Alan Turing, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:49 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
-</span>
-</span>
-</span>
 </button>
 </div>
 <div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
@@ -773,7 +451,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Marie Curie: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
@@ -782,22 +460,6 @@
 <span class="min-w-0 flex-1 truncate text-[0.65rem]">Marie Curie
 </span>
 <span class="ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums">1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="green" title="Northwind — Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:21 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
 </span>
 </span>
 </span>
@@ -813,7 +475,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -822,22 +484,6 @@
 <span class="min-w-0 flex-1 truncate text-[0.65rem]">Ada Lovelace
 </span>
 <span class="ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums">1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Delta Clinic — Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">6:28 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
 </span>
 </span>
 </span>
@@ -863,7 +509,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Grace Hopper: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
@@ -897,60 +543,6 @@
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+1
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Linus Pauling, Grace Hopper, Katherine Johnson, Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:05 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Grace Hopper">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">8:45 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="rose" title="Orsini &amp; Co — Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">4:42 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Orsini &amp; Co
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-14" role="gridcell" tabindex="-1" aria-label="Friday, August 14, 2026, 1 event">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -963,7 +555,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -985,26 +577,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Delta Clinic — Grace Hopper, Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">12:43 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-15" role="gridcell" tabindex="-1" aria-label="Saturday, August 15, 2026, 1 event">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -1017,7 +589,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -1036,26 +608,6 @@
 <span class="min-w-0 flex-1 truncate text-[0.65rem]">Alan Turing
 </span>
 <span class="ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums">1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Fabbri Srl — Alan Turing, Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">8:21 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
 </span>
 </span>
 </span>
@@ -1097,7 +649,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Katherine Johnson: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
@@ -1129,44 +681,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Katherine Johnson">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:00 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Linus Pauling, Katherine Johnson, Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:49 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-19" role="gridcell" tabindex="-1" aria-label="Wednesday, August 19, 2026, 3 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -1179,7 +693,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -1201,54 +715,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="rose" title="Orsini &amp; Co — Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">12:21 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Orsini &amp; Co
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="rose" title="Orsini &amp; Co — Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">5:32 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Orsini &amp; Co
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Delta Clinic — Ada Lovelace, Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">6:29 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-20" data-selected="true" role="gridcell" aria-selected="true" tabindex="0" aria-label="Thursday, August 20, 2026, 3 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -1261,7 +727,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Linus Pauling: 3">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
@@ -1295,72 +761,6 @@
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+1
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="amber" title="Bellini SpA — Grace Hopper, Linus Pauling, Ada Lovelace, Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:33 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="amber" title="Bellini SpA — Grace Hopper, Marie Curie, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">9:48 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Delta Clinic — Linus Pauling, Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">10:41 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-21" role="gridcell" tabindex="-1" aria-label="Friday, August 21, 2026, 1 event">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -1373,7 +773,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -1382,22 +782,6 @@
 <span class="min-w-0 flex-1 truncate text-[0.65rem]">Ada Lovelace
 </span>
 <span class="ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums">1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="amber" title="Bellini SpA — Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">5:32 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
 </span>
 </span>
 </span>
@@ -1413,7 +797,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -1432,26 +816,6 @@
 <span class="min-w-0 flex-1 truncate text-[0.65rem]">Katherine Johnson
 </span>
 <span class="ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums">1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Katherine Johnson, Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">1:56 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
 </span>
 </span>
 </span>
@@ -1483,7 +847,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -1515,30 +879,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Fabbri Srl — Alan Turing, Grace Hopper, Katherine Johnson">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:42 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-25" role="gridcell" tabindex="-1" aria-label="Tuesday, August 25, 2026, 2 events">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -1551,7 +891,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -1583,48 +923,6 @@
 </span>
 </span>
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+1
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="violet" title="Vega Logistics — Ada Lovelace, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">12:40 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Alan Turing, Grace Hopper, Ada Lovelace">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:14 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
 </span>
 </span>
 </button>
@@ -1659,7 +957,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Ada Lovelace: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
@@ -1693,32 +991,6 @@
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+1
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="rose" title="Orsini &amp; Co — Linus Pauling, Ada Lovelace, Alan Turing, Marie Curie">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:53 PM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Orsini &amp; Co
-</span>
-</span>
-</span>
 </button>
 <button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more) gap-1 px-1 pt-1 pb-1" data-day="2026-08-29" role="gridcell" tabindex="-1" aria-label="Saturday, August 29, 2026">
 <span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
@@ -1741,7 +1013,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 2">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -1763,40 +1035,6 @@
 </span>
 </span>
 </span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Kite Studio — Alan Turing, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:08 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
-</span>
-</span>
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="green" title="Northwind — Alan Turing">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">9:03 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
-</span>
-</span>
-</span>
 </button>
 </div>
 <div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
@@ -1815,7 +1053,7 @@
 <span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
 </span>
 </span>
-<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5 group-data-[group=events]/event-calendar:hidden">
+<span data-slot="event-calendar-day-assignees" class="flex w-full flex-col gap-0.5">
 <span data-slot="event-calendar-day-assignee" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground" title="Alan Turing: 1">
 <span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-4 shrink-0">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
@@ -1847,32 +1085,6 @@
 </span>
 </span>
 <span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+1
-</span>
-</span>
-<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5 group-data-[group=assignees]/event-calendar:hidden">
-<span data-slot="event-calendar-day-item" class="flex w-full flex-col gap-1.5 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)" data-color="default" title="Fabbri Srl — Katherine Johnson, Alan Turing, Grace Hopper, Linus Pauling">
-<span class="flex items-center gap-1">
-<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:09 AM
-</span>
-<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
-</span>
-</span>
-<span data-slot="avatar" data-size="sm" data-controller="" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
-<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
-</span>
-</span>
-<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
-</span>
-</span>
-</span>
-<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
-</span>
 </span>
 </span>
 </button>
