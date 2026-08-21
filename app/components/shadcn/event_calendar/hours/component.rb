@@ -45,13 +45,11 @@ module Shadcn
           "[&_[data-slot=event-calendar-day-head]]:self-stretch " \
           "[&_[data-slot=event-calendar-day-head]]:justify-start " \
           "[&_[data-slot=event-calendar-day-head]]:pt-1.5 " \
-          "[&_[data-slot=event-calendar-day-head]]:border-r " \
           "[&_[data-slot=event-calendar-day-head]]:bg-background " \
           "[&_[data-slot=event-calendar-ruler-pad]]:sticky " \
           "[&_[data-slot=event-calendar-ruler-pad]]:left-0 " \
           "[&_[data-slot=event-calendar-ruler-pad]]:z-10 " \
           "[&_[data-slot=event-calendar-ruler-pad]]:self-stretch " \
-          "[&_[data-slot=event-calendar-ruler-pad]]:border-r " \
           "[&_[data-slot=event-calendar-ruler-pad]]:bg-background"
 
         style do
@@ -94,7 +92,12 @@ module Shadcn
         # the same hours on every row, and forty-two copies would be forty-two
         # chances to disagree. The pad is the width of the date column, so mark
         # zero starts where the axes do.
-        RULER_CLASS = "flex items-end gap-0 pb-1 text-[0.6rem] text-muted-foreground"
+        # The same box as a row, and it has to be measured against one rather
+        # than eyeballed: the pad matches the date column, but a day cell also
+        # carries `px-2` and `gap-2`, so without them the scale started 16px to
+        # the left of the axis and ran 24px wider — every hour label pointing
+        # somewhere the gridlines were not.
+        RULER_CLASS = "flex items-end gap-2 px-2 pb-1 text-[0.6rem] text-muted-foreground"
         RULER_PAD_CLASS = "w-14 shrink-0"
         RULER_BODY_CLASS = "relative h-4 grow"
         HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
