@@ -371,6 +371,20 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(painted.css(%([data-shadcn--event-calendar-target*="agenda"]))).to be_empty
     end
 
+    # Off when the host has somewhere better for the day — and it is what the
+    # Day tab will be made of, so it is turned off rather than deleted.
+    context "with the agenda turned off" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), agenda: false,
+                            day_url: ->(date) { "/day/#{date.iso8601}" })
+      end
+
+      it "renders no day view of its own", :aggregate_failures do
+        expect(painted.at_css(%(*[data-slot="event-calendar-agenda"]))).to be_nil
+        expect(painted.at_css(%(*[data-slot="event-calendar-grid"]))).not_to be_nil
+      end
+    end
+
     context "without one" do
       subject(:calendar) { described_class.new(month: Date.new(2026, 8, 1)) }
 

@@ -233,29 +233,39 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
-  # The `day_url:` path end to end, which only a browser can show: the cells are
-  # links, the agenda is the frame they swap, and what comes back carries what
-  # the calendar never had. The model and the route are in `test/dummy` — the
-  # same reason `/chat` exists for the message scroller.
-  describe "a host owning the day view" do
+  # The `day_url:` path end to end, which only a browser can show. Two things
+  # happen on one click and neither needs a line of JavaScript in the host:
+  # Turbo sends the response into the frame inside the Sheet, and the dialog
+  # action opens it. The model and the route are in `test/dummy` — the same
+  # reason `/chat` exists for the message scroller.
+  describe "a host putting the day view in a sheet" do
+    let(:sheet) { "[data-slot=sheet-content]" }
+
     before do
       visit_preview("event_calendar", :with_turbo)
       wait_for_stimulus
     end
 
-    # The frame's `src` fetches on connect, so the built-in agenda is only ever
-    # the no-JavaScript fallback.
-    it "loads the selected day into the frame on connect" do
-      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 20")
+    it "starts closed, with no agenda of its own", :aggregate_failures do
+      expect(page).to have_no_css("#{sheet}[data-state=open]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-agenda]", visible: :all)
     end
 
-    it "swaps a different day in without leaving the page", :aggregate_failures do
-      before_click = page.current_url
-
+    it "opens the sheet and fills it, on one click", :aggregate_failures do
       find("#{calendar} [data-day='2026-08-13']").click
 
+      expect(page).to have_css("#{sheet}[data-state=open]")
       expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
-      expect(page.current_url).to eq(before_click)
+    end
+
+    it "swaps a different day into the open sheet", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "August 13")
+
+      find("body").send_keys(:escape)
+      find("#{calendar} [data-day='2026-08-20']").click
+
+      expect(page).to have_css("turbo-frame#day h2", text: "August 20")
     end
 
     # The point of the example: a cell shows what a cell can show, and the rest
@@ -265,7 +275,7 @@ RSpec.describe "Event calendar", :js do
       frame = find("turbo-frame#day")
 
       expect(frame).to have_link(href: %r{\Atel:})
-      expect(frame.text).to include('Bologna')
+      expect(frame.text).to include("Bologna")
       expect(frame.text).to match(/confirmed|pencilled|done/)
     end
   end

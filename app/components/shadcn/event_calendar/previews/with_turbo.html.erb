@@ -1,18 +1,35 @@
-<%# A host owning the day view. The cells are links, the agenda *is* the frame
-    they swap, and the frame's `src` loads it once on connect — so the built-in
-    agenda is what a browser without JavaScript is left with, which is the right
-    fallback rather than an empty box.
+<%# A host putting the day view in a Sheet.
 
-    The route, the model and the frame's markup live in `test/dummy`, because a
-    Lookbook preview can render a calendar but cannot answer its links. What
-    comes back carries four fields the calendar never had: where, who to ring,
-    what state it is in, and the note from last time. %>
-<%= render(Shadcn::EventCalendar::Component.new(
-      month: Date.new(2026, 8, 1),
-      selected: Date.new(2026, 8, 20),
-      events: Appointment.for_calendar,
-      day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
-      day_attributes: { data: { turbo_frame: "day" } },
-      agenda_as: :"turbo-frame",
-      agenda_attributes: { id: "day", src: "/calendar/days/2026-08-20" }
-    )) %>
+    Two things happen on one click, and neither needs a line of JavaScript
+    written here: Turbo sends the response into the frame inside the sheet, and
+    the `shadcn--dialog#open` action opens the sheet. The action reaches the
+    controller because the calendar is rendered *inside* the Sheet's root, which
+    is a `display: contents` wrapper and so costs the layout nothing.
+
+    The built-in agenda is off *here*, because the sheet is this host's day view
+    and two of them would be two answers to one question. It is not dead
+    generally: it is what the Day tab will be made of once the toolbar grows a
+    view switcher. Without JavaScript the day link is still a link, and the
+    browser lands on the page it points at.
+
+    The model, the route and the frame's markup are in `test/dummy` — a Lookbook
+    preview can render a calendar but cannot answer its links. What comes back
+    carries four fields the calendar never had: where it is, who to ring, what
+    state it is in, and the note from last time. %>
+<%= render(Shadcn::Sheet::Component.new) do |sheet| %>
+  <% sheet.with_dialog_content(side: :right, class: "w-full sm:max-w-md",
+                               "aria-label": "Day detail") do %>
+    <turbo-frame id="day" class="flex flex-col gap-3 overflow-y-auto p-4">
+      <p class="text-sm text-muted-foreground">Pick a day.</p>
+    </turbo-frame>
+  <% end %>
+
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: Date.new(2026, 8, 1),
+        selected: Date.new(2026, 8, 20),
+        events: Appointment.for_calendar,
+        agenda: false,
+        day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
+        day_attributes: { data: { turbo_frame: "day", action: "shadcn--dialog#open" } }
+      )) %>
+<% end %>

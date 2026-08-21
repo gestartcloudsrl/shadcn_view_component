@@ -475,6 +475,10 @@ module Shadcn
       #   a button and the controller redraws the agenda in place.
       # @param day_attributes [Hash] merged onto every day cell — where a
       #   `data: { turbo_frame: … }` goes
+      # @param agenda [Boolean] whether to render the built-in day view. `false`
+      #   when the host has somewhere better to put it — a Sheet, a panel — and
+      #   the day link is what fills it. It is not a leftover: it is what the
+      #   *Day* tab will be made of when the toolbar grows a view switcher.
       # @param agenda_as [Symbol] the agenda's element. `:"turbo-frame"` makes
       #   the agenda itself the thing a day link swaps, without this gem
       #   mentioning Turbo anywhere.
@@ -491,7 +495,8 @@ module Shadcn
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto, group: :assignees,
                      default_color: :default, month_url: nil, day_url: nil,
-                     day_attributes: {}, agenda_as: :div, agenda_attributes: {}, **attributes)
+                     day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
+                     **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -502,6 +507,7 @@ module Shadcn
         @month_url = month_url
         @day_url = day_url
         @day_attributes = day_attributes
+        @agenda = agenda
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
@@ -572,7 +578,7 @@ module Shadcn
       end
 
       def call
-        render_element(body: safe_join([ header, grid, agenda, prototypes ]))
+        render_element(body: safe_join([ header, grid, (agenda if @agenda), prototypes ].compact))
       end
 
       private

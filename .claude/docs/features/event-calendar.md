@@ -309,9 +309,12 @@ either: a calendar handed an array works with no server round trip.
 
 Named rather than left to be discovered:
 
-- **week, day and list views.** The month view is the one this iteration is
-  about; the others need a time axis, which is a different component's worth of
-  geometry.
+- **a view switcher, and the week and day views behind it.** The toolbar has a
+  grouping menu and a Show all switch but no Month / Week / Day tabs. The day
+  view is the one already half-built: the agenda *is* it, which is why `agenda:`
+  turns it off rather than deleting it — a host that puts the day somewhere else
+  today is not choosing against the tab tomorrow. Week needs a time axis, which
+  is a different component's worth of geometry.
 - **drag to move, drag to resize.** Both need a write path — a host endpoint, an
   optimistic update, a rollback — which is an application's decision, not a
   library's.
