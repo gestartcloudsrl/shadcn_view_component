@@ -245,6 +245,40 @@ keep `calendar_controller.js` honest keep this one honest:
 › then ‹, and compare every cell, every state, every label and every bar's
 position against what the server would have drawn for the same month.
 
+## The day view, and letting a host own it
+
+`shadcn--event-calendar:select` fires on every day click with the date and the
+day's events, and a host can do whatever it likes with it. For the common
+thing — open a drawer, swap a panel — an event is the long way round: a
+listener, a URL built by hand, and `Turbo.visit` called for you.
+
+`day_url:` is the short way. The cells become links, and the built-in agenda is
+the day view they swap:
+
+```erb
+<%= render Shadcn::EventCalendar::Component.new(
+      events:,
+      day_url: ->(date) { calendar_day_path(date) },
+      day_attributes: { data: { turbo_frame: "day" } },
+      agenda_as: :"turbo-frame", agenda_attributes: { id: "day" }
+    ) %>
+```
+
+Nothing here names Turbo — `agenda_as:` takes an element and the host chooses
+which. It is the same shape `as:` has everywhere else in this gem, and the same
+shape `month_url:` has for the nav.
+
+**A link and a selection cannot share a gesture**, so with a URL the click
+navigates and the controller's `select` is left off the cell: the server decides
+what the day shows and `aria-selected` follows it. The agenda's Stimulus targets
+come off with it, and `renderAgenda` returns early rather than racing a frame
+swap — as does the `aria-live` on the region, which existed because the agenda
+used to change under a pointer that never left the grid. A frame swap is a
+navigation, and Turbo announces those itself.
+
+What does not change is the grid: a cell is still `role="gridcell"`, still
+carries the roving tab stop, and the arrows still move across it.
+
 ## Lazy loading, when a host needs it
 
 The events a component was given are the ones the server had, and the month you

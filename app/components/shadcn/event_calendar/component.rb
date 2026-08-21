@@ -454,7 +454,8 @@ module Shadcn
         base { "group/event-calendar w-full text-foreground #{COLOR_TOKENS} #{ROWS_TOKENS} #{ROWS_CHIP_TOKENS}" }
       end
 
-      attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url
+      attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
+                  :day_url, :day_attributes, :agenda_as, :agenda_attributes
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -464,6 +465,16 @@ module Shadcn
       # @param max_events [Integer] bars per cell before a cell says "+2"
       # @param week_starts_on [Integer, nil] `Date#wday`; the host's
       #   `Date.beginning_of_week` when not given
+      # @param day_url [#call, nil] given a `Date`, the URL of that day. Present,
+      #   a cell is a link and the server owns what a click shows; absent, it is
+      #   a button and the controller redraws the agenda in place.
+      # @param day_attributes [Hash] merged onto every day cell — where a
+      #   `data: { turbo_frame: … }` goes
+      # @param agenda_as [Symbol] the agenda's element. `:"turbo-frame"` makes
+      #   the agenda itself the thing a day link swaps, without this gem
+      #   mentioning Turbo anywhere.
+      # @param agenda_attributes [Hash] merged onto the agenda — where its `id`
+      #   goes
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -474,7 +485,8 @@ module Shadcn
       #   `:workload` is the spike above, and always draws a row per day
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto, group: :assignees,
-                     default_color: :default, month_url: nil, **attributes)
+                     default_color: :default, month_url: nil, day_url: nil,
+                     day_attributes: {}, agenda_as: :div, agenda_attributes: {}, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -483,6 +495,10 @@ module Shadcn
         # `reading: :workLoad` off a params hash fell through every branch and
         # rendered a silent fourth thing: no bars, no `data-labelled`, no rows.
         @month_url = month_url
+        @day_url = day_url
+        @day_attributes = day_attributes
+        @agenda_as = agenda_as
+        @agenda_attributes = agenda_attributes
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
         @group = WORKLOAD_GROUPINGS.include?(group&.to_sym) ? group.to_sym : :assignees
         super(**attributes)
@@ -758,10 +774,21 @@ module Shadcn
         )
       end
 
+      # A link when the caller can name the day's URL, a button otherwise — the
+      # shape `#nav_button` already has for the months. A link is the whole of
+      # what a host needs to open a drawer or swap a frame: no listener, no URL
+      # built by hand, and it works before the JavaScript has loaded.
+      #
+      # The two cannot share a gesture. With a URL the click navigates and the
+      # controller's `select` is left off, so the server decides what the day
+      # shows and `aria-selected` follows it.
       def day_cell(day, on_day:, assignees:, hidden:)
-        tag.button(
+        href = day_url&.call(day)
+
+        tag.public_send(href ? :a : :button,
           safe_join(workload? ? workload_cell(day, on_day, assignees) : [ day_marker(day), ticks(on_day), more(hidden) ].compact),
-          type: "button",
+          **(href ? { href: } : { type: "button", "data-action": "click->shadcn--event-calendar#select" }),
+          **day_attributes,
           "data-slot": "event-calendar-day",
           class: [ DAY_CLASS, (WORKLOAD_CELL_CLASS if workload?) ].compact.join(" "),
           "data-day": day.iso8601,
@@ -777,8 +804,7 @@ module Shadcn
           "aria-current": ("date" if day == Date.current),
           # One tab stop for the whole month; the arrows move within it.
           tabindex: (day == selected ? "0" : "-1"),
-          "aria-label": day_label(day, on_day.size),
-          "data-action": "click->shadcn--event-calendar#select"
+          "aria-label": day_label(day, on_day.size)
         )
       end
 
@@ -1065,31 +1091,39 @@ module Shadcn
       # The mobile reading surface, and the desktop detail panel — one mechanism
       # rather than two, which is what lets the grid have a single tap target
       # per day at every width.
+      # The day view. With `day_url:` the server owns it — so the controller's
+      # targets come off, and `agenda_as: :"turbo-frame"` lets it *be* the thing
+      # a day link swaps without this gem naming Turbo anywhere.
       def agenda
         on_day = schedule.on(selected)
 
-        tag.div(
+        tag.public_send(agenda_as,
           safe_join([
             tag.div(
               safe_join([
                 tag.span(I18n.l(selected, format: agenda_format),
-                         "data-shadcn--event-calendar-target": "agendaDate"),
+                         "data-shadcn--event-calendar-target": ("agendaDate" unless day_url)),
                 tag.span(agenda_count(on_day.size),
                          "data-slot": "event-calendar-agenda-count", class: AGENDA_COUNT_CLASS,
-                         "data-shadcn--event-calendar-target": "agendaCount")
+                         "data-shadcn--event-calendar-target": ("agendaCount" unless day_url))
               ]),
               "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS
             ),
             tag.ul(safe_join(on_day.map { |event| agenda_item(event) }),
                    "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS,
-                   "data-shadcn--event-calendar-target": "agendaList"),
+                   "data-shadcn--event-calendar-target": ("agendaList" unless day_url)),
             tag.p(shadcn_t("event_calendar.empty"),
                   "data-slot": "event-calendar-agenda-empty", class: AGENDA_EMPTY_CLASS,
                   hidden: on_day.any?,
-                  "data-shadcn--event-calendar-target": "agendaEmpty")
+                  "data-shadcn--event-calendar-target": ("agendaEmpty" unless day_url))
           ]),
+          **agenda_attributes,
           "data-slot": "event-calendar-agenda", class: AGENDA_CLASS,
-          role: "region", "aria-live": "polite",
+          role: "region",
+          # The live region is the controller's: it exists because the agenda
+          # changes under a pointer that never left the grid. A frame swap is a
+          # navigation, and Turbo announces those itself.
+          "aria-live": ("polite" unless day_url),
           "aria-label": shadcn_t("event_calendar.agenda_label")
         )
       end
