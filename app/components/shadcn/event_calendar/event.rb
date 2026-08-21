@@ -21,28 +21,79 @@ module Shadcn
       # Each name resolves to two custom properties in `Component::COLOR_TOKENS`.
       COLORS = %i[default blue green amber rose violet].freeze
 
-      attr_reader :id, :title, :starts_at, :ends_at, :color, :url
+      # Who is doing the thing — a name, or a name and a picture. An event can
+      # take more than one, which is what the by-event grouping counts. Only the
+      # workload reading reads them.
+      Assignee = Struct.new(:name, :image) do
+        def initials = name.to_s.split(/\s+/).first(2).filter_map { |part| part[0] }.join.upcase
+      end
 
-      def self.wrap(value)
+      attr_reader :id, :title, :starts_at, :ends_at, :color, :url, :assignees
+
+      # `default_color:` is the calendar's own colour, standing where
+      # FullCalendar puts an *event source's*: between the event and the
+      # fallback. An already-built Event passes through untouched — it resolved
+      # its colour when it was built, and a caller who constructed one meant it.
+      def self.wrap(value, default_color: :default)
         return value if value.is_a?(Event)
 
-        new(**value.to_h.symbolize_keys)
+        new(default_color:, **value.to_h.symbolize_keys)
       end
 
       # @param all_day [Boolean, nil] inferred from `starts_at` when not given —
       #   a `Date` has no time of day to show, a `Time` has. An all-day `Time`
       #   at midnight is the case inference cannot see, so it takes the keyword.
-      def initialize(title:, starts_at:, ends_at: nil, color: :default, url: nil, all_day: nil, id: nil)
+      def initialize(title:, starts_at:, ends_at: nil, color: nil, url: nil, all_day: nil,
+                     id: nil, assignee: nil, assignees: nil, default_color: :default)
         @id = id
         @title = title.to_s
         @starts_at = starts_at
         @ends_at = ends_at
         @all_day = all_day.nil? ? !starts_at.respond_to?(:hour) : !!all_day
-        @color = COLORS.include?(color&.to_sym) ? color.to_sym : :default
+        # A name that is not in the palette falls back to the *calendar's*
+        # colour rather than to grey: a typo in one row of a `map` should look
+        # like the rest of that calendar, not like an uncategorised event.
+        @color = COLORS.include?(color&.to_sym) ? color.to_sym : fallback_color(default_color)
         @url = url
+        @assignees = wrap_assignees(assignees || assignee)
       end
 
       def all_day? = @all_day
+
+      def fallback_color(name) = COLORS.include?(name&.to_sym) ? name.to_sym : :default
+      private :fallback_color
+
+      # `Array()` is not usable here: a single `{ name:, image: }` is a Hash, and
+      # `Array(hash)` is its pairs rather than one element.
+      def wrap_assignees(value)
+        list = value.is_a?(Array) ? value : [ value ]
+
+        list.filter_map { |one| wrap_assignee(one) }
+      end
+      private :wrap_assignees
+
+      # A String is the common case — a name off a record. A Hash is the one
+      # with a picture.
+      #
+      # A hash keyed anything but `:name` used to yield `Assignee.new(nil)`
+      # silently, which drew an empty avatar and — once two operators tied on
+      # count — raised `comparison of Array with Array failed` out of
+      # `Schedule#assignees_on` and took the page with it. Loud where it can be
+      # fixed and quiet where it cannot, which is the trade `Icon::Component`
+      # makes for an unknown icon: a host mapping `full_name` finds out in
+      # development, and production draws an unnamed face rather than a 500.
+      def wrap_assignee(value)
+        case value
+        when nil, Assignee then value
+        when String then Assignee.new(value.to_s, nil)
+        else
+          name, image = value.to_h.symbolize_keys.values_at(:name, :image)
+          raise ArgumentError, "an assignee needs a :name, got #{value.inspect}" if name.blank? && Rails.env.local?
+
+          Assignee.new(name.to_s, image)
+        end
+      end
+      private :wrap_assignee
 
       def start_date = @start_date ||= starts_at.to_date
 

@@ -23,6 +23,15 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
   def parts(name) = painted.css(%(*[data-slot="#{name}"]))
 
+  # Enough on one day to put the calendar past `DENSE_ABOVE`. Inline rather than
+  # a shared fixture: the gallery has no dense preview any more, and a generator
+  # nothing renders is a generator nobody maintains.
+  def forty_on_one_day
+    Array.new(40) do |index|
+      { title: "Booking #{index + 1}", starts_at: Time.zone.local(2026, 8, 20, 7 + (index % 12), index) }
+    end
+  end
+
   def day(date) = painted.at_css(%(*[data-day="#{date}"]))
 
   describe "the day buttons" do
@@ -63,7 +72,7 @@ RSpec.describe Shadcn::EventCalendar::Component do
     it "is today when today is in the month" do
       render_inline(calendar)
 
-      expect(day("2026-08-12")["aria-pressed"]).to eq("true")
+      expect(day("2026-08-12")["aria-selected"]).to eq("true")
     end
 
     context "when the month is not the one today falls in" do
@@ -72,7 +81,7 @@ RSpec.describe Shadcn::EventCalendar::Component do
       it "is the first of the month" do
         render_inline(calendar)
 
-        expect(day("2026-11-01")["aria-pressed"]).to eq("true")
+        expect(day("2026-11-01")["aria-selected"]).to eq("true")
       end
     end
 
@@ -82,7 +91,7 @@ RSpec.describe Shadcn::EventCalendar::Component do
       it "is the one the caller named" do
         render_inline(calendar)
 
-        expect(day("2026-08-25")["aria-pressed"]).to eq("true")
+        expect(day("2026-08-25")["aria-selected"]).to eq("true")
       end
     end
   end
@@ -148,6 +157,168 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # The second reading, and the one a phone gets at any density: one mark per
+  # event rather than a sample and a count.
+  describe "the marks" do
+    let(:options) do
+      { events: [
+        { title: "A", starts_at: Time.zone.local(2026, 8, 20, 9), color: :blue },
+        { title: "B", starts_at: Time.zone.local(2026, 8, 20, 10), color: :rose },
+        { title: "C", starts_at: Time.zone.local(2026, 8, 20, 11), color: :blue }
+      ] }
+    end
+
+    before { render_inline(calendar) }
+
+    it "draws one per event, not one per lane" do
+      expect(day("2026-08-20").css(%(*[data-slot="event-calendar-day-tick"])).size).to eq(3)
+    end
+
+    # Grouped by colour rather than by the clock, in the palette's own order, so
+    # a cell reads as bands and two cells can be compared. `Component#in_bands`
+    # says why the agenda disagrees.
+    it "bands them by colour, in the palette's order" do
+      colors = day("2026-08-20").css(%(*[data-slot="event-calendar-day-tick"])).map { |tick| tick["data-color"] }
+
+      expect(colors).to eq(%w[blue blue rose])
+    end
+
+    it "closes the gap inside a band and not across one", :aggregate_failures do
+      ticks = day("2026-08-20").css(%(*[data-slot="event-calendar-day-tick"]))
+
+      expect(ticks.map { |tick| tick["data-run-after"] }).to eq([ "true", nil, nil ])
+      expect(ticks.map { |tick| tick["data-run-before"] }).to eq([ nil, "true", nil ])
+    end
+
+    it "sizes them against the busiest day in the month" do
+      expect(root["style"]).to include("--event-calendar-tick:0.4375rem")
+    end
+
+    context "when a day holds more than a cell can name" do
+      let(:options) { { events: forty_on_one_day } }
+
+      it "shrinks the marks to what a hundred of them cost" do
+        expect(root["style"]).to include("--event-calendar-tick:0.3125rem")
+      end
+
+      # A cell either names its events or shows their shape, never half of
+      # each — so past `DENSE_ABOVE` the bars and the "+2" go away at every
+      # width and the marks are the only reading.
+      it "stops naming them at any width", :aggregate_failures do
+        expect(root["data-labelled"]).to be_nil
+        expect(root["data-overflow"]).to be_nil
+      end
+
+      it "still draws every one of them" do
+        expect(day("2026-08-20").css(%(*[data-slot="event-calendar-day-tick"])).size).to eq(40)
+      end
+    end
+
+    context "when every day fits in its lanes" do
+      it "keeps naming them from sm up" do
+        expect(root["data-labelled"]).to eq("true")
+      end
+    end
+  end
+
+  # `Array(events)` splats a single Hash into its key/value pairs — the trap
+  # `Event#wrap_assignees` carries a comment about, in the same family.
+  describe "a single event" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1),
+                          events: { title: "Solo", starts_at: Date.new(2026, 8, 5) })
+    end
+
+    it "is a calendar with one event on it, not a TypeError" do
+      render_inline(calendar)
+
+      expect(day("2026-08-05")["aria-label"]).to end_with("1 event")
+    end
+  end
+
+  # Five defects a review found, each of which renders a plausible page or a
+  # 500 rather than anything a golden could catch.
+  describe "inputs a host can plausibly hand it" do
+    it "falls back to :auto for a reading it does not know", :aggregate_failures do
+      expect(described_class.new(reading: :workLoad).reading).to eq(:auto)
+      expect(described_class.new(reading: "workload").reading).to eq(:workload)
+    end
+
+    # `I18n.l`'s `%p` branch is guarded by `respond_to?(:hour)` and expands to
+    # nothing, while `Date#strftime` fills `%-l:%M` from hour zero — so a Date
+    # used to format as a confident midnight.
+    context "when a time column is really a date column" do
+      let(:options) do
+        { selected: Date.new(2026, 8, 20),
+          events: [ { title: "Task", starts_at: Time.zone.local(2026, 8, 20, 9, 30),
+                      ends_at: Date.new(2026, 8, 20) } ] }
+      end
+
+      it "says nothing rather than midnight" do
+        render_inline(calendar)
+
+        expect(parts("event-calendar-agenda-meta").map(&:text)).to eq([ "9:30 AM" ])
+      end
+    end
+
+    # `Event.wrap` passes an already-built Event through, so a subclass can
+    # carry a colour `COLORS.index` returns nil for.
+    it "sorts an unknown colour last instead of raising" do
+      exotic = Class.new(Shadcn::EventCalendar::Event) { def color = :teal }
+
+      expect do
+        render_inline(described_class.new(month: Date.new(2026, 8, 1), events: [
+          exotic.new(title: "a", starts_at: Time.zone.local(2026, 8, 20, 9)),
+          Shadcn::EventCalendar::Event.new(title: "b", starts_at: Time.zone.local(2026, 8, 20, 10), color: :blue)
+        ]))
+      end.not_to raise_error
+    end
+
+    # A `<button>` may not contain flow content, and the avatar group used to
+    # be a `<div>`.
+    it "keeps the workload day cell free of flow content" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, events: [
+        { title: "Job", starts_at: Time.zone.local(2026, 8, 3, 9),
+          assignees: [ "Ada Lovelace", "Grace Hopper", "Alan Turing", "Marie Curie" ] }
+      ]))
+
+      expect(painted.at_css(%(*[data-day="2026-08-03"])).css("div")).to be_empty
+    end
+  end
+
+  # The workload reading holds crews and titles the payload does not ship, so
+  # the controller cannot redraw it and deliberately does not try. A URL is what
+  # makes it navigable — and it serves the other readings too.
+  describe "#month_url" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1),
+                          month_url: ->(date) { "/calendar/#{date.strftime('%Y-%m')}" })
+    end
+
+    before { render_inline(calendar) }
+
+    def nav = painted.css(%(*[data-slot="event-calendar-nav"] a))
+
+    it "makes the nav links to the months either side", :aggregate_failures do
+      expect(nav.map { |link| link["href"] })
+        .to eq([ "/calendar/2026-08", "/calendar/2026-07", "/calendar/2026-09" ])
+    end
+
+    # A link that also preventDefaults is a link that goes nowhere.
+    it "leaves the controller's action off them" do
+      expect(nav.map { |link| link["data-action"] }.compact).to be_empty
+    end
+
+    context "without one" do
+      subject(:calendar) { described_class.new(month: Date.new(2026, 8, 1)) }
+
+      it "keeps the nav as buttons the controller drives", :aggregate_failures do
+        expect(nav).to be_empty
+        expect(painted.css(%(*[data-slot="event-calendar-nav"] button[data-action])).size).to eq(3)
+      end
+    end
+  end
+
   describe "#max_events" do
     it "clamps to what the lanes and the cell height can express", :aggregate_failures do
       expect(described_class.new(max_events: 99).max_events).to eq(6)
@@ -166,8 +337,8 @@ RSpec.describe Shadcn::EventCalendar::Component do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 
     it "holds every shape a re-render needs", :aggregate_failures do
-      %w[event-calendar-week event-calendar-event event-calendar-day-dots
-         event-calendar-day-dot event-calendar-day-more].each do |name|
+      %w[event-calendar-week event-calendar-event event-calendar-day-ticks
+         event-calendar-day-tick event-calendar-day-more].each do |name|
         expect(template.at_css(%(*[data-slot="#{name}"]))).not_to be_nil, "no #{name} in the template"
       end
     end
@@ -195,6 +366,53 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # Four bugs a review found, all of the same shape: the server renders a
+  # month correctly and the *prototype* it hands the controller is wrong, so
+  # nothing is visible until somebody presses a button. None of them could fail
+  # a golden, because a golden is the HTML the code produces.
+  describe "what the controller is handed" do
+    let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
+
+    # `#more` returns nothing when the calendar is not labelled, and the
+    # prototype used to go through it — so a dense month shipped no "+N" and
+    # the first navigation onto a month that overflowed threw on a null clone.
+    context "when the month is too dense to name its events" do
+      let(:options) { { events: forty_on_one_day } }
+
+      before { render_inline(calendar) }
+
+      it "still holds the shape a labelled month will need", :aggregate_failures do
+        expect(root["data-labelled"]).to be_nil
+        expect(template.at_css(%(*[data-slot="event-calendar-day-more"]))).not_to be_nil
+      end
+    end
+
+    context "with the workload reading" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), reading: :workload, events: [
+          { title: "Boiler service", starts_at: Time.zone.local(2026, 8, 1, 9),
+            assignees: [ "Ada Lovelace" ] }
+        ])
+      end
+
+      before { render_inline(calendar) }
+
+      # `workload_cell` used to ignore the `on_day:` it was handed and ask the
+      # schedule again, so `blank: true` blanked the count and nothing else.
+      it "hands over a blank cell, not the first week's people", :aggregate_failures do
+        expect(template.css(%(*[data-slot="event-calendar-day-assignee"]))).to be_empty
+        expect(template.css(%(*[data-slot="event-calendar-day-item"]))).to be_empty
+        expect(template.css(%(*[data-slot="event-calendar-day-count"]))).to be_empty
+      end
+
+      # The controller re-derived this from density alone and stamped
+      # `data-labelled` on a workload month, running both readings at once.
+      it "tells the controller which reading it is" do
+        expect(root["data-shadcn--event-calendar-reading-value"]).to eq("workload")
+      end
+    end
+  end
+
   describe "the events that cross to the controller" do
     let(:options) do
       { events: [ { title: "Meeting", starts_at: Time.zone.local(2026, 8, 20, 10, 30), color: :blue } ] }
@@ -206,14 +424,22 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
     # The controller formats no times at all — `shadcn/dates.js` stops at dates
     # on purpose — so every one of them has to arrive already written.
-    it "carries the time already formatted by I18n", :aggregate_failures do
+    it "carries the time already formatted by I18n" do
       expect(crossed["time"]).to eq("10:30 AM")
-      expect(crossed["meta"]).to eq("10:30 AM")
     end
 
-    it "carries the day span as ISO dates", :aggregate_failures do
+    it "carries the day it starts on as an ISO date" do
       expect(crossed["from"]).to eq("2026-08-20")
-      expect(crossed["to"]).to eq("2026-08-20")
+    end
+
+    # Every key is paid for once per event, and a dense month is two thousand of
+    # them. What can be worked out is left out, and `eventsValueChanged` fills
+    # it back in on the far side.
+    it "leaves out what the controller can work out", :aggregate_failures do
+      expect(crossed).not_to have_key("to")
+      expect(crossed).not_to have_key("meta")
+      expect(crossed).not_to have_key("allDay")
+      expect(crossed).not_to have_key("url")
     end
 
     # The array's own order is the packing order; `dayOrder` is the one a single

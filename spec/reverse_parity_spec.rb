@@ -89,7 +89,6 @@ RSpec.describe "reverse parity" do
 
     "field-group" => %w[w-[420px]],
     "tabs" => %w[w-[420px]],
-    "dropdown-menu-content" => %w[w-56],
     "select-trigger" => %w[w-[200px] w-[220px] w-[240px]],
     # The two floating panels the previews size at the call site, for the same
     # reason the dropdown's content is sized above: a panel does not know how
@@ -249,9 +248,21 @@ RSpec.describe "reverse parity" do
     #    palette. Two properties per name, declared once on the root, is what is
     #    left. See `Component::COLOR_TOKENS`.
     # 3. `bg-[var(--event-color)]/12` and `text-(--event-ink)`, which read them.
+    #
+    # The `max-lg:data-[rows]` block below is the rows-are-days spike: below
+    # `lg` the workload reading is one row per day, from `lg` up it is the
+    # seven-column month again. Declared as descendant rules on the root for the
+    # same reason the colours are, and inert on any calendar that is not the
+    # workload reading. Which arrangement applies is a width decision, never an
+    # argument — a server cannot know the viewport.
+    #
+    # A row is a fixed 80px and its chips scroll sideways inside it, which is
+    # where the `overflow-x`, `overscroll`, `touch-pan-x` and scrollbar-hiding
+    # rules come from — and `shrink-0` on the chips, without which they squash
+    # to fit and the strip never overflows at all.
     "event-calendar" => %w[
       group/event-calendar
-      [&_[data-color=default]]:[--event-color:var(--primary)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
+      [&_[data-color=default]]:[--event-color:var(--muted-foreground)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
       [&_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&_[data-color=blue]]:[--event-ink:var(--color-blue-800)]
       dark:[&_[data-color=blue]]:[--event-ink:var(--color-blue-300)]
       [&_[data-color=green]]:[--event-color:var(--color-emerald-500)] [&_[data-color=green]]:[--event-ink:var(--color-emerald-800)]
@@ -262,7 +273,64 @@ RSpec.describe "reverse parity" do
       dark:[&_[data-color=rose]]:[--event-ink:var(--color-rose-300)]
       [&_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&_[data-color=violet]]:[--event-ink:var(--color-violet-800)]
       dark:[&_[data-color=violet]]:[--event-ink:var(--color-violet-300)]
+
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex-col
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:gap-1
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:items-center
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:justify-center
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:shrink-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:w-14
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:shrink-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:w-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none]
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-nowrap
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-row
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:min-w-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:touch-pan-x
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:w-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex-col
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:gap-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:items-center
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:w-full
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-number]]:text-sm
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:shrink-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:w-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none]
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-row
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:min-w-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:w-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:shrink-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:w-auto
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-ticks]]:block
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-weekday]]:block
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day][data-outside]]:hidden
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:flex-row
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:gap-2
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:h-20
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:items-center
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:min-h-0
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:px-2
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:py-2
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-days]]:contents
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-segments]]:hidden
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-week]]:contents
+      max-lg:data-[rows]:[&_[data-slot=event-calendar-weekdays]]:hidden
+
+
     ],
+    "event-calendar-day-label" => %w[contents],
+    "event-calendar-day-weekday" => %w[text-[0.7rem]],
     "event-calendar-title" => %w[sm:text-lg],
     "event-calendar-weekdays" => %w[grid-cols-7],
     "event-calendar-weekday" => %w[sm:text-xs text-[0.7rem]],
@@ -272,9 +340,10 @@ RSpec.describe "reverse parity" do
     "event-calendar-weeks" => %w[gap-px],
     "event-calendar-days" => %w[gap-px grid-cols-7],
     "event-calendar-day" => %w[
-      data-[selected]:bg-accent focus-visible:ring-inset hover:bg-accent/50 min-h-14 pb-1 pt-1.5
+      data-[selected]:bg-accent focus-visible:ring-inset hover:bg-accent/50 min-h-14 pb-1 pt-1.5 px-0.5
       sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)
-      sm:items-start sm:min-h-(--event-calendar-cell) sm:px-1.5
+      sm:items-start sm:px-1.5 pt-1
+      group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell)
     ],
     "event-calendar-day-number" => %w[
       group-data-[outside]/day:text-muted-foreground
@@ -283,20 +352,74 @@ RSpec.describe "reverse parity" do
     ],
     # `top-8` clears the day number, and the row height is one bar plus its gap
     # — the two figures `Component#cell_height` derives a cell's height from.
-    "event-calendar-segments" => %w[auto-rows-[1.625rem] gap-x-px grid-cols-7 px-px sm:grid top-8],
-    "event-calendar-day-dots" => %w[sm:hidden],
-    "event-calendar-day-dot" => %w[bg-(--event-color) size-1.5],
-    "event-calendar-day-more" => %w[text-[0.7rem]],
+    "event-calendar-segments" => %w[
+      auto-rows-[1.625rem] gap-x-px grid-cols-7 px-px top-8
+      group-data-[labelled]/event-calendar:sm:grid
+    ],
+    # The phone's whole vocabulary: one mark per event, all of them. Every rule
+    # a mark obeys is here on the strip rather than on each mark — at eighty
+    # events a day the class string below repeated is half a megabyte of HTML
+    # for a rule that never varies.
+    "event-calendar-day-ticks" => %w[
+      content-start gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden
+      [&>span]:size-(--event-calendar-tick) [&>span]:shrink-0 [&>span]:rounded-[1px]
+      [&>span]:bg-(--event-color)
+      [&>span[data-run-after]]:-me-px [&>span[data-run-after]]:rounded-r-none
+      [&>span[data-run-before]]:rounded-l-none
+    ],
+    "event-calendar-day-more" => %w[text-[0.7rem] group-data-[labelled]/event-calendar:sm:block],
     "event-calendar-event" => %w[
       bg-[var(--event-color)]/12 data-[continues-after]:rounded-r-none data-[continues-before]:rounded-l-none
       h-5.5 mx-px text-(--event-ink) text-[0.7rem]
     ],
     "event-calendar-event-dot" => %w[bg-(--event-color) size-1.5],
     "event-calendar-agenda" => %w[mt-3],
-    "event-calendar-agenda-title" => %w[pb-1.5],
+    "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
     "event-calendar-agenda-mark" => %w[bg-(--event-color)],
-    "event-calendar-agenda-empty" => %w[py-8]
+    "event-calendar-agenda-empty" => %w[py-8],
+
+    # The workload reading, which had no template preview until now and so was
+    # in none of these lists — 450 lines of shipped classes that nothing
+    # checked. A cell there is a measure rather than a list: a count chip
+    # wearing a sequential ramp, and one chip per assignee or per event.
+    #
+    # `border-border/40` is the hairline that keeps a chip a chip at the pale
+    # end of the ramp; `data-[heavy]:text-primary-foreground` is the ink flip
+    # past halfway, which is what let the ramp use its whole length instead of
+    # the fifth that keeps dark-on-light readable.
+    # The avatar, shrunk a step for the crew stack on a workload chip and given
+    # two initials to hold at fourteen pixels: the group's overlap is a quarter
+    # of upstream's `size-8`, which on a `size-3.5` is four pixels and not eight.
+    "avatar-fallback" => %w[text-[0.5rem]],
+    "avatar-group" => %w[-space-x-1],
+    "avatar-group-count" => %w[lg:size-4 text-[0.5rem]],
+    # The width the grouping menu is given at the call site, like every other
+    # panel width in this list.
+    "dropdown-menu-content" => %w[w-52 w-56],
+    "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
+    "event-calendar-day-assignee" => %w[border-border/40],
+    "event-calendar-day-item" => %w[bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)],
+    "event-calendar-day-time" => %w[pe-2 text-[0.65rem]],
+    "event-calendar-day-text" => %w[text-[0.65rem]],
+    # The cap is a rule about the fourth chip onwards, scoped by slot so it
+    # cannot also catch the "+N" chip sitting last in the column — and the two
+    # groupings hide each other, because both are rendered and the menu picks.
+    "event-calendar-day-assignees" => %w[
+      group-data-[group=events]/event-calendar:hidden
+      group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-assignee]:nth-child(n+4)]:hidden
+    ],
+    "event-calendar-day-items" => %w[
+      group-data-[group=assignees]/event-calendar:hidden
+      group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-item]:nth-child(n+4)]:hidden
+    ],
+    # The event calendar shrinks an avatar a step below upstream's smallest for
+    # the crew stack on a workload chip, where five faces share the width of a
+    # clock. `size-3.5` is in the corpus; the desktop step up is not.
+    "avatar" => %w[lg:size-4],
+    "event-calendar-day-rest" => %w[
+      border-border/40 text-[0.65rem] group-data-[capped]/event-calendar:flex
+    ]
   }.freeze
 
   it "renders no class that has disappeared from every vendored source", :aggregate_failures do

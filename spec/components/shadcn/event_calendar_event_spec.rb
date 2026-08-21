@@ -6,14 +6,19 @@ require "spec_helper"
 # hash: everything goes through here first, which is why the awkward inputs are
 # asserted on the object rather than through rendered HTML.
 RSpec.describe Shadcn::EventCalendar::Event do
+  # `wrap` takes the hash as a *positional* argument, and since `default_color:`
+  # was added it has to be braced: without them Ruby reads the whole thing as
+  # keywords and `value` goes missing. Nothing in the gem calls it brace-less —
+  # it is always handed a variable — but the spec did, which is how this
+  # surfaced.
   describe ".wrap" do
     it "builds one from a hash of symbol keys" do
-      expect(described_class.wrap(title: "Standup", starts_at: Date.new(2026, 8, 20)))
+      expect(described_class.wrap({ title: "Standup", starts_at: Date.new(2026, 8, 20) }))
         .to have_attributes(title: "Standup", start_date: Date.new(2026, 8, 20))
     end
 
     it "builds one from a hash of string keys" do
-      expect(described_class.wrap("title" => "Standup", "starts_at" => Date.new(2026, 8, 20)))
+      expect(described_class.wrap({ "title" => "Standup", "starts_at" => Date.new(2026, 8, 20) }))
         .to have_attributes(title: "Standup")
     end
 
@@ -77,6 +82,68 @@ RSpec.describe Shadcn::EventCalendar::Event do
     # runtime, and a hex has no answer for the dark palette.
     it "falls back to the default for a name that is not in it" do
       expect(described_class.new(title: "x", starts_at: Date.current, color: "#ff0000").color).to eq(:default)
+    end
+  end
+
+  # The level FullCalendar puts on an event *source*: between the event and the
+  # fallback, so a calendar of one kind of thing says its colour once.
+  describe "#default_color" do
+    subject(:event) { described_class.wrap({ title: "x", starts_at: Date.current }, default_color: :violet) }
+
+    it "colours an event that names none" do
+      expect(event.color).to eq(:violet)
+    end
+
+    it "does not outrank an event that names its own" do
+      named = described_class.wrap({ title: "x", starts_at: Date.current, color: :rose }, default_color: :violet)
+
+      expect(named.color).to eq(:rose)
+    end
+
+    # A typo in one row of a `map` should look like the rest of that calendar,
+    # not like an uncategorised event.
+    it "catches a name that is not in the palette" do
+      typo = described_class.wrap({ title: "x", starts_at: Date.current, color: :perrywinkle },
+                                  default_color: :violet)
+
+      expect(typo.color).to eq(:violet)
+    end
+
+    it "is itself checked against the palette" do
+      expect(described_class.wrap({ title: "x", starts_at: Date.current }, default_color: "#abc").color)
+        .to eq(:default)
+    end
+
+    # An Event resolved its colour when it was built, and a caller who
+    # constructed one meant it.
+    it "leaves an already-built Event alone" do
+      built = described_class.new(title: "x", starts_at: Date.current)
+
+      expect(described_class.wrap(built, default_color: :violet).color).to eq(:default)
+    end
+  end
+
+  # A hash keyed anything but `:name` used to make an `Assignee` with a nil
+  # name: an empty avatar, and — once two operators tied on count — a 500 out
+  # of `Schedule#assignees_on`.
+  describe "#assignees" do
+    it "takes a name" do
+      event = described_class.new(title: "x", starts_at: Date.current, assignee: "Ada Lovelace")
+
+      expect(event.assignees.map(&:initials)).to eq([ "AL" ])
+    end
+
+    it "takes a crew" do
+      event = described_class.new(title: "x", starts_at: Date.current,
+                                  assignees: [ "Ada Lovelace", { name: "Grace Hopper" } ])
+
+      expect(event.assignees.map(&:name)).to eq([ "Ada Lovelace", "Grace Hopper" ])
+    end
+
+    # Loud where it can be fixed, which is the trade `Icon::Component` makes.
+    it "says so when a hash carries no name" do
+      expect { described_class.new(title: "x", starts_at: Date.current, assignees: [ { full_name: "Grace" } ]) }
+        .to raise_error(ArgumentError)
     end
   end
 

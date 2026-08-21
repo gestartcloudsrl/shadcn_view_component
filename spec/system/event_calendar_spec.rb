@@ -36,7 +36,7 @@ RSpec.describe "Event calendar", :js do
           state: [ cell.dataset.today, cell.dataset.selected, cell.dataset.outside ].join("|"),
           label: cell.getAttribute("aria-label"),
           text: cell.textContent.trim(),
-          dots: [...cell.querySelectorAll("[data-slot=event-calendar-day-dot]")].map((dot) => dot.dataset.color)
+          marks: [...cell.querySelectorAll("[data-slot=event-calendar-day-tick]")].map((tick) => tick.dataset.color)
         }))
         const bars = [...root.querySelectorAll("[data-slot=event-calendar-event]")].map((bar) => ({
           color: bar.dataset.color,
@@ -45,7 +45,14 @@ RSpec.describe "Event calendar", :js do
           cut: [ bar.dataset.continuesBefore, bar.dataset.continuesAfter ].join("|")
         }))
 
-        return { days, bars, overflow: root.dataset.overflow || "", title: root.querySelector("[data-slot=event-calendar-title]").textContent }
+        return {
+          days,
+          bars,
+          overflow: root.dataset.overflow || "",
+          labelled: root.dataset.labelled || "",
+          tick: root.style.getPropertyValue("--event-calendar-tick"),
+          title: root.querySelector("[data-slot=event-calendar-title]").textContent
+        }
       })()
     JS
   end
@@ -88,7 +95,7 @@ RSpec.describe "Event calendar", :js do
       click_on "Today"
 
       expect(page).to have_css(title, text: "August 2026")
-      expect(day("2026-08-12")["aria-pressed"]).to eq("true")
+      expect(day("2026-08-12")["aria-selected"]).to eq("true")
     end
 
     # A month whose cells all fit gets its extra row back. Asserted because the
@@ -116,6 +123,52 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # Forty-two tabbable buttons with no arrows and no geometry was the state
+  # this shipped in; the gem's own `Calendar` has implemented the date-grid
+  # pattern all along, two directories away.
+  describe "the keyboard" do
+    before do
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    def press(key)
+      page.execute_script(<<~JS)
+        document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "#{key}", bubbles: true }))
+      JS
+    end
+
+    it "gives the whole month one tab stop", :aggregate_failures do
+      stops = all("#{calendar} [data-slot=event-calendar-day][tabindex='0']", visible: :all)
+
+      expect(stops.size).to eq(1)
+      expect(stops.first["data-day"]).to eq("2026-08-20")
+    end
+
+    it "moves by day and by week", :aggregate_failures do
+      day("2026-08-20").click
+      day("2026-08-20").native.send_keys(:arrow_right)
+      expect(focused).to eq("2026-08-21")
+
+      press("ArrowDown")
+      expect(focused).to eq("2026-08-28")
+
+      press("Home")
+      expect(focused).to eq("2026-08-24")
+    end
+
+    # Stepping off the edge is a month change, and the tab stop goes with it.
+    it "crosses the grid's edge into the next month", :aggregate_failures do
+      day("2026-08-20").click
+      day("2026-08-20").native.send_keys(:page_down)
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "September 2026")
+      expect(focused).to eq("2026-09-20")
+    end
+  end
+
   describe "choosing a day" do
     before do
       visit_preview("event_calendar")
@@ -129,11 +182,15 @@ RSpec.describe "Event calendar", :js do
       expect(agenda_titles).to eq([ "Conference", "Birthday Party" ])
     end
 
-    it "moves the pressed state off the day that had it", :aggregate_failures do
+    # `aria-selected` is absent rather than "false" on the days that are not,
+    # which is what the gem's `Calendar` writes — and the tab stop travels with
+    # it, so the month keeps exactly one.
+    it "moves the selection, and the tab stop with it", :aggregate_failures do
       day("2026-08-21").click
 
-      expect(day("2026-08-21")["aria-pressed"]).to eq("true")
-      expect(day("2026-08-20")["aria-pressed"]).to eq("false")
+      expect(day("2026-08-21")["aria-selected"]).to eq("true")
+      expect(day("2026-08-20")["aria-selected"]).to be_nil
+      expect(all("#{calendar} [data-slot=event-calendar-day][tabindex='0']", visible: :all).size).to eq(1)
     end
 
     it "says so when there is nothing on the day", :aggregate_failures do
@@ -151,6 +208,31 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The workload reading is server-drawn — its cells hold crews and clients the
+  # payload does not carry — so its nav dispatches and leaves the DOM alone.
+  # Redrawing anyway is what put August's people on September's dates, and
+  # re-deriving `labelled` from density alone is what ran both readings at once.
+  describe "the workload reading's navigation", :aggregate_failures do
+    it "announces the month and changes nothing else" do
+      visit "/lookbook/preview/shadcn/event_calendar/workload"
+      wait_for_stimulus
+
+      moved = page.evaluate_script(<<~JS)
+        (() => {
+          let month = null
+          document.addEventListener("shadcn--event-calendar:month-change", (e) => { month = e.detail.month },
+                                    { once: true })
+          document.querySelector("[data-slot=event-calendar-nav] button[aria-label='Go to the Next Month']").click()
+          return month
+        })()
+      JS
+
+      expect(moved).to eq("2026-09-01")
+      expect(page).to have_css("#{calendar}:not([data-labelled])")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-tick]", visible: :all)
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.
@@ -163,8 +245,8 @@ RSpec.describe "Event calendar", :js do
 
     after { page.driver.browser.manage.window.resize_to(1400, 1000) }
 
-    it "shows dots in the cells instead of bars", :aggregate_failures do
-      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-dot]")
+    it "shows marks in the cells instead of bars", :aggregate_failures do
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-tick]")
       expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-event]")
     end
 

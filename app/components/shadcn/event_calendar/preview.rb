@@ -11,8 +11,9 @@ module Shadcn
         render_with_template
       end
 
-      # One of each colour. The palette is fixed rather than free-form; the
-      # reason is in `Event::COLORS`.
+      # One of each colour, then the same calendar with `default_color:` — the
+      # level FullCalendar puts on an event source. The palette is fixed rather
+      # than free-form; the reason is in `Event::COLORS`.
       def colors
         render_with_template
       end
@@ -38,6 +39,64 @@ module Shadcn
       # @param month text
       def month(month: "2026-09-01")
         render_component(month: Date.parse(month), events: Preview.sample_events)
+      end
+
+      # The cell as a *measure* rather than as a list.
+      #
+      # One row per day: a date column, then the day's chips scrolling sideways.
+      # There is no grid arrangement of this reading any more — a month of crews
+      # and job counts is a list of days that happens to be a month.
+      #
+      def workload
+        render_with_template
+      end
+
+      # The same reading with the knobs on. `colored` gives each event's subject
+      # its own hue, which is what makes the chips worth colouring at all — a
+      # colour that means nothing is noise.
+      #
+      # A method rather than a template, so a month of eight hundred events does
+      # not become a golden. The shape it exercises is the shipped one above.
+      #
+      # @param most number
+      # @param colored toggle
+      def workload_density(most: 30, colored: false)
+        render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
+                         reading: :workload,
+                         events: Preview.workload_events(per_day: 0..most.to_i,
+                                                         colored: ActiveModel::Type::Boolean.new.cast(colored)))
+      end
+
+      # A roster of six over a month of work, seeded so the gallery shows
+      # the same month twice. Counts run from nothing to past the ramp's
+      # ceiling, so both ends of the scale are on the page.
+      def self.workload_events(month: Date.new(2026, 8, 1), per_day: 0..30, crew: 1..5,
+                               seed: 7, colored: false)
+        random = Random.new(seed)
+        roster = [ "Ada Lovelace", "Grace Hopper", "Alan Turing",
+                   "Katherine Johnson", "Linus Pauling", "Marie Curie" ]
+        clients = [ "Acme Foods", "Northwind", "Bellini SpA", "Orsini & Co",
+                    "Vega Logistics", "Delta Clinic", "Fabbri Srl", "Kite Studio" ]
+        # One hue per client, in the palette's fixed order — and the clients past
+        # the fifth stay uncategorised rather than starting the list again. A
+        # cycled hue says two clients are the same thing, which is the one lie a
+        # categorical palette must not tell.
+        hues = Shadcn::EventCalendar::Event::COLORS - [ :default ]
+
+        (month.beginning_of_month..month.end_of_month).flat_map do |day|
+          on_shift = roster.sample(random.rand(2..6), random: random)
+
+          Array.new(random.rand(per_day)) do |index|
+            client = clients[random.rand(clients.size)]
+
+            {
+              title: client,
+              color: (hues[clients.index(client)] if colored),
+              starts_at: Time.zone.local(day.year, day.month, day.day, random.rand(7..18), random.rand(0..59)),
+              assignees: on_shift.sample(random.rand(crew), random: random)
+            }
+          end
+        end
       end
 
       # Shared by the previews above and by `spec/system/event_calendar_spec.rb`,

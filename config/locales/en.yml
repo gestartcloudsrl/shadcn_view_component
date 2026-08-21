@@ -49,6 +49,13 @@ en:
       # is limited to the date tokens that shim knows: %A %a %B %b %d %-d %e
       # %m %-m %Y %y.
       agenda_format: "%A, %B %-d"
+      # The workload reading's grouping menu — see
+      # `EventCalendar::Component::WORKLOAD_GROUPINGS`.
+      group:
+        label: Group cells by
+        assignees: By assignee
+        events: By event
+        show_all: Show all
       # Times never reach the shim — the server formats every one of them and
       # ships it with the event — so this may use any token `strftime` has.
       time_format: "%-l:%M %p"
