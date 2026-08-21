@@ -88,17 +88,24 @@ module Shadcn
       ARRANGEMENTS = %i[auto rows].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
+      # How a day *sits* in a row is each reading's own, and is deliberately not
+      # here. Both of them said something about the cell's height, and with the
+      # rules at equal specificity the winner was source order: the hours
+      # reading's `h-auto` lost to this file's `h-20`, its axis grew to 150px
+      # inside an 80px cell, and a busy day's lower lanes were drawn over the
+      # next day's row. What had been holding that up was the `data-[track]:`
+      # prefix — it was not only scoping the rules, it was winning them — and
+      # taking it off is what let the fixed height through.
+      #
+      # A rule a reading has to undo does not belong to the frame.
       ROWS_TOKENS =
         "rows:[&_[data-slot=event-calendar-week]]:contents " \
         "rows:[&_[data-slot=event-calendar-days]]:contents " \
         "rows:[&_[data-slot=event-calendar-weekdays]]:hidden " \
         "rows:[&_[data-slot=event-calendar-day]]:flex-row " \
-        "rows:[&_[data-slot=event-calendar-day]]:items-center " \
         "rows:[&_[data-slot=event-calendar-day]]:gap-2 " \
         "rows:[&_[data-slot=event-calendar-day]]:px-2 " \
         "rows:[&_[data-slot=event-calendar-day]]:py-2 " \
-        "rows:[&_[data-slot=event-calendar-day]]:h-20 " \
-        "rows:[&_[data-slot=event-calendar-day]]:min-h-0 " \
         "rows:[&_[data-slot=event-calendar-day][data-outside]]:hidden " \
         "rows:[&_[data-slot=event-calendar-day-head]]:flex " \
         "rows:[&_[data-slot=event-calendar-day-head]]:w-14 " \
@@ -466,16 +473,60 @@ module Shadcn
         )
       end
 
-      # The way in and out of the hours reading, offered to any caller that can
-      # name the URL of the other state. It belongs to no single reading, which
-      # is why it did not go with the rest of the toolbar.
-      def hours_toggle
-        nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#retrack",
-                   href: hours_url&.call(!hours?),
-                   pressed: hours?, value: (!hours?).to_s) do
-          shadcn_t("event_calendar.arrangement.hours")
+      # One panel instead of three buttons that ruled each other out.
+      #
+      # The toolbar had a control for the view, a control for the grouping and a
+      # control for the shape, and two of them were always about a view you were
+      # not in — which is how it ended up drawing controls that changed nothing.
+      # Here the first question is which view, and the second is the only
+      # question that view has: the readings answer it themselves through
+      # `#reading_options`, so no control exists for a reading that cannot act
+      # on it.
+      def view_panel
+        render(DropdownMenu::Component.new(align: :start)) do |dropdown|
+          dropdown.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :sm)) do
+            safe_join([
+              tag.span(view_label),
+              render(Icon::Component.new("chevron-down", class: CHEVRON_CLASS))
+            ])
+          end
+          dropdown.with_menu_content(class: "w-56") do
+            safe_join([ view_options, *reading_options ])
+          end
         end
       end
+
+      def view_options
+        safe_join([
+          render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.view.label") },
+          render(DropdownMenu::Separator::Component.new),
+          render(DropdownMenu::RadioGroup::Component.new) do
+            safe_join(%i[rows hours].map { |name| view_option(name) })
+          end
+        ])
+      end
+
+      def view_option(name)
+        wanted = name == :hours
+        href = hours_url&.call(wanted)
+
+        render(DropdownMenu::RadioItem::Component.new(
+          value: name, checked: wanted == hours?,
+          **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#retrack" })
+        )) { shadcn_t("event_calendar.view.#{name}") }
+      end
+
+      # The trigger says where you are and what you are seeing — the two things
+      # the panel decides, so it can be read without opening it.
+      def view_label
+        safe_join([ shadcn_t("event_calendar.view.#{hours? ? 'hours' : 'rows'}"), reading_label ].compact,
+                  " · ")
+      end
+
+      def reading_label = nil
+
+      # The second section: the one question this reading has.
+      def reading_options = []
 
       def step_button(direction)
         target = direction == :previous ? month.previous : month.next

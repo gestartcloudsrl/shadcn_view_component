@@ -17,6 +17,7 @@
       selected: Date.new(2026, 8, 20),
       reading: :hours,
       window: (7..19),
+      shape: :bars,
       events: Shadcn::EventCalendar::Preview.workload_events(per_day: 0..3, crew: 1..3,
                                                              colored: true, durations: true)
     )) %>
