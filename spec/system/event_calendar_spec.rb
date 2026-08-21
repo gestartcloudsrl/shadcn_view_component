@@ -417,6 +417,29 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # A component spec can only see what the style attribute says, and it said
+  # `--for:100%` while the chip rendered 124px wide inside a 1270px axis: the
+  # class carried both `w-auto` and `w-(--for)`, and the one Tailwind emitted
+  # last won. Only a browser can tell those two apart.
+  describe "an all-day chip in the hours reading" do
+    it "is as wide as the day" do
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=2&all_day=1&from=7&to=19"
+      wait_for_stimulus
+
+      widths = page.evaluate_script(<<~JS)
+        (() => {
+          const chip = [...document.querySelectorAll("[data-slot=event-calendar-day-item]")]
+            .find((c) => c.style.cssText.includes("--for") && c.offsetParent)
+          const axis = chip.closest("[data-slot=event-calendar-day-track]")
+          return { chip: Math.round(chip.getBoundingClientRect().width),
+                   axis: Math.round(axis.getBoundingClientRect().width) }
+        })()
+      JS
+
+      expect(widths["chip"]).to eq(widths["axis"])
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.

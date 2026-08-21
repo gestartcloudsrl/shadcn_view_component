@@ -70,14 +70,22 @@ module Shadcn
         # not used here at all: the duration stops being a length and goes back
         # to being the text in the clock. `max-w` is what stops a late-evening
         # chip running off the end of the axis.
-        CHIP_CLASS = "absolute top-(--lane) left-(--at) flex w-auto max-w-[13rem] flex-col gap-1 " \
+        # No width in here, and that is the point. A chip carries exactly one of
+        # the two below, because both are `width` and this string does not go
+        # through `tailwind_merge` — put them together and the winner is
+        # whichever Tailwind emitted last, which was `w-auto`: an all-day chip
+        # said `--for:100%`, wore `w-(--for)`, and rendered 124px wide inside a
+        # 1270px axis.
+        CHIP_CLASS = "absolute top-(--lane) left-(--at) flex flex-col gap-1 " \
                      "overflow-hidden rounded-md border border-border/40 " \
                      "bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)"
-        # An all-day chip is the one whose width means something: it has no hour
-        # to be placed at, so it is the whole axis rather than as wide as its
-        # own text. `max-w-none` because the cap that keeps a late-evening chip
-        # from running off the end is exactly what this one is allowed to do.
-        CHIP_ALL_DAY_CLASS = "w-(--for) max-w-none"
+        # As wide as its own text, capped so a late-evening chip does not run
+        # off the end of the axis.
+        CHIP_TIMED_CLASS = "w-auto max-w-[13rem]"
+        # The one chip whose width means something: an all-day job has no hour
+        # to be placed at, so it is the whole axis — and running to the end is
+        # exactly what it is for, so there is no cap.
+        CHIP_ALL_DAY_CLASS = "w-(--for)"
         # A share of the window, not a number of minutes — which is the bug the
         # first version had. The packer speaks minutes, but what decides whether
         # two chips collide is *pixels*, and how many pixels a minute is worth
@@ -240,7 +248,7 @@ module Shadcn
           tag.span(
             safe_join([ chip_head(event), chip_text(event) ]),
             "data-slot": "event-calendar-day-item",
-            class: [ CHIP_CLASS, (CHIP_ALL_DAY_CLASS if event.all_day?) ],
+            class: [ CHIP_CLASS, (event.all_day? ? CHIP_ALL_DAY_CLASS : CHIP_TIMED_CLASS) ],
             "data-color": event.color,
             style: [ "--at:#{at(from)}", ("--for:#{span(to - from)}" if event.all_day?),
                      "--lane:#{lane_offset(lane)}" ].compact.join(";"),
