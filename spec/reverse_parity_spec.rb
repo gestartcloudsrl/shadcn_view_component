@@ -394,6 +394,9 @@ RSpec.describe "reverse parity" do
     "avatar-fallback" => %w[text-[0.5rem]],
     "avatar-group" => %w[-space-x-1],
     "avatar-group-count" => %w[lg:size-4 text-[0.5rem]],
+    # The width the day sheet is given at the call site, like every other panel
+    # width in this list: a sheet does not know how wide its contents want to be.
+    "sheet-content" => %w[sm:max-w-md],
     # The width the grouping menu is given at the call site, like every other
     # panel width in this list.
     "dropdown-menu-content" => %w[w-52 w-56],
