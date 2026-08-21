@@ -24,6 +24,8 @@ module Shadcn
       # phone that trade stops working, and there the hour takes a fixed width
       # and the *month* scrolls as one, with the date column frozen.
       class Component < EventCalendar::Component
+        include Chips
+
         # No `data-[track]:` prefix on any of these, and that absence is the
         # split doing its job: these rules only ever land on this class's root,
         # so scoping them to an attribute would be guarding against a calendar
@@ -54,7 +56,8 @@ module Shadcn
           "[&_[data-slot=event-calendar-ruler-pad]]:bg-background"
 
         style do
-          base { "#{EventCalendar::Component::BASE_TOKENS} #{TOKENS}" }
+          base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
+                 "#{TOKENS}" }
         end
 
         AXIS_CLASS = "relative min-w-0 grow self-stretch"
@@ -138,11 +141,17 @@ module Shadcn
 
         def cell_body(day, on_day:, assignees:, hidden:)
           [
-            tag.span(safe_join([ day_marker(day), workload_count(on_day.size) ].compact),
-                     "data-slot": "event-calendar-day-head", class: WORKLOAD_HEAD_CLASS),
+            tag.span(safe_join([ day_marker(day), count_chip(on_day.size) ].compact),
+                     "data-slot": "event-calendar-day-head", class: HEAD_CLASS),
             day_axis(day)
           ].compact
         end
+
+        def cell_class = CELL_CLASS
+
+        def reading_attributes = { "data-rows" => "true", "data-arrangement" => :rows }
+
+        def reading_controls = [ hours_toggle ]
 
         # Position is a percentage of the window rather than a pixel, so the
         # marks stay aligned at every width without anything measuring anything.
@@ -171,7 +180,7 @@ module Shadcn
         # looks like.
         def chip(event, lane, from, _to)
           tag.span(
-            safe_join([ workload_item_head(event), workload_item_text(event) ]),
+            safe_join([ chip_head(event), chip_text(event) ]),
             "data-slot": "event-calendar-day-item", class: CHIP_CLASS,
             "data-color": event.color,
             style: "--at:#{at(from)};--lane:#{lane_offset(lane)}",
