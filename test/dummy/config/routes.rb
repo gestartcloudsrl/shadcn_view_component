@@ -12,6 +12,10 @@ Rails.application.routes.draw do
   # Lookbook preview cannot give it a page to be the height of.
   get "chat" => "chat#show", as: :chat
 
+  # The day view behind the event calendar's `day_url:`. A Lookbook preview can
+  # render the calendar but cannot answer its links, so the route lives here.
+  get "calendar/days/:date" => "calendar#day", as: :calendar_day
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   root to: redirect("/lookbook")

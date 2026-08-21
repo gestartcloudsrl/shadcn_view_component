@@ -265,7 +265,7 @@ module Shadcn
       # borrowed one.
       WORKLOAD_ASSIGNEE_CLASS = "flex w-full items-center gap-1 overflow-hidden rounded-md " \
                                 "border border-border/40 bg-muted px-1 py-0.5 text-foreground"
-      WORKLOAD_AVATAR_CLASS = "size-4 shrink-0"
+      WORKLOAD_ASSIGNEE_AVATAR_CLASS = "size-4 shrink-0"
       # `bg-background` rather than the fallback's own `bg-muted`: the chip *is*
       # `bg-muted` now, so an avatar wearing it would be an invisible circle
       # with initials floating in it. Inverting them also lifts the initials off
@@ -301,7 +301,12 @@ module Shadcn
       WORKLOAD_AVATARS_CLASS = "ml-auto flex shrink-0 -space-x-1"
       # Smaller everywhere a month is not on a desktop. Two initials at 14px
       # still read; the circle is what gives way, not the type.
-      WORKLOAD_AVATAR_CLASS = "size-3.5 lg:size-4"
+      # A face in a crew stack, which is not the same face as the one on an
+      # assignee chip: these two shared a name after a rename and Ruby kept the
+      # second, so the chip's avatar silently lost its `shrink-0` and shrank in
+      # a scrolling row. `ruby -w` was the only thing that saw it — no spec did,
+      # and rubocop has no cop for a reassigned constant.
+      WORKLOAD_STACK_AVATAR_CLASS = "size-3.5 lg:size-4"
       WORKLOAD_AVATARS_MORE_CLASS = "size-3.5 bg-background text-[0.5rem] lg:size-4"
       # Three faces, then the fourth is the count. Five was the first guess and
       # it is too many at this size: the stack out-weighs the clock beside it,
@@ -876,7 +881,7 @@ module Shadcn
       def workload_assignee(assignee, count)
         tag.span(
           safe_join([
-            render(Avatar::Component.new(size: :sm, class: WORKLOAD_AVATAR_CLASS)) do |avatar|
+            render(Avatar::Component.new(size: :sm, class: WORKLOAD_ASSIGNEE_AVATAR_CLASS)) do |avatar|
               avatar.with_fallback(class: WORKLOAD_INITIALS_CLASS) { assignee.initials }
               avatar.with_image(src: assignee.image, alt: "") if assignee.image
             end,
@@ -938,7 +943,7 @@ module Shadcn
       end
 
       def avatar_for(assignee)
-        render(Avatar::Component.new(size: :sm, class: WORKLOAD_AVATAR_CLASS)) do |avatar|
+        render(Avatar::Component.new(size: :sm, class: WORKLOAD_STACK_AVATAR_CLASS)) do |avatar|
           avatar.with_fallback(class: WORKLOAD_INITIALS_CLASS) { assignee.initials }
           avatar.with_image(src: assignee.image, alt: "") if assignee.image
         end
