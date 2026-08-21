@@ -474,12 +474,15 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
       before { render_inline(calendar) }
 
-      # `workload_cell` used to ignore the `on_day:` it was handed and ask the
-      # schedule again, so `blank: true` blanked the count and nothing else.
-      it "hands over a blank cell, not the first week's people", :aggregate_failures do
-        expect(template.css(%(*[data-slot="event-calendar-day-assignee"]))).to be_empty
-        expect(template.css(%(*[data-slot="event-calendar-day-item"]))).to be_empty
-        expect(template.css(%(*[data-slot="event-calendar-day-count"]))).to be_empty
+      # It used to hand over a blank cell, because it handed one over at all:
+      # the prototypes template shipped on every reading and this example
+      # asserted the workload one carried nobody's name. Now the reading the
+      # server draws whole ships neither the template nor the events, which is
+      # 34 KB of a workload page that its own controller returned before
+      # reading — and the strongest version of what this example was checking.
+      it "hands the controller nothing to draw with", :aggregate_failures do
+        expect(fragment.at_css("template")).to be_nil
+        expect(root["data-shadcn--event-calendar-events-value"]).to be_nil
       end
 
       # The controller re-derived this from density alone and stamped

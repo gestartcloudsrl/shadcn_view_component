@@ -372,7 +372,7 @@ module Shadcn
           # The order the marks band in. Crossed rather than repeated in the
           # controller for the reason everything else is: one list, in Ruby.
           "data-shadcn--event-calendar-colors-value" => Event::COLORS.to_json,
-          "data-shadcn--event-calendar-events-value" => portable_events.to_json,
+          **client_values,
           # Everything below is text, and all of it comes from `I18n` for the
           # reason the calendar's does: a `toLocaleDateString` in the controller
           # answers to the *browser's* locale, and the month you navigate to
@@ -401,7 +401,8 @@ module Shadcn
       end
 
       def call
-        render_element(body: safe_join([ header, grid, (agenda if @agenda), prototypes ].compact))
+        render_element(body: safe_join([ header, grid, (agenda if agenda?),
+                                        (prototypes if client_drawn?) ].compact))
       end
 
       private
@@ -530,6 +531,31 @@ module Shadcn
       # Custom properties a reading needs on the root, merged into `style`
       # alongside the ones every reading has.
       def reading_style = []
+
+      # Whether the browser ever redraws this month. The events reading does —
+      # its controller packs a month the server never rendered. The workload and
+      # hours readings do not: their cells hold crews, clients and clock times
+      # that `#portable_events` cannot carry, so the controller returns before
+      # drawing and the month changes by URL.
+      #
+      # What that was costing was measured before it was fixed: 34 KB on a
+      # workload page, 15% of it, in an events payload and a prototypes template
+      # that its own controller refuses to read.
+      def client_drawn? = true
+
+      # An agenda has to be filled by whoever draws the month.
+      #
+      # The events reading fills it in the browser, from the crossed payload.
+      # A server-drawn reading cannot: its cells hold crews and clients that
+      # payload does not carry, which is the whole reason it does not ship it.
+      # So there the agenda is the *server's*, and it needs `day_url:` to name
+      # where a day lives — with one, the cells are links and what comes back
+      # fills it; without one, there is nothing that could.
+      #
+      # Found by clicking a day rather than by reading the code: the suite has
+      # no example that opens a workload day, so dropping the payload emptied
+      # an agenda that had been working and nothing went red.
+      def agenda? = @agenda && (client_drawn? || day_url.present?)
 
       # `data-*` a reading needs on the root for its own rules to key off.
       def reading_attributes = {}
@@ -844,6 +870,14 @@ module Shadcn
       # which is the thing the calendar's two rules exist to prevent. So the
       # shapes are rendered here, once, into a `<template>` the browser does not
       # paint and Tailwind does scan.
+      # Everything the controller needs only in order to draw. A reading the
+      # server draws whole ships none of it.
+      def client_values
+        return {} unless client_drawn?
+
+        { "data-shadcn--event-calendar-events-value" => portable_events.to_json }
+      end
+
       def prototypes
         tag.template(
           safe_join([
