@@ -148,15 +148,6 @@ These bite while editing, so they are here rather than in the docs.
   `vendor/shadcn/themes.json` or drop an SVG in `vendor/lucide/icons`, then run
   `rake themes:build` / `rake icons:build`. CI fails if regenerating produces a
   diff.
-- **In a hand-built `tag.*` call, write `data-slot:` before `class:`.**
-  `reverse_parity_spec` matches `data-slot="…"` and then scans *the rest of that
-  element's attributes* for the class, so a `class:` written first is a class the
-  spec never sees. Components that go through `render_element` get the order
-  right for free — it builds the `data-slot` into the hash before anything else —
-  and only a family that composes its own markup can get it wrong. The event
-  calendar did, and every slot but its root was silently unchecked until the
-  order was fixed.
-
 - **Attribute precedence is `data-slot` < component defaults < caller.** What a
   subclass passes to `super` in `#element_attributes` is a *default*, despite
   arriving as a keyword splat. `class` and `data-action` concatenate rather than
