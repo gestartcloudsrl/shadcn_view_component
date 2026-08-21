@@ -303,6 +303,60 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The one toolbar control whose effect is a stylesheet rather than a render.
+  # `rows:` in `shadcn.css` carries the breakpoint and the override behind one
+  # name, so what is asserted here is that both halves of it still fire: the
+  # width alone below `lg`, and the attribute alone above it.
+  describe "the arrangement toggle" do
+    subject(:week) { find("#{calendar} [data-slot=event-calendar-week]", match: :first, visible: :all) }
+
+    def display_of(node) = page.evaluate_script("getComputedStyle(arguments[0]).display", node)
+
+    # `visible: :all`, because one example is about it not being visible.
+    def toggle
+      find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Rows", visible: :all)
+    end
+
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=6"
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.manage.window.resize_to(1400, 1000) }
+
+    context "when the window is wide" do
+      it "lays the month out as a grid until it is pressed" do
+        expect(display_of(week)).to eq("block")
+      end
+
+      it "lays it out as rows once it is", :aggregate_failures do
+        toggle.click
+
+        expect(page).to have_css("#{calendar}[data-arrangement=rows]")
+        expect(display_of(week)).to eq("contents")
+        expect(page).to have_css("#{calendar} [data-slot=button][aria-pressed=true]", text: "Rows")
+      end
+    end
+
+    context "when the window is narrow" do
+      before do
+        page.driver.browser.manage.window.resize_to(820, 900)
+        visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=6"
+        wait_for_stimulus
+      end
+
+      it "is already rows, with nothing for the toggle to change" do
+        expect(display_of(week)).to eq("contents")
+      end
+
+      # The server cannot know which side of the breakpoint it rendered for, so
+      # this is the only place that can hide a control with no work to do.
+      it "hides the toggle" do
+        expect(toggle).not_to be_visible
+      end
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.

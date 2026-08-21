@@ -49,6 +49,10 @@ en:
       # is limited to the date tokens that shim knows: %A %a %B %b %d %-d %e
       # %m %-m %Y %y.
       agenda_format: "%A, %B %-d"
+      # The workload reading's arrangement toggle. It names what pressing it
+      # does, not the state it is in, so the controller never has to write it.
+      arrangement:
+        rows: Rows
       # The workload reading's grouping menu — see
       # `EventCalendar::Component::WORKLOAD_GROUPINGS`.
       group:

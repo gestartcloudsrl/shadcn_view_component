@@ -11,6 +11,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* The event calendar's workload reading lays a month out as one row per day
+ * below `lg` and as a seven-column grid above it. Its toolbar can force the
+ * rows at any width, and a media query is not something a button can reach —
+ * so the breakpoint and the override are two rules behind one variant name,
+ * and `EventCalendar::Component::ROWS_TOKENS` writes each rule once.
+ *
+ * Order matters: the unconditional rule comes second, so above `lg` the
+ * forced arrangement wins. `:where()` keeps both at zero specificity, which
+ * is what leaves source order in charge. */
+@custom-variant rows {
+  @media (width < 64rem) { &:where([data-rows]) { @slot } }
+  &:where([data-rows][data-arrangement="rows"]) { @slot }
+}
+
 /* --------------------------------------------------------------------------
  * Design tokens
  * ------------------------------------------------------------------------ */

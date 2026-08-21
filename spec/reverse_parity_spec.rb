@@ -249,17 +249,23 @@ RSpec.describe "reverse parity" do
     #    left. See `Component::COLOR_TOKENS`.
     # 3. `bg-[var(--event-color)]/12` and `text-(--event-ink)`, which read them.
     #
-    # The `max-lg:data-[rows]` block below is the rows-are-days spike: below
-    # `lg` the workload reading is one row per day, from `lg` up it is the
-    # seven-column month again. Declared as descendant rules on the root for the
-    # same reason the colours are, and inert on any calendar that is not the
-    # workload reading. Which arrangement applies is a width decision, never an
-    # argument — a server cannot know the viewport.
+    # The `rows:` block below is the rows-are-days spike: the workload reading
+    # is one row per day when it is narrow or when the toolbar says so, and the
+    # seven-column month otherwise. Declared as descendant rules on the root for
+    # the same reason the colours are, and inert on any calendar that is not the
+    # workload reading. `rows:` is the gem's own variant, declared in
+    # `shadcn.css` beside `dark`; it carries the breakpoint *and* the override,
+    # so each rule below is written once. The default is still a width decision
+    # a server cannot make — `arrangement:` only overrules it.
     #
     # A row is a fixed 80px and its chips scroll sideways inside it, which is
     # where the `overflow-x`, `overscroll`, `touch-pan-x` and scrollbar-hiding
     # rules come from — and `shrink-0` on the chips, without which they squash
     # to fit and the strip never overflows at all.
+    # The toolbar's Rows toggle. Below `lg` the rows are already what is drawn,
+    # so the button has nothing to change — and the server cannot know which
+    # side of the breakpoint it rendered for, so CSS is what hides it.
+    "button" => %w[max-lg:hidden],
     "event-calendar" => %w[
       group/event-calendar
       [&_[data-color=default]]:[--event-color:var(--muted-foreground)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
@@ -274,58 +280,58 @@ RSpec.describe "reverse parity" do
       [&_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&_[data-color=violet]]:[--event-ink:var(--color-violet-800)]
       dark:[&_[data-color=violet]]:[--event-ink:var(--color-violet-300)]
 
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex-col
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:gap-1
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:items-center
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:justify-center
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:shrink-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:w-14
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:shrink-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:w-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none]
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-nowrap
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-row
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:min-w-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:touch-pan-x
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:w-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex-col
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:gap-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:items-center
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:w-full
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-number]]:text-sm
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:shrink-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:w-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none]
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-row
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:min-w-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:w-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:shrink-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:w-auto
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-ticks]]:block
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day-weekday]]:block
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day][data-outside]]:hidden
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:flex-row
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:gap-2
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:h-20
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:items-center
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:min-h-0
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:px-2
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:py-2
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-days]]:contents
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-segments]]:hidden
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-week]]:contents
-      max-lg:data-[rows]:[&_[data-slot=event-calendar-weekdays]]:hidden
+      rows:[&_[data-slot=event-calendar-day-head]]:flex
+      rows:[&_[data-slot=event-calendar-day-head]]:flex-col
+      rows:[&_[data-slot=event-calendar-day-head]]:gap-1
+      rows:[&_[data-slot=event-calendar-day-head]]:items-center
+      rows:[&_[data-slot=event-calendar-day-head]]:justify-center
+      rows:[&_[data-slot=event-calendar-day-head]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-head]]:w-14
+      rows:[&_[data-slot=event-calendar-day-item]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-item]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex
+      rows:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden
+      rows:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none]
+      rows:[&_[data-slot=event-calendar-day-items]]:flex-nowrap
+      rows:[&_[data-slot=event-calendar-day-items]]:flex-row
+      rows:[&_[data-slot=event-calendar-day-items]]:min-w-0
+      rows:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto
+      rows:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain
+      rows:[&_[data-slot=event-calendar-day-items]]:touch-pan-x
+      rows:[&_[data-slot=event-calendar-day-items]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-label]]:flex
+      rows:[&_[data-slot=event-calendar-day-label]]:flex-col
+      rows:[&_[data-slot=event-calendar-day-label]]:gap-0
+      rows:[&_[data-slot=event-calendar-day-label]]:items-center
+      rows:[&_[data-slot=event-calendar-day-label]]:w-full
+      rows:[&_[data-slot=event-calendar-day-number]]:text-sm
+      rows:[&_[data-slot=event-calendar-day-assignee]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-assignee]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden
+      rows:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none]
+      rows:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap
+      rows:[&_[data-slot=event-calendar-day-assignees]]:flex-row
+      rows:[&_[data-slot=event-calendar-day-assignees]]:min-w-0
+      rows:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto
+      rows:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain
+      rows:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x
+      rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-rest]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-rest]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-ticks]]:block
+      rows:[&_[data-slot=event-calendar-day-weekday]]:block
+      rows:[&_[data-slot=event-calendar-day][data-outside]]:hidden
+      rows:[&_[data-slot=event-calendar-day]]:flex-row
+      rows:[&_[data-slot=event-calendar-day]]:gap-2
+      rows:[&_[data-slot=event-calendar-day]]:h-20
+      rows:[&_[data-slot=event-calendar-day]]:items-center
+      rows:[&_[data-slot=event-calendar-day]]:min-h-0
+      rows:[&_[data-slot=event-calendar-day]]:px-2
+      rows:[&_[data-slot=event-calendar-day]]:py-2
+      rows:[&_[data-slot=event-calendar-days]]:contents
+      rows:[&_[data-slot=event-calendar-segments]]:hidden
+      rows:[&_[data-slot=event-calendar-week]]:contents
+      rows:[&_[data-slot=event-calendar-weekdays]]:hidden
 
 
     ],

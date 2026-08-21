@@ -110,6 +110,13 @@ module Shadcn
       # switching is a `data-group` on the root and no round trip — a spike can
       # afford the duplicate because both lists are capped at three chips.
       READINGS = %i[auto workload].freeze
+
+      # How the workload month is laid out. `:auto` is the breakpoint doing the
+      # deciding — rows below `lg`, the seven-column grid above it — and
+      # `:rows` is the toolbar overruling it. There is no `:grid`: forcing
+      # seven columns onto a phone is the thing rows were built to avoid, so
+      # the toggle only exists where it has something to change.
+      ARRANGEMENTS = %i[auto rows].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
       WORKLOAD_GROUPINGS = %i[assignees events].freeze
@@ -143,6 +150,14 @@ module Shadcn
       # is two halves that match nothing. That has already cost one silent
       # failure in this file.
       #
+      # `rows:` is the gem's own variant, declared in `shadcn.css` beside
+      # `dark`. It stands for *narrow or told to*: below `lg`, or at any width
+      # once the toolbar has set `data-arrangement="rows"`. It exists because
+      # these rules had been written as `max-lg:data-[rows]:` — a media query,
+      # which no button can reach. Writing each rule twice would have been
+      # fifty-two more tokens to keep in step; a variant is one name and the
+      # list below is unchanged.
+      #
       # The whole switch is `display: contents` on the week and on its
       # seven-column grid: with neither box in the way, the day buttons become
       # children of the weeks column and lay themselves out as rows.
@@ -163,64 +178,64 @@ module Shadcn
       # *ends the string*: `"a " \` + comment + `"b"` is `"a "`, silently, and
       # rubocop reports nothing. Three of these rules were lost that way.
       ROWS_TOKENS =
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-week]]:contents " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-days]]:contents " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-weekdays]]:hidden " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:flex-row " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:items-center " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:gap-2 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:px-2 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:py-2 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:h-20 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:min-h-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day][data-outside]]:hidden " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:w-14 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:shrink-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex-col " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:items-center " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:justify-center " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:gap-1 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:w-full " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex-col " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:items-center " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:gap-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-weekday]]:block " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-number]]:text-sm " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:w-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-row " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none] " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:min-w-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:w-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-row " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-nowrap " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:touch-pan-x " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none] " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:min-w-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-ticks]]:block " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-segments]]:hidden " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex"
+        "rows:[&_[data-slot=event-calendar-week]]:contents " \
+        "rows:[&_[data-slot=event-calendar-days]]:contents " \
+        "rows:[&_[data-slot=event-calendar-weekdays]]:hidden " \
+        "rows:[&_[data-slot=event-calendar-day]]:flex-row " \
+        "rows:[&_[data-slot=event-calendar-day]]:items-center " \
+        "rows:[&_[data-slot=event-calendar-day]]:gap-2 " \
+        "rows:[&_[data-slot=event-calendar-day]]:px-2 " \
+        "rows:[&_[data-slot=event-calendar-day]]:py-2 " \
+        "rows:[&_[data-slot=event-calendar-day]]:h-20 " \
+        "rows:[&_[data-slot=event-calendar-day]]:min-h-0 " \
+        "rows:[&_[data-slot=event-calendar-day][data-outside]]:hidden " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:flex " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:w-14 " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:shrink-0 " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:flex-col " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:items-center " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:justify-center " \
+        "rows:[&_[data-slot=event-calendar-day-head]]:gap-1 " \
+        "rows:[&_[data-slot=event-calendar-day-label]]:flex " \
+        "rows:[&_[data-slot=event-calendar-day-label]]:w-full " \
+        "rows:[&_[data-slot=event-calendar-day-label]]:flex-col " \
+        "rows:[&_[data-slot=event-calendar-day-label]]:items-center " \
+        "rows:[&_[data-slot=event-calendar-day-label]]:gap-0 " \
+        "rows:[&_[data-slot=event-calendar-day-weekday]]:block " \
+        "rows:[&_[data-slot=event-calendar-day-number]]:text-sm " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:flex-row " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none] " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden " \
+        "rows:[&_[data-slot=event-calendar-day-assignees]]:min-w-0 " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:w-auto " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:flex-row " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:flex-nowrap " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:touch-pan-x " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none] " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden " \
+        "rows:[&_[data-slot=event-calendar-day-items]]:min-w-0 " \
+        "rows:[&_[data-slot=event-calendar-day-ticks]]:block " \
+        "rows:[&_[data-slot=event-calendar-segments]]:hidden " \
+        "rows:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex"
       # A chip is the width of its own contents in a row, not of the column —
       # and `shrink-0`, or the strip never overflows: flex items default to
       # shrinking, so the chips squash to fit and the scroller has nothing to
       # scroll. Measured, not assumed; the first version had `w-auto` alone and
       # `scrollWidth === clientWidth`.
       ROWS_CHIP_TOKENS =
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:w-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:shrink-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:w-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:shrink-0 " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:w-auto " \
-        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:shrink-0"
+        "rows:[&_[data-slot=event-calendar-day-assignee]]:w-auto " \
+        "rows:[&_[data-slot=event-calendar-day-assignee]]:shrink-0 " \
+        "rows:[&_[data-slot=event-calendar-day-item]]:w-auto " \
+        "rows:[&_[data-slot=event-calendar-day-item]]:shrink-0 " \
+        "rows:[&_[data-slot=event-calendar-day-rest]]:w-auto " \
+        "rows:[&_[data-slot=event-calendar-day-rest]]:shrink-0"
       # `contents` in the grid, so the number sits in the cell exactly as it did
       # before this existed; a real box only in rows, where it is the fixed
       # left-hand column. The other three utilities are inert under `contents`.
@@ -457,7 +472,7 @@ module Shadcn
 
       attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :show_all, :show_all_url, :group_url
+                  :show_all, :show_all_url, :group_url, :arrangement, :arrangement_url
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -495,11 +510,19 @@ module Shadcn
       #   kind of thing says it once instead of on every row of a `map`
       # @param reading [Symbol] `:auto` picks bars or marks by density;
       #   `:workload` is the spike above, and always draws a row per day
+      # @param arrangement [Symbol] `:auto` lets the breakpoint decide — rows
+      #   below `lg`, the grid above; `:rows` keeps the rows at every width.
+      #   Only the workload reading has two arrangements to pick between.
+      # @param arrangement_url [#call, nil] given the desired arrangement, the
+      #   URL of that state. Present, the toggle is a link; absent, it flips
+      #   the attribute in the browser — which is instant, but the workload
+      #   month is drawn by the server, so the next › puts it back.
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto, group: :assignees,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     show_all: false, show_all_url: nil, group_url: nil, **attributes)
+                     show_all: false, show_all_url: nil, group_url: nil,
+                     arrangement: :auto, arrangement_url: nil, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -518,6 +541,8 @@ module Shadcn
         @agenda_attributes = agenda_attributes
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
         @group = WORKLOAD_GROUPINGS.include?(group&.to_sym) ? group.to_sym : :assignees
+        @arrangement = ARRANGEMENTS.include?(arrangement&.to_sym) ? arrangement.to_sym : :auto
+        @arrangement_url = arrangement_url
         super(**attributes)
       end
 
@@ -536,6 +561,11 @@ module Shadcn
           "data-labelled" => ("true" if labelled?),
           "data-group" => (group if workload?),
           "data-rows" => ("true" if workload?),
+          # What the `rows:` variant reads at `lg` and above. `auto` is not the
+          # absence of a value: the toggle flips between two named states, and
+          # a controller that had to distinguish "unset" from "chosen" would be
+          # reading the breakpoint it cannot see.
+          "data-arrangement" => (arrangement if workload?),
           "data-shadcn--event-calendar-month-value" => month.first.iso8601,
           # The application's today, not the browser's — the same reason the
           # calendar crosses one: `Time.zone` and a laptop's clock disagree by a
@@ -637,6 +667,7 @@ module Shadcn
         tag.div(
           safe_join([
             (grouping_menu if workload?),
+            (arrangement_toggle if workload?),
             (show_all_toggle if workload?),
             nav_button(Date.current, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
@@ -673,6 +704,28 @@ module Shadcn
       # own `type="button"` and its own controller, so it cannot become a link
       # without fighting both, and a control whose job is to change server state
       # should be the thing that can.
+      # Rows at a width that would otherwise get the grid.
+      #
+      # `max-lg:hidden` rather than a condition in Ruby: below `lg` the rows
+      # are already what is drawn, so the button has nothing to change, and the
+      # server cannot know which side of the breakpoint it is rendering for.
+      # Hiding it in CSS is the only place that knows.
+      #
+      # `aria-pressed` and not a second radio menu: two states, one of which is
+      # "leave it alone", is what a toggle is for. The grouping next to it is a
+      # menu because a third cut is the obvious next question; a third
+      # *arrangement* is not — see `ARRANGEMENTS`.
+      def arrangement_toggle
+        wanted = arrangement == :rows ? :auto : :rows
+
+        nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#arrange",
+                   href: arrangement_url&.call(wanted),
+                   pressed: arrangement == :rows, classes: "max-lg:hidden",
+                   value: wanted) do
+          shadcn_t("event_calendar.arrangement.rows")
+        end
+      end
+
       def show_all_toggle
         nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#showAll",
                    href: show_all_url&.call(!show_all),
@@ -723,12 +776,14 @@ module Shadcn
       # keeping a second copy of this file in JavaScript — for a reading whose
       # data is exactly what should *not* travel. A URL is the smaller and the
       # more Rails answer, and it serves the other readings too.
-      def nav_button(target, size:, action:, label: nil, href: :month, pressed: nil, &block)
+      def nav_button(target, size:, action:, label: nil, href: :month, pressed: nil,
+                     classes: nil, value: nil, &block)
         href = month_url&.call(target) if href == :month
 
         render(Button::Component.new(
-          variant: :outline, size:,
+          variant: :outline, size:, class: classes,
           **(href ? { as: :a, href: } : { "data-action": action }),
+          "data-value": value,
           "aria-label": label,
           "aria-pressed": (pressed.to_s unless pressed.nil?)
         ).with_content(capture(&block)))
