@@ -781,7 +781,14 @@ module Shadcn
         href = month_url&.call(target) if href == :month
 
         render(Button::Component.new(
-          variant: :outline, size:, class: classes,
+          # A pressed toggle is the solid button among outline ones, which is
+          # what shadcn does everywhere a selection sits in a row of buttons.
+          # Not `aria-pressed:bg-accent`, the shape `Toggle` uses: an outline
+          # button's *hover* is already `bg-accent`, so pressed and hovered
+          # would be the same picture, and an unpressed button under the mouse
+          # would read as on. Borrowing a variant costs no new class, and
+          # `Toggle` itself does not collide because its hover is `bg-muted`.
+          variant: (pressed ? :default : :outline), size:, class: classes,
           **(href ? { as: :a, href: } : { "data-action": action }),
           "data-value": value,
           "aria-label": label,

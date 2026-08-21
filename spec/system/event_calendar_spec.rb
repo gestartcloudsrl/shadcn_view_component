@@ -312,6 +312,8 @@ RSpec.describe "Event calendar", :js do
 
     def display_of(node) = page.evaluate_script("getComputedStyle(arguments[0]).display", node)
 
+    def paint(node) = page.evaluate_script("getComputedStyle(arguments[0]).backgroundColor", node)
+
     # `visible: :all`, because one example is about it not being visible.
     def toggle
       find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Rows", visible: :all)
@@ -335,6 +337,18 @@ RSpec.describe "Event calendar", :js do
         expect(page).to have_css("#{calendar}[data-arrangement=rows]")
         expect(display_of(week)).to eq("contents")
         expect(page).to have_css("#{calendar} [data-slot=button][aria-pressed=true]", text: "Rows")
+      end
+
+      # `aria-pressed` is the state; this is the half an eye can see. Asserted
+      # as a colour rather than a class because what matters is that the two
+      # buttons do not look alike — the pressed one borrows the solid `default`
+      # variant, and a rename of that should not fail here.
+      it "makes a pressed toggle look different from an unpressed one" do
+        toggle.click
+
+        pressed = paint(find("#{calendar} [data-slot=button][aria-pressed=true]", text: "Rows"))
+
+        expect(pressed).not_to eq(paint(find("#{calendar} [data-slot=button]", text: "Today")))
       end
     end
 
