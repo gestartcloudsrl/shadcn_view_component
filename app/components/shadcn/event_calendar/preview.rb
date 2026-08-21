@@ -73,13 +73,18 @@ module Shadcn
       # @param most number
       # @param colored toggle
       # @param show_all toggle
-      def workload_density(most: 30, colored: false, show_all: false)
+      # @param group select [assignees, events]
+      def workload_density(most: 30, colored: false, show_all: false, group: "assignees")
         cast = ActiveModel::Type::Boolean.new
-        here = ->(all) { "/lookbook/preview/shadcn/event_calendar/workload_density" \
-                         "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}" }
+        here = lambda do |all: cast.cast(show_all), cut: group|
+          "/lookbook/preview/shadcn/event_calendar/workload_density" \
+            "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}&group=#{cut}"
+        end
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
-                         reading: :workload, show_all: cast.cast(show_all), show_all_url: here,
+                         reading: :workload, group: group.to_sym,
+                         show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(all:) },
+                         group_url: ->(cut) { here.call(cut:) },
                          events: Preview.workload_events(per_day: 0..most.to_i,
                                                          colored: cast.cast(colored)))
       end

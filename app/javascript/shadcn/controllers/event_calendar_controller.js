@@ -110,15 +110,13 @@ export default class extends Controller {
     this.goTo(shiftMonths(parse(this.todayValue), 0), this.todayValue)
   }
 
-  // Both cuts of a cell are already in the page; this says which one is
-  // showing. No re-render, because nothing about the month changed — only
-  // which of two lists the CSS is hiding.
+  // A cell renders the grouping it is showing, so there is nothing here to
+  // swap: this announces the ask. A host that gave `group_url:` never gets
+  // here — the menu items are links.
   regroup(event) {
     const chosen = event.currentTarget.dataset.value
     if (!chosen) return
 
-    this.element.dataset.group = chosen
-    if (this.hasGroupLabelTarget) this.groupLabelTarget.textContent = event.currentTarget.textContent.trim()
     this.dispatch("regroup", { detail: { group: chosen } })
   }
 

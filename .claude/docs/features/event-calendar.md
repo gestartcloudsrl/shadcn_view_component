@@ -215,12 +215,23 @@ and `connect()` returns immediately when there is no image — so eleven hundred
 Stimulus instances were doing nothing. `Avatar::Component` attaches it only when
 it has an image now, which is a gem-wide saving.
 
-Measured after: **460 KB, 70 ms, 305 avatars, no Stimulus instances.**
+**Both cuts of a cell were rendered and the menu hid one**, which made switching
+free and everything else twice as expensive. `group_url:` finishes what
+`show_all:` started: a cell renders the grouping it is showing, and the menu
+items are links to the other one.
 
-What is still paid twice is the grouping: both cuts of a cell are rendered and
-the menu hides one, which is what makes switching free. At this density that is
-the next thing to look at, and it is the same trade `show_all:` just stopped
-making.
+Measured after, warm, on the same 447 events:
+
+| grouping | render | HTML | avatars |
+|---|---|---|---|
+| by assignee | 32 ms | 277 KB | 87 |
+| by event | 46 ms | 382 KB | 218 |
+
+Against 1157 KB and 1136 avatars before. The pattern the three fixes share is
+one sentence: **the cheapest thing to render is the thing nobody will see, and
+the way to stop paying for it is to stop rendering it.** Every toolbar control
+in this reading is now state the caller owns, and a link when the caller can
+name the URL of the other state.
 
 ## The keyboard
 
