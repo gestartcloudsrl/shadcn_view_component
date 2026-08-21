@@ -21,12 +21,19 @@ module Shadcn
     #   own and no class of its own — which is what keeps the JavaScript from
     #   becoming a second, differently-spelled copy of this file.
     #
-    # **Mobile and desktop are two readings, not one scaled down.** Below `sm`
-    # a cell is a number and up to `max_events` dots, and the events are read in
-    # the agenda underneath — the phone pattern, because a 48px-wide cell can
-    # hold a title or be legible and not both. From `sm` up the cell grows and
-    # the events land in it as bars, laid out by `Schedule` so that a three-day
-    # event is one bar across three columns.
+    # **A cell either names its events or shows their shape, never half of
+    # each.** Named, it holds bars — laid out by `Schedule` so a three-day event
+    # is one bar across three columns — and says "+2" when it runs out of lanes.
+    # Showing the shape, it holds one mark per event, all of them, banded by
+    # colour and sized against the busiest day in the month.
+    #
+    # Below `sm` it is always the marks: a 48px cell can hold a title or be
+    # legible, not both. Above `sm` the busiest day decides, because past
+    # `DENSE_ABOVE` a "+79" is not information — the bars above it are an
+    # arbitrary sample and what the number counts is invisible until the day is
+    # opened. See
+    # [features/event-calendar.md](../../../../.claude/docs/features/event-calendar.md).
+    #
     class Component < ApplicationViewComponent
       # Each colour is two custom properties, declared once on the root as
       # descendant rules rather than as utilities on every chip and every dot.
@@ -35,13 +42,21 @@ module Shadcn
       # colour table into JavaScript — and a month of thirty dots does not
       # repeat seventeen tokens thirty times in the HTML.
       #
+      # `default` means *uncategorised*, so it is the quietest mark rather than
+      # the loudest. It was `--primary` until a month of marks was looked at:
+      # in the neutral palette that is near-black, which at four pixels carries
+      # about twice the weight of the 500-level hues beside it and takes the
+      # cell over. A mid grey is what "no category" should look like, and it
+      # matches what the chip already did — its background was `primary/12`,
+      # which is a light grey, so only the solid mark was ever loud.
+      #
       # The inks are the 800/300 pair rather than the 500 the dot uses, and both
       # halves of that were measured rather than chosen: 500 on a 12%-tinted
-      # background is around 3:1, and 700 is 4.41 — under AA by six hundredths,
+      # background is around 3:1, and 700 is 4.41 — under AA by nine hundredths,
       # which is exactly the kind of miss `accessibility_spec` exists to catch
       # and an eye does not.
       COLOR_TOKENS =
-        "[&_[data-color=default]]:[--event-color:var(--primary)] " \
+        "[&_[data-color=default]]:[--event-color:var(--muted-foreground)] " \
         "[&_[data-color=default]]:[--event-ink:var(--foreground)] " \
         "[&_[data-color=blue]]:[--event-color:var(--color-blue-500)] " \
         "[&_[data-color=blue]]:[--event-ink:var(--color-blue-800)] " \
@@ -62,6 +77,273 @@ module Shadcn
       # Past six a cell has stopped being a day on a calendar and become a list
       # that happens to be square, so this is where `max_events` clamps.
       MAX_EVENTS = (1..6).freeze
+
+      # ---- the workload reading -------------------------------------------
+      #
+      # A third way to read a cell, behind `reading: :workload`.
+      #
+      # The cell stops being a list and becomes a *measure*: a tint for how
+      # much work the day holds, a count, and who did it.
+      #
+      # `WORKLOAD_CEILING` is where the ramp tops out — twenty-five and above
+      # are the same colour, because a scale that keeps stretching to its worst
+      # day flattens every other day into nothing.
+      WORKLOAD_CEILING = 25
+      # One hue, light to dark, which is the only correct shape for a
+      # sequential scale — a green-amber-red "load" ramp is a rainbow wearing a
+      # hard hat, and it makes 12 look like a different *kind* of day from 13
+      # rather than a busier one. `--primary` so the ramp is the host's own
+      # colour, and so dark mode gets its own direction rather than a flip:
+      # `--primary` is near-black on a white surface and near-white on a dark
+      # one, so "more" is always "more prominent".
+      # The ramp runs almost its whole length rather than the fifth it started
+      # at, and what bought the other four fifths is `WORKLOAD_INK_FLIPS_AT`:
+      # a heat map capped at whatever keeps dark-on-light readable is a heat map
+      # with no heat in it — 2 and 29 came out the same grey. Past the flip the
+      # cell wears `--primary-foreground`, which is the ink that colour is *for*,
+      # so both halves of the scale are legible and the whole of it is visible.
+      #
+      # 85 rather than 100 so the busiest day is still a cell rather than a
+      # hole; 55 measured, not chosen — `--foreground` on a 60% tint is 4.4:1,
+      # which AA does not take.
+      # Two ways to cut the same day. Both are rendered and one is hidden, so
+      # switching is a `data-group` on the root and no round trip — a spike can
+      # afford the duplicate because both lists are capped at three chips.
+      READINGS = %i[auto workload].freeze
+      # Past the last hue, for a colour the palette does not know.
+      COLORS_END = Event::COLORS.size
+      WORKLOAD_GROUPINGS = %i[assignees events].freeze
+      # How many chips a cell shows before it says "+N". Every chip is rendered
+      # either way — "Show all" is a `data-capped` on the root and a CSS rule,
+      # not a re-render, for the same reason the grouping switch is.
+      WORKLOAD_CAP = 3
+
+      # ---- rows-are-days --------------------------------------------------
+      #
+      # Below `lg` the workload reading is one row per day: a fixed date column
+      # on the left, the day's chips scrolling to the right. From `lg` up it is
+      # the seven-column month again.
+      #
+      # Which arrangement is a *width* decision and not an argument. `layout:`
+      # existed for a while and was the wrong shape: a server cannot know the
+      # viewport, so the choice was never the caller's to make.
+      #
+      # Declared here as descendant rules on the root, the way `COLOR_TOKENS`
+      # is, rather than as a variant chain on each of eight elements — and each
+      # one on a single line, because a token split across a `\` continuation
+      # is two halves that match nothing. That has already cost one silent
+      # failure in this file.
+      #
+      # The whole switch is `display: contents` on the week and on its
+      # seven-column grid: with neither box in the way, the day buttons become
+      # children of the weeks column and lay themselves out as rows.
+      #
+      # Some of the rules give back what the phone's *grid* had to drop from an
+      # intervention chip — the clock with its minutes and meridiem, and the
+      # crew — because a row is not a 46px cell and has room for all of it.
+      #
+      # The rest build the date column. In the grid the head is a line: number
+      # on the left, count badge on the right. In a row it is a stack — weekday
+      # small, day large, count under both — so `contents` gives way to a real
+      # `w-14` box and the badge stops being pushed to the far end. That is what
+      # takes a row from 44px to 72px, and it is the whole cost of the change:
+      # the month goes from about 1400px tall to about 2200px.
+      #
+      # No comments inside the list below, however tempting. A comment line
+      # between two `\` continuations does not interrupt the expression, it
+      # *ends the string*: `"a " \` + comment + `"b"` is `"a "`, silently, and
+      # rubocop reports nothing. Three of these rules were lost that way.
+      ROWS_TOKENS =
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-week]]:contents " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-days]]:contents " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-weekdays]]:hidden " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:flex-row " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:items-center " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:gap-2 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:px-2 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:py-2 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:h-20 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day]]:min-h-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day][data-outside]]:hidden " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:w-14 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:shrink-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:flex-col " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:items-center " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:justify-center " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-head]]:gap-1 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:w-full " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:flex-col " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:items-center " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-label]]:gap-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-weekday]]:block " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-number]]:text-sm " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:w-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-row " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none] " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignees]]:min-w-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:w-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-row " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:flex-nowrap " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:touch-pan-x " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none] " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-items]]:min-w-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-ticks]]:block " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-segments]]:hidden " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex"
+      # A chip is the width of its own contents in a row, not of the column —
+      # and `shrink-0`, or the strip never overflows: flex items default to
+      # shrinking, so the chips squash to fit and the scroller has nothing to
+      # scroll. Measured, not assumed; the first version had `w-auto` alone and
+      # `scrollWidth === clientWidth`.
+      ROWS_CHIP_TOKENS =
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:w-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-assignee]]:shrink-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:w-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-item]]:shrink-0 " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:w-auto " \
+        "max-lg:data-[rows]:[&_[data-slot=event-calendar-day-rest]]:shrink-0"
+      # `contents` in the grid, so the number sits in the cell exactly as it did
+      # before this existed; a real box only in rows, where it is the fixed
+      # left-hand column. The other three utilities are inert under `contents`.
+      ROWS_LABEL_CLASS = "contents shrink-0 items-center gap-1"
+      ROWS_WEEKDAY_CLASS = "hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums"
+
+      WORKLOAD_TINT = 85
+      WORKLOAD_INK_FLIPS_AT = 55
+      WORKLOAD_CELL_CLASS = "gap-1 px-1 pt-1 pb-1"
+      WORKLOAD_HEAD_CLASS = "flex w-full items-center justify-between gap-1"
+      # The one thing that wears the ramp. Its fill is the tint and nothing else
+      # — no surface of its own — so a quiet day is an outline and a full one is
+      # a solid pill, and the flip to `--primary-foreground` past the halfway
+      # mark is the chip's own business rather than the whole cell's.
+      WORKLOAD_COUNT_CLASS = "border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] " \
+                             "tabular-nums text-foreground data-[heavy]:text-primary-foreground"
+      # One chip per operator, the width of the cell, stacked. Full width rather
+      # than an inline row of faces because the tally has to line up down the
+      # column — that is what makes two days comparable at a glance, and a
+      # wrapped row of avatar-and-number pairs never lines up with anything.
+      # The cap is a rule about the fourth chip onwards, scoped by slot so it
+      # cannot also catch the "+N" chip sitting last in the column.
+      #
+      # On one line each, however long: Tailwind scans this file as text, and a
+      # token split across a `\` continuation is two halves that match nothing.
+      # These two were written split and the cap silently did nothing — the
+      # cells rendered every chip and the "+22" sat under all twenty-two of
+      # them. Nothing in the suite saw it; a browser example counting visible
+      # chips did.
+      OPERATORS_CAP_CLASS = "group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-assignee]:nth-child(n+4)]:hidden"
+      INTERVENTIONS_CAP_CLASS = "group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-item]:nth-child(n+4)]:hidden"
+      WORKLOAD_ASSIGNEES_CLASS = "flex w-full flex-col gap-0.5 " \
+                                 "group-data-[group=events]/event-calendar:hidden " +
+                                 OPERATORS_CAP_CLASS
+      WORKLOAD_ITEMS_CLASS = "flex w-full flex-col gap-0.5 " \
+                                     "group-data-[group=assignees]/event-calendar:hidden " +
+                                     INTERVENTIONS_CAP_CLASS
+      # Shrinkable, not fixed: with the title hidden below `sm` there is
+      # no flexible element left in the chip, and a `shrink-0` clock pushes the
+      # crew size out of a 46px cell entirely. The clock truncating is a worse
+      # look and a better chip — the number is the half that cannot be guessed.
+      # `pe-2` rather than a wider gap on the head: the avatars are pushed right
+      # by `ml-auto`, so the only thing guaranteeing a space when the clock runs
+      # long is the clock's own padding — and it survives truncation, where the
+      # ellipsis lands before the padding rather than against a face.
+      WORKLOAD_TIME_CLASS = "min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums"
+      # `bg-muted`, not a translucent `bg-background`. The translucent version
+      # worked only while the cell underneath was tinted — the moment the ramp
+      # moved to the count chip and the cell went plain, every chip was white on
+      # white with a hairline round it. A chip needs a surface of its own, not a
+      # borrowed one.
+      WORKLOAD_ASSIGNEE_CLASS = "flex w-full items-center gap-1 overflow-hidden rounded-md " \
+                                "border border-border/40 bg-muted px-1 py-0.5 text-foreground"
+      WORKLOAD_AVATAR_CLASS = "size-4 shrink-0"
+      # `bg-background` rather than the fallback's own `bg-muted`: the chip *is*
+      # `bg-muted` now, so an avatar wearing it would be an invisible circle
+      # with initials floating in it. Inverting them also lifts the initials off
+      # the pair `accessibility_spec` excludes as upstream's — 4.34:1 on muted,
+      # 4.74:1 on background.
+      WORKLOAD_INITIALS_CLASS = "bg-background text-[0.5rem] font-medium"
+      # No `sm:` gate on either of these any more. They were hidden on a phone
+      # because a 46px grid cell could not hold a name — and below `lg` there is
+      # no grid now, there is a row three hundred pixels wide. A breakpoint rule
+      # written for a layout that no longer exists at any width is a rule that
+      # only ever hides things.
+      WORKLOAD_NAME_CLASS = "min-w-0 flex-1 truncate text-[0.65rem]"
+      # An intervention chip is two levels: the clock and who is on it above,
+      # what it is below. It is the one chip with room to be a card — an
+      # operator chip is a face and a number and has nothing to put on a second
+      # line.
+      # The same tinted pair the bars wear, rather than a fixed `bg-muted`: an
+      # intervention has a category and an operator does not, so this is the one
+      # workload chip that carries `data-color`. Uncoloured, `--event-color` is
+      # `--muted-foreground` and twelve per cent of it over the page is within a
+      # hair of `bg-muted` — so a calendar that names no colours looks exactly
+      # as it did before this could carry one.
+      WORKLOAD_ITEM_CLASS = "flex w-full flex-col gap-1.5 overflow-hidden rounded-md " \
+                           "border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 " \
+                           "text-(--event-ink)"
+      WORKLOAD_ITEM_HEAD_CLASS = "flex items-center gap-1"
+      WORKLOAD_ITEM_TEXT_CLASS = "truncate text-left text-[0.65rem] leading-tight"
+      # Faces up to `WORKLOAD_AVATARS_CAP`, then a count.
+      # `-space-x-1` overrides the group's own `-space-x-2`: upstream's overlap
+      # is a quarter of a `size-8` avatar, and the same eight pixels on a
+      # `size-4` one is half of it — the second initial disappears under the
+      # next face. A quarter of *this* size is four.
+      WORKLOAD_AVATARS_CLASS = "ml-auto flex shrink-0 -space-x-1"
+      # Smaller everywhere a month is not on a desktop. Two initials at 14px
+      # still read; the circle is what gives way, not the type.
+      WORKLOAD_AVATAR_CLASS = "size-3.5 lg:size-4"
+      WORKLOAD_AVATARS_MORE_CLASS = "size-3.5 bg-background text-[0.5rem] lg:size-4"
+      # Three faces, then the fourth is the count. Five was the first guess and
+      # it is too many at this size: the stack out-weighs the clock beside it,
+      # and past three the faces stop being read individually anyway.
+      WORKLOAD_AVATARS_CAP = 3
+      # Text tokens, never the ramp's colour: the tint says how much, the
+      # numerals stay ink.
+      WORKLOAD_TALLY_CLASS = "ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums"
+      # The same chip, so the column keeps its rhythm rather than ending in a
+      # different shape.
+      # Only there when the cap is on: uncapped, the chips it was counting are
+      # all on the page and a "+22" under them would be counting nothing.
+      # `text-foreground`, not muted: the chip's surface became `bg-muted` when
+      # the cell stopped being tinted, and muted-on-muted is 4.34:1 — the same
+      # pair the avatar fallback was already excluded for — sixteen hundredths
+      # under, there.
+      WORKLOAD_REST_CLASS = "hidden justify-center text-[0.65rem] font-medium " \
+                            "group-data-[capped]/event-calendar:flex"
+      WORKLOAD_SHOW_ALL_CLASS = "flex items-center gap-1.5"
+      WORKLOAD_SHOW_ALL_LABEL_CLASS = "text-xs font-medium text-muted-foreground"
+
+      # Above a dozen on the busiest day, a cell stops naming its events at any
+      # width and shows the strip instead — the rule being that **a cell either
+      # names its events or shows their shape, never half of each**.
+      #
+      # Twelve is where "+N" stops carrying its weight. Three bars and "+9" is
+      # still a sentence: here are the next three, there are a few more. Three
+      # bars and "+79" is not — the three are an arbitrary sample, the number is
+      # the only information on the cell, and the events it is counting are
+      # invisible until you open the day. The marks say all eighty-two.
+      DENSE_ABOVE = 12
+
+      # How big a mark is, against the busiest day in the month — `nil` is the
+      # floor and matches anything. Crossed to the controller as a table rather
+      # than as a resolved size, for the reason the plural forms are: it has to
+      # choose again for a month the server never drew, and the numbers stay
+      # here.
+      #
+      # Four pixels is the floor because it is what a hundred marks cost: at a
+      # 5px pitch a ~48px cell fits nine to a row, eleven rows, and the busiest
+      # day in the month still ends inside a phone screen.
+      TICK_SIZES = [ [ 8, "0.4375rem" ], [ 24, "0.375rem" ], [ 60, "0.3125rem" ], [ nil, "0.25rem" ] ].freeze
 
       # One lane, and the gap under it. The cell's height is derived from these
       # two in `#cell_height`, so changing a bar's height does not leave the
@@ -85,31 +367,49 @@ module Shadcn
       WEEKS_CLASS = "flex flex-col gap-px bg-border"
       WEEK_CLASS = "relative"
       DAYS_CLASS = "grid grid-cols-7 gap-px"
-      DAY_CLASS = "group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-1 " \
+      DAY_CLASS = "group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 " \
                   "pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 " \
                   "focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 " \
                   "focus-visible:ring-inset data-[selected]:bg-accent " \
-                  "sm:min-h-(--event-calendar-cell) sm:items-start sm:px-1.5 " \
+                  "sm:items-start sm:px-1.5 " \
+                  "group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) " \
                   "sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)"
       DAY_NUMBER_CLASS = "flex size-6 shrink-0 items-center justify-center rounded-full text-xs " \
                          "font-medium tabular-nums select-none " \
                          "group-data-[outside]/day:text-muted-foreground " \
                          "group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold " \
                          "group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]"
-      DOTS_CLASS = "flex max-w-full flex-wrap items-center justify-center gap-0.5 sm:hidden"
-      DOT_CLASS = "size-1.5 shrink-0 rounded-full bg-(--event-color)"
+      # The phone's whole vocabulary, and the answer to a day nobody can label:
+      # one mark per event, every one of them drawn. `content-start` so a short
+      # last row sits under the others rather than being stretched into them,
+      # and `justify-center` because only that last row is ever short — a full
+      # band fills the width either way, so centring costs nothing at eighty
+      # events and is the difference between tidy and adrift at four.
+      # Every mark's styling lives here, on the one element, rather than on each
+      # of them. At this density that is not tidiness: a day of eighty bookings
+      # is eighty elements, a month of them is two thousand, and the class
+      # string below repeated two thousand times is half a megabyte of HTML for
+      # a rule that never varies. What varies is `data-color` and the two run
+      # attributes, so that is all a mark carries.
+      TICKS_CLASS = "flex w-full flex-wrap content-start justify-center gap-px pt-0.5 " \
+                    "group-data-[labelled]/event-calendar:sm:hidden " \
+                    "[&>span]:size-(--event-calendar-tick) [&>span]:shrink-0 " \
+                    "[&>span]:rounded-[1px] [&>span]:bg-(--event-color) " \
+                    "[&>span[data-run-after]]:-me-px [&>span[data-run-after]]:rounded-r-none " \
+                    "[&>span[data-run-before]]:rounded-l-none"
+
       # `text-foreground` rather than the muted grey it looks like it wants:
       # muted on a *selected* cell's `bg-accent` measures 4.34, and this line
       # carries information — how many events the cell did not have room for.
       MORE_CLASS = "mt-auto hidden w-full truncate text-left text-[0.7rem] font-medium " \
-                   "select-none sm:block"
+                   "select-none group-data-[labelled]/event-calendar:sm:block"
       # `aria-hidden`, and deliberately: the bars repeat what the day button
       # already carries in its name and what the agenda reads out in full, and a
       # screen reader hearing every event twice is worse than not seeing the
       # decoration. They are also `pointer-events-none` — one tap target per
       # day is the whole mobile-first bargain, and it holds on desktop too.
       SEGMENTS_CLASS = "pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] " \
-                       "grid-cols-7 gap-x-px px-px sm:grid"
+                       "grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid"
       EVENT_CLASS = "mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm " \
                     "bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium " \
                     "text-(--event-ink) data-[continues-before]:rounded-l-none " \
@@ -120,7 +420,11 @@ module Shadcn
       EVENT_TIME_CLASS = "shrink-0 tabular-nums"
       EVENT_TITLE_CLASS = "truncate"
       AGENDA_CLASS = "mt-3"
-      AGENDA_TITLE_CLASS = "px-2 pb-1.5 text-sm font-medium"
+      AGENDA_TITLE_CLASS = "flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium"
+      # How many, beside the date. Cheap at three events and the difference
+      # between a list and a wall at sixty — a day this deep needs to say how
+      # deep before you start scrolling it.
+      AGENDA_COUNT_CLASS = "text-xs font-normal text-muted-foreground"
       AGENDA_LIST_CLASS = "flex flex-col"
       AGENDA_ITEM_CLASS = "flex items-start gap-2.5 rounded-md px-2 py-2 text-sm"
       AGENDA_LINK_CLASS = "transition-colors hover:bg-accent focus-visible:outline-none " \
@@ -133,14 +437,24 @@ module Shadcn
 
       MONTH_FORMAT = "%B %Y"
 
+      # Written out rather than interpolated into `"…#\#{direction}"`, because
+      # `stimulus_contract_spec` scans this file as text: an interpolated method
+      # name matches nothing, so the two nav buttons were the only actions in
+      # the component nothing checked. `calendar/component.rb:219` and `:291`
+      # still do it the other way and are unchecked for the same reason.
+      STEP_ACTIONS = {
+        previous: "click->shadcn--event-calendar#previous",
+        next: "click->shadcn--event-calendar#next"
+      }.freeze
+
       default_tag :div
       slot_name :"event-calendar"
 
       style do
-        base { "group/event-calendar w-full text-foreground #{COLOR_TOKENS}" }
+        base { "group/event-calendar w-full text-foreground #{COLOR_TOKENS} #{ROWS_TOKENS} #{ROWS_CHIP_TOKENS}" }
       end
 
-      attr_reader :month, :selected, :max_events, :schedule
+      attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -150,12 +464,27 @@ module Shadcn
       # @param max_events [Integer] bars per cell before a cell says "+2"
       # @param week_starts_on [Integer, nil] `Date#wday`; the host's
       #   `Date.beginning_of_week` when not given
+      # @param month_url [#call, nil] given a `Date`, the URL of that month.
+      #   Present, the nav is links and the server draws the month; absent, the
+      #   controller redraws it in the browser.
+      # @param default_color [Symbol] the colour for events that name none —
+      #   the level FullCalendar puts on an event *source*, so a calendar of one
+      #   kind of thing says it once instead of on every row of a `map`
+      # @param reading [Symbol] `:auto` picks bars or marks by density;
+      #   `:workload` is the spike above, and always draws a row per day
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
-                     week_starts_on: nil, **attributes)
+                     week_starts_on: nil, reading: :auto, group: :assignees,
+                     default_color: :default, month_url: nil, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
-        @schedule = Schedule.new(month: @month, events:, max_lanes: @max_events)
+        @schedule = Schedule.new(month: @month, events:, max_lanes: @max_events, default_color:)
+        # Checked against its list, like `group:` on the next line. Unchecked,
+        # `reading: :workLoad` off a params hash fell through every branch and
+        # rendered a silent fourth thing: no bars, no `data-labelled`, no rows.
+        @month_url = month_url
+        @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
+        @group = WORKLOAD_GROUPINGS.include?(group&.to_sym) ? group.to_sym : :assignees
         super(**attributes)
       end
 
@@ -163,10 +492,18 @@ module Shadcn
         super(**{
           "data-controller" => "shadcn--event-calendar",
           "style" => merged_style("--event-calendar-cell:#{cell_height}rem",
-                                  "--event-calendar-cell-more:#{cell_height(more: true)}rem"),
+                                  "--event-calendar-cell-more:#{cell_height(more: true)}rem",
+                                  "--event-calendar-tick:#{tick_size}"),
           # Read by the `sm:group-data-[overflow]` rule on the cells, and reset
           # by the controller when it draws a month with a different answer.
-          "data-overflow" => ("true" if schedule.overflow?),
+          "data-overflow" => ("true" if labelled? && schedule.overflow?),
+          # Whether this calendar names its events or shows their shape. See
+          # `#labelled?` — it is the one decision that changes what a desktop
+          # cell is made of.
+          "data-labelled" => ("true" if labelled?),
+          "data-group" => (group if workload?),
+          "data-capped" => ("true" if workload?),
+          "data-rows" => ("true" if workload?),
           "data-shadcn--event-calendar-month-value" => month.first.iso8601,
           # The application's today, not the browser's — the same reason the
           # calendar crosses one: `Time.zone` and a laptop's clock disagree by a
@@ -175,6 +512,16 @@ module Shadcn
           "data-shadcn--event-calendar-selected-value" => selected.iso8601,
           "data-shadcn--event-calendar-week-starts-on-value" => month.week_starts_on,
           "data-shadcn--event-calendar-max-events-value" => max_events,
+          "data-shadcn--event-calendar-tick-sizes-value" => TICK_SIZES.to_json,
+          "data-shadcn--event-calendar-dense-above-value" => DENSE_ABOVE,
+          # The one constructor argument that did not cross, and both halves of
+          # that were bugs: the controller re-derived `labelled` from density
+          # alone, so one press of › stamped `data-labelled` on a workload
+          # calendar and ran both readings at once.
+          "data-shadcn--event-calendar-reading-value" => reading,
+          # The order the marks band in. Crossed rather than repeated in the
+          # controller for the reason everything else is: one list, in Ruby.
+          "data-shadcn--event-calendar-colors-value" => Event::COLORS.to_json,
           "data-shadcn--event-calendar-events-value" => portable_events.to_json,
           # Everything below is text, and all of it comes from `I18n` for the
           # reason the calendar's does: a `toLocaleDateString` in the controller
@@ -209,6 +556,13 @@ module Shadcn
 
       private
 
+      # Bars and a "+N" from `sm` up, or marks at every width. Decided per
+      # calendar rather than per cell, because two cells in one grid made of
+      # different things would read as two kinds of day.
+      def labelled? = reading == :auto && schedule.busiest <= DENSE_ABOVE
+
+      def workload? = reading == :workload
+
       def default_selection
         Date.current.between?(month.first, month.last) ? Date.current : month.first
       end
@@ -222,6 +576,13 @@ module Shadcn
         lanes = max_events + (more ? 1 : 0)
 
         (NUMBER_HEIGHT + (lanes * (LANE_HEIGHT + LANE_GAP)) + LANE_GAP).round(3)
+      end
+
+      # Against the busiest day rather than against each day's own count: marks
+      # of two sizes in one grid would read as two kinds of event, and the whole
+      # point of the strip is that its area is comparable from cell to cell.
+      def tick_size
+        TICK_SIZES.find { |most, _| most.nil? || schedule.busiest <= most }.last
       end
 
       # --- the toolbar ----------------------------------------------------------
@@ -243,26 +604,102 @@ module Shadcn
       def nav
         tag.div(
           safe_join([
-            render(Button::Component.new(
-              variant: :outline, size: :sm,
-              "data-action": "click->shadcn--event-calendar#today"
-            ).with_content(shadcn_t("event_calendar.today"))),
+            (grouping_menu if workload?),
+            (show_all_switch if workload?),
+            nav_button(Date.current, size: :sm, action: "click->shadcn--event-calendar#today") do
+              shadcn_t("event_calendar.today")
+            end,
             step_button(:previous),
             step_button(:next)
-          ]),
+          ].compact),
           "data-slot": "event-calendar-nav", class: NAV_CLASS
         )
       end
 
+      # Which way the cells are cut. A radio group rather than a toggle
+      # because a third cut is the obvious next question, and a toggle would
+      # have to become this anyway.
+      def grouping_menu
+        render(DropdownMenu::Component.new(align: :start)) do |dropdown|
+          dropdown.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :sm)) do
+            safe_join([
+              tag.span(shadcn_t("event_calendar.group.#{group}"),
+                       "data-shadcn--event-calendar-target": "groupLabel"),
+              render(Icon::Component.new("chevron-down", class: CHEVRON_CLASS))
+            ])
+          end
+          dropdown.with_menu_content(class: "w-52") { grouping_items }
+        end
+      end
+
+      # `role="switch"` is one of the roles that cannot take its name from its
+      # content, so the visible label is pointed at rather than wrapped around
+      # it — see the FormBuilder note in CLAUDE.md. A `<label for>` would also
+      # have flipped the switch without firing this controller's action.
+      def show_all_switch
+        tag.span(
+          safe_join([
+            render(Switch::Component.new(
+              size: :sm,
+              "aria-labelledby": show_all_id,
+              "data-action": "click->shadcn--event-calendar#showAll"
+            )),
+            tag.span(shadcn_t("event_calendar.group.show_all"),
+                     id: show_all_id, class: WORKLOAD_SHOW_ALL_LABEL_CLASS)
+          ]),
+          "data-slot": "event-calendar-show-all", class: WORKLOAD_SHOW_ALL_CLASS
+        )
+      end
+
+      def show_all_id = @show_all_id ||= "shadcn-event-calendar-all-#{SecureRandom.hex(4)}"
+
+      def grouping_items
+        safe_join([
+          render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.group.label") },
+          render(DropdownMenu::Separator::Component.new),
+          render(DropdownMenu::RadioGroup::Component.new) do
+            safe_join(WORKLOAD_GROUPINGS.map { |name| grouping_item(name) })
+          end
+        ])
+      end
+
+      # Only the extra action goes here: the radio item already carries the
+      # dropdown's own, and `data-action` is concatenated rather than replaced.
+      def grouping_item(name)
+        render(DropdownMenu::RadioItem::Component.new(
+          value: name, checked: name == group,
+          "data-action": "click->shadcn--event-calendar#regroup"
+        )) { shadcn_t("event_calendar.group.#{name}") }
+      end
+
       def step_button(direction)
-        render(Button::Component.new(
-          variant: :outline, size: :"icon-sm",
-          "data-action": "click->shadcn--event-calendar##{direction}",
-          "aria-label": shadcn_t("event_calendar.#{direction}")
-        ).with_content(
+        target = direction == :previous ? month.previous : month.next
+
+        nav_button(target.first, size: :"icon-sm", action: STEP_ACTIONS.fetch(direction),
+                   label: shadcn_t("event_calendar.#{direction}")) do
           render(Icon::Component.new(direction == :previous ? "chevron-left" : "chevron-right",
                                      class: CHEVRON_CLASS))
-        ))
+        end
+      end
+
+      # A link when the caller can name the month's URL, a button otherwise.
+      #
+      # This is what makes the workload reading navigable at all: its cells hold
+      # crews and titles that `#portable_events` does not ship, so there is
+      # nothing in the browser to rebuild them from, and the controller
+      # deliberately leaves them alone. Teaching the JavaScript to draw them
+      # would mean shipping every assignee of every month to every page and
+      # keeping a second copy of this file in JavaScript — for a reading whose
+      # data is exactly what should *not* travel. A URL is the smaller and the
+      # more Rails answer, and it serves the other readings too.
+      def nav_button(target, size:, action:, label: nil, &block)
+        href = month_url&.call(target)
+
+        render(Button::Component.new(
+          variant: :outline, size:,
+          **(href ? { as: :a, href: } : { "data-action": action }),
+          "aria-label": label
+        ).with_content(capture(&block)))
       end
 
       # --- the month ------------------------------------------------------------
@@ -285,10 +722,20 @@ module Shadcn
         )
       end
 
+      # `role="grid"` and a keyboard, which is the pattern the gem's own
+      # `Calendar` implements and this one went without: forty-two tabbable
+      # buttons, no arrows, no geometry. The roles describe the seven-column
+      # month; below `lg` the workload reading lays the same DOM out as one row
+      # per day, so what a screen reader reports and what an eye sees disagree
+      # there. That is the price of one tree serving two arrangements, and it is
+      # the same trade the Sidebar documents.
       def weeks
         tag.div(safe_join(schedule.weeks.map { |week| week_row(week) }),
                 "data-slot": "event-calendar-weeks", class: WEEKS_CLASS,
-                "data-shadcn--event-calendar-target": "weeks")
+                role: "grid",
+                "aria-label": I18n.l(month.date, format: MONTH_FORMAT),
+                "data-shadcn--event-calendar-target": "weeks",
+                "data-action": "keydown->shadcn--event-calendar#keydown")
       end
 
       # `blank:` is what the `<template>` at the bottom renders through: the
@@ -298,32 +745,205 @@ module Shadcn
         cells = week.days.map do |day|
           day_cell(day,
                    on_day: blank ? [] : schedule.on(day),
+                   assignees: blank ? [] : schedule.assignees_on(day),
                    hidden: blank ? 0 : week.hidden_on(day))
         end
 
         tag.div(
           safe_join([
-            tag.div(safe_join(cells), "data-slot": "event-calendar-days", class: DAYS_CLASS),
+            tag.div(safe_join(cells), "data-slot": "event-calendar-days", class: DAYS_CLASS, role: "row"),
             segments(week)
           ]),
-          "data-slot": "event-calendar-week", class: WEEK_CLASS
+          "data-slot": "event-calendar-week", class: WEEK_CLASS, role: "presentation"
         )
       end
 
-      def day_cell(day, on_day:, hidden:)
+      def day_cell(day, on_day:, assignees:, hidden:)
         tag.button(
-          safe_join([ day_number(day), dots(on_day), more(hidden) ].compact),
+          safe_join(workload? ? workload_cell(day, on_day, assignees) : [ day_marker(day), ticks(on_day), more(hidden) ].compact),
           type: "button",
           "data-slot": "event-calendar-day",
-          class: DAY_CLASS,
+          class: [ DAY_CLASS, (WORKLOAD_CELL_CLASS if workload?) ].compact.join(" "),
           "data-day": day.iso8601,
           "data-today": ("true" if day == Date.current),
           "data-selected": ("true" if day == selected),
           "data-outside": ("true" if month.outside?(day)),
+          role: "gridcell",
+          # `aria-selected`, present only when true — what the gem's `Calendar`
+          # writes. `aria-pressed` made every one of the other forty-one days
+          # announce as "toggle button, not pressed", a state a date grid has no
+          # meaning for, and it was the only non-toggle in the gem claiming it.
+          "aria-selected": ("true" if day == selected),
           "aria-current": ("date" if day == Date.current),
-          "aria-pressed": (day == selected).to_s,
+          # One tab stop for the whole month; the arrows move within it.
+          tabindex: (day == selected ? "0" : "-1"),
           "aria-label": day_label(day, on_day.size),
           "data-action": "click->shadcn--event-calendar#select"
+        )
+      end
+
+
+      # Every part of the cell reads the collections it was *handed*. Two of the
+      # three used to go back to `schedule` for themselves, which meant
+      # `week_row(blank: true)` did not blank them: the `<template>` the
+      # controller clones held the first week's real people and titles, and
+      # every month it drew afterwards showed August's people on September's
+      # dates. A parameter nobody has to remember to use is the fix.
+      def workload_cell(day, on_day, assignees)
+        [
+          tag.span(safe_join([ day_marker(day), workload_count(on_day.size) ].compact),
+                   "data-slot": "event-calendar-day-head", class: WORKLOAD_HEAD_CLASS),
+          workload_assignees(assignees),
+          workload_items(on_day)
+        ].compact
+      end
+
+      def workload_share(count)
+        [ count, WORKLOAD_CEILING ].min.fdiv(WORKLOAD_CEILING) * WORKLOAD_TINT
+      end
+
+      # The ramp crosses as a custom property rather than as a background, so
+      # that *which element wears it* is a CSS decision. The grid paints the
+      # cell; the rows layout paints only the count chip and leaves the row
+      # plain. An inline background could not have been moved — a media query
+      # cannot outrank a style attribute without `!important`.
+      # One element wears the ramp, at every width: the count chip. Painting the
+      # whole cell was the first design and it read as a *state* — selected,
+      # disabled — where the same colour on the chip reads as the measure it is.
+      #
+      # Everything that existed only to survive a tinted cell went with it: the
+      # ink flip on the cell, the ring that put today's circle back, and six CSS
+      # rules that moved the tint between the two layouts. An inline
+      # `background-image` is enough once nothing has to move it.
+      def workload_tint(count)
+        "background-image:linear-gradient(#{workload_ramp(count)},#{workload_ramp(count)})"
+      end
+
+      def workload_ramp(count)
+        "color-mix(in oklab, var(--primary) #{workload_share(count).round(2)}%, transparent)"
+      end
+
+      def workload_count(count)
+        return if count.zero?
+
+        render(Badge::Component.new(
+          variant: :outline, class: WORKLOAD_COUNT_CLASS,
+          "data-slot": "event-calendar-day-count",
+          "data-heavy": ("true" if workload_share(count) > WORKLOAD_INK_FLIPS_AT),
+          style: workload_tint(count)
+        ).with_content(count.to_s))
+      end
+
+      # Three faces and a "+2", busiest first. Identity is the initials or the
+      # picture, never the colour — every avatar here is the same neutral, which
+      # is what stops a fourth operator from needing a fourth hue.
+      def workload_assignees(tallies)
+        return if tallies.empty?
+
+        tag.span(
+          safe_join(tallies.map { |assignee, count| workload_assignee(assignee, count) } +
+                    [ workload_rest(tallies.size) ].compact),
+          "data-slot": "event-calendar-day-assignees", class: WORKLOAD_ASSIGNEES_CLASS
+        )
+      end
+
+      def workload_assignee(assignee, count)
+        tag.span(
+          safe_join([
+            render(Avatar::Component.new(size: :sm, class: WORKLOAD_AVATAR_CLASS)) do |avatar|
+              avatar.with_fallback(class: WORKLOAD_INITIALS_CLASS) { assignee.initials }
+              avatar.with_image(src: assignee.image, alt: "") if assignee.image
+            end,
+            tag.span(assignee.name, class: WORKLOAD_NAME_CLASS),
+            tag.span(count, class: WORKLOAD_TALLY_CLASS)
+          ]),
+          "data-slot": "event-calendar-day-assignee", class: WORKLOAD_ASSIGNEE_CLASS,
+          title: "#{assignee.name}: #{count}"
+        )
+      end
+
+      # One chip per intervention, in the order the day happens: the clock, who
+      # it is for, and how many people it takes.
+      def workload_items(items)
+        return if items.empty?
+
+        tag.span(
+          safe_join(items.map { |item| workload_item(item) } +
+                    [ workload_rest(items.size) ].compact),
+          "data-slot": "event-calendar-day-items", class: WORKLOAD_ITEMS_CLASS
+        )
+      end
+
+      def workload_item(item)
+        tag.span(
+          safe_join([ workload_item_head(item), workload_item_text(item) ]),
+          "data-slot": "event-calendar-day-item", class: WORKLOAD_ITEM_CLASS,
+          "data-color": item.color,
+          title: "#{item.title} — #{item.assignees.map(&:name).join(', ')}"
+        )
+      end
+
+      def workload_item_head(item)
+        tag.span(
+          safe_join([
+            tag.span(chip_time(item) || shadcn_t("event_calendar.all_day"),
+                     "data-slot": "event-calendar-day-time", class: WORKLOAD_TIME_CLASS),
+            workload_avatars(item)
+          ]),
+          class: WORKLOAD_ITEM_HEAD_CLASS
+        )
+      end
+
+      def workload_item_text(item)
+        tag.span(item.title, "data-slot": "event-calendar-day-text",
+                 class: WORKLOAD_ITEM_TEXT_CLASS)
+      end
+
+      # `Avatar::Group` is upstream's own overlap and ring; the count past
+      # `WORKLOAD_AVATARS_CAP` is its `GroupCount`, so the shape is shadcn's
+      # rather than a lookalike.
+      def workload_avatars(item)
+        shown = item.assignees.first(WORKLOAD_AVATARS_CAP)
+        rest = item.assignees.size - shown.size
+
+        render(Avatar::Group::Component.new(class: WORKLOAD_AVATARS_CLASS)) do
+          safe_join(shown.map { |assignee| avatar_for(assignee) } + [ avatars_more(rest) ].compact)
+        end
+      end
+
+      def avatar_for(assignee)
+        render(Avatar::Component.new(size: :sm, class: WORKLOAD_AVATAR_CLASS)) do |avatar|
+          avatar.with_fallback(class: WORKLOAD_INITIALS_CLASS) { assignee.initials }
+          avatar.with_image(src: assignee.image, alt: "") if assignee.image
+        end
+      end
+
+      def avatars_more(count)
+        return if count.zero?
+
+        render(Avatar::GroupCount::Component.new(class: WORKLOAD_AVATARS_MORE_CLASS)
+                                            .with_content("+#{count}"))
+      end
+
+      def workload_rest(total)
+        hidden = total - WORKLOAD_CAP
+        return if hidden <= 0
+
+        tag.span("+#{hidden}", "data-slot": "event-calendar-day-rest",
+                 class: "#{WORKLOAD_ASSIGNEE_CLASS} #{WORKLOAD_REST_CLASS}")
+      end
+
+
+      # The number, and — in the rows layout only — the weekday beside it. A
+      # column heading cannot serve a row, so each row carries its own.
+      def day_marker(day)
+        tag.span(
+          safe_join([
+            tag.span(I18n.t("date.abbr_day_names")[day.wday],
+                     "data-slot": "event-calendar-day-weekday", class: ROWS_WEEKDAY_CLASS),
+            day_number(day)
+          ]),
+          "data-slot": "event-calendar-day-label", class: ROWS_LABEL_CLASS
         )
       end
 
@@ -331,31 +951,84 @@ module Shadcn
         tag.span(day.day, "data-slot": "event-calendar-day-number", class: DAY_NUMBER_CLASS)
       end
 
-      # The phone's whole vocabulary for "something happens here". Capped at
-      # `max_events` for the same reason the bars are: past four, dots stop
-      # counting and start being texture.
-      def dots(on_day)
+      # Every event on the day, in order, as one mark each — not a sample of
+      # them. A phone cell cannot hold a title, so it holds the shape of the
+      # day instead: how much, of what kind, and in what order.
+      #
+      # `aria-hidden`, like the bars and for the same reason: the day button
+      # already carries the count in its name and the agenda reads the events
+      # out in full, so eighty empty spans in the accessibility tree would be
+      # eighty ways to say nothing.
+      #
+      # `run_before`/`run_after` are read by `TICK_CLASS`. They are computed
+      # here rather than with `:has(+ …)` because the controller has to compute
+      # the same thing, and an attribute is the one form both sides can write.
+      def ticks(on_day)
         return if on_day.empty?
 
+        marks = in_bands(on_day)
+
         tag.span(
-          safe_join(on_day.first(max_events).map do |event|
-            tag.span("", "data-slot": "event-calendar-day-dot", class: DOT_CLASS,
-                     "data-color": event.color)
-          end),
-          "data-slot": "event-calendar-day-dots", class: DOTS_CLASS
+          safe_join(marks.each_with_index.map { |event, index| tick(event, marks, index) }),
+          "data-slot": "event-calendar-day-ticks", class: TICKS_CLASS, "aria-hidden": "true"
+        )
+      end
+
+      # Grouped by colour, in the palette's own order, and stable within each
+      # group so the clock still decides the order inside a band.
+      #
+      # This is the one place the marks disagree with the agenda, and it was
+      # measured rather than assumed: chronological marks were built first and
+      # a month of them reads as confetti — at four pixels nobody can tell
+      # *which* event a mark is, so ordering by time buys nothing and costs the
+      # only thing a cell this size can say, which is what kind of day it is.
+      # Grouped, a cell is four or five bands and two cells can be compared;
+      # ordering by the palette rather than by size is what makes them
+      # comparable, since a colour then sits in the same place in every cell.
+      def in_bands(on_day)
+        # `index` is nil for a colour outside the palette — which `Event.wrap`
+        # lets through, deliberately, for an already-built Event — and a nil in
+        # a sort key is a 500 rather than a bad order. Unknown sorts last, which
+        # is where the JavaScript half already put it.
+        on_day.sort_by.with_index { |event, index| [ Event::COLORS.index(event.color) || COLORS_END, index ] }
+      end
+
+      def tick(event, on_day, index)
+        tag.span(
+          "",
+          "data-slot": "event-calendar-day-tick",
+          "data-color": event.color,
+          "data-run-before": ("true" if on_day[index - 1]&.color == event.color && index.positive?),
+          "data-run-after": ("true" if on_day[index + 1]&.color == event.color)
         )
       end
 
       def more(count)
-        return if count.zero?
+        return if count.zero? || !labelled?
 
+        more_chip(count)
+      end
+
+      # Split out so the `<template>` can hold the shape unconditionally. It
+      # used to go through `#more`, which returns nothing when the calendar is
+      # not labelled — so a dense month shipped a prototype with no "+N" in it,
+      # `this.morePrototype` was null, and the first press of › onto a month
+      # that *did* overflow threw inside `replaceChildren`. The title had
+      # already advanced, so every press after that threw too and the nav was
+      # dead. A prototype is markup the controller may need later; whether this
+      # month needs it is not the same question.
+      def more_chip(count)
         tag.span(shadcn_t("event_calendar.more", count:),
                  "data-slot": "event-calendar-day-more", class: MORE_CLASS)
       end
 
+      # The layer is rendered even when it holds nothing, because the controller
+      # clones a week to draw one — but a dense calendar puts no bars in it at
+      # any width, and rendering ninety-three of them to be hidden by a media
+      # query is ninety-three elements nobody will ever see.
       def segments(week)
         tag.div(
-          safe_join(week.visible.map { |segment| event_bar(segment) }),
+          safe_join(labelled? ? week.visible.map { |segment| event_bar(segment) } : []),
           "data-slot": "event-calendar-segments", class: SEGMENTS_CLASS, "aria-hidden": "true"
         )
       end
@@ -397,9 +1070,16 @@ module Shadcn
 
         tag.div(
           safe_join([
-            tag.div(I18n.l(selected, format: agenda_format),
-                    "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS,
-                    "data-shadcn--event-calendar-target": "agendaTitle"),
+            tag.div(
+              safe_join([
+                tag.span(I18n.l(selected, format: agenda_format),
+                         "data-shadcn--event-calendar-target": "agendaDate"),
+                tag.span(agenda_count(on_day.size),
+                         "data-slot": "event-calendar-agenda-count", class: AGENDA_COUNT_CLASS,
+                         "data-shadcn--event-calendar-target": "agendaCount")
+              ]),
+              "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS
+            ),
             tag.ul(safe_join(on_day.map { |event| agenda_item(event) }),
                    "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS,
                    "data-shadcn--event-calendar-target": "agendaList"),
@@ -412,6 +1092,12 @@ module Shadcn
           role: "region", "aria-live": "polite",
           "aria-label": shadcn_t("event_calendar.agenda_label")
         )
+      end
+
+      # Nothing rather than "0 events" — an empty day already says so in the
+      # line underneath, and two ways of saying it is one too many.
+      def agenda_count(count)
+        shadcn_t("event_calendar.event_count", count:) if count.positive?
       end
 
       def agenda_item(event)
@@ -454,8 +1140,8 @@ module Shadcn
             week_row(Schedule::Week.new(days: month.weeks.first, segments: [], max_lanes: max_events),
                      blank: true),
             event_bar(Schedule::Segment.new(event: prototype_event, column: 1, span: 1, lane: 1)),
-            dots([ prototype_event ]),
-            more(1),
+            ticks([ prototype_event ]),
+            more_chip(1),
             agenda_item(prototype_event),
             agenda_item(prototype_link_event)
           ]),
@@ -481,28 +1167,44 @@ module Shadcn
       def portable_events
         # Two orderings cross, because the controller needs both and can derive
         # neither: the array's own order is the one `Schedule#pack` packs in,
-        # and `dayOrder` is the one a person reads a single day in. Sorting
-        # again in JavaScript would be a second `sort_key`, spelled differently.
-        by_day = schedule.events.sort_by(&:day_sort_key).each_with_index.to_h
+        # and `dayOrder` is the one a person reads a single day in.
+        #
+        # Ranked with an index tiebreak and keyed by position, not by object.
+        # `sort_by` is not stable and `day_sort_key` ends at the title, so two
+        # events differing only in colour or url ranked one way here and another
+        # in `Schedule#on` — and `each_with_index.to_h` on `Event`, which defines
+        # neither `#hash` nor `#eql?`, collapsed a reused instance into one key.
+        ranked = schedule.events.each_with_index.sort_by { |event, index| [ *event.day_sort_key, index ] }
+        day_order = ranked.each_with_index.to_h { |(_, original), rank| [ original, rank ] }
 
-        schedule.events.map do |event|
+        schedule.events.each_with_index.map do |event, index|
+          # Bound once each. `chip_time` was called four times and `agenda_meta`
+          # twice per event, and on a month of two thousand that measured 117 ms
+          # of a 155 ms render.
+          time = chip_time(event)
+          meta = agenda_meta(event)
+
           {
             id: event.id,
-            dayOrder: by_day[event],
+            dayOrder: day_order[index],
             title: event.title,
             color: event.color,
             from: event.start_date.iso8601,
-            to: event.end_date.iso8601,
-            allDay: event.all_day?,
-            time: chip_time(event),
-            meta: agenda_meta(event),
+            # Only what differs from what can be worked out. At this component's
+            # thin end that saves nothing; at the dense one it is a third of a
+            # megabyte, because every key is paid for two thousand times. The
+            # controller fills each of these back in — see `eventsValueChanged`.
+            to: (event.end_date.iso8601 unless event.end_date == event.start_date),
+            allDay: (true if event.all_day?),
+            time:,
+            meta: (meta unless meta == time),
             url: event.url.presence
-          }
+          }.compact
         end
       end
 
       def chip_time(event)
-        return if event.all_day?
+        return if event.all_day? || !event.starts_at.respond_to?(:hour)
 
         I18n.l(event.starts_at, format: time_format)
       end
@@ -512,7 +1214,7 @@ module Shadcn
       def agenda_meta(event)
         return date_span(event) if event.multi_day?
         return shadcn_t("event_calendar.all_day") if event.all_day?
-        return chip_time(event) if event.ends_at.blank?
+        return chip_time(event) if event.ends_at.blank? || !event.ends_at.respond_to?(:hour)
 
         "#{chip_time(event)} – #{I18n.l(event.ends_at, format: time_format)}"
       end

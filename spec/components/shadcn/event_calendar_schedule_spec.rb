@@ -132,6 +132,20 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
     end
   end
 
+  # `by_day` is a Hash with a writing default block, so asking about a day
+  # outside the grid used to add an entry — and `busiest` memoised whatever had
+  # been asked for by then. Which reading the month rendered in depended on
+  # argument-evaluation order.
+  describe "#busiest" do
+    subject(:month_of_one) { schedule([ { title: "x", starts_at: Date.new(2026, 8, 5) } ]) }
+
+    it "counts the grid's own days, whatever else has been asked about" do
+      month_of_one.on(Date.new(2026, 10, 15))
+
+      expect(month_of_one.busiest).to eq(1)
+    end
+  end
+
   describe "#on" do
     subject(:day) do
       schedule([

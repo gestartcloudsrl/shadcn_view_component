@@ -24,7 +24,8 @@ import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 // the one with the tests; this one is kept identical on purpose, down to
 // "lowest free lane" rather than "next free lane".
 export default class extends Controller {
-  static targets = [ "title", "weeks", "agendaTitle", "agendaList", "agendaEmpty", "prototypes" ]
+  static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
+                     "prototypes", "groupLabel" ]
 
   static values = {
     month: String,
@@ -35,6 +36,10 @@ export default class extends Controller {
     selected: String,
     weekStartsOn: { type: Number, default: 1 },
     maxEvents: { type: Number, default: 3 },
+    tickSizes: Array,
+    denseAbove: Number,
+    reading: String,
+    colors: Array,
     events: Array,
     locale: String,
     dayNames: Array,
@@ -49,13 +54,26 @@ export default class extends Controller {
     eventCount: Object
   }
 
+  // The server ships only what cannot be worked out — see `#portable_events`
+  // — so this fills the rest back in, once, rather than at every one of the
+  // several thousand places that read an event.
+  eventsValueChanged() {
+    this.events = this.eventsValue.map((event) => ({
+      ...event,
+      to: event.to || event.from,
+      allDay: !!event.allDay,
+      meta: event.meta || event.time || ""
+    }))
+    this.index = null
+  }
+
   connect() {
     const shapes = this.prototypesTarget.content
 
     this.weekPrototype = shapes.querySelector("[data-slot='event-calendar-week']")
     this.eventPrototype = shapes.querySelector("[data-slot='event-calendar-event']")
-    this.dotsPrototype = shapes.querySelector("[data-slot='event-calendar-day-dots']")
-    this.dotPrototype = this.dotsPrototype.querySelector("[data-slot='event-calendar-day-dot']")
+    this.ticksPrototype = shapes.querySelector("[data-slot='event-calendar-day-ticks']")
+    this.tickPrototype = this.ticksPrototype.querySelector("[data-slot='event-calendar-day-tick']")
     this.morePrototype = shapes.querySelector("[data-slot='event-calendar-day-more']")
 
     // Two, because an event with a `url` is a link and one without is not, and
@@ -92,6 +110,27 @@ export default class extends Controller {
     this.goTo(shiftMonths(parse(this.todayValue), 0), this.todayValue)
   }
 
+  // Both cuts of a cell are already in the page; this says which one is
+  // showing. No re-render, because nothing about the month changed — only
+  // which of two lists the CSS is hiding.
+  regroup(event) {
+    const chosen = event.currentTarget.dataset.value
+    if (!chosen) return
+
+    this.element.dataset.group = chosen
+    if (this.hasGroupLabelTarget) this.groupLabelTarget.textContent = event.currentTarget.textContent.trim()
+    this.dispatch("regroup", { detail: { group: chosen } })
+  }
+
+  // Every chip is already rendered; the cap is a rule about the fourth
+  // onwards. So this toggles the root's own attribute rather than reading the
+  // switch's state — the two flip on the same click and cannot get out of step,
+  // and nothing has to know which of the two actions Stimulus runs first.
+  showAll() {
+    this.mark(this.element, "capped", this.element.dataset.capped !== "true")
+    this.dispatch("show-all", { detail: { capped: this.element.dataset.capped === "true" } })
+  }
+
   select(event) {
     const day = event.currentTarget.dataset.day
     if (!day) return
@@ -111,6 +150,7 @@ export default class extends Controller {
     this.selectedValue = selected || this.defaultSelection(first)
     this.render()
     this.dispatch("month-change", { detail: { month: this.monthValue, selected: this.selectedValue } })
+
   }
 
   // The same rule `Component#default_selection` follows: today when today is in
@@ -125,14 +165,26 @@ export default class extends Controller {
   // --- drawing --------------------------------------------------------------
 
   render() {
+    // The workload reading is server-drawn: its cells hold crews, clients and
+    // a tinted count that `#portable_events` does not ship, so there is nothing
+    // here to rebuild them from. Redrawing anyway is what filled September with
+    // August's people. Until the payload carries them, `month-change` is the
+    // whole of its navigation — see `goTo`.
+    if (this.readingValue === "workload") return
+
     const first = this.month
+    const weeks = this.weeksOf(first)
 
     this.overflowed = false
+    // Over the grid's own days, which is what `Schedule#busiest` counts — the
+    // days either side of the month are cells too, and a size chosen from a
+    // different set of them would change under the nav for no visible reason.
+    this.measure(weeks.flat())
     this.titleTarget.textContent = this.format(first, this.monthFormatValue)
-    this.weeksTarget.replaceChildren(...this.weeksOf(first).map((days) => this.weekElement(days, first)))
+    this.weeksTarget.replaceChildren(...weeks.map((days) => this.weekElement(days, first)))
     // After the weeks, because it is `weekElement` that finds out: a month
     // whose cells all fit gets its row back, and one that does not reserves it.
-    this.mark(this.element, "overflow", this.overflowed)
+    this.mark(this.element, "overflow", this.labelled && this.overflowed)
     this.renderAgenda()
   }
 
@@ -145,9 +197,14 @@ export default class extends Controller {
     if (segments.some((segment) => segment.lane > this.maxEventsValue)) this.overflowed = true
 
     days.forEach((day, index) => this.fillDay(cells[index], day, index + 1, segments, first))
+    // Nothing goes in the layer when the calendar is dense — `Component#segments`
+    // renders none either, and for the same reason: ninety-three bars drawn to
+    // be hidden by a media query are ninety-three elements nobody will see.
     layer.replaceChildren(
-      ...segments.filter((segment) => segment.lane <= this.maxEventsValue)
-                 .map((segment) => this.eventElement(segment))
+      ...(this.labelled
+        ? segments.filter((segment) => segment.lane <= this.maxEventsValue)
+                  .map((segment) => this.eventElement(segment))
+        : [])
     )
 
     return week
@@ -163,7 +220,7 @@ export default class extends Controller {
     this.mark(cell, "today", today)
     this.mark(cell, "selected", selected)
     this.mark(cell, "outside", day.getMonth() !== first.getMonth())
-    cell.setAttribute("aria-pressed", String(selected))
+    this.markSelected(cell, selected)
     if (today) cell.setAttribute("aria-current", "date")
     else cell.removeAttribute("aria-current")
     cell.setAttribute("aria-label", this.dayLabelFor(day, on.length))
@@ -172,25 +229,53 @@ export default class extends Controller {
     // The prototype cell carries neither, so this appends rather than replaces
     // — and the cell is a fresh clone every render, so there is nothing left
     // over from the month before.
-    if (on.length) cell.append(this.dotsElement(on))
+    if (on.length) cell.append(this.ticksElement(on))
 
     const hidden = segments.filter((segment) => segment.lane > this.maxEventsValue &&
                                                 column >= segment.column &&
                                                 column < segment.column + segment.span).length
-    if (hidden) cell.append(this.moreElement(hidden))
+    if (hidden && this.labelled) cell.append(this.moreElement(hidden))
   }
 
-  dotsElement(events) {
-    const dots = this.dotsPrototype.cloneNode(false)
+  // Every event, not the first few: below `sm` the marks are the only reading
+  // there is, and a strip that stopped at three would be a count pretending to
+  // be a picture.
+  ticksElement(events) {
+    const ticks = this.ticksPrototype.cloneNode(false)
+    // `Component#in_bands`. `sort` is stable, so the clock still decides the
+    // order inside a band, exactly as it does on the server.
+    const marks = [ ...events ].sort((left, right) =>
+      this.colorsValue.indexOf(left.color) - this.colorsValue.indexOf(right.color))
 
-    dots.replaceChildren(...events.slice(0, this.maxEventsValue).map((event) => {
-      const dot = this.dotPrototype.cloneNode(true)
-      dot.dataset.color = event.color
+    ticks.replaceChildren(...marks.map((event, index) => {
+      const tick = this.tickPrototype.cloneNode(true)
 
-      return dot
+      tick.dataset.color = event.color
+      this.mark(tick, "runBefore", index > 0 && marks[index - 1].color === event.color)
+      this.mark(tick, "runAfter", index + 1 < marks.length && marks[index + 1].color === event.color)
+
+      return tick
     }))
 
-    return dots
+    return ticks
+  }
+
+  // Both answers the busiest day decides — how big a mark is, and whether this
+  // month names its events at all — so they are found together and found again
+  // for every month. The numbers cross from Ruby rather than the answers, for
+  // the reason the plural forms do: they stay where Tailwind and the specs can
+  // see them.
+  measure(days) {
+    const busiest = Math.max(0, ...days.map((day) => this.eventsOn(iso(day)).length))
+    const [ , size ] = this.tickSizesValue.find(([ most ]) => most === null || busiest <= most)
+
+    this.element.style.setProperty("--event-calendar-tick", size)
+    // `Component#labelled?` is `reading == :auto && busiest <= DENSE_ABOVE`.
+    // Dropping the first clause let a workload month acquire `data-labelled`
+    // on its first re-render, which turns the bar layer on over the rows
+    // layout and resizes every cell.
+    this.labelled = this.readingValue === "auto" && busiest <= this.denseAboveValue
+    this.mark(this.element, "labelled", this.labelled)
   }
 
   moreElement(count) {
@@ -224,7 +309,8 @@ export default class extends Controller {
   renderAgenda() {
     const on = this.eventsOn(this.selectedValue)
 
-    this.agendaTitleTarget.textContent = this.format(parse(this.selectedValue), this.agendaFormatValue)
+    this.agendaDateTarget.textContent = this.format(parse(this.selectedValue), this.agendaFormatValue)
+    this.agendaCountTarget.textContent = on.length ? this.eventCountFor(on.length) : ""
     this.agendaListTarget.replaceChildren(...on.map((event) => this.agendaElement(event)))
     this.agendaEmptyTarget.hidden = on.length > 0
   }
@@ -235,9 +321,17 @@ export default class extends Controller {
     node.dataset.color = event.color
     if (event.url) node.querySelector("a").setAttribute("href", event.url)
     node.querySelector("[data-slot='event-calendar-agenda-event-title']").textContent = event.title
-    node.querySelector("[data-slot='event-calendar-agenda-meta']").textContent = event.meta || ""
+    node.querySelector("[data-slot='event-calendar-agenda-meta']").textContent = event.meta
 
     return node
+  }
+
+  // `aria-selected` present only when true, and the single tab stop travels
+  // with it — the pair the gem's `Calendar` writes.
+  markSelected(cell, chosen) {
+    if (chosen) cell.setAttribute("aria-selected", "true")
+    else cell.removeAttribute("aria-selected")
+    cell.setAttribute("tabindex", chosen ? "0" : "-1")
   }
 
   markSelection() {
@@ -245,8 +339,63 @@ export default class extends Controller {
       const chosen = cell.dataset.day === this.selectedValue
 
       this.mark(cell, "selected", chosen)
-      cell.setAttribute("aria-pressed", String(chosen))
+      this.markSelected(cell, chosen)
     })
+  }
+
+  // --- the keyboard ---------------------------------------------------------
+
+  // `Calendar`'s own map, minus the year jump it has and the bounds it clamps
+  // to. Without this the month was forty-two tab stops and no way across it.
+  keydown(event) {
+    const from = event.target.closest("[data-slot='event-calendar-day']")?.dataset?.day
+    if (!from) return
+
+    const moves = {
+      ArrowLeft: [ "day", -1 ],
+      ArrowRight: [ "day", 1 ],
+      ArrowUp: [ "week", -1 ],
+      ArrowDown: [ "week", 1 ],
+      Home: [ "weekStart", 0 ],
+      End: [ "weekEnd", 0 ],
+      PageUp: [ "month", -1 ],
+      PageDown: [ "month", 1 ]
+    }
+    const move = moves[event.key]
+    if (!move) return
+
+    event.preventDefault()
+    this.focusDay(this.step(parse(from), ...move))
+  }
+
+  step(from, unit, by) {
+    const to = new Date(from)
+
+    if (unit === "day") to.setDate(to.getDate() + by)
+    if (unit === "week") to.setDate(to.getDate() + by * 7)
+    if (unit === "month") to.setMonth(to.getMonth() + by)
+    if (unit === "weekStart") to.setDate(to.getDate() - this.mod(to.getDay() - this.weekStartsOnValue))
+    if (unit === "weekEnd") to.setDate(to.getDate() + (6 - this.mod(to.getDay() - this.weekStartsOnValue)))
+
+    return to
+  }
+
+  // A step off the edge of the grid is a month change. The workload reading is
+  // server-drawn, so there it announces and stops rather than pretending to
+  // move — the same boundary its nav buttons have.
+  focusDay(date) {
+    const day = iso(date)
+    let cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+
+    if (!cell) {
+      this.goTo(shiftMonths(date, 0), day)
+      cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+      if (!cell) return
+    }
+
+    this.element.querySelectorAll("[data-slot='event-calendar-day']")
+        .forEach((other) => other.setAttribute("tabindex", other === cell ? "0" : "-1"))
+    cell.focus()
   }
 
   // --- the grid, and what sits on it ----------------------------------------
@@ -281,7 +430,7 @@ export default class extends Controller {
     const last = iso(days[6])
     const occupied = []
 
-    return this.eventsValue
+    return this.events
       .filter((event) => event.from <= last && event.to >= first)
       .map((event) => {
         const column = Math.max(1, this.offsetOf(event.from, days[0]) + 1)
@@ -313,10 +462,26 @@ export default class extends Controller {
     return lane
   }
 
+  // Indexed once, not filtered per cell. `Schedule#by_day`'s own comment
+  // rejects the scan on the Ruby side and this file was doing it anyway:
+  // eighty-five full passes of the whole array per navigation, each with a
+  // sort, on a month that can hold two thousand events.
   eventsOn(day) {
-    return this.eventsValue
-      .filter((event) => event.from <= day && event.to >= day)
-      .sort((left, right) => left.dayOrder - right.dayOrder)
+    if (!this.index) this.buildIndex()
+
+    return this.index.get(day) || []
+  }
+
+  buildIndex() {
+    this.index = new Map()
+
+    for (const event of this.events) {
+      for (let day = event.from; day <= event.to; day = iso(addDays(parse(day), 1))) {
+        if (!this.index.has(day)) this.index.set(day, [])
+        this.index.get(day).push(event)
+      }
+    }
+    this.index.forEach((list) => list.sort((left, right) => left.dayOrder - right.dayOrder))
   }
 
   // --- helpers --------------------------------------------------------------

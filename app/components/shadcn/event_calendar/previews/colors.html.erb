@@ -1,4 +1,5 @@
-<%= render(Shadcn::EventCalendar::Component.new(
+<div class="flex flex-col gap-8">
+  <%= render(Shadcn::EventCalendar::Component.new(
       month: Date.new(2026, 8, 1),
       selected: Date.new(2026, 8, 12),
       events: [
@@ -12,3 +13,19 @@
           ends_at: Time.zone.local(2026, 8, 12, 15, 0), color: :blue, url: "#retrospective" }
       ]
     )) %>
+
+  <%# The level between an event and the fallback, which FullCalendar puts on an
+      event *source*: none of these name a colour, and a calendar of one kind of
+      thing says its colour once instead of on every row of a `map`. %>
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: Date.new(2026, 8, 1),
+        selected: Date.new(2026, 8, 12),
+        default_color: :green,
+        events: [
+          { title: "Standup", starts_at: Time.zone.local(2026, 8, 10, 9, 30) },
+          { title: "Retro", starts_at: Time.zone.local(2026, 8, 12, 14, 0) },
+          { title: "Release", starts_at: Date.new(2026, 8, 13), ends_at: Date.new(2026, 8, 14) },
+          { title: "Incident review", starts_at: Time.zone.local(2026, 8, 17, 11, 0), color: :rose }
+        ]
+      )) %>
+</div>
