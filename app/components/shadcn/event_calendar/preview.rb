@@ -81,23 +81,25 @@ module Shadcn
       # @param view select [grid, rows, hours]
       # @param most number
       # @param all_day number
+      # @param spanning number
       # @param colored toggle
       # @param show_all toggle
       # @param group select [events, assignees]
       # @param shape select [chips, bars]
       # @param from number
       # @param to number
-      def density(view: "grid", most: 30, all_day: 1, colored: false, show_all: false,
-                  group: "events", shape: "chips", from: 7, to: 23)
+      def density(view: "grid", most: 30, all_day: 1, spanning: 2, colored: false,
+                  show_all: false, group: "events", shape: "chips", from: 7, to: 23)
         cast = ActiveModel::Type::Boolean.new
         here = lambda do |**changed|
-          state = { view:, most:, all_day:, colored: cast.cast(colored),
+          state = { view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, from:, to: }.merge(changed)
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
         events = Preview.workload_events(per_day: 0..most.to_i, colored: cast.cast(colored),
-                                         durations: view.to_s == "hours", all_day: all_day.to_i)
+                                         durations: view.to_s == "hours", all_day: all_day.to_i,
+                                         spanning: spanning.to_i)
         common = { month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), events:,
                    view_url: ->(name) { here.call(view: name) } }
 
@@ -115,13 +117,18 @@ module Shadcn
       # A roster of six over a month of work, seeded so the gallery shows
       # the same month twice. Counts run from nothing to past the ramp's
       # ceiling, so both ends of the scale are on the page.
+      # `spanning:` is how many jobs in the month run across several days —
+      # half of them all-day, half with a clock, because that pair is where the
+      # lane ordering is decided and a fixture of only one kind proves nothing
+      # about it.
+      #
       # `all_day:` is how many day-long facts a day may hold. They are the ones
       # with no hour to be placed at — a depot shut, a van off the road — which
       # is the whole point of the case: the grid puts them in its top lanes, a
       # row leads with them, and the hours axis gives them its full width
       # because there is no moment to point at.
       def self.workload_events(month: Date.new(2026, 8, 1), per_day: 0..30, crew: 1..5,
-                               seed: 7, colored: false, durations: false, all_day: 0)
+                               seed: 7, colored: false, durations: false, all_day: 0, spanning: 0)
         random = Random.new(seed)
         roster = [ "Ada Lovelace", "Grace Hopper", "Alan Turing",
                    "Katherine Johnson", "Linus Pauling", "Marie Curie" ]
@@ -135,7 +142,23 @@ module Shadcn
 
         closures = [ "Depot closed", "Stock take", "Van off the road", "Training day" ]
 
-        (month.beginning_of_month..month.end_of_month).flat_map do |day|
+        days = (month.beginning_of_month..month.end_of_month).to_a
+        # Drawn first and from its own generator, so the knob does not disturb
+        # the per-day sequence below — the same reason `all_day:` draws nothing
+        # when it is off.
+        crossing = Array.new(spanning.to_i) do |index|
+          span = Random.new(seed + index).rand(2..5)
+          from = days[Random.new(seed + index + 100).rand(0..(days.size - span - 1))]
+
+          { title: "#{clients[index % clients.size]} — #{span}-day job",
+            color: (hues[index % hues.size] if colored),
+            starts_at: index.even? ? from : Time.zone.local(from.year, from.month, from.day, 9),
+            ends_at: index.even? ? from + (span - 1) : Time.zone.local(from.year, from.month, from.day, 17) + (span - 1).days,
+            all_day: index.even?,
+            assignees: roster.first(2) }
+        end
+
+        crossing + days.flat_map do |day|
           on_shift = roster.sample(random.rand(2..6), random: random)
           # Nothing is drawn at all when the knob is off, rather than drawing
           # zero of them: `rand` consumes from the seeded sequence whether or

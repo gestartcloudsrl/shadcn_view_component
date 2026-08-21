@@ -382,3 +382,70 @@ the DOM changes.
 Not to reintroduce: `<title>` inside an SVG a pointer will hover. It is not
 `<title>`'s fault — it is the only element whose *rendered* behaviour differs
 from what a DOM assertion sees, which is why no spec here had a chance.
+
+## A frozen column that stopped after 62 pixels
+
+The hours reading freezes its date column so scrolling the hours away does not
+take the day with them. Left to its content the column was 56×62 inside a 239px
+row, so a hundred and seventy-seven pixels of it covered nothing and chips on
+the lower lanes scrolled out from under it. A frozen column has to be as tall as
+the row it freezes — `self-stretch`, not a box that happens to stay put.
+
+## The hour scale pointed where the gridlines were not
+
+The scale is drawn once above the month, so it is not inside a day cell and had
+neither the `px-2` nor the `gap-2` a cell carries: it started 16px left of the
+axis and ran 24px wider. Every label named an hour the lines below disagreed
+with. Measured rather than eyeballed — scale left 81 width 1294 against axis
+left 97 width 1270 — and the browser example asserts the two boxes are one box,
+because nothing else in the suite compares two elements that both render fine.
+
+## An all-day chip that said it was the whole day and was not
+
+Its style attribute carried `--for:100%` and it rendered 124px inside a 1270px
+axis: the class held both `w-auto` and `w-(--for)`, both `width`, on a string
+that does not go through `tailwind_merge`, so the winner was whichever Tailwind
+emitted last. **A component spec cannot see this** — it asserts what the style
+attribute says and passed the whole time. Only a rendered page tells a declared
+width from an applied one.
+
+The same shape had already appeared twice: `h-20` against `h-auto` on a cell,
+and before that a `data-[track]:` prefix that had been silently winning those
+races until it was removed as redundant scoping. The fix is never more
+specificity. A rule a reading has to undo does not belong to the shared frame.
+
+## A month drawn outside the axis it was windowed to
+
+`Schedule#track_on` answers in minutes of the day, having no idea what the hours
+axis is showing, so an all-day job came back as `0..1440` and on a 07–19 axis
+was drawn at −58% and two hundred per cent wide. Everything is clipped to the
+window before it is drawn. It was never only an all-day problem — any job
+outside the window did the same; the all-day one is just always outside.
+
+## An agenda emptied by a payload that stopped being sent
+
+The workload and hours readings stopped shipping the events payload, which their
+own controller returns before reading — 34 KB, 15% of a page. But `select`
+redraws the agenda *from that payload*, so a day with three jobs opened an empty
+agenda and every spec stayed green: no example opens a workload day.
+
+The agenda now goes where the month already is. A server-drawn reading renders
+one only when `day_url:` names where a day lives; drawing an agenda that cannot
+be filled is worse than not drawing it.
+
+## Two toolbar controls that changed nothing
+
+The grouping menu and "Show all" were guarded by "is this the workload
+reading", which the hours reading implied — so hours drew both and neither did
+anything: 141 chips whichever way either was set. Naming hours as a reading of
+its own fixed them for free, and the options panel made the class of bug
+unreachable: a reading declares its own controls, so one for a reading that
+cannot act on it can no longer exist.
+
+## An all-day event underneath a longer timed one
+
+`Event#sort_key` compared duration before all-day, so a *timed* event running
+three days took the top lane over a one-day holiday. All-day leads now, and
+length leads within each of the two groups. That ordering is also the order
+events cross to the browser in, so the fix reached the client-side packer
+without it being touched — it re-packs lanes and never re-sorts.
