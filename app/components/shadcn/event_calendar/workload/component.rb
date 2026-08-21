@@ -67,6 +67,8 @@ module Shadcn
           "rows:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden " \
           "rows:[&_[data-slot=event-calendar-day-items]]:min-w-0"
 
+        def client_drawn? = false
+
         def cell_class = CELL_CLASS
 
         def reading_attributes
