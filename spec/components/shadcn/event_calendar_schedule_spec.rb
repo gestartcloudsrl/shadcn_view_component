@@ -89,8 +89,24 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
       expect(week_of(apart, Date.new(2026, 8, 20)).segments.map(&:lane)).to eq([ 1, 1 ])
     end
 
-    # `sort_key` puts the longest first, so the bar that crosses the week gets
-    # the top row and the one-day events fill in underneath it.
+    # An all-day event is not a thing that happens at a moment the grid can
+    # point at, it is a fact about the whole day — so it belongs above the
+    # schedule rather than interleaved with it. Length used to lead and this is
+    # where the two disagree: three days of a *timed* event beat one day of a
+    # holiday, and the holiday ended up underneath.
+    it "gives the top lane to an all-day event over a longer timed one" do
+      mixed = schedule([
+        { title: "Trip", starts_at: Time.zone.local(2026, 8, 19, 9),
+          ends_at: Time.zone.local(2026, 8, 21, 17) },
+        { title: "Holiday", starts_at: Date.new(2026, 8, 20) }
+      ])
+      lanes = week_of(mixed, Date.new(2026, 8, 20)).segments.to_h { |s| [ s.event.title, s.lane ] }
+
+      expect(lanes).to eq("Holiday" => 1, "Trip" => 2)
+    end
+
+    # `sort_key` puts the longest first *within* each of the two groups, so the
+    # bar that crosses the week still gets the top row of the timed ones.
     it "gives the top lane to the longest event" do
       mixed = schedule([
         { title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9) },

@@ -57,10 +57,21 @@ gives it the **lowest free lane** — so a three-day event is one bar across thr
 columns, and two one-day events on opposite sides of the week share the top row
 instead of stacking.
 
-Ordering decides who gets the top lane, and it is FullCalendar's: longest first,
-then all-day before timed, then by the clock, then by title so a render is
-stable. A bar that crosses the week is more use above the one-day events than
-interleaved with them.
+Ordering decides who gets the top lane: **all-day first**, then longest, then by
+the clock, then by title so a render is stable. Within each of the two groups a
+bar that crosses the week is more use above the one-day events than interleaved
+with them.
+
+All-day leads because that is what an all-day event *is* — not a thing that
+happens at a moment the grid can point at, but a fact about the whole day, and
+a fact belongs above the schedule. FullCalendar says it with a separate all-day
+row; this port has one set of lanes, so it says it with the sort. Length used to
+lead, which read fine until the two disagreed: a *timed* event running three
+days took the top lane over a one-day holiday.
+
+That ordering is also the order the events cross to the browser in, so
+`Event#sort_key` is the single place it is decided — the controller re-packs the
+lanes but never re-sorts.
 
 It renders nothing, so it is asserted on directly — the same reason
 `Calendar::Month` is a plain object.
@@ -152,6 +163,21 @@ Two thousand events is where the design's bills arrive, and both were paid:
 What is *not* solved is that a dense month still ships every event to the
 browser so the controller can redraw it. At this density a host should feed
 months on demand instead, and `month-change` is the hook for it.
+
+### An all-day event, in each of the three readings
+
+Marked with `all_day: true`, or inferred from a `Date` — which has no time of
+day to show. What it means is the same in all three and looks different in each:
+
+| reading | where it goes |
+|---|---|
+| grid | the top lanes, above everything with a clock |
+| rows | first in the cell, its chip reading "All day" instead of a time |
+| hours | the top lane, `0%` to `100%` — the whole axis, because it has no hour to be placed at |
+
+Only the grid needed anything doing: the other two already sort by
+`#day_sort_key`, which has always led with all-day, and the hours axis already
+treated a day-long event as the full window.
 
 ### Rows, and the button that asks for them
 
