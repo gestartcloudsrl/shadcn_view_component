@@ -73,6 +73,11 @@ module Shadcn
         CHIP_CLASS = "absolute top-(--lane) left-(--at) flex w-auto max-w-[13rem] flex-col gap-1 " \
                      "overflow-hidden rounded-md border border-border/40 " \
                      "bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)"
+        # An all-day chip is the one whose width means something: it has no hour
+        # to be placed at, so it is the whole axis rather than as wide as its
+        # own text. `max-w-none` because the cap that keeps a late-evening chip
+        # from running off the end is exactly what this one is allowed to do.
+        CHIP_ALL_DAY_CLASS = "w-(--for) max-w-none"
         # A share of the window, not a number of minutes — which is the bug the
         # first version had. The packer speaks minutes, but what decides whether
         # two chips collide is *pixels*, and how many pixels a minute is worth
@@ -198,10 +203,24 @@ module Shadcn
           placed = schedule.track_on(day, floor: floor_minutes)
           lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
 
-          tag.span(safe_join(placed.map { |slot| chips? ? chip(*slot) : bar(*slot) }),
+          tag.span(safe_join(placed.map { |slot| draw(*slot) }),
                    "data-slot": "event-calendar-day-track",
                    class: [ AXIS_CLASS, GRIDLINES_CLASS, AXIS_HEIGHT_CLASS ],
                    style: "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem")
+        end
+
+        # Clipped to the window before anything is drawn from it.
+        #
+        # `Schedule#track_on` answers in minutes of the *day*, because it has no
+        # idea what the axis is showing — so on a 07–19 axis an all-day job came
+        # back as 0..1440 and was drawn at −58% and two hundred per cent wide.
+        # Any job outside the window did the same; the all-day case is only the
+        # one that always is.
+        def draw(event, lane, from, to)
+          low, high = window.first * 60, window.last * 60
+          slot = [ event, lane, from.clamp(low, high), to.clamp(low, high) ]
+
+          chips? ? chip(*slot) : bar(*slot)
         end
 
         def bar(event, lane, from, to)
@@ -217,12 +236,14 @@ module Shadcn
         # The chip the workload reading already draws, placed by the clock — so
         # what the two readings differ in is the axis, not what an intervention
         # looks like.
-        def chip(event, lane, from, _to)
+        def chip(event, lane, from, to)
           tag.span(
             safe_join([ chip_head(event), chip_text(event) ]),
-            "data-slot": "event-calendar-day-item", class: CHIP_CLASS,
+            "data-slot": "event-calendar-day-item",
+            class: [ CHIP_CLASS, (CHIP_ALL_DAY_CLASS if event.all_day?) ],
             "data-color": event.color,
-            style: "--at:#{at(from)};--lane:#{lane_offset(lane)}",
+            style: [ "--at:#{at(from)}", ("--for:#{span(to - from)}" if event.all_day?),
+                     "--lane:#{lane_offset(lane)}" ].compact.join(";"),
             title: [ chip_time(event), event.title ].compact.join(" — ")
           )
         end

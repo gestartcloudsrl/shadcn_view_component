@@ -80,23 +80,24 @@ module Shadcn
       #
       # @param view select [grid, rows, hours]
       # @param most number
+      # @param all_day number
       # @param colored toggle
       # @param show_all toggle
       # @param group select [events, assignees]
       # @param shape select [chips, bars]
       # @param from number
       # @param to number
-      def density(view: "grid", most: 30, colored: false, show_all: false,
+      def density(view: "grid", most: 30, all_day: 1, colored: false, show_all: false,
                   group: "events", shape: "chips", from: 7, to: 23)
         cast = ActiveModel::Type::Boolean.new
         here = lambda do |**changed|
-          state = { view:, most:, colored: cast.cast(colored), show_all: cast.cast(show_all),
-                    group:, shape:, from:, to: }.merge(changed)
+          state = { view:, most:, all_day:, colored: cast.cast(colored),
+                    show_all: cast.cast(show_all), group:, shape:, from:, to: }.merge(changed)
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
         events = Preview.workload_events(per_day: 0..most.to_i, colored: cast.cast(colored),
-                                         durations: view.to_s == "hours")
+                                         durations: view.to_s == "hours", all_day: all_day.to_i)
         common = { month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), events:,
                    view_url: ->(name) { here.call(view: name) } }
 
@@ -114,8 +115,13 @@ module Shadcn
       # A roster of six over a month of work, seeded so the gallery shows
       # the same month twice. Counts run from nothing to past the ramp's
       # ceiling, so both ends of the scale are on the page.
+      # `all_day:` is how many day-long facts a day may hold. They are the ones
+      # with no hour to be placed at — a depot shut, a van off the road — which
+      # is the whole point of the case: the grid puts them in its top lanes, a
+      # row leads with them, and the hours axis gives them its full width
+      # because there is no moment to point at.
       def self.workload_events(month: Date.new(2026, 8, 1), per_day: 0..30, crew: 1..5,
-                               seed: 7, colored: false, durations: false)
+                               seed: 7, colored: false, durations: false, all_day: 0)
         random = Random.new(seed)
         roster = [ "Ada Lovelace", "Grace Hopper", "Alan Turing",
                    "Katherine Johnson", "Linus Pauling", "Marie Curie" ]
@@ -127,10 +133,22 @@ module Shadcn
         # categorical palette must not tell.
         hues = Shadcn::EventCalendar::Event::COLORS - [ :default ]
 
+        closures = [ "Depot closed", "Stock take", "Van off the road", "Training day" ]
+
         (month.beginning_of_month..month.end_of_month).flat_map do |day|
           on_shift = roster.sample(random.rand(2..6), random: random)
+          # Nothing is drawn at all when the knob is off, rather than drawing
+          # zero of them: `rand` consumes from the seeded sequence whether or
+          # not the answer is used, so asking and discarding would move every
+          # timed event in the month and every fixture with it. With the knob
+          # on it is a different month, which is the point.
+          all_day_here = Array.new(all_day.to_i.zero? ? 0 : random.rand(0..all_day.to_i)) do
+            { title: closures[random.rand(closures.size)],
+              starts_at: day, all_day: true,
+              assignees: on_shift.sample(random.rand(crew), random: random) }
+          end
 
-          Array.new(random.rand(per_day)) do |index|
+          all_day_here + Array.new(random.rand(per_day)) do |index|
             client = clients[random.rand(clients.size)]
             starts_at = Time.zone.local(day.year, day.month, day.day,
                                         random.rand(7..18), random.rand(0..59))
