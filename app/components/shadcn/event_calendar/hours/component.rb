@@ -85,7 +85,13 @@ module Shadcn
         # The one chip whose width means something: an all-day job has no hour
         # to be placed at, so it is the whole axis — and running to the end is
         # exactly what it is for, so there is no cap.
-        CHIP_ALL_DAY_CLASS = "w-(--for)"
+        #
+        # `items-start` is the width's consequence. A chip is a column, so its
+        # head and title stretch to it, and the crew rides `ml-auto` to the far
+        # end of the head — which is the right answer at 124px and absurd at
+        # 1270, with the faces a metre from the label they belong to. Not by
+        # overriding `ml-auto`: by leaving it no slack to use.
+        CHIP_ALL_DAY_CLASS = "w-(--for) items-start"
         # A share of the window, not a number of minutes — which is the bug the
         # first version had. The packer speaks minutes, but what decides whether
         # two chips collide is *pixels*, and how many pixels a minute is worth
