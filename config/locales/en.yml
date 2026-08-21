@@ -53,6 +53,7 @@ en:
       # does, not the state it is in, so the controller never has to write it.
       arrangement:
         rows: Rows
+        hours: Hours
       # The workload reading's grouping menu — see
       # `EventCalendar::Component::WORKLOAD_GROUPINGS`.
       group:

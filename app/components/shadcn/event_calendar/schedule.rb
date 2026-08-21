@@ -129,6 +129,52 @@ module Shadcn
               .map(&:first)
       end
 
+      # SPIKE — a day's events placed on a 24-hour track.
+      #
+      # The same lowest-free-lane packer as `pack`, in minutes instead of days:
+      # `free_lane` only ever compares `first`/`last`, so it does not care what
+      # the unit is. Returns `[event, lane, from, to]` with the minutes clamped
+      # to this day, so an event that crosses midnight is a bar to the edge.
+      #
+      # `floor:` is what keeps the packing honest: two appointments four minutes
+      # apart do not overlap in arithmetic but do overlap on screen, and a lane
+      # assignment that ignores that draws them on top of each other. So the
+      # interval that gets packed is the one that will be *drawn*, not the one
+      # in the data.
+      #
+      # Which is why it is an argument rather than the constant. A bar is as
+      # wide as its duration, so the floor only has to cover the shortest job
+      # worth seeing. A chip is as wide as its *content* — a clock, some faces
+      # and a client — and no arithmetic on times can know that, so a chip
+      # track has to pack as though every job lasted long enough to draw one.
+      TRACK_FLOOR = 45
+
+      public def track_on(day, floor: TRACK_FLOOR)
+        occupied = []
+
+        ordered_on(day).map do |event|
+          minutes = track_minutes(event, day, floor)
+          lane = free_lane(occupied, minutes)
+          (occupied[lane] ||= []) << minutes
+
+          [ event, lane, minutes.first, minutes.last ]
+        end
+      end
+
+      def track_minutes(event, day, floor)
+        return 0..1440 if event.all_day?
+
+        from = event.start_date == day ? (event.starts_at.hour * 60) + event.starts_at.min : 0
+        to =
+          if event.end_date > day then 1440
+          elsif event.ends_at.respond_to?(:hour) then (event.ends_at.hour * 60) + event.ends_at.min
+          else from
+          end
+
+        from..[ to, from + floor ].max.clamp(0, 1440)
+      end
+      private :track_minutes
+
       def pack(days)
         span_of_week = days.first..days.last
         occupied = []

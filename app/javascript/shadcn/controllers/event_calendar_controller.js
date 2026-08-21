@@ -136,6 +136,13 @@ export default class extends Controller {
     this.dispatch("arrange", { detail: { arrangement: wanted } })
   }
 
+  // SPIKE — the hour axis. What a cell is made of changes, so this is the
+  // server's to answer: it announces the ask, and a host that gave `track_url:`
+  // never gets here.
+  retrack(event) {
+    this.dispatch("retrack", { detail: { track: event.currentTarget.dataset.value === "true" } })
+  }
+
   // A cell renders the grouping it is showing, so there is nothing here to
   // swap: this announces the ask. A host that gave `group_url:` never gets
   // here — the menu items are links.
