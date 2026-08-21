@@ -51,6 +51,14 @@ module Shadcn
         render_with_template
       end
 
+      # A host owning the day view: the cells are links, the agenda is the frame
+      # they swap, and what comes back carries what the calendar could not. The
+      # model, the route and the frame live in `test/dummy` — a preview can
+      # render a calendar but cannot answer its links.
+      def with_turbo
+        render_with_template
+      end
+
       # The same reading with the knobs on. `colored` gives each event's subject
       # its own hue, which is what makes the chips worth colouring at all — a
       # colour that means nothing is noise.

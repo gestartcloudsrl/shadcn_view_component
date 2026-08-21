@@ -1,0 +1,61 @@
+<%# What a day link answers with. The `<turbo-frame id="day">` is the same id the
+    calendar's agenda was given, so Turbo swaps this in place of it — and without
+    Turbo the browser lands on this page instead, which is why it is a link and
+    not a listener. %>
+<turbo-frame id="day" class="mt-3 flex flex-col gap-2">
+  <div class="flex items-baseline justify-between gap-2 px-1">
+    <h2 class="text-sm font-medium"><%= l(@date, format: "%A, %B %-d") %></h2>
+    <span class="text-xs text-muted-foreground">
+      <%= t("shadcn_view_component.event_calendar.event_count", count: @appointments.size) %>
+    </span>
+  </div>
+
+  <% if @appointments.empty? %>
+    <p class="px-2 py-8 text-center text-sm text-muted-foreground">
+      <%= t("shadcn_view_component.event_calendar.empty") %>
+    </p>
+  <% end %>
+
+  <%# Four fields the calendar never carried: where it is, who to ring, what
+      state it is in, and the note from last time. That is the example — a cell
+      shows what a cell can show, and the rest is one request away. %>
+  <% @appointments.each do |appointment| %>
+    <%= render(Shadcn::Card::Component.new(class: "gap-3 py-3")) do |card| %>
+      <% card.with_header(class: "px-3") do |header| %>
+        <% header.with_title(class: "flex items-center gap-2 text-sm") do %>
+          <span class="size-2 shrink-0 rounded-full bg-(--event-color)"
+                data-color="<%= appointment.color %>"></span>
+          <%= appointment.title %>
+        <% end %>
+        <% header.with_description do %>
+          <%= l(appointment.starts_at, format: "%-l:%M %p") %> –
+          <%= l(appointment.ends_at, format: "%-l:%M %p") %> · <%= appointment.location %>
+        <% end %>
+        <% header.with_action do %>
+          <%= render(Shadcn::Badge::Component.new(
+                variant: appointment.status == "done" ? :secondary : :outline)) { appointment.status } %>
+        <% end %>
+      <% end %>
+
+      <% card.with_card_content(class: "flex flex-col gap-2 px-3") do %>
+        <div class="flex items-center gap-2">
+          <%= render(Shadcn::Avatar::Group::Component.new) do %>
+            <% appointment.assignees.each do |name| %>
+              <%= render(Shadcn::Avatar::Component.new(size: :sm)) do |avatar| %>
+                <% avatar.with_fallback(class: "bg-background text-[0.6rem]") do %>
+                  <%= name.split.first(2).map { |part| part[0] }.join %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+          <span class="text-xs text-muted-foreground"><%= appointment.assignees.to_sentence %></span>
+        </div>
+
+        <p class="text-xs text-muted-foreground"><%= appointment.notes %></p>
+        <a class="text-xs underline underline-offset-4" href="tel:<%= appointment.phone.delete(' ') %>">
+          <%= appointment.phone %>
+        </a>
+      <% end %>
+    <% end %>
+  <% end %>
+</turbo-frame>

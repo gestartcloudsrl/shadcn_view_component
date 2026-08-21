@@ -279,6 +279,15 @@ navigation, and Turbo announces those itself.
 What does not change is the grid: a cell is still `role="gridcell"`, still
 carries the roving tab stop, and the arrows still move across it.
 
+The worked example is `event_calendar/with_turbo` in the gallery, and the half a
+preview cannot hold — a model, a route, a controller and the frame's own
+markup — is in `test/dummy`, for the reason `/chat` is there for the message
+scroller. The model is a plain object rather than an ActiveRecord one, which is
+the more useful shape for the thing being shown: **a component never sees a
+record.** `Appointment.for_calendar` maps ten fields down to six, and the four
+that stay behind — where it is, who to ring, what state it is in, the note from
+last time — are what appears when a day is opened.
+
 ## Lazy loading, when a host needs it
 
 The events a component was given are the ones the server had, and the month you

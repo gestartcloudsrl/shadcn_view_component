@@ -233,6 +233,43 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The `day_url:` path end to end, which only a browser can show: the cells are
+  # links, the agenda is the frame they swap, and what comes back carries what
+  # the calendar never had. The model and the route are in `test/dummy` — the
+  # same reason `/chat` exists for the message scroller.
+  describe "a host owning the day view" do
+    before do
+      visit_preview("event_calendar", :with_turbo)
+      wait_for_stimulus
+    end
+
+    # The frame's `src` fetches on connect, so the built-in agenda is only ever
+    # the no-JavaScript fallback.
+    it "loads the selected day into the frame on connect" do
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 20")
+    end
+
+    it "swaps a different day in without leaving the page", :aggregate_failures do
+      before_click = page.current_url
+
+      find("#{calendar} [data-day='2026-08-13']").click
+
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
+      expect(page.current_url).to eq(before_click)
+    end
+
+    # The point of the example: a cell shows what a cell can show, and the rest
+    # is one request away.
+    it "shows the fields the calendar could not carry", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+      frame = find("turbo-frame#day")
+
+      expect(frame).to have_link(href: %r{\Atel:})
+      expect(frame.text).to include('Bologna')
+      expect(frame.text).to match(/confirmed|pencilled|done/)
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.

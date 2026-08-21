@@ -1,0 +1,18 @@
+<%# A host owning the day view. The cells are links, the agenda *is* the frame
+    they swap, and the frame's `src` loads it once on connect — so the built-in
+    agenda is what a browser without JavaScript is left with, which is the right
+    fallback rather than an empty box.
+
+    The route, the model and the frame's markup live in `test/dummy`, because a
+    Lookbook preview can render a calendar but cannot answer its links. What
+    comes back carries four fields the calendar never had: where, who to ring,
+    what state it is in, and the note from last time. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      events: Appointment.for_calendar,
+      day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
+      day_attributes: { data: { turbo_frame: "day" } },
+      agenda_as: :"turbo-frame",
+      agenda_attributes: { id: "day", src: "/calendar/days/2026-08-20" }
+    )) %>
