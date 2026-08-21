@@ -190,6 +190,15 @@ markup: `arrange` flips the attribute and the stylesheet does the rest, with no
 round trip. It is offered as a URL anyway because the workload month is drawn by
 the server, so a flip made in the browser is gone the next time the month is.
 
+A pressed toggle is the **solid** button among outline ones — `nav_button`
+swaps `variant: :outline` for `:default` — which is what shadcn does wherever a
+selection sits in a row of buttons, and it costs no class of ours. Not
+`aria-pressed:bg-accent`, the shape `Toggle` uses: an outline button's *hover*
+is already `bg-accent`, so pressed and hovered would be the same picture and an
+unpressed button under the mouse would read as on. `Toggle` does not have that
+problem because its own hover is `bg-muted`. This is what "Show all" was
+missing too.
+
 The button is hidden below `lg` with `max-lg:hidden` rather than by a condition
 in Ruby. There the rows are already what is drawn, so it has nothing to change —
 and the server cannot know which side of the breakpoint it rendered for, so CSS
