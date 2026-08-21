@@ -268,114 +268,6 @@ module Shadcn
       # one left in this reading.
       WORKLOAD_CHIPS_CLASS = "flex w-full flex-col gap-0.5"
 
-      # SPIKE — the hour track.
-      #
-      # It *fits* rather than scrolls, and that is the whole constraint. Each
-      # row owns its own `overflow-x-auto` today, so two rows scrolled to
-      # different offsets would put the same hour at two different x — which is
-      # exactly the alignment the track exists to provide. A track that fits
-      # cannot be scrolled out of agreement.
-      #
-      # Fitting costs the labels: 24 hours across ~1200px is 50px an hour, so
-      # an hour-long appointment is a 50px bar. That is the labelled/dense
-      # trade this component already makes for cells, arriving again on the
-      # time axis — and the reason a bar carries its text in `title=`.
-      TRACK_CLASS = "relative min-w-0 grow self-stretch"
-      # Eight gridlines, matching the eight ruler marks `#track_hour_marks`
-      # draws, whatever window the track is showing.
-      TRACK_GRID_CLASS = "bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_12.5%)]"
-      TRACK_HEIGHT_CLASS = "h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]"
-      TRACK_BAR_CLASS = "absolute top-(--lane) left-(--at) h-2 w-(--for) min-w-[3px] rounded-full"
-      # A chip is placed by its start and sized by its content, so `--for` is
-      # not used here at all: the duration stops being a length and goes back to
-      # being the text in the clock. `max-w` is what stops a late-evening chip
-      # running off the end of the track.
-      TRACK_CHIP_CLASS = "absolute top-(--lane) left-(--at) flex w-auto max-w-[13rem] flex-col gap-1 " \
-                         "overflow-hidden rounded-md border border-border/40 " \
-                         "bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)"
-      # A share of the window, not a number of minutes — which is the bug the
-      # first version had. The packer speaks minutes, but what decides whether
-      # two chips collide is *pixels*, and how many pixels a minute is worth
-      # depends on how many hours the track is showing. 120 minutes was a tenth
-      # of a 07–23 window and a twelfth of a 00–24 one, so the same floor that
-      # kept them apart on the short window let them pile up on the long one.
-      #
-      # Measured: a chip runs 93–160px on a ~1370px track, so the widest is
-      # under 12% of it.
-      TRACK_CHIP_SHARE = 0.12
-      # Measured, not chosen: a chip renders 51px tall — a clock line, a gap and
-      # a title — so a 2.9rem lane overlapped the next one by five pixels and
-      # the bottom row of every busy day was clipped by the track's own height.
-      TRACK_LANE_HEIGHTS = { bars: 0.9, chips: 3.4 }.freeze
-      TRACK_BAR_PAINT_CLASS = "bg-[var(--event-color)]/70 ring-1 ring-background"
-      # The ruler, drawn once above the month rather than once per row: it is
-      # the same 24 hours on every row, and 42 copies of it would be 42 chances
-      # to disagree.
-      TRACK_RULER_CLASS = "flex items-end gap-0 pb-1 text-[0.6rem] text-muted-foreground"
-      TRACK_RULER_PAD_CLASS = "w-14 shrink-0"
-      TRACK_RULER_BODY_CLASS = "relative h-4 grow"
-      TRACK_HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
-      # Lanes aside, a track row is as tall as its lanes make it, so the fixed
-      # `h-20` a rows-mode cell carries has to give way.
-      # Only what the track *adds*. Everything else — weeks and days to
-      # `contents`, the weekday strip and the outside days hidden, the cell laid
-      # out as a row — is the rows arrangement, which a track always is.
-      #
-      # The scrolling half is the answer to a phone. Twenty-four hours across
-      # 350px puts a 120px chip at a third of the track, so no packing floor
-      # expressed as a share of the *window* can keep them apart — the chip's
-      # width is in pixels and the window's is not. So the hour gets a fixed
-      # width below `lg` and the month scrolls.
-      #
-      # One scroller for the whole month, not one per row: rows that scroll
-      # independently sit at different offsets, and then the same x is a
-      # different hour on each of them, which is the entire thing the track is
-      # for. `overflow-x-auto` therefore goes on the frame, and the date column
-      # is `sticky` so that scrolling the hours away does not take the day with
-      # them.
-      #
-      # `self-stretch` on that column is not tidiness. Left to its content it
-      # was 56×62 inside a 239px row, so a hundred and seventy-seven pixels of
-      # it were not covering anything and chips on the lower lanes scrolled out
-      # from under a box that stopped short. A frozen column has to be as tall
-      # as the row it freezes. The border is what makes it read as a column
-      # rather than as a cell that happens to stay put; the fill stays the
-      # cell's own, so the only thing that changed is the shape.
-      #
-      # It does not follow the row's hover. A tint is translucent, and a frozen
-      # column has to be opaque or the chips scrolling behind it show through —
-      # which is the whole reason it is there.
-      TRACK_TOKENS =
-        "data-[track]:[--event-calendar-hour:0px] " \
-        "max-lg:data-[track]:[--event-calendar-hour:22vw] " \
-        "data-[track]:[&_[data-slot=event-calendar-grid]]:overflow-x-auto " \
-        "data-[track]:[&_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track) " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track) " \
-        "data-[track]:[&_[data-slot=event-calendar-day]]:h-auto " \
-        "data-[track]:[&_[data-slot=event-calendar-day]]:min-h-14 " \
-        "data-[track]:[&_[data-slot=event-calendar-day]]:items-start " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:sticky " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:left-0 " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:z-10 " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:self-stretch " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:justify-start " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:pt-1.5 " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:border-r " \
-        "data-[track]:[&_[data-slot=event-calendar-day-head]]:bg-background " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:sticky " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:left-0 " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:z-10 " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:self-stretch " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:border-r " \
-        "data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:bg-background"
-      # Shrinkable, not fixed: with the title hidden below `sm` there is
-      # no flexible element left in the chip, and a `shrink-0` clock pushes the
-      # crew size out of a 46px cell entirely. The clock truncating is a worse
-      # look and a better chip — the number is the half that cannot be guessed.
-      # `pe-2` rather than a wider gap on the head: the avatars are pushed right
-      # by `ml-auto`, so the only thing guaranteeing a space when the clock runs
-      # long is the clock's own padding — and it survives truncation, where the
-      # ellipsis lands before the padding rather than against a face.
       WORKLOAD_TIME_CLASS = "min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums"
       # `bg-muted`, not a translucent `bg-background`. The translucent version
       # worked only while the cell underneath was tinted — the moment the ramp
@@ -572,13 +464,34 @@ module Shadcn
       default_tag :div
       slot_name :"event-calendar"
 
+      # Every reading's tokens, and no reading's alone: a subclass adds its own
+      # by redefining `style` over this. Which is the whole point of the split —
+      # a plain calendar carried fifty-two `rows:` rules and twenty-two
+      # `data-[track]` ones it could never fire, 74 of 94 tokens on its root.
+      BASE_TOKENS = "group/event-calendar w-full text-foreground " \
+                    "#{COLOR_TOKENS} #{ROWS_TOKENS} #{ROWS_CHIP_TOKENS}"
+
       style do
-        base { "group/event-calendar w-full text-foreground #{COLOR_TOKENS} #{ROWS_TOKENS} #{ROWS_CHIP_TOKENS} #{TRACK_TOKENS}" }
+        base { BASE_TOKENS }
       end
 
       attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :show_all, :show_all_url, :group_url, :arrangement, :arrangement_url, :track_hours, :track_url, :track_as
+                  :show_all, :show_all_url, :group_url, :arrangement, :arrangement_url, :hours_url
+
+      # The readings that are not this class. `.new` hands over to them, so a
+      # host writes `Component.new(reading: :hours)` and never names a subclass
+      # — the dispatcher is the constructor, not a wrapper element, so nothing
+      # extra is rendered and the root stays one element.
+      RENDERERS = { hours: "Shadcn::EventCalendar::Hours::Component" }.freeze
+
+      def self.new(reading: :auto, **rest)
+        renderer = RENDERERS[reading&.to_sym]
+
+        return super(reading:, **rest) if renderer.nil? || name == renderer
+
+        renderer.constantize.new(reading:, **rest)
+      end
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -629,7 +542,7 @@ module Shadcn
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
                      show_all: false, show_all_url: nil, group_url: nil,
                      arrangement: :auto, arrangement_url: nil,
-                     track_hours: (0..24), track_url: nil, track_as: :bars, **attributes)
+                     hours_url: nil, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -651,9 +564,7 @@ module Shadcn
         @group = WORKLOAD_GROUPINGS.include?(group&.to_sym) ? group.to_sym : :assignees
         @arrangement = ARRANGEMENTS.include?(arrangement&.to_sym) ? arrangement.to_sym : :auto
         @arrangement_url = arrangement_url
-        @track_hours = track_hours
-        @track_url = track_url
-        @track_as = TRACK_LANE_HEIGHTS.key?(track_as&.to_sym) ? track_as.to_sym : :bars
+        @hours_url = hours_url
         super(**attributes)
       end
 
@@ -663,7 +574,7 @@ module Shadcn
           "style" => merged_style("--event-calendar-cell:#{cell_height}rem",
                                   "--event-calendar-cell-more:#{cell_height(more: true)}rem",
                                   "--event-calendar-tick:#{tick_size}",
-                                  ("--event-calendar-track:#{track_width}" if hours?)),
+                                  *reading_style),
           # Read by the `sm:group-data-[overflow]` rule on the cells, and reset
           # by the controller when it draws a month with a different answer.
           "data-overflow" => ("true" if labelled? && schedule.overflow?),
@@ -677,16 +588,13 @@ module Shadcn
           # absence of a value: the toggle flips between two named states, and
           # a controller that had to distinguish "unset" from "chosen" would be
           # reading the breakpoint it cannot see.
-          # A track is a row per day and has no grid form, so it *is* the rows
-          # arrangement rather than something laid over it. Said here, the
-          # `rows:` variant does the whole layout and `TRACK_TOKENS` only has
-          # to add what the track itself changes. Said anywhere else, pressing
-          # the toggle took `data-arrangement` back to `auto`, the rows rules
+          # The hours reading is a row per day and has no grid form, so it *is*
+          # the rows arrangement rather than something laid over it. Said here,
+          # the `rows:` variant does its whole layout. Said anywhere else,
+          # pressing the toggle took this back to `auto`, the rows rules
           # stopped applying above `lg`, and what was left was a hybrid: weeks
           # still `contents`, cells no longer rows.
           "data-arrangement" => (hours? ? :rows : (arrangement if workload?)),
-          # SPIKE
-          "data-track" => ("true" if hours?),
           "data-shadcn--event-calendar-month-value" => month.first.iso8601,
           # The application's today, not the browser's — the same reason the
           # calendar crosses one: `Time.zone` and a laptop's clock disagree by a
@@ -799,11 +707,11 @@ module Shadcn
             # to change there — but the slot must not go empty either, because
             # then there is no way out of the track. It gets its own toggle
             # instead, and the two are never both useful at once.
-            (hours? ? track_toggle : (arrangement_toggle if workload?)),
+            (hours? ? hours_toggle : (arrangement_toggle if workload?)),
             # The way *into* the track, offered only to a caller that named its
             # URL — so the shipped readings gain no control they did not ask
             # for while the spike is being looked at.
-            (track_toggle if workload? && track_url),
+            (hours_toggle if workload? && hours_url),
             (show_all_toggle if workload?),
             nav_button(Date.current, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
@@ -865,9 +773,9 @@ module Shadcn
       # SPIKE — the hour axis on or off. Named for what it shows rather than
       # for the shape it makes, the way `Show all` is: a person reading the
       # toolbar is choosing between crews and clock, not between two layouts.
-      def track_toggle
+      def hours_toggle
         nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#retrack",
-                   href: track_url&.call(!hours?),
+                   href: hours_url&.call(!hours?),
                    pressed: hours?, value: (!hours?).to_s) do
           shadcn_t("event_calendar.arrangement.hours")
         end
@@ -946,9 +854,17 @@ module Shadcn
       # --- the month ------------------------------------------------------------
 
       def grid
-        tag.div(safe_join([ (track_ruler if hours?), weekdays, weeks ].compact),
+        tag.div(safe_join([ scale, weekdays, weeks ].compact),
                 "data-slot": "event-calendar-grid", class: FRAME_CLASS)
       end
+
+      # A reading that measures something across the month draws its scale here,
+      # once, above the weeks. Nothing in this one does.
+      def scale = nil
+
+      # Custom properties a reading needs on the root, merged into `style`
+      # alongside the ones every reading has.
+      def reading_style = []
 
       # `aria-hidden`: each day button already carries its whole date, so the
       # column headings are decoration by the time anything reads them.
@@ -1011,7 +927,7 @@ module Shadcn
         href = day_url&.call(day)
 
         tag.public_send(href ? :a : :button,
-          safe_join(rows_reading? ? workload_cell(day, on_day, assignees) : [ day_marker(day), ticks(on_day), more(hidden) ].compact),
+          safe_join(cell_body(day, on_day:, assignees:, hidden:)),
           **(href ? { href: } : { type: "button", "data-action": "click->shadcn--event-calendar#select" }),
           **day_attributes,
           "data-slot": "event-calendar-day",
@@ -1040,106 +956,22 @@ module Shadcn
       # controller clones held the first week's real people and titles, and
       # every month it drew afterwards showed August's people on September's
       # dates. A parameter nobody has to remember to use is the fix.
+      # What a day is made of, which is the one thing the three readings do not
+      # agree on — a list of events, a measure of work, or a timeline.
+      def cell_body(day, on_day:, assignees:, hidden:)
+        return workload_cell(day, on_day, assignees) if rows_reading?
+
+        [ day_marker(day), ticks(on_day), more(hidden) ].compact
+      end
+
       def workload_cell(day, on_day, assignees)
         [
           tag.span(safe_join([ day_marker(day), workload_count(on_day.size) ].compact),
                    "data-slot": "event-calendar-day-head", class: WORKLOAD_HEAD_CLASS),
-          if hours? then workload_track(day)
-          elsif group == :assignees then workload_assignees(assignees)
+          if group == :assignees then workload_assignees(assignees)
           else workload_items(on_day)
           end
         ].compact
-      end
-
-      # SPIKE — a day as a 24-hour track.
-      #
-      # Position is a percentage of the day rather than a pixel, so the bars
-      # stay aligned at every width without anything measuring anything: the
-      # track is the same box on every row, and 09:15 is 38.5% of it whatever
-      # that box happens to be.
-      def workload_track(day)
-        placed = schedule.track_on(day, floor: track_floor)
-        lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
-
-        tag.span(safe_join(placed.map { |slot| track_chips? ? track_chip(*slot) : track_bar(*slot) }),
-                 "data-slot": "event-calendar-day-track",
-                 class: [ TRACK_CLASS, TRACK_GRID_CLASS, TRACK_HEIGHT_CLASS ],
-                 style: "--lanes:#{lanes};--lane-h:#{TRACK_LANE_HEIGHTS.fetch(track_as)}rem")
-      end
-
-      def track_chips? = track_as == :chips
-
-      def track_window_minutes = (track_hours.last - track_hours.first) * 60
-
-      # `3.5rem` is the date column's own `w-14`, which does not scroll.
-      def track_width
-        "calc(3.5rem + (#{track_hours.last - track_hours.first} * var(--event-calendar-hour)))"
-      end
-
-      def track_floor
-        return Schedule::TRACK_FLOOR unless track_chips?
-
-        (track_window_minutes * TRACK_CHIP_SHARE).round
-      end
-
-      def track_chip(event, lane, from, _to)
-        tag.span(
-          safe_join([ workload_item_head(event), workload_item_text(event) ]),
-          "data-slot": "event-calendar-day-item", class: TRACK_CHIP_CLASS,
-          "data-color": event.color,
-          style: "--at:#{track_at(from)};--lane:#{track_lane(lane)}",
-          title: [ chip_time(event), event.title ].compact.join(" — ")
-        )
-      end
-
-      def track_lane(lane) = "calc(#{lane} * var(--lane-h))"
-
-      def track_bar(event, lane, from, to)
-        tag.span(
-          "", "data-slot": "event-calendar-day-bar",
-          class: [ TRACK_BAR_CLASS, TRACK_BAR_PAINT_CLASS ],
-          "data-color": event.color,
-          style: "--at:#{track_at(from)};--for:#{track_span(to - from)};--lane:#{track_lane(lane)}",
-          title: [ chip_time(event), event.title ].compact.join(" — ")
-        )
-      end
-
-      # Minutes into a percentage of the *window*, not of the day. A calendar of
-      # field work spent thirty per cent of its width on the hours between
-      # midnight and seven, which is measured rather than guessed: the bars in
-      # the 00–24 spike ran from 29.2% to 95.6% and nothing was ever drawn in
-      # the first third.
-      # Two of them, and the difference is the whole bug that made the first
-      # windowed track a field of three-pixel ticks: a *position* is measured
-      # from the start of the window and a *length* is not, so subtracting the
-      # window offset from a duration turned every sixty-minute job negative
-      # and left `min-w` to draw it.
-      def track_at(minutes) = track_span(minutes - (track_hours.first * 60))
-
-      def track_span(minutes)
-        "#{((minutes / ((track_hours.last - track_hours.first) * 60.0)) * 100).round(3)}%"
-      end
-
-      def track_hour_marks
-        step = ((track_hours.last - track_hours.first) / 8.0).ceil
-        (track_hours.first...track_hours.last).step(step)
-      end
-
-      # The hours, once, above the month.
-      def track_ruler
-        tag.div(
-          safe_join([
-            tag.span("", "data-slot": "event-calendar-ruler-pad", class: TRACK_RULER_PAD_CLASS),
-            tag.span(safe_join(track_hour_marks.map { |hour| track_hour(hour) }),
-                     class: TRACK_RULER_BODY_CLASS)
-          ]),
-          "data-slot": "event-calendar-ruler", class: TRACK_RULER_CLASS, "aria-hidden": "true"
-        )
-      end
-
-      def track_hour(hour)
-        tag.span(format("%02d", hour), class: TRACK_HOUR_CLASS,
-                 style: "--at:#{track_at(hour * 60)}")
       end
 
       def workload_share(count)

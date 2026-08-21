@@ -1,0 +1,213 @@
+# frozen_string_literal: true
+
+module Shadcn
+  module EventCalendar
+    module Hours
+      # A month read as a **timeline**: every job placed at the hour it starts,
+      # so the same x is the same hour on every row.
+      #
+      # The third of the three readings, and the reason there are three. A day
+      # is a list of events in `EventCalendar::Component`, a quantity of work in
+      # the workload reading, and here it is an axis — three different questions
+      # with three different answers, which is why they stopped sharing a file.
+      # What they still share is the domain: `Calendar::Month`, `Schedule` and
+      # `Event` are the parent's and are not duplicated here.
+      #
+      # A host never names this class. `EventCalendar::Component.new(reading:
+      # :hours)` hands over to it — see `Component::RENDERERS`.
+      #
+      # **The axis fits; it does not scroll per row.** Each row owns its own
+      # overflow, so two rows scrolled to different offsets would put the same
+      # hour at two different x — exactly the alignment the reading exists for.
+      # Fitting costs the labels: sixteen hours across ~1200px is 75px an hour,
+      # so an hour-long job is a 75px bar and its text lives in `title=`. On a
+      # phone that trade stops working, and there the hour takes a fixed width
+      # and the *month* scrolls as one, with the date column frozen.
+      class Component < EventCalendar::Component
+        # No `data-[track]:` prefix on any of these, and that absence is the
+        # split doing its job: these rules only ever land on this class's root,
+        # so scoping them to an attribute would be guarding against a calendar
+        # that cannot reach them. They were prefixed while every reading shared
+        # one root and one class string.
+        TOKENS =
+          "[--event-calendar-hour:0px] " \
+          "max-lg:[--event-calendar-hour:22vw] " \
+          "[&_[data-slot=event-calendar-grid]]:overflow-x-auto " \
+          "[&_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track) " \
+          "[&_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track) " \
+          "[&_[data-slot=event-calendar-day]]:h-auto " \
+          "[&_[data-slot=event-calendar-day]]:min-h-14 " \
+          "[&_[data-slot=event-calendar-day]]:items-start " \
+          "[&_[data-slot=event-calendar-day-head]]:sticky " \
+          "[&_[data-slot=event-calendar-day-head]]:left-0 " \
+          "[&_[data-slot=event-calendar-day-head]]:z-10 " \
+          "[&_[data-slot=event-calendar-day-head]]:self-stretch " \
+          "[&_[data-slot=event-calendar-day-head]]:justify-start " \
+          "[&_[data-slot=event-calendar-day-head]]:pt-1.5 " \
+          "[&_[data-slot=event-calendar-day-head]]:border-r " \
+          "[&_[data-slot=event-calendar-day-head]]:bg-background " \
+          "[&_[data-slot=event-calendar-ruler-pad]]:sticky " \
+          "[&_[data-slot=event-calendar-ruler-pad]]:left-0 " \
+          "[&_[data-slot=event-calendar-ruler-pad]]:z-10 " \
+          "[&_[data-slot=event-calendar-ruler-pad]]:self-stretch " \
+          "[&_[data-slot=event-calendar-ruler-pad]]:border-r " \
+          "[&_[data-slot=event-calendar-ruler-pad]]:bg-background"
+
+        style do
+          base { "#{EventCalendar::Component::BASE_TOKENS} #{TOKENS}" }
+        end
+
+        AXIS_CLASS = "relative min-w-0 grow self-stretch"
+        # Eight gridlines, matching the eight marks `#hour_marks` draws, whatever
+        # window the axis is showing. A gradient rather than twenty-four
+        # elements: they are decoration, and a node each would be a thousand of
+        # them in a month.
+        GRIDLINES_CLASS = "bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_12.5%)]"
+        AXIS_HEIGHT_CLASS = "h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]"
+        BAR_CLASS = "absolute top-(--lane) left-(--at) h-2 w-(--for) min-w-[3px] rounded-full"
+        BAR_PAINT_CLASS = "bg-[var(--event-color)]/70 ring-1 ring-background"
+        # A chip is placed by its start and sized by its content, so `--for` is
+        # not used here at all: the duration stops being a length and goes back
+        # to being the text in the clock. `max-w` is what stops a late-evening
+        # chip running off the end of the axis.
+        CHIP_CLASS = "absolute top-(--lane) left-(--at) flex w-auto max-w-[13rem] flex-col gap-1 " \
+                     "overflow-hidden rounded-md border border-border/40 " \
+                     "bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink)"
+        # A share of the window, not a number of minutes — which is the bug the
+        # first version had. The packer speaks minutes, but what decides whether
+        # two chips collide is *pixels*, and how many pixels a minute is worth
+        # depends on how many hours are showing. 120 minutes was a tenth of a
+        # 07–23 window and a twelfth of a 00–24 one, so the same floor that kept
+        # them apart on the short window let them pile up on the long one.
+        #
+        # Measured: a chip runs 93–160px on a ~1370px axis, so the widest is
+        # under 12% of it.
+        CHIP_SHARE = 0.12
+        # Measured too: a chip renders 51px — a clock line, a gap and a title —
+        # so a 2.9rem lane overlapped the next by five pixels and clipped the
+        # bottom row of every busy day.
+        LANE_HEIGHTS = { bars: 0.9, chips: 3.4 }.freeze
+
+        # The scale, drawn once above the month rather than once per row: it is
+        # the same hours on every row, and forty-two copies would be forty-two
+        # chances to disagree. The pad is the width of the date column, so mark
+        # zero starts where the axes do.
+        RULER_CLASS = "flex items-end gap-0 pb-1 text-[0.6rem] text-muted-foreground"
+        RULER_PAD_CLASS = "w-14 shrink-0"
+        RULER_BODY_CLASS = "relative h-4 grow"
+        HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
+
+        attr_reader :window, :shape
+
+        # @param window [Range] the hours the axis shows. A calendar of field
+        #   work spent thirty per cent of its width on midnight-to-seven —
+        #   measured, not guessed: the bars ran 29.2% to 95.6% and nothing was
+        #   ever drawn in the first third.
+        # @param shape [Symbol] `:bars` — as wide as the job lasts, and nothing
+        #   else said — or `:chips`, which say who and for whom and are as wide
+        #   as that takes. On 447 events the month is 3437px of bars or 11114px
+        #   of chips, so this is a density decision more than a taste one.
+        # Not `as:`: that name is already the gem's, for the tag an element
+        # renders as, and taking it here made every bar ask `LANE_HEIGHTS` for
+        # a key of `nil`.
+        def initialize(window: (0..24), shape: :bars, **attributes)
+          @window = window
+          @shape = LANE_HEIGHTS.key?(shape&.to_sym) ? shape.to_sym : :bars
+          super(**attributes)
+        end
+
+        def chips? = shape == :chips
+
+        private
+
+        # `3.5rem` is the date column's own `w-14`, which does not scroll.
+        def reading_style
+          [ "--event-calendar-track:calc(3.5rem + (#{window.last - window.first} * " \
+            "var(--event-calendar-hour)))" ]
+        end
+
+        def scale
+          tag.div(
+            safe_join([
+              tag.span("", "data-slot": "event-calendar-ruler-pad", class: RULER_PAD_CLASS),
+              tag.span(safe_join(hour_marks.map { |hour| hour_mark(hour) }), class: RULER_BODY_CLASS)
+            ]),
+            "data-slot": "event-calendar-ruler", class: RULER_CLASS, "aria-hidden": "true"
+          )
+        end
+
+        def cell_body(day, on_day:, assignees:, hidden:)
+          [
+            tag.span(safe_join([ day_marker(day), workload_count(on_day.size) ].compact),
+                     "data-slot": "event-calendar-day-head", class: WORKLOAD_HEAD_CLASS),
+            day_axis(day)
+          ].compact
+        end
+
+        # Position is a percentage of the window rather than a pixel, so the
+        # marks stay aligned at every width without anything measuring anything.
+        def day_axis(day)
+          placed = schedule.track_on(day, floor: floor_minutes)
+          lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
+
+          tag.span(safe_join(placed.map { |slot| chips? ? chip(*slot) : bar(*slot) }),
+                   "data-slot": "event-calendar-day-track",
+                   class: [ AXIS_CLASS, GRIDLINES_CLASS, AXIS_HEIGHT_CLASS ],
+                   style: "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem")
+        end
+
+        def bar(event, lane, from, to)
+          tag.span(
+            "", "data-slot": "event-calendar-day-bar",
+            class: [ BAR_CLASS, BAR_PAINT_CLASS ],
+            "data-color": event.color,
+            style: "--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
+            title: [ chip_time(event), event.title ].compact.join(" — ")
+          )
+        end
+
+        # The chip the workload reading already draws, placed by the clock — so
+        # what the two readings differ in is the axis, not what an intervention
+        # looks like.
+        def chip(event, lane, from, _to)
+          tag.span(
+            safe_join([ workload_item_head(event), workload_item_text(event) ]),
+            "data-slot": "event-calendar-day-item", class: CHIP_CLASS,
+            "data-color": event.color,
+            style: "--at:#{at(from)};--lane:#{lane_offset(lane)}",
+            title: [ chip_time(event), event.title ].compact.join(" — ")
+          )
+        end
+
+        def floor_minutes
+          return Schedule::TRACK_FLOOR unless chips?
+
+          (window_minutes * CHIP_SHARE).round
+        end
+
+        def window_minutes = (window.last - window.first) * 60
+
+        def lane_offset(lane) = "calc(#{lane} * var(--lane-h))"
+
+        # Two of them, and the difference is the whole bug that made the first
+        # windowed axis a field of three-pixel ticks: a *position* is measured
+        # from the start of the window and a *length* is not, so subtracting the
+        # window offset from a duration turned every hour-long job negative and
+        # left `min-w` to draw it.
+        def at(minutes) = span(minutes - (window.first * 60))
+
+        def span(minutes) = "#{((minutes / (window_minutes * 1.0)) * 100).round(3)}%"
+
+        def hour_marks
+          step = ((window.last - window.first) / 8.0).ceil
+
+          (window.first...window.last).step(step)
+        end
+
+        def hour_mark(hour)
+          tag.span(format("%02d", hour), class: HOUR_CLASS, style: "--at:#{at(hour * 60)}")
+        end
+      end
+    end
+  end
+end
