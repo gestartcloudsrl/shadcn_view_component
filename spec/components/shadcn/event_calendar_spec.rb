@@ -484,6 +484,37 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # A job that crosses days is one bar per day in this reading, and each one is
+  # clipped to the day it is drawn on — the hours axis has no way to say
+  # "continues tomorrow", so what it says instead is where the work was that
+  # day. The middle days are the whole axis for the same reason an all-day job
+  # is: there is no hour to point at.
+  describe "a multi-day job in the hours reading" do
+    subject(:spans) do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :hours, window: (0..24), shape: :bars,
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 4, 9),
+                    ends_at: Time.zone.local(2026, 8, 6, 17) } ]
+      ))
+      (4..6).map do |day|
+        page.first("[data-slot=event-calendar-day][data-day='2026-08-0#{day}'] " \
+                   "[data-slot=event-calendar-day-bar]")[:style]
+      end
+    end
+
+    it "starts the first day at its clock and runs to midnight" do
+      expect(spans.first).to include("--at:37.5%", "--for:62.5%")
+    end
+
+    it "gives a middle day the whole axis" do
+      expect(spans[1]).to include("--at:0.0%", "--for:100.0%")
+    end
+
+    it "ends the last day at its clock" do
+      expect(spans.last).to include("--at:0.0%", "--for:70.833%")
+    end
+  end
+
   describe "what the controller is handed" do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 

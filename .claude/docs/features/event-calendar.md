@@ -76,27 +76,72 @@ lanes but never re-sorts.
 It renders nothing, so it is asserted on directly — the same reason
 `Calendar::Month` is a plain object.
 
-## Three readings
+## Three readings, three components
 
-`reading:` picks between two of them and the busiest day picks between the rest.
+A month answers three different questions, and they are three questions about
+what a day *is*:
 
-| | |
+| | a day is | the cell | the class |
+|---|---|---|---|
+| events | a **list** of what is on | bars, or marks when it is too dense to name them | `EventCalendar::Component` |
+| workload | a **quantity** of work, and whose | the day's total on a heat ramp, then a chip per operator or per job | `Workload::Component` |
+| hours | a **timeline** | a 24-hour axis, jobs placed by their clock | `Hours::Component` |
+
+They were one 1,592-line class until the measurements said otherwise — see
+[architecture](../decisions/01-architecture.md#when-one-component-grows-a-second-reading)
+for what they were and what the seam is. What matters here: **a host never names
+a subclass.** `EventCalendar::Component.new(reading: :hours)` hands over from
+`.new`, so the API is one component and one argument, and the root is still one
+element. `:auto` remains a synonym for `:events`, because the gem is published.
+
+`Calendar::Month`, `Schedule` and `Event` are not split. `Chips` — what one job
+looks like as a chip, and what a day's total looks like as a badge — is a module
+the workload and hours readings both include, because hours is not a kind of
+workload: it is a third reading that wants the same chip, so what the two differ
+in is the axis, not what an intervention looks like.
+
+### One options panel
+
+The toolbar had a control for the view, one for the grouping and one for the
+shape, and two of them were always about a view you were not in. It has one
+panel: **which view**, then the only question that view has.
+
+| view | its question |
 |---|---|
-| `:auto` | the month as a list of events — bars when they can be named, marks when they cannot |
-| `:workload` | the month as a *measure* — a tinted count per day, and one chip per assignee or per event |
+| Grid | group cells by assignee or by event |
+| Rows | the same |
+| Hours | draw each job as chips or as bars |
 
-The workload reading is the one that answers "how much, of what, by whom"
-rather than "what is on". Its cells are a heat ramp on the count chip and a
-column of chips, its toolbar carries a grouping menu and a *Show all* toggle,
-and below `lg` it lays the month out as one row per day.
+`Grid` and `Rows` are the workload reading at its two arrangements and `Hours`
+is a different reading; that distinction matters to this port and to nobody
+using it, which is why `view_url:` is one callback rather than two. `:grid` is
+`arrangement: :auto`, not a third arrangement — below `lg` it is rows anyway,
+because forcing seven columns onto a phone is what rows were built to avoid.
 
-**It is navigated by URL, not by the browser.** Its cells hold crews and titles
+### What the server-drawn readings do not ship
+
+The workload and hours readings are drawn whole by the server: their cells hold
+crews, clients and clock times that `#portable_events` cannot carry, so the
+controller returns before redrawing. They therefore ship neither the events
+payload nor the prototypes template — 34 KB of a workload page, 15% of it,
+behind a guard that never read it.
+
+Which moves the agenda too. A server-drawn reading renders one only when
+`day_url:` names where a day lives: with one the cells are links and what comes
+back fills it, without one there is nothing that could.
+
+### Navigated by URL, not by the browser
+
+`reading:` picks the reading and, within the events one, the busiest day picks
+between bars and marks.
+
+**The server-drawn readings navigate by URL.** Its cells hold crews and titles
 that `#portable_events` does not ship, so there is nothing in the browser to
 rebuild them from — and shipping them would mean every assignee of every month
 travelling to every page, plus a second copy of the cell in JavaScript, for the
 one reading whose data is exactly what should not travel. `month_url:` turns the
 nav into links; without it the nav announces `month-change` and leaves the DOM
-alone. The other two readings redraw in the browser as before.
+alone. The events reading redraws in the browser as before.
 
 ## Two arrangements, and what picks between them
 

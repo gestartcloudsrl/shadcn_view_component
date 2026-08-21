@@ -305,6 +305,59 @@ the gem works untranslated and a host app can override any key.
 system gem, `bundle config set path`, and a `path:`/`git:` source — and a wrong
 path fails silently, as a completely unstyled app.
 
+## When one component grows a second reading
+
+The event calendar answered three different questions about a month and did it
+from one 1,592-line class. Splitting it was argued from measurements rather than
+from taste, and the measurements are the part worth keeping:
+
+- **79% of a plain calendar's root class could never fire.** 74 of 94 tokens
+  were the workload and hours layouts, on every calendar ever rendered.
+- **15% of a workload page was JavaScript machinery its own controller refuses
+  to read** — an events payload and a prototypes template behind a guard that
+  returns before drawing.
+- **Two toolbar controls did nothing.** The grouping menu and "Show all" were
+  guarded by "is this the workload reading", which the hours reading implied,
+  so hours drew two controls that changed nothing — 141 chips whichever way
+  either was set.
+- **It built two levels of DOM and dissolved both**, and kept `role="grid"` over
+  a geometry it used zero times.
+
+The seam is the **reading**, not the arrangement or the option: three questions
+about what a day *is* — a list of events, a quantity of work, a timeline — and
+each answers it with its own cells, its own layout rules, its own toolbar and
+its own client-side needs.
+
+**What splits is the rendering. What does not is the domain.** `Calendar::Month`,
+`Schedule` and `Event` stay one copy: this gem has already paid for the lane
+packer existing twice, in Ruby and in JavaScript, and a third copy would have
+been the real mistake. Neither does the public API split —
+`EventCalendar::Component.new(reading:)` hands over to a subclass from `.new`,
+so a host names no subclass, nothing extra is rendered, and the root stays one
+element.
+
+A reading declares itself through six hooks and nothing else: `cell_body`,
+`cell_class`, `reading_attributes`, `reading_controls`, `reading_style` and
+`scale`. The toolbar stopped asking what the reading is and started asking the
+reading, which is why a control for a reading that cannot act on it can no
+longer exist.
+
+**The safety net was `snapshot_spec`.** The split is behaviour-preserving at the
+HTML level, so goldens that do not move are the proof — across three commits the
+only lines that moved were root class attributes.
+
+### The trap it kept setting
+
+Three times, a rule one reading had to *undo* was left in the shared frame, and
+each time the loser was decided by CSS source order rather than by intent:
+`h-20` against `h-auto` on a cell, `w-auto` against `w-(--for)` on a chip, and
+the `data-[track]:` prefix that had been silently *winning* those races before
+it was removed as redundant scoping.
+
+The fix is never more specificity. **A rule a reading has to undo does not
+belong to the frame** — give it to whoever wants it, and the conflict has
+nowhere to happen.
+
 ## Performance
 
 **tailwind_merge's LRU defaults to 500**, which a page of these components can
