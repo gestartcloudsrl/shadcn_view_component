@@ -110,12 +110,23 @@ module Shadcn
 
       def overlaps?(range) = start_date <= range.last && end_date >= range.first
 
-      # Longest first, then all-day before timed, then by clock, then by title
-      # so the order is stable across renders. This is what decides which event
-      # gets the top lane, and it is FullCalendar's own ordering: a bar that
-      # crosses the week is more use above than below the one-day events it
-      # would otherwise be interleaved with.
-      def sort_key = [ -duration_days, all_day? ? 0 : 1, starts_at.to_time.to_i, title ]
+      # All-day first, then longest, then by clock, then by title so the order
+      # is stable across renders. This is what decides which event gets the top
+      # lane.
+      #
+      # All-day leads because that is what an all-day event *is*: not a thing
+      # that happens at a moment the grid can point at, but a fact about the
+      # whole day, and a fact belongs above the schedule rather than interleaved
+      # with it. FullCalendar says the same thing with a separate all-day row;
+      # this port has one row of lanes, so it says it with the sort.
+      #
+      # Length used to lead, and it read fine until the two disagreed: a *timed*
+      # event running three days took the top lane over a one-day holiday,
+      # because three beats all-day when duration is compared first. Within
+      # each of the two groups length still leads, for the reason it always
+      # did — a bar that crosses the week is more use above than below the
+      # one-day events it would otherwise be interleaved with.
+      def sort_key = [ all_day? ? 0 : 1, -duration_days, starts_at.to_time.to_i, title ]
 
       # Within one day the length no longer matters — what a person reads down
       # is the clock.

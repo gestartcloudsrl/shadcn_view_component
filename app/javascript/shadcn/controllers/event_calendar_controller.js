@@ -446,8 +446,10 @@ export default class extends Controller {
   }
 
   // `Schedule#pack`. The events arrive in the order the server packed them —
-  // longest first, then all-day, then by the clock — so there is nothing to
-  // sort here, and nothing that can be sorted differently.
+  // all-day first, then longest, then by the clock — so there is nothing to
+  // sort here, and nothing that can be sorted differently. That the order is
+  // the array's own is what makes `Event#sort_key` the single place it is
+  // decided: change it there and this follows without being touched.
   segmentsIn(days) {
     const first = iso(days[0])
     const last = iso(days[6])

@@ -447,6 +447,32 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # month correctly and the *prototype* it hands the controller is wrong, so
   # nothing is visible until somebody presses a button. None of them could fail
   # a golden, because a golden is the HTML the code produces.
+  # The hours reading places a job by its clock, and an all-day one has no
+  # clock to be placed by — so it is the whole day, on top. Both halves are
+  # asserted because both are the feature: `--for` is the width, `--lane` is
+  # the position, and a bar that spans the day but sits at the bottom would
+  # pass an assertion about either one alone.
+  describe "an all-day event in the hours reading" do
+    subject(:bars) do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :hours, window: (0..24), shape: :bars,
+        events: [ { title: "Timed", starts_at: Time.zone.local(2026, 8, 20, 9) },
+                  { title: "Holiday", starts_at: Date.new(2026, 8, 20) } ]
+      ))
+      page.all("[data-slot=event-calendar-day][data-day='2026-08-20'] [data-slot=event-calendar-day-bar]")
+    end
+
+    it "runs the whole width of the day" do
+      expect(bars.first[:style]).to include("--at:0.0%", "--for:100.0%")
+    end
+
+    it "takes the top lane, above what has a clock", :aggregate_failures do
+      expect(bars.first[:style]).to include("--lane:calc(0 *")
+      expect(bars.last[:title]).to start_with("9:00 AM")
+      expect(bars.last[:style]).to include("--lane:calc(1 *")
+    end
+  end
+
   describe "what the controller is handed" do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 
