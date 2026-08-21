@@ -162,6 +162,8 @@ module Shadcn
         # hours month *is* rows. A menu rather than a two-state toggle for the
         # same reason the grouping is one: a third shape is the obvious next
         # question, and a toggle would have to become this anyway.
+        def view = :hours
+
         def reading_controls = [ view_panel ]
 
         def reading_label = shadcn_t("event_calendar.hours.#{shape}")

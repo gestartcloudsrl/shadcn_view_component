@@ -94,18 +94,20 @@ module Shadcn
             "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}&group=#{cut}" \
             "&arrangement=#{laid}"
         end
+        # One callback for the whole panel: two of the views are this preview at
+        # a different arrangement, the third is the other one.
+        view_here = lambda do |name|
+          next here.call(laid: name == :rows ? :rows : :auto) unless name == :hours
+
+          "/lookbook/preview/shadcn/event_calendar/hours_density" \
+            "?most=#{most}&colored=#{cast.cast(colored)}&from=7&to=23"
+        end
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
                          reading: :workload, group: group.to_sym,
                          show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(all:) },
                          group_url: ->(cut) { here.call(cut:) },
-                         arrangement: arrangement.to_sym,
-                         arrangement_url: ->(laid) { here.call(laid:) },
-                         # SPIKE — the way across to `workload_track`.
-                         hours_url: lambda { |_on|
-                           "/lookbook/preview/shadcn/event_calendar/hours_density" \
-                             "?most=#{most}&colored=#{cast.cast(colored)}&from=7&to=23"
-                         },
+                         arrangement: arrangement.to_sym, view_url: view_here,
                          events: Preview.workload_events(per_day: 0..most.to_i,
                                                          colored: cast.cast(colored)))
       end
@@ -130,18 +132,24 @@ module Shadcn
       # @param as select [chips, bars]
       def hours_density(most: 8, colored: true, from: 0, to: 24, as: "chips")
         cast = ActiveModel::Type::Boolean.new
+        # `shape_here` first: a lambda body resolves a name at call time, but
+        # Ruby decides whether it *is* a local when it parses the assignment —
+        # referring to it from a lambda defined above made it a method call.
         shape_here = lambda do |form|
           "/lookbook/preview/shadcn/event_calendar/hours_density" \
             "?most=#{most}&colored=#{cast.cast(colored)}&from=#{from}&to=#{to}&as=#{form}"
+        end
+        view_here = lambda do |name|
+          next shape_here.call(as) if name == :hours
+
+          "/lookbook/preview/shadcn/event_calendar/workload_density" \
+            "?most=#{most}&colored=#{cast.cast(colored)}&arrangement=#{name == :rows ? 'rows' : 'auto'}"
         end
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
                          reading: :hours,
                          window: (from.to_i..to.to_i), shape: as.to_sym, shape_url: shape_here,
-                         hours_url: lambda { |_on|
-                           "/lookbook/preview/shadcn/event_calendar/workload_density" \
-                             "?most=#{most}&colored=#{cast.cast(colored)}&arrangement=rows"
-                         },
+                         view_url: view_here,
                          events: Preview.workload_events(per_day: 0..most.to_i,
                                                          colored: cast.cast(colored),
                                                          durations: true))

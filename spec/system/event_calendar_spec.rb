@@ -243,7 +243,7 @@ RSpec.describe "Event calendar", :js do
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
         .to eq([ "Show the month as", "Group cells by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Rows", "Hours", "By assignee", "By event" ])
+        .to eq([ "Grid", "Rows", "Hours", "By assignee", "By event" ])
     end
 
     it "carries the month across to the hours view" do
@@ -326,21 +326,19 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
-  # The one toolbar control whose effect is a stylesheet rather than a render.
-  # `rows:` in `shadcn.css` carries the breakpoint and the override behind one
-  # name, so what is asserted here is that both halves of it still fire: the
-  # width alone below `lg`, and the attribute alone above it.
-  describe "the arrangement toggle" do
+  # The one option whose effect is a stylesheet rather than a render. `rows:`
+  # in `shadcn.css` carries the breakpoint and the override behind one name, so
+  # what is asserted here is that both halves still fire: the width alone below
+  # `lg`, and the attribute alone above it.
+  #
+  # It was a toggle button until the panel took it; the behaviour did not
+  # change, only who asks for it.
+  describe "the grid and rows views" do
     subject(:week) { find("#{calendar} [data-slot=event-calendar-week]", match: :first, visible: :all) }
 
     def display_of(node) = page.evaluate_script("getComputedStyle(arguments[0]).display", node)
 
     def paint(node) = page.evaluate_script("getComputedStyle(arguments[0]).backgroundColor", node)
-
-    # `visible: :all`, because one example is about it not being visible.
-    def toggle
-      find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Rows", visible: :all)
-    end
 
     before do
       visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=6"
@@ -350,26 +348,26 @@ RSpec.describe "Event calendar", :js do
     after { page.driver.browser.manage.window.resize_to(1400, 1000) }
 
     context "when the window is wide" do
-      it "lays the month out as a grid until it is pressed" do
+      it "lays the month out as a grid until rows is asked for" do
         expect(display_of(week)).to eq("block")
       end
 
       it "lays it out as rows once it is", :aggregate_failures do
-        toggle.click
+        open_panel
+        find("[data-slot=dropdown-menu-radio-item][data-value=rows]").click
 
         expect(page).to have_css("#{calendar}[data-arrangement=rows]")
         expect(display_of(week)).to eq("contents")
-        expect(page).to have_css("#{calendar} [data-slot=button][aria-pressed=true]", text: "Rows")
       end
 
-      # `aria-pressed` is the state; this is the half an eye can see. Asserted
-      # as a colour rather than a class because what matters is that the two
-      # buttons do not look alike — the pressed one borrows the solid `default`
-      # variant, and a rename of that should not fail here.
+      # The half an eye can see. Asserted as a colour rather than a class,
+      # because what matters is that a pressed toggle and an unpressed one do
+      # not look alike — the pressed one borrows the solid `default` variant,
+      # and a rename of that should not fail here.
       it "makes a pressed toggle look different from an unpressed one" do
-        toggle.click
+        find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Show all").click
 
-        pressed = paint(find("#{calendar} [data-slot=button][aria-pressed=true]", text: "Rows"))
+        pressed = paint(find("#{calendar} [data-slot=button][aria-pressed=true]", text: "Show all"))
 
         expect(pressed).not_to eq(paint(find("#{calendar} [data-slot=button]", text: "Today")))
       end
@@ -382,14 +380,10 @@ RSpec.describe "Event calendar", :js do
         wait_for_stimulus
       end
 
-      it "is already rows, with nothing for the toggle to change" do
+      # The breakpoint alone, with nothing asked for: below `lg` the grid view
+      # is rows anyway, because seven columns on a phone is what rows avoid.
+      it "is already rows" do
         expect(display_of(week)).to eq("contents")
-      end
-
-      # The server cannot know which side of the breakpoint it rendered for, so
-      # this is the only place that can hide a control with no work to do.
-      it "hides the toggle" do
-        expect(toggle).not_to be_visible
       end
     end
   end
