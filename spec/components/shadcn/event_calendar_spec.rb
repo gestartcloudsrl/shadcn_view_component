@@ -319,6 +319,69 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # The day view, when the server owns it. A link is the whole of what a host
+  # needs to open a drawer or swap a frame — no listener, no URL built by hand,
+  # and it works before the JavaScript has loaded.
+  describe "#day_url" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1),
+                          day_url: ->(date) { "/day/#{date.iso8601}" },
+                          day_attributes: { data: { turbo_frame: "day" } },
+                          agenda_as: :"turbo-frame", agenda_attributes: { id: "day" })
+    end
+
+    before { render_inline(calendar) }
+
+    it "makes every cell a link to its own day", :aggregate_failures do
+      cell = day("2026-08-20")
+
+      expect(cell.name).to eq("a")
+      expect(cell["href"]).to eq("/day/2026-08-20")
+      expect(cell["data-turbo-frame"]).to eq("day")
+    end
+
+    # A link that also selects in place would race its own navigation.
+    it "leaves the controller's action off the cells" do
+      expect(painted.css(%(*[data-slot="event-calendar-day"][data-action]))).to be_empty
+    end
+
+    it "keeps the grid semantics a button had", :aggregate_failures do
+      cell = day("2026-08-20")
+
+      expect(cell["role"]).to eq("gridcell")
+      expect(cell["tabindex"]).to eq("-1")
+      expect(day("2026-08-12")["aria-selected"]).to eq("true")
+    end
+
+    # `agenda_as:` is how the agenda becomes the thing a day link swaps without
+    # this gem naming Turbo anywhere.
+    it "lets the agenda be the frame", :aggregate_failures do
+      agenda = painted.at_css(%(*[data-slot="event-calendar-agenda"]))
+
+      expect(agenda.name).to eq("turbo-frame")
+      expect(agenda["id"]).to eq("day")
+    end
+
+    # The live region exists because the agenda changes under a pointer that
+    # never left the grid; a frame swap is a navigation and Turbo announces it.
+    it "hands the agenda over to the server", :aggregate_failures do
+      agenda = painted.at_css(%(*[data-slot="event-calendar-agenda"]))
+
+      expect(agenda["aria-live"]).to be_nil
+      expect(painted.css(%([data-shadcn--event-calendar-target*="agenda"]))).to be_empty
+    end
+
+    context "without one" do
+      subject(:calendar) { described_class.new(month: Date.new(2026, 8, 1)) }
+
+      it "keeps the cells buttons the controller drives", :aggregate_failures do
+        expect(day("2026-08-20").name).to eq("button")
+        expect(day("2026-08-20")["data-action"]).to eq("click->shadcn--event-calendar#select")
+        expect(painted.at_css(%(*[data-slot="event-calendar-agenda"]))["aria-live"]).to eq("polite")
+      end
+    end
+  end
+
   describe "#max_events" do
     it "clamps to what the lanes and the cell height can express", :aggregate_failures do
       expect(described_class.new(max_events: 99).max_events).to eq(6)

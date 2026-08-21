@@ -307,6 +307,11 @@ export default class extends Controller {
   }
 
   renderAgenda() {
+    // Server-owned when the cells are links: the component leaves the targets
+    // off, and redrawing an agenda a frame is about to swap would be a race
+    // with the network.
+    if (!this.hasAgendaListTarget) return
+
     const on = this.eventsOn(this.selectedValue)
 
     this.agendaDateTarget.textContent = this.format(parse(this.selectedValue), this.agendaFormatValue)
