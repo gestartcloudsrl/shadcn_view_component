@@ -388,6 +388,35 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The hours reading draws its scale once, above the month, so the only thing
+  # keeping an hour label over the gridline it names is that the two boxes are
+  # the same box. Nothing else in the suite can see that: the scale and the
+  # axis are different elements, both render, and axe has no opinion.
+  #
+  # They were 16px apart, which is a day cell's `px-2` and `gap-2` — the scale
+  # is not inside a cell and had neither.
+  describe "the hour scale" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/hours_density?most=6&from=7&to=23"
+      wait_for_stimulus
+    end
+
+    it "sits over the axis it names, to the pixel", :aggregate_failures do
+      boxes = page.evaluate_script(<<~JS)
+        (() => {
+          const scale = document.querySelector("[data-slot=event-calendar-ruler] > span:last-child")
+          const axis = [...document.querySelectorAll("[data-slot=event-calendar-day-track]")]
+                         .find((t) => t.offsetParent)
+          const [a, b] = [scale.getBoundingClientRect(), axis.getBoundingClientRect()]
+          return { left: Math.round(b.left - a.left), width: Math.round(b.width - a.width) }
+        })()
+      JS
+
+      expect(boxes["left"]).to eq(0)
+      expect(boxes["width"]).to eq(0)
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.

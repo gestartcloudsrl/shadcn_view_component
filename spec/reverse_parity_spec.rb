@@ -275,7 +275,7 @@ RSpec.describe "reverse parity" do
     # per row: it is the same hours on every row and forty-two copies would be
     # forty-two chances to disagree. Its pad is the width of the date column,
     # so tick zero starts where the tracks do.
-    "event-calendar-ruler" => %w[gap-0 pb-1 text-[0.6rem]],
+    "event-calendar-ruler" => %w[pb-1 text-[0.6rem]],
     "event-calendar-ruler-pad" => %w[w-14],
     # The axis itself. The gridlines are a repeating gradient rather than
     # twenty-four elements, because they are decoration and a DOM node each
@@ -313,13 +313,11 @@ RSpec.describe "reverse parity" do
       [&_[data-slot=event-calendar-day-head]]:self-stretch
       [&_[data-slot=event-calendar-day-head]]:justify-start
       [&_[data-slot=event-calendar-day-head]]:pt-1.5
-      [&_[data-slot=event-calendar-day-head]]:border-r
       [&_[data-slot=event-calendar-day-head]]:bg-background
       [&_[data-slot=event-calendar-ruler-pad]]:sticky
       [&_[data-slot=event-calendar-ruler-pad]]:left-0
       [&_[data-slot=event-calendar-ruler-pad]]:z-10
       [&_[data-slot=event-calendar-ruler-pad]]:self-stretch
-      [&_[data-slot=event-calendar-ruler-pad]]:border-r
       [&_[data-slot=event-calendar-ruler-pad]]:bg-background
       [&_[data-color=default]]:[--event-color:var(--muted-foreground)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
       [&_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&_[data-color=blue]]:[--event-ink:var(--color-blue-800)]
