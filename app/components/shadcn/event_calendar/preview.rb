@@ -95,15 +95,53 @@ module Shadcn
                          group_url: ->(cut) { here.call(cut:) },
                          arrangement: arrangement.to_sym,
                          arrangement_url: ->(laid) { here.call(laid:) },
+                         # SPIKE — the way across to `workload_track`.
+                         track_url: lambda { |_on|
+                           "/lookbook/preview/shadcn/event_calendar/workload_track" \
+                             "?most=#{most}&colored=#{cast.cast(colored)}&from=7&to=23"
+                         },
                          events: Preview.workload_events(per_day: 0..most.to_i,
                                                          colored: cast.cast(colored)))
+      end
+
+      # SPIKE — the hour track: a day as a proportional 24-hour axis rather than
+      # a strip of chips, so the same x is the same hour on every row.
+      #
+      # Throwaway. It exists to answer whether that reads at this density, and
+      # `durations: true` is part of the question — the sample events had no
+      # `ends_at` at all, so on a time axis every one of them was an instant and
+      # there was no duration to see.
+      #
+      # `as` is the question this spike is really asking: a bar is as wide as
+      # its duration and says nothing else, a chip says who and for whom and is
+      # as wide as that takes. They cannot both be packed the same way — see
+      # `Schedule#track_on`'s `floor:`.
+      #
+      # @param most number
+      # @param colored toggle
+      # @param from number
+      # @param to number
+      # @param as select [bars, chips]
+      def workload_track(most: 8, colored: true, from: 0, to: 24, as: "bars")
+        cast = ActiveModel::Type::Boolean.new
+
+        render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
+                         reading: :workload, arrangement: :rows, track: true,
+                         track_hours: (from.to_i..to.to_i), track_as: as.to_sym,
+                         track_url: lambda { |_on|
+                           "/lookbook/preview/shadcn/event_calendar/workload_density" \
+                             "?most=#{most}&colored=#{cast.cast(colored)}&arrangement=rows"
+                         },
+                         events: Preview.workload_events(per_day: 0..most.to_i,
+                                                         colored: cast.cast(colored),
+                                                         durations: true))
       end
 
       # A roster of six over a month of work, seeded so the gallery shows
       # the same month twice. Counts run from nothing to past the ramp's
       # ceiling, so both ends of the scale are on the page.
       def self.workload_events(month: Date.new(2026, 8, 1), per_day: 0..30, crew: 1..5,
-                               seed: 7, colored: false)
+                               seed: 7, colored: false, durations: false)
         random = Random.new(seed)
         roster = [ "Ada Lovelace", "Grace Hopper", "Alan Turing",
                    "Katherine Johnson", "Linus Pauling", "Marie Curie" ]
@@ -120,11 +158,14 @@ module Shadcn
 
           Array.new(random.rand(per_day)) do |index|
             client = clients[random.rand(clients.size)]
+            starts_at = Time.zone.local(day.year, day.month, day.day,
+                                        random.rand(7..18), random.rand(0..59))
 
             {
               title: client,
               color: (hues[clients.index(client)] if colored),
-              starts_at: Time.zone.local(day.year, day.month, day.day, random.rand(7..18), random.rand(0..59)),
+              starts_at:,
+              ends_at: (starts_at + random.rand(1..8) * 30.minutes if durations),
               assignees: on_shift.sample(random.rand(crew), random: random)
             }
           end

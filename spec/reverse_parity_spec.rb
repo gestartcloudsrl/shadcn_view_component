@@ -266,8 +266,39 @@ RSpec.describe "reverse parity" do
     # so the button has nothing to change — and the server cannot know which
     # side of the breakpoint it rendered for, so CSS is what hides it.
     "button" => %w[max-lg:hidden],
+    # SPIKE — the hour track. Everything `data-[track]` is the axis reading: a
+    # month as one row per day with the events placed by time of day, drawn as
+    # bars or as chips. Declared on the root like the rest, and inert on every
+    # calendar that is not it.
+    #
+    # These are visible here only because the root's class ends up in a golden.
+    # The track's *own* markup is not — `workload_track` is a method preview, so
+    # nothing generates a fixture for it, and no spec has ever read a chip or a
+    # bar this reading draws. That is the first thing graduating it has to fix.
     "event-calendar" => %w[
       group/event-calendar
+      data-[track]:[--event-calendar-hour:0px]
+      max-lg:data-[track]:[--event-calendar-hour:22vw]
+      data-[track]:[&_[data-slot=event-calendar-grid]]:overflow-x-auto
+      data-[track]:[&_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track)
+      data-[track]:[&_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track)
+      data-[track]:[&_[data-slot=event-calendar-day]]:h-auto
+      data-[track]:[&_[data-slot=event-calendar-day]]:min-h-14
+      data-[track]:[&_[data-slot=event-calendar-day]]:items-start
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:sticky
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:left-0
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:z-10
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:self-stretch
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:justify-start
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:pt-1.5
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:border-r
+      data-[track]:[&_[data-slot=event-calendar-day-head]]:bg-background
+      data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:sticky
+      data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:left-0
+      data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:z-10
+      data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:self-stretch
+      data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:border-r
+      data-[track]:[&_[data-slot=event-calendar-ruler-pad]]:bg-background
       [&_[data-color=default]]:[--event-color:var(--muted-foreground)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
       [&_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&_[data-color=blue]]:[--event-ink:var(--color-blue-800)]
       dark:[&_[data-color=blue]]:[--event-ink:var(--color-blue-300)]
