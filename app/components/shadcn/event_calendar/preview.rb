@@ -51,6 +51,12 @@ module Shadcn
         render_with_template
       end
 
+      # A day as a timeline: every job at the hour it starts, lanes where they
+      # overlap. Windowed to working hours — see the template for why.
+      def hours
+        render_with_template
+      end
+
       # A host owning the day view: the cells are links, the agenda is the frame
       # they swap, and what comes back carries what the calendar could not. The
       # model, the route and the frame live in `test/dummy` — a preview can
@@ -97,7 +103,7 @@ module Shadcn
                          arrangement_url: ->(laid) { here.call(laid:) },
                          # SPIKE — the way across to `workload_track`.
                          track_url: lambda { |_on|
-                           "/lookbook/preview/shadcn/event_calendar/workload_track" \
+                           "/lookbook/preview/shadcn/event_calendar/hours_density" \
                              "?most=#{most}&colored=#{cast.cast(colored)}&from=7&to=23"
                          },
                          events: Preview.workload_events(per_day: 0..most.to_i,
@@ -122,11 +128,11 @@ module Shadcn
       # @param from number
       # @param to number
       # @param as select [bars, chips]
-      def workload_track(most: 8, colored: true, from: 0, to: 24, as: "bars")
+      def hours_density(most: 8, colored: true, from: 0, to: 24, as: "bars")
         cast = ActiveModel::Type::Boolean.new
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
-                         reading: :workload, arrangement: :rows, track: true,
+                         reading: :hours,
                          track_hours: (from.to_i..to.to_i), track_as: as.to_sym,
                          track_url: lambda { |_on|
                            "/lookbook/preview/shadcn/event_calendar/workload_density" \

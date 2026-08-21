@@ -266,6 +266,32 @@ RSpec.describe "reverse parity" do
     # so the button has nothing to change — and the server cannot know which
     # side of the breakpoint it rendered for, so CSS is what hides it.
     "button" => %w[max-lg:hidden],
+    # The hours reading's own parts. None of these had ever been read by a
+    # spec: the reading had only a method preview, so no fixture existed and
+    # this file — which globs the fixtures — could not see them. Adding
+    # `previews/hours.html.erb` is what surfaced them.
+    #
+    # The ruler is the hour scale, drawn once above the month rather than once
+    # per row: it is the same hours on every row and forty-two copies would be
+    # forty-two chances to disagree. Its pad is the width of the date column,
+    # so tick zero starts where the tracks do.
+    "event-calendar-ruler" => %w[gap-0 pb-1 text-[0.6rem]],
+    "event-calendar-ruler-pad" => %w[w-14],
+    # The axis itself. The gridlines are a repeating gradient rather than
+    # twenty-four elements, because they are decoration and a DOM node each
+    # would be a thousand of them in a month. Its height is its lanes: a day
+    # is as tall as the deepest stack of overlapping jobs it has.
+    "event-calendar-day-track" => %w[
+      bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_12.5%)]
+      h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]
+    ],
+    # A bar is placed and sized by the clock: `--at` is its start as a share of
+    # the window, `--for` its duration, `--lane` which row of the stack it got.
+    # `min-w-[3px]` is the floor at which a job is still a mark rather than
+    # nothing — a fifteen-minute call on a sixteen-hour axis is under a pixel.
+    "event-calendar-day-bar" => %w[
+      bg-[var(--event-color)]/70 left-(--at) min-w-[3px] top-(--lane) w-(--for)
+    ],
     # SPIKE — the hour track. Everything `data-[track]` is the axis reading: a
     # month as one row per day with the events placed by time of day, drawn as
     # bars or as chips. Declared on the root like the rest, and inert on every

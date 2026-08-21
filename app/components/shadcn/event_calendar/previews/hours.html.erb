@@ -1,0 +1,22 @@
+<%# The hours reading: a day as a *timeline* rather than a list or a measure.
+    Every job placed at the hour it starts, so the same x is the same hour on
+    every row, and packed into lanes where they overlap.
+
+    A template rather than a method, for the reason `workload.html.erb` gives
+    in its own comment — and this one is the same lesson learned twice. The
+    reading spent its whole life as a method preview, so nothing generated a
+    fixture for it and no spec had ever read a bar or a chip it draws: it was
+    passing `reverse_parity` by being invisible to it, not by being clean.
+
+    Windowed to working hours on purpose. On a 00–24 axis the bars of a month
+    of field work ran from 29.2% to 95.6%, so nearly a third of the width drew
+    nothing — which is why the window is an argument. `hours_density` is where
+    the knobs and the hundreds live. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      reading: :hours,
+      track_hours: (7..19),
+      events: Shadcn::EventCalendar::Preview.workload_events(per_day: 0..3, crew: 1..3,
+                                                             colored: true, durations: true)
+    )) %>

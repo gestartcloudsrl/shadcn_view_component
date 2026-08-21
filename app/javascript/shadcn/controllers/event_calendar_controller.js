@@ -201,7 +201,7 @@ export default class extends Controller {
     // here to rebuild them from. Redrawing anyway is what filled September with
     // August's people. Until the payload carries them, `month-change` is the
     // whole of its navigation — see `goTo`.
-    if (this.readingValue === "workload") return
+    if (this.readingValue === "workload" || this.readingValue === "hours") return
 
     const first = this.month
     const weeks = this.weeksOf(first)
