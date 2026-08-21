@@ -113,9 +113,18 @@ module Shadcn
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
       WORKLOAD_GROUPINGS = %i[assignees events].freeze
-      # How many chips a cell shows before it says "+N". Every chip is rendered
-      # either way — "Show all" is a `data-capped` on the root and a CSS rule,
-      # not a re-render, for the same reason the grouping switch is.
+      # How many chips a cell shows before it says "+N", and how many it
+      # *renders*. Those used to be different numbers: every chip was rendered
+      # and CSS hid the fourth onwards, so "Show all" could be a class toggle.
+      # Measured on a month of 447 events that cost 1157 KB of HTML and 131 ms
+      # of render for ninety-three visible chips — 1136 avatar components, of
+      # which eight hundred were never seen. Capping the render is 451 KB and
+      # 74 ms.
+      #
+      # So "Show all" is state now, like `group:` and `month:`: `show_all:`
+      # comes in, and the toggle is a link when the caller can name the URL of
+      # the other state. That is the same bargain the nav makes, and this
+      # reading is server-drawn anyway.
       WORKLOAD_CAP = 3
 
       # ---- rows-are-days --------------------------------------------------
@@ -232,23 +241,13 @@ module Shadcn
       # than an inline row of faces because the tally has to line up down the
       # column — that is what makes two days comparable at a glance, and a
       # wrapped row of avatar-and-number pairs never lines up with anything.
-      # The cap is a rule about the fourth chip onwards, scoped by slot so it
-      # cannot also catch the "+N" chip sitting last in the column.
-      #
-      # On one line each, however long: Tailwind scans this file as text, and a
-      # token split across a `\` continuation is two halves that match nothing.
-      # These two were written split and the cap silently did nothing — the
-      # cells rendered every chip and the "+22" sat under all twenty-two of
-      # them. Nothing in the suite saw it; a browser example counting visible
-      # chips did.
-      OPERATORS_CAP_CLASS = "group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-assignee]:nth-child(n+4)]:hidden"
-      INTERVENTIONS_CAP_CLASS = "group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-item]:nth-child(n+4)]:hidden"
+      # No `nth-child` cap here any more — the server renders what a cell shows.
+      # The two `hidden` rules stay: both groupings are still rendered, and the
+      # menu picks between them without a round trip.
       WORKLOAD_ASSIGNEES_CLASS = "flex w-full flex-col gap-0.5 " \
-                                 "group-data-[group=events]/event-calendar:hidden " +
-                                 OPERATORS_CAP_CLASS
+                                 "group-data-[group=events]/event-calendar:hidden"
       WORKLOAD_ITEMS_CLASS = "flex w-full flex-col gap-0.5 " \
-                                     "group-data-[group=assignees]/event-calendar:hidden " +
-                                     INTERVENTIONS_CAP_CLASS
+                             "group-data-[group=assignees]/event-calendar:hidden"
       # Shrinkable, not fixed: with the title hidden below `sm` there is
       # no flexible element left in the chip, and a `shrink-0` clock pushes the
       # crew size out of a 46px cell entirely. The clock truncating is a worse
@@ -323,10 +322,8 @@ module Shadcn
       # the cell stopped being tinted, and muted-on-muted is 4.34:1 — the same
       # pair the avatar fallback was already excluded for — sixteen hundredths
       # under, there.
-      WORKLOAD_REST_CLASS = "hidden justify-center text-[0.65rem] font-medium " \
-                            "group-data-[capped]/event-calendar:flex"
-      WORKLOAD_SHOW_ALL_CLASS = "flex items-center gap-1.5"
-      WORKLOAD_SHOW_ALL_LABEL_CLASS = "text-xs font-medium text-muted-foreground"
+      # Rendered only when there is a remainder, which `show_all:` removes.
+      WORKLOAD_REST_CLASS = "justify-center text-[0.65rem] font-medium"
 
       # Above a dozen on the busiest day, a cell stops naming its events at any
       # width and shows the strip instead — the rule being that **a cell either
@@ -460,7 +457,8 @@ module Shadcn
       end
 
       attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
-                  :day_url, :day_attributes, :agenda_as, :agenda_attributes
+                  :day_url, :day_attributes, :agenda_as, :agenda_attributes,
+                  :show_all, :show_all_url
 
       # @param month [Date, nil] which month is shown; defaults to today's
       # @param selected [Date, nil] the day the agenda reads out; defaults to
@@ -475,6 +473,10 @@ module Shadcn
       #   a button and the controller redraws the agenda in place.
       # @param day_attributes [Hash] merged onto every day cell — where a
       #   `data: { turbo_frame: … }` goes
+      # @param show_all [Boolean] render every chip in a cell rather than the
+      #   first `WORKLOAD_CAP` and a "+N"
+      # @param show_all_url [#call, nil] given the desired `show_all`, the URL
+      #   of that state. Present, the toggle is a link; absent, it dispatches.
       # @param agenda [Boolean] whether to render the built-in day view. `false`
       #   when the host has somewhere better to put it — a Sheet, a panel — and
       #   the day link is what fills it. It is not a leftover: it is what the
@@ -496,7 +498,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto, group: :assignees,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     **attributes)
+                     show_all: false, show_all_url: nil, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -507,6 +509,8 @@ module Shadcn
         @month_url = month_url
         @day_url = day_url
         @day_attributes = day_attributes
+        @show_all = show_all
+        @show_all_url = show_all_url
         @agenda = agenda
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
@@ -529,7 +533,6 @@ module Shadcn
           # cell is made of.
           "data-labelled" => ("true" if labelled?),
           "data-group" => (group if workload?),
-          "data-capped" => ("true" if workload?),
           "data-rows" => ("true" if workload?),
           "data-shadcn--event-calendar-month-value" => month.first.iso8601,
           # The application's today, not the browser's — the same reason the
@@ -632,7 +635,7 @@ module Shadcn
         tag.div(
           safe_join([
             (grouping_menu if workload?),
-            (show_all_switch if workload?),
+            (show_all_toggle if workload?),
             nav_button(Date.current, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
             end,
@@ -659,26 +662,23 @@ module Shadcn
         end
       end
 
-      # `role="switch"` is one of the roles that cannot take its name from its
-      # content, so the visible label is pointed at rather than wrapped around
-      # it — see the FormBuilder note in CLAUDE.md. A `<label for>` would also
-      # have flipped the switch without firing this controller's action.
-      def show_all_switch
-        tag.span(
-          safe_join([
-            render(Switch::Component.new(
-              size: :sm,
-              "aria-labelledby": show_all_id,
-              "data-action": "click->shadcn--event-calendar#showAll"
-            )),
-            tag.span(shadcn_t("event_calendar.group.show_all"),
-                     id: show_all_id, class: WORKLOAD_SHOW_ALL_LABEL_CLASS)
-          ]),
-          "data-slot": "event-calendar-show-all", class: WORKLOAD_SHOW_ALL_CLASS
-        )
+      # A toggle, and a link when the caller can name the URL of the other
+      # state — the shape `#nav_button` has for the months, and for the same
+      # reason: what it changes is what the *server* renders, now that the cap
+      # is applied there rather than by a class.
+      #
+      # It was a `Switch` while it was a class toggle. A switch hardcodes its
+      # own `type="button"` and its own controller, so it cannot become a link
+      # without fighting both, and a control whose job is to change server state
+      # should be the thing that can.
+      def show_all_toggle
+        nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#showAll",
+                   href: show_all_url&.call(!show_all),
+                   pressed: show_all) do
+          shadcn_t("event_calendar.group.show_all")
+        end
       end
 
-      def show_all_id = @show_all_id ||= "shadcn-event-calendar-all-#{SecureRandom.hex(4)}"
 
       def grouping_items
         safe_join([
@@ -719,13 +719,14 @@ module Shadcn
       # keeping a second copy of this file in JavaScript — for a reading whose
       # data is exactly what should *not* travel. A URL is the smaller and the
       # more Rails answer, and it serves the other readings too.
-      def nav_button(target, size:, action:, label: nil, &block)
-        href = month_url&.call(target)
+      def nav_button(target, size:, action:, label: nil, href: :month, pressed: nil, &block)
+        href = month_url&.call(target) if href == :month
 
         render(Button::Component.new(
           variant: :outline, size:,
           **(href ? { as: :a, href: } : { "data-action": action }),
-          "aria-label": label
+          "aria-label": label,
+          "aria-pressed": (pressed.to_s unless pressed.nil?)
         ).with_content(capture(&block)))
       end
 
@@ -877,8 +878,10 @@ module Shadcn
       def workload_assignees(tallies)
         return if tallies.empty?
 
+        shown = show_all ? tallies : tallies.first(WORKLOAD_CAP)
+
         tag.span(
-          safe_join(tallies.map { |assignee, count| workload_assignee(assignee, count) } +
+          safe_join(shown.map { |assignee, count| workload_assignee(assignee, count) } +
                     [ workload_rest(tallies.size) ].compact),
           "data-slot": "event-calendar-day-assignees", class: WORKLOAD_ASSIGNEES_CLASS
         )
@@ -904,8 +907,10 @@ module Shadcn
       def workload_items(items)
         return if items.empty?
 
+        shown = show_all ? items : items.first(WORKLOAD_CAP)
+
         tag.span(
-          safe_join(items.map { |item| workload_item(item) } +
+          safe_join(shown.map { |item| workload_item(item) } +
                     [ workload_rest(items.size) ].compact),
           "data-slot": "event-calendar-day-items", class: WORKLOAD_ITEMS_CLASS
         )
@@ -963,7 +968,7 @@ module Shadcn
       end
 
       def workload_rest(total)
-        hidden = total - WORKLOAD_CAP
+        hidden = show_all ? 0 : total - WORKLOAD_CAP
         return if hidden <= 0
 
         tag.span("+#{hidden}", "data-slot": "event-calendar-day-rest",

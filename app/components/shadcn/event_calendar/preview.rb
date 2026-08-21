@@ -66,13 +66,22 @@ module Shadcn
       # A method rather than a template, so a month of eight hundred events does
       # not become a golden. The shape it exercises is the shipped one above.
       #
+      # `show_all` is server state now, not a class toggle: a cell renders what
+      # it shows. The toggle in the toolbar is a link back to this preview in
+      # the other state, which is what a host would wire it to.
+      #
       # @param most number
       # @param colored toggle
-      def workload_density(most: 30, colored: false)
+      # @param show_all toggle
+      def workload_density(most: 30, colored: false, show_all: false)
+        cast = ActiveModel::Type::Boolean.new
+        here = ->(all) { "/lookbook/preview/shadcn/event_calendar/workload_density" \
+                         "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}" }
+
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
-                         reading: :workload,
+                         reading: :workload, show_all: cast.cast(show_all), show_all_url: here,
                          events: Preview.workload_events(per_day: 0..most.to_i,
-                                                         colored: ActiveModel::Type::Boolean.new.cast(colored)))
+                                                         colored: cast.cast(colored)))
       end
 
       # A roster of six over a month of work, seeded so the gallery shows

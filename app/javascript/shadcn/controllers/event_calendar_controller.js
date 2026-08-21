@@ -122,13 +122,13 @@ export default class extends Controller {
     this.dispatch("regroup", { detail: { group: chosen } })
   }
 
-  // Every chip is already rendered; the cap is a rule about the fourth
-  // onwards. So this toggles the root's own attribute rather than reading the
-  // switch's state — the two flip on the same click and cannot get out of step,
-  // and nothing has to know which of the two actions Stimulus runs first.
-  showAll() {
-    this.mark(this.element, "capped", this.element.dataset.capped !== "true")
-    this.dispatch("show-all", { detail: { capped: this.element.dataset.capped === "true" } })
+  // The cap is the server's now, so there is nothing here to toggle: what a
+  // cell renders is what it shows. This announces the ask, and a host that
+  // gave `show_all_url:` never gets here — the toggle is a link.
+  showAll(event) {
+    const pressed = event.currentTarget.getAttribute("aria-pressed") === "true"
+
+    this.dispatch("show-all", { detail: { showAll: !pressed } })
   }
 
   select(event) {

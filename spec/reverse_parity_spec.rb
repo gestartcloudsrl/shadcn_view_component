@@ -408,21 +408,13 @@ RSpec.describe "reverse parity" do
     # The cap is a rule about the fourth chip onwards, scoped by slot so it
     # cannot also catch the "+N" chip sitting last in the column — and the two
     # groupings hide each other, because both are rendered and the menu picks.
-    "event-calendar-day-assignees" => %w[
-      group-data-[group=events]/event-calendar:hidden
-      group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-assignee]:nth-child(n+4)]:hidden
-    ],
-    "event-calendar-day-items" => %w[
-      group-data-[group=assignees]/event-calendar:hidden
-      group-data-[capped]/event-calendar:[&>[data-slot=event-calendar-day-item]:nth-child(n+4)]:hidden
-    ],
     # The event calendar shrinks an avatar a step below upstream's smallest for
     # the crew stack on a workload chip, where five faces share the width of a
     # clock. `size-3.5` is in the corpus; the desktop step up is not.
     "avatar" => %w[lg:size-4],
-    "event-calendar-day-rest" => %w[
-      border-border/40 text-[0.65rem] group-data-[capped]/event-calendar:flex
-    ]
+    "event-calendar-day-assignees" => %w[group-data-[group=events]/event-calendar:hidden],
+    "event-calendar-day-items" => %w[group-data-[group=assignees]/event-calendar:hidden],
+    "event-calendar-day-rest" => %w[border-border/40 text-[0.65rem]]
   }.freeze
 
   it "renders no class that has disappeared from every vendored source", :aggregate_failures do

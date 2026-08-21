@@ -76,7 +76,7 @@ It renders nothing, so it is asserted on directly — the same reason
 
 The workload reading is the one that answers "how much, of what, by whom"
 rather than "what is on". Its cells are a heat ramp on the count chip and a
-column of chips, its toolbar carries a grouping menu and a *Show all* switch,
+column of chips, its toolbar carries a grouping menu and a *Show all* toggle,
 and below `lg` it lays the month out as one row per day.
 
 **It is navigated by URL, not by the browser.** Its cells hold crews and titles
@@ -197,6 +197,31 @@ on cream without complaint. Here a colour name resolves to a *pair* that axe has
 already checked, which is what a fixed palette buys in exchange for not
 accepting a hex.
 
+## What a cell costs
+
+A month of 447 events used to be **1157 KB of HTML and 131 ms of render** for
+ninety-three visible chips. Two decisions compounded, and both were made when
+they were cheap:
+
+**Every chip was rendered and CSS hid the fourth onwards**, so *Show all* could
+be a class toggle with no round trip. Eight hundred of the eleven hundred avatar
+components on the page were never seen. `show_all:` is state now — the server
+renders what a cell shows, and the toggle is a link to the other state when the
+caller names its URL. Three of the file's gnarliest class strings went with it.
+
+**Every avatar carried `data-controller="shadcn--avatar"`.** The controller's
+whole job is swapping the image for the fallback once it has loaded or failed,
+and `connect()` returns immediately when there is no image — so eleven hundred
+Stimulus instances were doing nothing. `Avatar::Component` attaches it only when
+it has an image now, which is a gem-wide saving.
+
+Measured after: **460 KB, 70 ms, 305 avatars, no Stimulus instances.**
+
+What is still paid twice is the grouping: both cuts of a cell are rendered and
+the menu hides one, which is what makes switching free. At this density that is
+the next thing to look at, and it is the same trade `show_all:` just stopped
+making.
+
 ## The keyboard
 
 `role="grid"` on the weeks, `role="row"` on each, `role="gridcell"` and
@@ -310,7 +335,7 @@ either: a calendar handed an array works with no server round trip.
 Named rather than left to be discovered:
 
 - **a view switcher, and the week and day views behind it.** The toolbar has a
-  grouping menu and a Show all switch but no Month / Week / Day tabs. The day
+  grouping menu and a Show all toggle but no Month / Week / Day tabs. The day
   view is the one already half-built: the agenda *is* it, which is why `agenda:`
   turns it off rather than deleting it — a host that puts the day somewhere else
   today is not choosing against the tab tomorrow. Week needs a time axis, which
