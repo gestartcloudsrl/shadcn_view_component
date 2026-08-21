@@ -153,6 +153,48 @@ What is *not* solved is that a dense month still ships every event to the
 browser so the controller can redraw it. At this density a host should feed
 months on demand instead, and `month-change` is the hook for it.
 
+### Rows, and the button that asks for them
+
+The workload reading is one row per day below `lg` and the seven-column month
+above it. The rows are the better view of a busy month at any width — a row has
+space for a clock, a crew and a client where a 46px cell has room for none of
+them — so the toolbar can ask for them on a desktop too. `arrangement:` is
+`:auto` (the breakpoint decides) or `:rows` (it does not). There is no `:grid`:
+forcing seven columns onto a phone is the thing the rows were built to avoid.
+
+The fifty-two rules that make up the arrangement had been written as
+`max-lg:data-[rows]:`, which is a media query and therefore not something a
+button can reach. Writing each one twice — once for the breakpoint, once for the
+override — would have been fifty-two more tokens to keep in step, and this file
+has already lost three rules to a class list edited in one place and not the
+other. So `shadcn.css` declares a variant instead, beside the `dark` one it
+already ships:
+
+```css
+@custom-variant rows {
+  @media (width < 64rem) { &:where([data-rows]) { @slot } }
+  &:where([data-rows][data-arrangement="rows"]) { @slot }
+}
+```
+
+One token, two rules, and the unconditional one second so that above `lg` the
+override wins — `:where()` holds both at zero specificity, which is what leaves
+source order in charge. A host gets it for free: the installer writes an
+`@import` of `shadcn.css` into their Tailwind entrypoint, which is the same road
+`dark` travels.
+
+The toggle itself is a link when `arrangement_url:` names the other state, and a
+`data-action` otherwise — the shape `show_all` and the grouping menu both have.
+Unlike those two it *could* have been client-side only, because it changes no
+markup: `arrange` flips the attribute and the stylesheet does the rest, with no
+round trip. It is offered as a URL anyway because the workload month is drawn by
+the server, so a flip made in the browser is gone the next time the month is.
+
+The button is hidden below `lg` with `max-lg:hidden` rather than by a condition
+in Ruby. There the rows are already what is drawn, so it has nothing to change —
+and the server cannot know which side of the breakpoint it rendered for, so CSS
+is the only place that can decide.
+
 ## Where it diverges from FullCalendar
 
 **`ends_at` is inclusive.** FullCalendar's `end` is exclusive, which is right for
@@ -245,10 +287,11 @@ One tab stop for the month; the arrows move within it, `Home`/`End` reach the
 ends of a week, and `PageUp`/`PageDown` cross a month — a step off the grid's own
 edge navigates, and the tab stop travels with the selection.
 
-The roles describe the seven-column month. Below `lg` the workload reading lays
-the same DOM out as one row per day, so what a screen reader reports and what an
-eye sees disagree there. That is the price of one tree serving two arrangements,
-and it is the trade the Sidebar documents for the same reason.
+The roles describe the seven-column month. When the workload reading lays the
+same DOM out as one row per day, what a screen reader reports and what an eye
+sees disagree there. That is the price of one tree serving two arrangements, and
+it is the trade the Sidebar documents for the same reason. The toolbar's Rows
+toggle widens that gap deliberately rather than introducing it.
 
 ## The controller, and the two rules it is written to
 

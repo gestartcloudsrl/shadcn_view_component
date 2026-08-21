@@ -70,21 +70,31 @@ module Shadcn
       # it shows. The toggle in the toolbar is a link back to this preview in
       # the other state, which is what a host would wire it to.
       #
+      # `arrangement` is the toolbar's Rows toggle, and it is a URL here for
+      # the same reason the other two are: press › and the server draws the
+      # next month, which would not otherwise know what you had chosen. Widen
+      # the window past `lg` to see it do anything.
+      #
       # @param most number
       # @param colored toggle
       # @param show_all toggle
       # @param group select [assignees, events]
-      def workload_density(most: 30, colored: false, show_all: false, group: "assignees")
+      # @param arrangement select [auto, rows]
+      def workload_density(most: 30, colored: false, show_all: false, group: "assignees",
+                           arrangement: "auto")
         cast = ActiveModel::Type::Boolean.new
-        here = lambda do |all: cast.cast(show_all), cut: group|
+        here = lambda do |all: cast.cast(show_all), cut: group, laid: arrangement|
           "/lookbook/preview/shadcn/event_calendar/workload_density" \
-            "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}&group=#{cut}"
+            "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}&group=#{cut}" \
+            "&arrangement=#{laid}"
         end
 
         render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
                          reading: :workload, group: group.to_sym,
                          show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(all:) },
                          group_url: ->(cut) { here.call(cut:) },
+                         arrangement: arrangement.to_sym,
+                         arrangement_url: ->(laid) { here.call(laid:) },
                          events: Preview.workload_events(per_day: 0..most.to_i,
                                                          colored: cast.cast(colored)))
       end
