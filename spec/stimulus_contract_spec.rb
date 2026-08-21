@@ -37,7 +37,10 @@ RSpec.describe "Ruby ↔ Stimulus contract" do
     identifier && [ identifier, attribute.delete_prefix("#{identifier}-") ]
   end
 
-  used_controllers = scan.call(/"data-controller"\s*=>\s*"(shadcn--[a-z-]+)"/).map(&:last).uniq
+  # The optional-paren form too: a component that attaches its controller only
+  # when it has something to do writes `=> ("shadcn--x" if …)`, and a scan that
+  # reads only the bare string would drop that family without saying so.
+  used_controllers = scan.call(/"data-controller"\s*=>\s*\(?"(shadcn--[a-z-]+)"/).map(&:last).uniq
   actions = scan.call(/(shadcn--[a-z-]+)#([a-zA-Z]+)/)
 
   # Both spellings. A component that builds its own markup writes
