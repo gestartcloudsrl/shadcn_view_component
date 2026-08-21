@@ -47,12 +47,15 @@ module Shadcn
       # There is no grid arrangement of this reading any more — a month of crews
       # and job counts is a list of days that happens to be a month.
       #
+      # @hidden
       def workload
         render_with_template
       end
 
       # A day as a timeline: every job at the hour it starts, lanes where they
       # overlap. Windowed to working hours — see the template for why.
+      #
+      # @hidden
       def hours
         render_with_template
       end
@@ -65,94 +68,47 @@ module Shadcn
         render_with_template
       end
 
-      # The same reading with the knobs on. `colored` gives each event's subject
-      # its own hue, which is what makes the chips worth colouring at all — a
-      # colour that means nothing is noise.
+      # The playground for the three server-drawn views, and one preview for all
+      # of them because the options panel already walks between them: `view_url`
+      # points back here, so picking Grid, Rows or Hours is a link to this same
+      # page in another state. It was two previews while the toolbar had a
+      # control per view.
       #
       # A method rather than a template, so a month of eight hundred events does
-      # not become a golden. The shape it exercises is the shipped one above.
+      # not become a golden. The fixtures are `workload` and `hours`, which are
+      # `@hidden`: they exist to be diffed and audited, not browsed.
       #
-      # `show_all` is server state now, not a class toggle: a cell renders what
-      # it shows. The toggle in the toolbar is a link back to this preview in
-      # the other state, which is what a host would wire it to.
-      #
-      # `arrangement` is the toolbar's Rows toggle, and it is a URL here for
-      # the same reason the other two are: press › and the server draws the
-      # next month, which would not otherwise know what you had chosen. Widen
-      # the window past `lg` to see it do anything.
-      #
+      # @param view select [grid, rows, hours]
       # @param most number
       # @param colored toggle
       # @param show_all toggle
       # @param group select [events, assignees]
-      # @param arrangement select [auto, rows]
-      def workload_density(most: 30, colored: false, show_all: false, group: "events",
-                           arrangement: "auto")
-        cast = ActiveModel::Type::Boolean.new
-        here = lambda do |all: cast.cast(show_all), cut: group, laid: arrangement|
-          "/lookbook/preview/shadcn/event_calendar/workload_density" \
-            "?most=#{most}&colored=#{cast.cast(colored)}&show_all=#{all}&group=#{cut}" \
-            "&arrangement=#{laid}"
-        end
-        # One callback for the whole panel: two of the views are this preview at
-        # a different arrangement, the third is the other one.
-        view_here = lambda do |name|
-          next here.call(laid: name == :rows ? :rows : :auto) unless name == :hours
-
-          "/lookbook/preview/shadcn/event_calendar/hours_density" \
-            "?most=#{most}&colored=#{cast.cast(colored)}&from=7&to=23"
-        end
-
-        render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
-                         reading: :workload, group: group.to_sym,
-                         show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(all:) },
-                         group_url: ->(cut) { here.call(cut:) },
-                         arrangement: arrangement.to_sym, view_url: view_here,
-                         events: Preview.workload_events(per_day: 0..most.to_i,
-                                                         colored: cast.cast(colored)))
-      end
-
-      # SPIKE — the hour track: a day as a proportional 24-hour axis rather than
-      # a strip of chips, so the same x is the same hour on every row.
-      #
-      # Throwaway. It exists to answer whether that reads at this density, and
-      # `durations: true` is part of the question — the sample events had no
-      # `ends_at` at all, so on a time axis every one of them was an instant and
-      # there was no duration to see.
-      #
-      # `as` is the question this spike is really asking: a bar is as wide as
-      # its duration and says nothing else, a chip says who and for whom and is
-      # as wide as that takes. They cannot both be packed the same way — see
-      # `Schedule#track_on`'s `floor:`.
-      #
-      # @param most number
-      # @param colored toggle
+      # @param shape select [chips, bars]
       # @param from number
       # @param to number
-      # @param as select [chips, bars]
-      def hours_density(most: 8, colored: true, from: 0, to: 24, as: "chips")
+      def density(view: "grid", most: 30, colored: false, show_all: false,
+                  group: "events", shape: "chips", from: 7, to: 23)
         cast = ActiveModel::Type::Boolean.new
-        # `shape_here` first: a lambda body resolves a name at call time, but
-        # Ruby decides whether it *is* a local when it parses the assignment —
-        # referring to it from a lambda defined above made it a method call.
-        shape_here = lambda do |form|
-          "/lookbook/preview/shadcn/event_calendar/hours_density" \
-            "?most=#{most}&colored=#{cast.cast(colored)}&from=#{from}&to=#{to}&as=#{form}"
-        end
-        view_here = lambda do |name|
-          next shape_here.call(as) if name == :hours
+        here = lambda do |**changed|
+          state = { view:, most:, colored: cast.cast(colored), show_all: cast.cast(show_all),
+                    group:, shape:, from:, to: }.merge(changed)
 
-          "/lookbook/preview/shadcn/event_calendar/workload_density" \
-            "?most=#{most}&colored=#{cast.cast(colored)}&arrangement=#{name == :rows ? 'rows' : 'auto'}"
+          "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
+        events = Preview.workload_events(per_day: 0..most.to_i, colored: cast.cast(colored),
+                                         durations: view.to_s == "hours")
+        common = { month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), events:,
+                   view_url: ->(name) { here.call(view: name) } }
 
-        render_component(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
-                         reading: :hours,
-                         window: (from.to_i..to.to_i), shape: as.to_sym, shape_url: shape_here,
-                         view_url: view_here,
-                         events: Preview.workload_events(per_day: 0..most.to_i,
-                                                         colored: cast.cast(colored),
-                                                         durations: true))
+        if view.to_s == "hours"
+          render_component(**common, reading: :hours, window: (from.to_i..to.to_i),
+                           shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })
+        else
+          render_component(**common, reading: :workload, group: group.to_sym,
+                           arrangement: view.to_s == "rows" ? :rows : :auto,
+                           show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
+                           group_url: ->(cut) { here.call(group: cut) })
+        end
       end
 
       # A roster of six over a month of work, seeded so the gallery shows

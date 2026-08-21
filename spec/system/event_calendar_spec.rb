@@ -217,7 +217,7 @@ RSpec.describe "Event calendar", :js do
   # is showing now, and the panel is links to the other state.
   describe "the options panel, as links" do
     before do
-      visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=8&colored=true"
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=8&colored=true"
       wait_for_stimulus
     end
 
@@ -341,7 +341,7 @@ RSpec.describe "Event calendar", :js do
     def paint(node) = page.evaluate_script("getComputedStyle(arguments[0]).backgroundColor", node)
 
     before do
-      visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=6"
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=6"
       wait_for_stimulus
     end
 
@@ -376,7 +376,7 @@ RSpec.describe "Event calendar", :js do
     context "when the window is narrow" do
       before do
         page.driver.browser.manage.window.resize_to(820, 900)
-        visit "/lookbook/preview/shadcn/event_calendar/workload_density?most=6"
+        visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=6"
         wait_for_stimulus
       end
 
@@ -397,7 +397,7 @@ RSpec.describe "Event calendar", :js do
   # is not inside a cell and had neither.
   describe "the hour scale" do
     before do
-      visit "/lookbook/preview/shadcn/event_calendar/hours_density?most=6&from=7&to=23"
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=6"
       wait_for_stimulus
     end
 
