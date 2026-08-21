@@ -422,10 +422,12 @@ RSpec.describe "Event calendar", :js do
   # class carried both `w-auto` and `w-(--for)`, and the one Tailwind emitted
   # last won. Only a browser can tell those two apart.
   describe "an all-day chip in the hours reading" do
-    it "is as wide as the day" do
+    before do
       visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=2&all_day=1&from=7&to=19"
       wait_for_stimulus
+    end
 
+    it "is as wide as the day" do
       widths = page.evaluate_script(<<~JS)
         (() => {
           const chip = [...document.querySelectorAll("[data-slot=event-calendar-day-item]")]
@@ -437,6 +439,26 @@ RSpec.describe "Event calendar", :js do
       JS
 
       expect(widths["chip"]).to eq(widths["axis"])
+    end
+
+    # The width's consequence, and the reason this is measured rather than
+    # eyeballed: the crew rides `ml-auto` to the end of the head, which is right
+    # at 124px and absurd at 1270 — the faces a metre from the label they belong
+    # to. Asserted as the gap between them, so it cannot pass by the chip having
+    # quietly stopped being wide.
+    it "keeps the crew beside the label, not at the far end" do
+      gap = page.evaluate_script(<<~JS)
+        (() => {
+          const chip = [...document.querySelectorAll("[data-slot=event-calendar-day-item]")]
+            .find((c) => c.style.cssText.includes("--for") && c.offsetParent &&
+                         c.querySelector("[data-slot=avatar-group]"))
+          const label = chip.querySelector("[data-slot=event-calendar-day-time]")
+          const crew = chip.querySelector("[data-slot=avatar-group]")
+          return Math.round(crew.getBoundingClientRect().left - label.getBoundingClientRect().right)
+        })()
+      JS
+
+      expect(gap).to be < 16
     end
   end
 
