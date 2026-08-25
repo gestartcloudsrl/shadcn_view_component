@@ -425,6 +425,28 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **The event calendar's week view.** The one shape the family does not
+      have. It was blocked on a time axis "that is a different component's
+      worth of geometry"; the hours reading has that axis now, so what is left
+      is running it *across* seven days rather than down one — the lane packing
+      is per-week already (`Schedule#pack`), and `Hours::Component` places by a
+      percentage of a window, which a week can widen. Smaller than it was, not
+      free.
+
+- [ ] **Split `event_calendar_controller.js`, for readability only.** 306 of its
+      571 lines are the redraw that three of the four readings never run: the
+      events reading packs months the server never rendered, and workload, hours
+      and daily are drawn whole and ship no payload to redraw from. A base with
+      the keyboard, the selection and the toolbar announcers, extended by the
+      half that draws, is the shape.
+
+      **It saves no bytes**, and the entry said it did until that was measured:
+      `shadcn/index.js` imports all thirty-three controllers eagerly, so a
+      second one would be imported there too — 11 KB of a 208 KB set a host
+      registers whatever it uses. A host that wants fewer already has the door
+      open, since `CONTROLLERS` is exported and every controller is pinned
+      individually; registering is not loading.
+
 - [x] **The Sidebar's mobile sheet has no role and no accessible name.** Fixed:
       the controller writes `role="dialog"`, `aria-modal` and both relationships
       while the sheet is open, and takes all four back when it closes — on
@@ -564,22 +586,17 @@ noting that it would not have delivered the component that raised the question:
 
 ## Deliberately not doing
 
-- **The remaining halves of the event calendar** — the week view, drag to move
-  and resize, a "+2 more" popover, and recurrence. Each is named with its reason
-  in [features/event-calendar.md](features/event-calendar.md#not-done); the
-  short version is that two of them need a write path an application owns, and
-  the popover would cost the one-tap-target-per-day property the mobile reading
-  is built on.
+- **Three of the event calendar's four halves** — drag to move and resize, a
+  "+2 more" popover, and recurrence. Each is named with its reason in
+  [features/event-calendar.md](features/event-calendar.md#not-done); the short
+  version is that two of them need a write path an application owns, and the
+  popover would cost the one-tap-target-per-day property the mobile reading is
+  built on.
 
-  The day view and the time axis are no longer on this list — they were built,
-  and the entry said otherwise for a while after.
-
-  Splitting the event calendar's controller is named there too, with what
-  measuring it changed: the redraw three readings never run is 11 KB of the
-  208 KB of controllers a host registers whatever it uses, so the split is a
-  readability argument and not a payload one — and the payload has an answer
-  already, since `CONTROLLERS` is exported and every controller is pinned
-  individually.
+  The fourth was the week view, and it is under *Smaller things* now rather than
+  here: it was listed as blocked on a time axis that has since been built. The
+  day view came off this list the same way — it was named as deliberately not
+  done for a while after it was done.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
   false positives.
 - **Portalling to `document.body`** — unbinds the Stimulus actions inside the

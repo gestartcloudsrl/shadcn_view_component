@@ -14,8 +14,15 @@ be the ones nobody checks.
 
 ## What it is
 
-One component. `EventCalendar::Component` renders the whole thing; two plain
-objects beside it do the thinking, and one Stimulus controller moves it.
+**One component to a host, four to this directory.**
+`EventCalendar::Component.new(reading:)` is the whole public surface — it hands
+over to a subclass from `.new`, so nothing here names one and the root stays a
+single element. Two plain objects beside them do the thinking, and one Stimulus
+controller moves them.
+
+It was one 1,592-line class until the measurements said otherwise; the seam and
+the numbers that argued it are in
+[architecture](../decisions/01-architecture.md#when-one-component-grows-a-second-reading).
 
 ```ruby
 render Shadcn::EventCalendar::Component.new(
