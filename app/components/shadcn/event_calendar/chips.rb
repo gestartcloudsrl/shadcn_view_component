@@ -111,11 +111,6 @@ module Shadcn
       # — no surface of its own — so a quiet day is an outline and a full one is
       # a solid pill, and the flip to `--primary-foreground` past the halfway
       # mark is the chip's own business rather than the whole cell's.
-
-      # The one thing that wears the ramp. Its fill is the tint and nothing else
-      # — no surface of its own — so a quiet day is an outline and a full one is
-      # a solid pill, and the flip to `--primary-foreground` past the halfway
-      # mark is the chip's own business rather than the whole cell's.
       COUNT_CLASS = "border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] " \
                            "tabular-nums text-foreground data-[heavy]:text-primary-foreground"
       # One chip per operator, the width of the cell, stacked. Full width rather
@@ -161,26 +156,9 @@ module Shadcn
       # is a quarter of a `size-8` avatar, and the same eight pixels on a
       # `size-4` one is half of it — the second initial disappears under the
       # next face. A quarter of *this* size is four.
-
-      # Faces up to `AVATARS_CAP`, then a count.
-      # `-space-x-1` overrides the group's own `-space-x-2`: upstream's overlap
-      # is a quarter of a `size-8` avatar, and the same eight pixels on a
-      # `size-4` one is half of it — the second initial disappears under the
-      # next face. A quarter of *this* size is four.
       AVATARS_CLASS = "ml-auto flex shrink-0 -space-x-1"
-      # Smaller everywhere a month is not on a desktop. Two initials at 14px
-      # still read; the circle is what gives way, not the type.
-      # A face in a crew stack, which is not the same face as the one on an
-      # assignee chip: these two shared a name after a rename and Ruby kept the
-      # second, so the chip's avatar silently lost its `shrink-0` and shrank in
-      # a scrolling row. `ruby -w` was the only thing that saw it — no spec did,
-      # and rubocop has no cop for a reassigned constant.
-
+      # The fourth face is a number, at the same size as the three it follows.
       AVATARS_MORE_CLASS = "size-3.5 bg-background text-[0.5rem] lg:size-4"
-      # Three faces, then the fourth is the count. Five was the first guess and
-      # it is too many at this size: the stack out-weighs the clock beside it,
-      # and past three the faces stop being read individually anyway.
-
       # Three faces, then the fourth is the count. Five was the first guess and
       # it is too many at this size: the stack out-weighs the clock beside it,
       # and past three the faces stop being read individually anyway.
@@ -191,20 +169,6 @@ module Shadcn
       def share(count)
         [ count, CEILING ].min.fdiv(CEILING) * TINT
       end
-
-      # The ramp crosses as a custom property rather than as a background, so
-      # that *which element wears it* is a CSS decision. The grid paints the
-      # cell; the rows layout paints only the count chip and leaves the row
-      # plain. An inline background could not have been moved — a media query
-      # cannot outrank a style attribute without `!important`.
-      # One element wears the ramp, at every width: the count chip. Painting the
-      # whole cell was the first design and it read as a *state* — selected,
-      # disabled — where the same colour on the chip reads as the measure it is.
-      #
-      # Everything that existed only to survive a tinted cell went with it: the
-      # ink flip on the cell, the ring that put today's circle back, and six CSS
-      # rules that moved the tint between the two layouts. An inline
-      # `background-image` is enough once nothing has to move it.
 
       # The ramp crosses as a custom property rather than as a background, so
       # that *which element wears it* is a CSS decision. The grid paints the
@@ -256,13 +220,13 @@ module Shadcn
         shadcn_t("event_calendar.until", time: I18n.l(item.ends_at, format: time_format))
       end
 
-      def chip_head(item, day = nil)
+      def chip_head(item, day)
         tag.span(
         safe_join([
-          tag.span(day ? chip_clock(item, day) : (chip_time(item) || shadcn_t("event_calendar.all_day")),
+          tag.span(chip_clock(item, day),
                    "data-slot": "event-calendar-day-time",
-                   class: [ TIME_CLASS, (TIME_FIXED_CLASS if day && item.multi_day?) ]),
-          (if day && item.multi_day?
+                   class: [ TIME_CLASS, (TIME_FIXED_CLASS if item.multi_day?) ]),
+          (if item.multi_day?
              tag.span(date_span(item), "data-slot": "event-calendar-day-span", class: SPAN_CLASS)
            end),
           chip_avatars(item)
@@ -275,10 +239,6 @@ module Shadcn
         tag.span(item.title, "data-slot": "event-calendar-day-text",
                class: CHIP_TEXT_CLASS)
       end
-
-      # `Avatar::Group` is upstream's own overlap and ring; the count past
-      # `AVATARS_CAP` is its `GroupCount`, so the shape is shadcn's
-      # rather than a lookalike.
 
       # `Avatar::Group` is upstream's own overlap and ring; the count past
       # `AVATARS_CAP` is its `GroupCount`, so the shape is shadcn's
