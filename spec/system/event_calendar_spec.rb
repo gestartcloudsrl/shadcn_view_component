@@ -524,6 +524,26 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # A server-drawn reading has no other way to change month: its cells hold
+  # crews and clients `#portable_events` does not carry, so the controller
+  # announces the ask and leaves the DOM alone. `month_url:` is the whole of its
+  # navigation, and what a host wires to its own route.
+  describe "walking the months in a server-drawn reading" do
+    it "moves and keeps the view it was in", :aggregate_failures do
+      visit "/lookbook/preview/shadcn/event_calendar/density?month=2026-08-01&view=hours&most=4"
+      wait_for_stimulus
+
+      2.times { find("#{calendar} [aria-label='Go to the Next Month']").click }
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "October 2026")
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
+
+      find("#{calendar} [aria-label='Go to the Previous Month']").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "September 2026")
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.
