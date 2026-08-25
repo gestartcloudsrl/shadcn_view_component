@@ -142,7 +142,13 @@ module Shadcn
       # written for a layout that no longer exists at any width is a rule that
       # only ever hides things.
 
-      CHIP_HEAD_CLASS = "flex items-center gap-1"
+      # `min-h-6` is what a head with a crew measures — 24px, not the 16 of the
+      # avatar's own `size-4`, which is what guessing it from the class got
+      # wrong. Given to every head whether or not it has one, so a chip is a
+      # chip: without it a reserved row came out 45px against a real 53, and
+      # the band it was holding open sat at 81 pixels in some cells and 89 in
+      # others.
+      CHIP_HEAD_CLASS = "flex min-h-6 items-center gap-1"
 
       CHIP_TEXT_CLASS = "truncate text-left text-[0.65rem] leading-tight"
       # Faces up to `AVATARS_CAP`, then a count.

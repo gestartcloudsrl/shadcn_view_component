@@ -462,6 +462,36 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The whole point of the lanes, and the only place it can be checked: a job
+  # that crosses days has to land on the same row in every cell it appears in,
+  # or it reads as several jobs that happen to share a name. Two things can
+  # break it and neither is visible in HTML — a row held open that is shorter
+  # than a real one, and a band that starts wherever the day above it ends.
+  describe "a job that crosses days, across a week" do
+    it "sits on one line in every cell" do
+      visit "/lookbook/preview/shadcn/event_calendar/density" \
+            "?view=grid&most=30&all_day=1&spanning=2&group=events"
+      wait_for_stimulus
+
+      rows = page.evaluate_script(<<~JS)
+        (() => {
+          const rows = {}
+          for (const cell of document.querySelectorAll("[data-slot=event-calendar-day]")) {
+            for (const chip of cell.querySelectorAll("[data-slot=event-calendar-day-item]")) {
+              const text = chip.querySelector("[data-slot=event-calendar-day-text]")
+              if (!text || !text.textContent.includes("day job")) continue
+              ;(rows[text.textContent.trim()] ||= []).push(
+                Math.round(chip.getBoundingClientRect().top - cell.getBoundingClientRect().top))
+            }
+          }
+          return rows
+        })()
+      JS
+
+      expect(rows.values).to all(satisfy { |tops| tops.uniq.one? })
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.

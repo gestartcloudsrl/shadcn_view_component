@@ -396,24 +396,34 @@ module Shadcn
           )
         end
 
-        # One-day all-day jobs, then the crossing ones on the lanes they keep,
-        # then the rest. `items` is already in band order, so the partition only
-        # has to lift the first band above the lanes.
+        # One-day all-day jobs on rows the whole week holds open, then the
+        # crossing ones on the lanes they keep, then the rest.
+        #
+        # The reservation is what makes a five-day job read as one band: without
+        # it the crossing rows start wherever that day's one-day jobs leave
+        # them, and the same job sat on row one in some cells and row two in
+        # others. `items` is already in band order, so the partition only has to
+        # lift the first band above the lanes.
         def cell_rows(items, day)
           crossing = schedule.crossing_on(day)
           singles, rest = (items - crossing.compact).partition do |item|
             item.all_day_on?(day) && !item.multi_day?
           end
 
-          singles + crossing + rest
+          singles + Array.new([ schedule.singles_room(day) - singles.size, 0 ].max) + crossing + rest
         end
 
         # A lane this day does not use, kept open so the day that does use it
-        # finds it in the same place. Invisible rather than absent, and shaped
-        # like a chip rather than given a height, so it cannot drift from one.
+        # finds it in the same place. Invisible rather than absent, and built
+        # from a chip's own parts rather than given a height — the first version
+        # left out the head's wrapper, came out 45px against a chip's 53, and
+        # put the band it was aligning eight pixels off.
         def held_lane
           tag.span(
-            safe_join([ tag.span("\u00A0", class: TIME_CLASS), tag.span("\u00A0", class: CHIP_TEXT_CLASS) ]),
+            safe_join([
+              tag.span(tag.span("\u00A0", class: TIME_CLASS), class: CHIP_HEAD_CLASS),
+              tag.span("\u00A0", class: CHIP_TEXT_CLASS)
+            ]),
             "data-slot": "event-calendar-day-held", class: [ ITEM_CLASS, "invisible" ],
             "aria-hidden": "true"
           )
