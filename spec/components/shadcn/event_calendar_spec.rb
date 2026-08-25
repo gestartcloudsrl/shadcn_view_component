@@ -515,6 +515,36 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # A chip is drawn on every day a job covers, and it used to read the job's
+  # *first* clock on all of them — "9:00 AM" on the third day of a three-day
+  # fit-out, a time nothing happened at. What a day wants to know is when the
+  # work is on it.
+  describe "a job that crosses days, in a workload cell" do
+    subject(:chips) do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :workload, group: :events,
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 6, 9),
+                    ends_at: Time.zone.local(2026, 8, 8, 17) } ]
+      ))
+      (6..8).map do |day|
+        page.first("[data-slot=event-calendar-day][data-day='2026-08-0#{day}'] " \
+                   "[data-slot=event-calendar-day-item]")
+      end
+    end
+
+    it "reads the clock that belongs to each day" do
+      expect(chips.map { |chip| chip.first("[data-slot=event-calendar-day-time]").text })
+        .to eq([ "9:00 AM", "All day", "→ 5:00 PM" ])
+    end
+
+    # The same two attributes the events reading's bars have always used, so
+    # the flat edge means the same thing in both.
+    it "says which side it runs off", :aggregate_failures do
+      expect(chips.map { |chip| chip["data-continues-before"] }).to eq([ nil, "true", "true" ])
+      expect(chips.map { |chip| chip["data-continues-after"] }).to eq([ "true", "true", nil ])
+    end
+  end
+
   describe "what the controller is handed" do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 

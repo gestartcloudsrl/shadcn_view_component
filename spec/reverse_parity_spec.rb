@@ -459,6 +459,11 @@ RSpec.describe "reverse parity" do
     "dropdown-menu-content" => %w[w-52 w-56],
     "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
     "event-calendar-day-assignee" => %w[border-border/40],
+    # A job that crosses days is drawn on each day it covers, and wears a flat
+    # edge on the side it runs off — the same two attributes and the same rule
+    # the events reading's bars have used since the first branch, so a reader
+    # learns the vocabulary once.
+    #
     # The chip, and — in the hours reading — where the clock puts it. An all-day
     # chip is the one whose width means something: it has no hour to be placed
     # at, so it is the whole axis rather than as wide as its own text — and it
@@ -467,6 +472,7 @@ RSpec.describe "reverse parity" do
     "event-calendar-day-item" => %w[
       bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)
       left-(--at) top-(--lane) max-w-[13rem] w-(--for)
+      data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none
     ],
     "event-calendar-day-time" => %w[pe-2 text-[0.65rem]],
     "event-calendar-day-text" => %w[text-[0.65rem]],

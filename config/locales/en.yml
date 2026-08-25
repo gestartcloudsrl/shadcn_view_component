@@ -36,6 +36,8 @@ en:
       today: Today
       empty: Nothing scheduled.
       all_day: All day
+      # A job that started before this day and stops during it.
+      until: "→ %{time}"
       agenda_label: Events on the selected day
       # The "+2" a cell shows when it has more events than lanes. A template
       # rather than a sentence: the controller re-renders it for a month the

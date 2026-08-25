@@ -130,6 +130,30 @@ Which moves the agenda too. A server-drawn reading renders one only when
 `day_url:` names where a day lives: with one the cells are links and what comes
 back fills it, without one there is nothing that could.
 
+### A job that crosses days
+
+Three readings, three answers, and none of them repeats a job as if it were
+several:
+
+| reading | what a crossing job is |
+|---|---|
+| events | one bar per **week**, clipped to it, with a flat edge on the side it runs off — FullCalendar's answer, and the port's since its first branch |
+| workload | one chip per **day** it covers, each reading the clock that belongs to that day |
+| hours | one bar or chip per **day**, clipped to the day: from its clock to midnight, the whole axis, then to its clock |
+
+The workload chips said the job's *first* clock on every day of it — "9:00 AM"
+on the third day of a three-day fit-out, a time nothing happened at. They read
+the day's own now: the hour it starts if it starts here, the hour it stops if it
+stops here, and *All day* if it does neither.
+
+`data-continues-before` and `data-continues-after` are the same two attributes
+the bars have always carried, and `rounded-l-none`/`rounded-r-none` the same
+rule, so the flat edge means one thing everywhere.
+
+**The count is not deduplicated, and that is deliberate.** A five-day job counts
+on each of its five days, because the workload reading answers "how much work
+does this day hold" and the crew is engaged on all five.
+
 ### Navigated by URL, not by the browser
 
 `reading:` picks the reading and, within the events one, the busiest day picks

@@ -217,7 +217,7 @@ module Shadcn
           placed = schedule.track_on(day, floor: floor_minutes)
           lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
 
-          tag.span(safe_join(placed.map { |slot| draw(*slot) }),
+          tag.span(safe_join(placed.map { |slot| draw(day, *slot) }),
                    "data-slot": "event-calendar-day-track",
                    class: [ AXIS_CLASS, GRIDLINES_CLASS, AXIS_HEIGHT_CLASS ],
                    style: "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem")
@@ -230,18 +230,19 @@ module Shadcn
         # back as 0..1440 and was drawn at −58% and two hundred per cent wide.
         # Any job outside the window did the same; the all-day case is only the
         # one that always is.
-        def draw(event, lane, from, to)
+        def draw(day, event, lane, from, to)
           low, high = window.first * 60, window.last * 60
           slot = [ event, lane, from.clamp(low, high), to.clamp(low, high) ]
 
-          chips? ? chip(*slot) : bar(*slot)
+          chips? ? chip(day, *slot) : bar(day, *slot)
         end
 
-        def bar(event, lane, from, to)
+        def bar(day, event, lane, from, to)
           tag.span(
             "", "data-slot": "event-calendar-day-bar",
-            class: [ BAR_CLASS, BAR_PAINT_CLASS ],
+            class: [ BAR_CLASS, BAR_PAINT_CLASS, CROSSING_CLASS ],
             "data-color": event.color,
+            **crossing_attributes(event, day),
             style: "--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
             title: [ chip_time(event), event.title ].compact.join(" — ")
           )
@@ -250,12 +251,14 @@ module Shadcn
         # The chip the workload reading already draws, placed by the clock — so
         # what the two readings differ in is the axis, not what an intervention
         # looks like.
-        def chip(event, lane, from, to)
+        def chip(day, event, lane, from, to)
           tag.span(
-            safe_join([ chip_head(event), chip_text(event) ]),
+            safe_join([ chip_head(event, day), chip_text(event) ]),
             "data-slot": "event-calendar-day-item",
-            class: [ CHIP_CLASS, (event.all_day? ? CHIP_ALL_DAY_CLASS : CHIP_TIMED_CLASS) ],
+            class: [ CHIP_CLASS, CROSSING_CLASS,
+                     (event.all_day? ? CHIP_ALL_DAY_CLASS : CHIP_TIMED_CLASS) ],
             "data-color": event.color,
+            **crossing_attributes(event, day),
             style: [ "--at:#{at(from)}", ("--for:#{span(to - from)}" if event.all_day?),
                      "--lane:#{lane_offset(lane)}" ].compact.join(";"),
             title: [ chip_time(event), event.title ].compact.join(" — ")
