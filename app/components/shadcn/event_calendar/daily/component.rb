@@ -162,7 +162,7 @@ module Shadcn
                          "data-slot": "event-calendar-resource", class: RESOURCE_CLASS),
                 assignee_axis(assignee)
               ]),
-              "data-slot": "event-calendar-day", class: [ DAY_CLASS, CELL_CLASS ],
+              "data-slot": "event-calendar-day", class: DAY_CLASS,
               "data-day": selected.iso8601, role: "listitem"
             )
           end

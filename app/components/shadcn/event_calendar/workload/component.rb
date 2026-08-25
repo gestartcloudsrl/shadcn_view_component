@@ -46,14 +46,15 @@ module Shadcn
         # pixels for three of them, because a chip is as wide as its client's
         # name and its crew. No placeholder can align those; the one that was
         # there measured 25 pixels and bought a meaningless indent.
-        # A workload row is a fixed 80px of chips that scroll sideways, so it says
-        # so itself — these left `ROWS_TOKENS` when the hours reading needed a
+        # A workload row is a fixed 80px of chips that scroll sideways with the
+        # date centred in its column, so it says so itself — these left `ROWS_TOKENS` when the hours reading needed a
         # cell that grows with its lanes, and a rule a reading has to undo does
         # not belong to the frame.
         CELL_TOKENS =
           "rows:[&_[data-slot=event-calendar-day]]:items-center " \
           "rows:[&_[data-slot=event-calendar-day]]:h-20 " \
-          "rows:[&_[data-slot=event-calendar-day]]:min-h-0"
+          "rows:[&_[data-slot=event-calendar-day]]:min-h-0 " \
+          "rows:[&_[data-slot=event-calendar-day-head]]:justify-center"
 
         HELD_TOKENS = "rows:[&_[data-slot=event-calendar-day-held]]:hidden"
 
@@ -78,8 +79,6 @@ module Shadcn
           "rows:[&_[data-slot=event-calendar-day-items]]:min-w-0"
 
         def client_drawn? = false
-
-        def cell_class = CELL_CLASS
 
         def reading_attributes
           { "data-group" => group, "data-rows" => "true", "data-arrangement" => arrangement }
@@ -374,7 +373,7 @@ module Shadcn
 
           tag.span(
             safe_join(shown.map { |item| item ? item_chip(item, day) : held_lane } +
-                      [ rest_chip(items.size) ].compact),
+                      [ rest_chip(items.size - shown.compact.size) ].compact),
             "data-slot": "event-calendar-day-items", class: CHIPS_CLASS
           )
         end
@@ -432,8 +431,11 @@ module Shadcn
           )
         end
 
-        def rest_chip(total)
-          hidden = show_all ? 0 : total - CAP
+        # What the cap actually hid, counted rather than derived. It used to be
+        # `total - CAP`, which was the same number only while every row held a
+        # chip: once a row could be a held lane or a hole in the crossing band,
+        # a cell of three jobs drew two and said nothing about the third.
+        def rest_chip(hidden)
           return if hidden <= 0
 
           tag.span("+#{hidden}", "data-slot": "event-calendar-day-rest",
