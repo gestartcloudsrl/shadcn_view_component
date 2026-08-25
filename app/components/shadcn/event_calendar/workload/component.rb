@@ -117,19 +117,6 @@ module Shadcn
         # comes in, and the toggle is a link when the caller can name the URL of
         # the other state. That is the same bargain the nav makes, and this
         # reading is server-drawn anyway.
-
-        # How many chips a cell shows before it says "+N", and how many it
-        # *renders*. Those used to be different numbers: every chip was rendered
-        # and CSS hid the fourth onwards, so "Show all" could be a class toggle.
-        # Measured on a month of 447 events that cost 1157 KB of HTML and 131 ms
-        # of render for ninety-three visible chips — 1136 avatar components, of
-        # which eight hundred were never seen. Capping the render is 451 KB and
-        # 74 ms.
-        #
-        # So "Show all" is state now, like `group:` and `month:`: `show_all:`
-        # comes in, and the toggle is a link when the caller can name the URL of
-        # the other state. That is the same bargain the nav makes, and this
-        # reading is server-drawn anyway.
         CAP = 3
 
         # ---- rows-are-days --------------------------------------------------
@@ -229,17 +216,6 @@ module Shadcn
         # `--muted-foreground` and twelve per cent of it over the page is within a
         # hair of `bg-muted` — so a calendar that names no colours looks exactly
         # as it did before this could carry one.
-
-        # An intervention chip is two levels: the clock and who is on it above,
-        # what it is below. It is the one chip with room to be a card — an
-        # operator chip is a face and a number and has nothing to put on a second
-        # line.
-        # The same tinted pair the bars wear, rather than a fixed `bg-muted`: an
-        # intervention has a category and an operator does not, so this is the one
-        # workload chip that carries `data-color`. Uncoloured, `--event-color` is
-        # `--muted-foreground` and twelve per cent of it over the page is within a
-        # hair of `bg-muted` — so a calendar that names no colours looks exactly
-        # as it did before this could carry one.
         ITEM_CLASS = "flex w-full flex-col gap-1.5 overflow-hidden rounded-md " \
                              "border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 " \
                              "text-(--event-ink)"
@@ -248,16 +224,6 @@ module Shadcn
         # Text tokens, never the ramp's colour: the tint says how much, the
         # numerals stay ink.
         TALLY_CLASS = "ml-auto shrink-0 text-[0.65rem] font-medium tabular-nums"
-        # The same chip, so the column keeps its rhythm rather than ending in a
-        # different shape.
-        # Only there when the cap is on: uncapped, the chips it was counting are
-        # all on the page and a "+22" under them would be counting nothing.
-        # `text-foreground`, not muted: the chip's surface became `bg-muted` when
-        # the cell stopped being tinted, and muted-on-muted is 4.34:1 — the same
-        # pair the avatar fallback was already excluded for — sixteen hundredths
-        # under, there.
-        # Rendered only when there is a remainder, which `show_all:` removes.
-
         # The same chip, so the column keeps its rhythm rather than ending in a
         # different shape.
         # Only there when the cap is on: uncapped, the chips it was counting are
@@ -357,9 +323,7 @@ module Shadcn
 
         # One chip per intervention, in the order the day happens: the clock, who
         # it is for, and how many people it takes.
-
-        # One chip per intervention, in the order the day happens: the clock, who
-        # it is for, and how many people it takes.
+        #
         # A cell is its crossing jobs on the lanes they hold all week, then
         # everything else in the order `#day_sort_key` puts it.
         #

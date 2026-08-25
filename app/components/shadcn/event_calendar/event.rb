@@ -135,7 +135,7 @@ module Shadcn
       # each of the two groups length still leads, for the reason it always
       # did — a bar that crosses the week is more use above than below the
       # one-day events it would otherwise be interleaved with.
-      def sort_key = [ all_day? ? 0 : 1, -duration_days, starts_at.to_time.to_i, title ]
+      def sort_key = [ all_day? ? 0 : 1, -duration_days, day_moment, title ]
 
       # What a person reads down a cell, in three bands.
       #
@@ -149,12 +149,14 @@ module Shadcn
       # then the title keep the order stable across renders.
       def day_sort_key(day = nil) = [ day_band(day), day_moment, title ]
 
-      # An all-day job is ranked by its date and a timed one by its clock, which
-      # is not pedantry: `Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8,
+      # Used by both keys. An all-day job is ranked by its date and a timed one
+      # by its clock, which is not pedantry: `Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8,
       # 20)` are the same midnight to a reader and two different integers to
       # `to_time`, one in the system zone and one in the app's. Two all-day jobs
       # on one day were ordered by which way their start had been *written*
-      # rather than by their title.
+      # rather than by their title — in a cell by `day_sort_key`, and in the
+      # grid's lanes by `sort_key`, which kept the bug for a while after the
+      # comment above said it was fixed.
       def day_moment = all_day? ? start_date.jd : starts_at.to_time.to_i
       private :day_moment
 

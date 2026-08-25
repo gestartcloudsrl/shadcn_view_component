@@ -310,7 +310,6 @@ RSpec.describe "reverse parity" do
       [&_[data-slot=event-calendar-grid]]:overflow-x-auto
       [&_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track)
       [&_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track)
-      [&_[data-slot=event-calendar-day]]:h-auto
       [&_[data-slot=event-calendar-day]]:min-h-14
       [&_[data-slot=event-calendar-day]]:items-start
       [&_[data-slot=event-calendar-day-head]]:sticky
@@ -374,7 +373,6 @@ RSpec.describe "reverse parity" do
       rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto
       rows:[&_[data-slot=event-calendar-day-rest]]:shrink-0
       rows:[&_[data-slot=event-calendar-day-rest]]:w-auto
-      rows:[&_[data-slot=event-calendar-day-ticks]]:block
       rows:[&_[data-slot=event-calendar-day-weekday]]:block
       rows:[&_[data-slot=event-calendar-day][data-outside]]:hidden
       rows:[&_[data-slot=event-calendar-day]]:flex-row
@@ -462,7 +460,7 @@ RSpec.describe "reverse parity" do
     "sheet-content" => %w[sm:max-w-md],
     # The width the grouping menu is given at the call site, like every other
     # panel width in this list.
-    "dropdown-menu-content" => %w[w-52 w-56],
+    "dropdown-menu-content" => %w[w-56],
     "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
     "event-calendar-day-assignee" => %w[border-border/40],
     # A lane a day does not use, held open so the day that does use it finds it
