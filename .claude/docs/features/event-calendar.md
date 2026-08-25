@@ -164,12 +164,16 @@ lane held that day by a job this day does not have, and the cell draws an
 invisible chip there rather than closing up. The hole is the feature — closing
 it is exactly what moved everything below.
 
-**Every job that crosses days, not only the all-day ones.** The band order asks
-for all-day-and-crossing first and `pack` already delivers it, since its sort
-leads with all-day and then with length. But a *timed* five-day job is equally
-the same job on five days, and leaving it to the clock-ordered tail is what made
-one read as three chips on one line and two on another — measured at 81, 81, 81,
-34, 34 pixels from the top of its cell.
+**All-day and crossing, and nothing else.** A timed job that happens to run five
+days is a normal event with a clock: it reads in the third band with the rest,
+in clock order, and moves between rows as the days around it change. Giving it a
+lane bought continuity at the price of the bands — "→ 5:00 PM" sat above "All
+day, van off the road", which is the one thing the bands exist to prevent.
+
+The lanes are ranked among the band's own jobs, not by `pack`'s numbers. Those
+are assigned over *every* event in the week, so a job outside this band holding
+a low lane left a hole at the top of every cell the crossing job appeared in — a
+lane nothing could fill, because its holder never arrives here.
 
 **A cell reads in three bands**, not two: a job that is all day *and* crosses
 days, then the single-day all-day ones, then everything with a clock in clock

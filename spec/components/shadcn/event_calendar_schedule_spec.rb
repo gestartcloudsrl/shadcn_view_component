@@ -182,6 +182,34 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
     it "leaves out what does not cross days" do
       expect(slots(20)).to eq([ "B" ])
     end
+
+    # `#pack` numbers lanes over *every* event in the week, so a job outside
+    # this band holding a low lane used to leave a hole at the top of every cell
+    # the crossing job appeared in — a lane nothing could ever fill, because its
+    # holder never arrives here. Ranked among themselves, there is no hole to
+    # keep for it.
+    it "does not hold a lane for a job that is not in this band" do
+      overlapped = schedule([
+        { title: "Stock take", starts_at: Date.new(2026, 8, 19) },
+        { title: "Standup", starts_at: Time.zone.local(2026, 8, 19, 9) },
+        { title: "Fit-out", starts_at: Date.new(2026, 8, 18), ends_at: Date.new(2026, 8, 20) }
+      ], max_lanes: 5)
+
+      expect(overlapped.crossing_on(Date.new(2026, 8, 19)).map { |event| event&.title })
+        .to eq([ "Fit-out" ])
+    end
+
+    # A job with a clock is a normal event however long it runs: it reads in the
+    # third band, in clock order, and does not take a lane above the all-day
+    # ones. Giving it one put "→ 5:00 PM" over "All day, van off the road".
+    it "leaves out a timed job however many days it crosses" do
+      timed = schedule([
+        { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 18, 9),
+          ends_at: Time.zone.local(2026, 8, 20, 17) }
+      ], max_lanes: 5)
+
+      expect(timed.crossing_on(Date.new(2026, 8, 19))).to be_empty
+    end
   end
 
   describe "#busiest" do

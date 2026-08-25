@@ -158,12 +158,12 @@ module Shadcn
       # `#pack` already computes for the grid's bars, so this reads it rather
       # than inventing a second answer.
       #
-      # Every job that crosses days, not only the all-day ones. The band order
-      # asks for all-day-and-crossing first and `#pack` already delivers it —
-      # its sort leads with all-day and then with length — but a *timed*
-      # five-day job is equally the same job on five days, and leaving it to the
-      # clock-ordered tail is what made one read as three chips on one line and
-      # two on another.
+      # All-day *and* crossing, which is lane one, and nothing else. A timed job
+      # that happens to run five days is a normal event with a clock: it reads
+      # in the third band with the rest, in clock order, so it moves between
+      # rows as the days around it change. Giving it a lane put it above the
+      # all-day jobs — "→ 5:00 PM" sitting over "All day, van off the road" —
+      # which is the one thing the bands are for.
       #
       # Returns an array indexed by lane, holes and all: a `nil` is a lane held
       # that day by a job this day does not have, and the cell draws a gap there
@@ -172,11 +172,18 @@ module Shadcn
         week = weeks.find { |candidate| candidate.days.include?(day) }
         return [] unless week
 
-        week.segments.each_with_object([]) do |segment, slots|
-          event = segment.event
-          next unless event.multi_day? && event.covers?(day)
+        crossing = week.segments.select { |segment| segment.event.all_day? && segment.event.multi_day? }
+        # Ranked among themselves, not by `#pack`'s own lane numbers. Those are
+        # assigned over *every* event in the week, so a one-day all-day job
+        # holding lane 1 left a hole at the top of five consecutive cells that
+        # nothing could ever fill — it is not in this band, so it never arrives.
+        # A hole is only worth keeping when another *crossing* job holds it.
+        ranks = crossing.map(&:lane).uniq.sort
 
-          slots[segment.lane - 1] = event
+        crossing.each_with_object([]) do |segment, slots|
+          next unless segment.event.covers?(day)
+
+          slots[ranks.index(segment.lane)] = segment.event
         end
       end
 
