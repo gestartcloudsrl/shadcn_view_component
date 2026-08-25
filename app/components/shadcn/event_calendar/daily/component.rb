@@ -23,10 +23,12 @@ module Shadcn
         # One row, not forty-two, so the frame's month rules have nothing to do
         # here — and the cell grows with its lanes rather than being told a
         # height, because a day with thirty jobs is as tall as it is.
+        # No border on the row: the frame already draws one round the whole
+        # thing, and `WEEKS_CLASS` separates the rows with `gap-px` over
+        # `bg-border`. An inner one was decoration that cost a pixel — and a
+        # pixel is what stands between an hour label and the chips it names.
         TOKENS = "[&_[data-slot=event-calendar-day]]:w-full " \
-                 "[&_[data-slot=event-calendar-day]]:rounded-md " \
-                 "[&_[data-slot=event-calendar-day]]:border " \
-                 "[&_[data-slot=event-calendar-ruler-pad]]:w-0"
+                 "[&_[data-slot=event-calendar-day]]:rounded-md"
 
         style do
           base { "#{Hours::Component::BASE} #{TOKENS}" }
@@ -49,6 +51,25 @@ module Shadcn
         end
 
         def view = :daily
+
+        # The scale has to start where the axes do, and here that is not the
+        # date column's `w-14`: cut by operator the left column is the name at
+        # `w-32`, cut by event there is no column at all. Measured against a row
+        # rather than assumed, because the two were 72 pixels apart and every
+        # hour label named a time the chips below disagreed with.
+        #
+        # Absent rather than zero-width when there is no column: the ruler is a
+        # `gap-2` flex, so an empty pad would still push the scale eight pixels
+        # past the axis.
+        def scale
+          tag.div(
+            safe_join([
+              (tag.span("", "data-slot": "event-calendar-ruler-pad", class: RESOURCE_CLASS) if by_assignee?),
+              tag.span(safe_join(hour_marks.map { |hour| hour_mark(hour) }), class: RULER_BODY_CLASS)
+            ].compact),
+            "data-slot": "event-calendar-ruler", class: RULER_CLASS, "aria-hidden": "true"
+          )
+        end
 
         # No date column, and not drawn rather than hidden. The title already
         # says which day this is, and in a month the column exists because

@@ -462,6 +462,35 @@ RSpec.describe "Event calendar", :js do
     # at 124px and absurd at 1270 — the faces a metre from the label they belong
     # to. Asserted as the gap between them, so it cannot pass by the chip having
     # quietly stopped being wide.
+    # A chip drawn at its duration can still be narrower than its own clock,
+    # three faces and a "+1" — and `overflow-hidden` cut the crew in half rather
+    # than letting it be as wide as what it says. The duration is a floor for
+    # the width, not a cap.
+    #
+    # Both halves are asserted together because each alone has a trivial wrong
+    # answer: nothing clips if every chip is enormous, nothing overlaps if every
+    # chip is tiny.
+    it "cuts nothing off, and still overlaps nothing", :aggregate_failures do
+      counts = page.evaluate_script(<<~JS)
+        (() => {
+          let clipped = 0, overlaps = 0
+          for (const chip of document.querySelectorAll("[data-slot=event-calendar-day-item]"))
+            if (chip.scrollWidth > chip.clientWidth + 1) clipped++
+          for (const axis of document.querySelectorAll("[data-slot=event-calendar-day-track]")) {
+            const b = [...axis.querySelectorAll("[data-slot=event-calendar-day-item]")]
+              .map((c) => c.getBoundingClientRect())
+            for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++)
+              if (Math.min(b[i].right, b[j].right) - Math.max(b[i].left, b[j].left) > 1 &&
+                  Math.min(b[i].bottom, b[j].bottom) - Math.max(b[i].top, b[j].top) > 1) overlaps++
+          }
+          return { clipped, overlaps }
+        })()
+      JS
+
+      expect(counts["clipped"]).to eq(0)
+      expect(counts["overlaps"]).to eq(0)
+    end
+
     it "keeps the crew beside the label, not at the far end" do
       gap = page.evaluate_script(<<~JS)
         (() => {
@@ -588,6 +617,30 @@ RSpec.describe "Event calendar", :js do
       visit "/lookbook/preview/shadcn/event_calendar/density" \
             "?view=daily&month=2026-08-04&most=8&from=7&to=19"
       wait_for_stimulus
+    end
+
+    # The same check the month's scale gets, and it needs its own because the
+    # left column is a different width here — the operator's name at `w-32` cut
+    # by operator, nothing at all cut by event. The two were 72 pixels apart.
+    %w[assignees events].each do |group|
+      it "sits its scale over the axis, cut by #{group}", :aggregate_failures do
+        visit "/lookbook/preview/shadcn/event_calendar/density" \
+              "?view=daily&month=2026-08-01&most=10&group=#{group}&from=7&to=19"
+        wait_for_stimulus
+
+        boxes = page.evaluate_script(<<~JS)
+          (() => {
+            const scale = document.querySelector("[data-slot=event-calendar-ruler] > span:last-child")
+            const axis = [...document.querySelectorAll("[data-slot=event-calendar-day-track]")]
+                           .find((track) => track.offsetParent)
+            const [a, b] = [scale.getBoundingClientRect(), axis.getBoundingClientRect()]
+            return { left: Math.round(b.left - a.left), width: Math.round(b.width - a.width) }
+          })()
+        JS
+
+        expect(boxes["left"]).to eq(0)
+        expect(boxes["width"]).to eq(0)
+      end
     end
 
     it "gives the axis the whole width", :aggregate_failures do
