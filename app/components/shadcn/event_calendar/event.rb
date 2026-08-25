@@ -108,6 +108,15 @@ module Shadcn
 
       def covers?(day) = day.between?(start_date, end_date)
 
+      # All day *as far as this day is concerned*. A job flagged all-day is one
+      # everywhere; a timed job that started yesterday and ends tomorrow is one
+      # here, because there is no hour of this day it is not on.
+      #
+      # The chip's clock has always read it this way — a middle day says "All
+      # day" — and the bands did not, so a job that said "All day" and crossed
+      # days sat below one that said "All day" and did not.
+      def all_day_on?(day) = all_day? || (start_date < day && end_date > day)
+
       def overlaps?(range) = start_date <= range.last && end_date >= range.first
 
       # All-day first, then longest, then by clock, then by title so the order
@@ -139,7 +148,7 @@ module Shadcn
       # Length does not sort within a band the way `sort_key` has it: inside one
       # day a five-day job and a two-day job are both simply on, and the clock
       # then the title keep the order stable across renders.
-      def day_sort_key = [ day_band, day_moment, title ]
+      def day_sort_key(day = nil) = [ day_band(day), day_moment, title ]
 
       # An all-day job is ranked by its date and a timed one by its clock, which
       # is not pedantry: `Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8,
@@ -150,8 +159,8 @@ module Shadcn
       def day_moment = all_day? ? start_date.jd : starts_at.to_time.to_i
       private :day_moment
 
-      def day_band
-        return 2 unless all_day?
+      def day_band(day = nil)
+        return 2 unless day ? all_day_on?(day) : all_day?
 
         multi_day? ? 0 : 1
       end

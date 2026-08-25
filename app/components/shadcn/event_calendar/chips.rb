@@ -238,9 +238,9 @@ module Shadcn
       # if it starts here, the hour it stops if it stops here, and the whole day
       # if it does neither.
       def chip_clock(item, day)
-        return shadcn_t("event_calendar.all_day") if item.all_day?
+        return shadcn_t("event_calendar.all_day") if item.all_day_on?(day)
         return chip_time(item) if item.start_date == day
-        return shadcn_t("event_calendar.all_day") if item.end_date > day || !item.ends_at.respond_to?(:hour)
+        return shadcn_t("event_calendar.all_day") unless item.ends_at.respond_to?(:hour)
 
         shadcn_t("event_calendar.until", time: I18n.l(item.ends_at, format: time_format))
       end

@@ -199,16 +199,34 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
         .to eq([ "Fit-out" ])
     end
 
-    # A job with a clock is a normal event however long it runs: it reads in the
-    # third band, in clock order, and does not take a lane above the all-day
-    # ones. Giving it one put "→ 5:00 PM" over "All day, van off the road".
-    it "leaves out a timed job however many days it crosses" do
-      timed = schedule([
-        { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 18, 9),
-          ends_at: Time.zone.local(2026, 8, 20, 17) }
-      ], max_lanes: 5)
+    # A timed job is banded by what it is on the day being drawn, not by its
+    # flag: on the middle day of a fit-out there is no hour of that day it is
+    # not on, and its own chip says "All day" there. The two used to disagree,
+    # so a chip reading "All day" and crossing days sat below one reading "All
+    # day" that did not.
+    context "with a timed job that crosses days" do
+      subject(:fit_out) do
+        schedule([
+          { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 18, 9),
+            ends_at: Time.zone.local(2026, 8, 20, 17) },
+          { title: "Stock take", starts_at: Date.new(2026, 8, 19) }
+        ], max_lanes: 5)
+      end
 
-      expect(timed.crossing_on(Date.new(2026, 8, 19))).to be_empty
+      it "takes the band on a day it covers whole" do
+        expect(fit_out.crossing_on(Date.new(2026, 8, 19)).map(&:title)).to eq(%w[Fit-out])
+      end
+
+      it "leads the cell there, above an all-day job of one day" do
+        expect(fit_out.on(Date.new(2026, 8, 19)).map(&:title)).to eq(%w[Fit-out Stock\ take])
+      end
+
+      # Its first and last days are hours, not a fact about the day, so it
+      # reads with the rest — which is where "→ 5:00 PM" belongs.
+      it "leaves the band on the day it ends", :aggregate_failures do
+        expect(fit_out.crossing_on(Date.new(2026, 8, 20))).to be_empty
+        expect(fit_out.crossing_on(Date.new(2026, 8, 18))).to be_empty
+      end
     end
   end
 
