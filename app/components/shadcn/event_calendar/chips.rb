@@ -25,6 +25,16 @@ module Shadcn
       STACK_AVATAR_CLASS = "size-3.5 lg:size-4"
 
       CELL_CLASS = "gap-1 px-1 pt-1 pb-1"
+      # What a job that crosses days wears on the days it is not starting or
+      # ending: a flat edge on the side it runs off. The events reading's bars
+      # have said it that way since the first branch — same attributes, same
+      # rule, so a reader learns it once.
+      CROSSING_CLASS = "data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none"
+
+      def crossing_attributes(item, day)
+        { "data-continues-before": ("true" if item.start_date < day),
+          "data-continues-after": ("true" if item.end_date > day) }
+      end
 
       # ---- the workload reading -------------------------------------------
       #
@@ -197,10 +207,24 @@ module Shadcn
       # picture, never the colour — every avatar here is the same neutral, which
       # is what stops a fourth operator from needing a fourth hue.
 
-      def chip_head(item)
+      # The clock for *this* day, not the job's first one. A chip is drawn on
+      # every day a job covers, and it read "9:00 AM" on all of them — on the
+      # third day of a three-day fit-out that is a time nothing happened at.
+      # What a day wants to know is when the work is on it: the hour it starts
+      # if it starts here, the hour it stops if it stops here, and the whole day
+      # if it does neither.
+      def chip_clock(item, day)
+        return shadcn_t("event_calendar.all_day") if item.all_day?
+        return chip_time(item) if item.start_date == day
+        return shadcn_t("event_calendar.all_day") if item.end_date > day || !item.ends_at.respond_to?(:hour)
+
+        shadcn_t("event_calendar.until", time: I18n.l(item.ends_at, format: time_format))
+      end
+
+      def chip_head(item, day = nil)
         tag.span(
         safe_join([
-          tag.span(chip_time(item) || shadcn_t("event_calendar.all_day"),
+          tag.span(day ? chip_clock(item, day) : (chip_time(item) || shadcn_t("event_calendar.all_day")),
                    "data-slot": "event-calendar-day-time", class: TIME_CLASS),
           chip_avatars(item)
         ]),

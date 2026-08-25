@@ -334,7 +334,7 @@ module Shadcn
             tag.span(safe_join([ day_marker(day), count_chip(on_day.size) ].compact),
                      "data-slot": "event-calendar-day-head", class: HEAD_CLASS),
             if group == :assignees then assignee_chips(assignees)
-            else item_chips(on_day)
+            else item_chips(on_day, day)
             end
           ].compact
         end
@@ -374,23 +374,24 @@ module Shadcn
 
         # One chip per intervention, in the order the day happens: the clock, who
         # it is for, and how many people it takes.
-        def item_chips(items)
+        def item_chips(items, day)
           return if items.empty?
 
           shown = show_all ? items : items.first(CAP)
 
           tag.span(
-            safe_join(shown.map { |item| item_chip(item) } +
+            safe_join(shown.map { |item| item_chip(item, day) } +
                       [ rest_chip(items.size) ].compact),
             "data-slot": "event-calendar-day-items", class: CHIPS_CLASS
           )
         end
 
-        def item_chip(item)
+        def item_chip(item, day)
           tag.span(
-            safe_join([ chip_head(item), chip_text(item) ]),
-            "data-slot": "event-calendar-day-item", class: ITEM_CLASS,
+            safe_join([ chip_head(item, day), chip_text(item) ]),
+            "data-slot": "event-calendar-day-item", class: [ ITEM_CLASS, CROSSING_CLASS ],
             "data-color": item.color,
+            **crossing_attributes(item, day),
             title: "#{item.title} — #{item.assignees.map(&:name).join(', ')}"
           )
         end
