@@ -555,6 +555,30 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # The first band's rows are held open across a week so a crossing job starts
+  # at the same row in every cell. A day with no crossing job is not part of any
+  # band, though, and reserving there bought an empty row and nothing else — a
+  # Monday with eleven jobs and no fit-out opened on a gap.
+  describe "a held row in a workload cell" do
+    subject(:cells) do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :workload, group: :events, week_starts_on: 1,
+        events: [ { title: "Depot closed", starts_at: Date.new(2026, 8, 6) },
+                  { title: "Fit-out", starts_at: Date.new(2026, 8, 4), ends_at: Date.new(2026, 8, 7) },
+                  { title: "Standup", starts_at: Time.zone.local(2026, 8, 3, 9) } ]
+      ))
+      ->(day) { page.first("[data-slot=event-calendar-day][data-day='2026-08-0#{day}']") }
+    end
+
+    it "holds one where a crossing job needs the row above it" do
+      expect(cells.call(4).all("[data-slot=event-calendar-day-held]", visible: :all).size).to eq(1)
+    end
+
+    it "holds none on a day with nothing to align" do
+      expect(cells.call(3).all("[data-slot=event-calendar-day-held]", visible: :all)).to be_empty
+    end
+  end
+
   describe "what the controller is handed" do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 

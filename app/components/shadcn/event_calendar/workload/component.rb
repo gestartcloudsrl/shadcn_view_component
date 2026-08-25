@@ -410,7 +410,17 @@ module Shadcn
             item.all_day_on?(day) && !item.multi_day?
           end
 
-          singles + Array.new([ schedule.singles_room(day) - singles.size, 0 ].max) + crossing + rest
+          singles + Array.new(held_rows(day, singles.size, crossing)) + crossing + rest
+        end
+
+        # A row is only worth holding on a day that has something to align. A
+        # day with no crossing job is not part of any band, so reserving there
+        # bought an empty row and nothing else — which is what a Monday with
+        # eleven jobs and no fit-out was showing.
+        def held_rows(day, taken, crossing)
+          return 0 if crossing.compact.empty?
+
+          [ schedule.singles_room(day) - taken, 0 ].max
         end
 
         # A lane this day does not use, kept open so the day that does use it
