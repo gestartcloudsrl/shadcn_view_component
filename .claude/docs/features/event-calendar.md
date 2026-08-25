@@ -150,6 +150,13 @@ stops here, and *All day* if it does neither.
 the bars have always carried, and `rounded-l-none`/`rounded-r-none` the same
 rule, so the flat edge means one thing everywhere.
 
+In the hours reading a chip's width is what it **occupies that day**, not what
+it is flagged: an all-day job and the middle day of a crossing one are both the
+whole axis, and a job with a real duration is drawn at it once there is room to
+read one. The threshold is the packer's own floor, which already says how much
+room a chip needs — below it a chip could not be read at its duration anyway,
+so it stays as wide as its text.
+
 **The count is not deduplicated, and that is deliberate.** A five-day job counts
 on each of its five days, because the workload reading answers "how much work
 does this day hold" and the crew is engaged on all five.

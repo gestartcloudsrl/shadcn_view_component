@@ -82,16 +82,22 @@ module Shadcn
         # As wide as its own text, capped so a late-evening chip does not run
         # off the end of the axis.
         CHIP_TIMED_CLASS = "w-auto max-w-[13rem]"
-        # The one chip whose width means something: an all-day job has no hour
-        # to be placed at, so it is the whole axis — and running to the end is
-        # exactly what it is for, so there is no cap.
+        # The chip whose width means something. Not "the all-day ones": the ones
+        # whose *drawn* interval is long enough to be worth drawing, which is an
+        # all-day job and equally the middle day of a job that crosses days —
+        # that one said "All day" in 130 pixels until the test was the event's
+        # own flag rather than what it occupies here.
+        #
+        # The threshold is the packer's own floor, which already encodes how
+        # much room a chip needs: below it a chip could not be read at its
+        # duration anyway, so it stays as wide as its text.
         #
         # `items-start` is the width's consequence. A chip is a column, so its
         # head and title stretch to it, and the crew rides `ml-auto` to the far
         # end of the head — which is the right answer at 124px and absurd at
         # 1270, with the faces a metre from the label they belong to. Not by
         # overriding `ml-auto`: by leaving it no slack to use.
-        CHIP_ALL_DAY_CLASS = "w-(--for) items-start"
+        CHIP_SPANNING_CLASS = "w-(--for) items-start"
         # A share of the window, not a number of minutes — which is the bug the
         # first version had. The packer speaks minutes, but what decides whether
         # two chips collide is *pixels*, and how many pixels a minute is worth
@@ -256,11 +262,10 @@ module Shadcn
             safe_join([ chip_head(event, day), chip_text(event) ]),
             "data-slot": "event-calendar-day-item",
             class: [ CHIP_CLASS, CROSSING_CLASS,
-                     (event.all_day? ? CHIP_ALL_DAY_CLASS : CHIP_TIMED_CLASS) ],
+                     (to - from >= floor_minutes ? CHIP_SPANNING_CLASS : CHIP_TIMED_CLASS) ],
             "data-color": event.color,
             **crossing_attributes(event, day),
-            style: [ "--at:#{at(from)}", ("--for:#{span(to - from)}" if event.all_day?),
-                     "--lane:#{lane_offset(lane)}" ].compact.join(";"),
+            style: "--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
             title: [ chip_time(event), event.title ].compact.join(" — ")
           )
         end
