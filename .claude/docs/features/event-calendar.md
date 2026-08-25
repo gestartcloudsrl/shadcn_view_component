@@ -164,6 +164,16 @@ lane held that day by a job this day does not have, and the cell draws an
 invisible chip there rather than closing up. The hole is the feature — closing
 it is exactly what moved everything below.
 
+**The order is: one-day all-day, then crossing, then the clock.** A job that is
+true of *this* day and only this day reads above one that is as true tomorrow.
+
+The cost of that order is the continuity the lanes were for: the crossing band
+no longer starts at a fixed row, so a five-day job sits on row one on the days
+below it nothing all-day, and on row two on the days something does — measured
+at 34, 34, 89, 34, 89 pixels from the top of its cells. Holding row one open on
+every day would restore it, at one wasted row on the 24 days of 42 that have no
+one-day all-day job.
+
 **All-day is asked of the day, not of the flag.** A job flagged all-day is one
 everywhere; a timed job that started yesterday and ends tomorrow is one *today*,
 because there is no hour of today it is not on — and its own chip has always
