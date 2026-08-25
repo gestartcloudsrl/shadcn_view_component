@@ -32,7 +32,7 @@ written.
 | [features/resizable.md](features/resizable.md) | panels as flex shares rather than `react-resizable-panels`, and the class upstream renders that reads an attribute upstream stopped rendering |
 | [features/chart.md](features/chart.md) | the one family whose package was doing the work: what `chart.tsx` actually is, why the frame is 1:1 and the four shapes are ours, and why the graphic is `aria-hidden` with a `sr-only` table beside it |
 | [features/calendar.md](features/calendar.md) | the calendar without `react-day-picker`: a third of the package is locale data and another fifth is other calendar systems, the grid that now exists twice, and what keeps the two copies honest |
-| [features/event-calendar.md](features/event-calendar.md) | the event calendar, which is ours because shadcn has the day picker and no event calendar: FullCalendar's `dayGridMonth` as the reference, the lane packing that is the part neither markup nor a browser, the rule that a cell either names its events or shows their shape, and the three readings it was split into |
+| [features/event-calendar.md](features/event-calendar.md) | the event calendar, which is ours because shadcn has the day picker and no event calendar: FullCalendar's `dayGridMonth` as the reference, the lane packing that is the part neither markup nor a browser, the rule that a cell either names its events or shows their shape, the three readings it was split into and the day the period switch asks for |
 | [features/toaster.md](features/toaster.md) | the toaster, which is ours rather than a port: why there was nothing to reproduce, what was kept from sonner, and the three ways a Rails app raises one |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything

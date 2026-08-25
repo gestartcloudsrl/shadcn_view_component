@@ -323,10 +323,12 @@ from taste, and the measurements are the part worth keeping:
 - **It built two levels of DOM and dissolved both**, and kept `role="grid"` over
   a geometry it used zero times.
 
-The seam is the **reading**, not the arrangement or the option: three questions
-about what a day *is* — a list of events, a quantity of work, a timeline — and
-each answers it with its own cells, its own layout rules, its own toolbar and
-its own client-side needs.
+The seam is the **reading**, not the arrangement or the option: questions about
+what a day *is* — a list of events, a quantity of work, a timeline — and each
+answers with its own cells, its own layout rules, its own toolbar and its own
+client-side needs. A fourth arrived later without the shape having to move,
+which is the test a seam passes or fails: the daily reading is the timeline with
+a day's worth of room, and it inherited one.
 
 **What splits is the rendering. What does not is the domain.** `Calendar::Month`,
 `Schedule` and `Event` stay one copy: this gem has already paid for the lane
