@@ -150,6 +150,41 @@ stops here, and *All day* if it does neither.
 the bars have always carried, and `rounded-l-none`/`rounded-r-none` the same
 rule, so the flat edge means one thing everywhere.
 
+### One job, one line across the week
+
+Ordering a cell is not enough to make a five-day job read as one band across
+five cells. As soon as a second crossing job starts halfway through the first,
+the first one's position moves on the day the second ends. What keeps a job on
+one line is a lane it **keeps** — and `Schedule#pack` already computes one per
+week for the grid's bars, so `#crossing_on` reads it rather than inventing a
+second answer.
+
+It returns the day's crossing jobs indexed by lane, holes and all: a `nil` is a
+lane held that day by a job this day does not have, and the cell draws an
+invisible chip there rather than closing up. The hole is the feature — closing
+it is exactly what moved everything below.
+
+**Every job that crosses days, not only the all-day ones.** The band order asks
+for all-day-and-crossing first and `pack` already delivers it, since its sort
+leads with all-day and then with length. But a *timed* five-day job is equally
+the same job on five days, and leaving it to the clock-ordered tail is what made
+one read as three chips on one line and two on another — measured at 81, 81, 81,
+34, 34 pixels from the top of its cell.
+
+**A cell reads in three bands**, not two: a job that is all day *and* crosses
+days, then the single-day all-day ones, then everything with a clock in clock
+order. The first band is the standing fact about that day — the depot is shut,
+the crew is away on a fit-out — and it holds true before and after it, so it
+sits above the facts that are only today's. Length does not sort within a band
+the way the grid's lanes do: inside one day a five-day job and a two-day job are
+both simply on.
+
+An all-day job is ranked by its **date**, a timed one by its clock.
+`Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8, 20)` are the same midnight
+to a reader and two different integers to `to_time` — one in the system zone,
+one in the app's — so two all-day jobs on one day used to order by which way
+their start had been written.
+
 In the hours reading a chip's width is what it **occupies that day**, not what
 it is flagged: an all-day job and the middle day of a crossing one are both the
 whole axis, and a job with a real duration is drawn at it once there is room to

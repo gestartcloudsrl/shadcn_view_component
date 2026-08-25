@@ -546,6 +546,13 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(chips.map { |chip| chip["data-continues-before"] }).to eq([ nil, "true", "true" ])
       expect(chips.map { |chip| chip["data-continues-after"] }).to eq([ "true", "true", nil ])
     end
+
+    # Because the flat edge cannot be seen in a stacked cell, and the rail
+    # cannot say how long — so the span says it, the way the agenda does.
+    it "carries the whole span on every day of it" do
+      expect(chips.map { |chip| chip.first("[data-slot=event-calendar-day-span]").text })
+        .to all(eq("Aug 06 – Aug 08"))
+    end
   end
 
   describe "what the controller is handed" do

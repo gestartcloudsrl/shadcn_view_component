@@ -374,15 +374,42 @@ module Shadcn
 
         # One chip per intervention, in the order the day happens: the clock, who
         # it is for, and how many people it takes.
+        # A cell is its crossing jobs on the lanes they hold all week, then
+        # everything else in the order `#day_sort_key` puts it.
+        #
+        # The lanes are what makes a five-day job read as one band across five
+        # cells instead of five chips that happen to share a title: it keeps its
+        # line even on a day when the line above it is empty, which is what the
+        # `nil`s are for. Ordering alone could not do it — a second crossing job
+        # starting halfway through the first moves the first one the day the
+        # second ends.
         def item_chips(items, day)
           return if items.empty?
 
-          shown = show_all ? items : items.first(CAP)
+          rows = cell_rows(items, day)
+          shown = show_all ? rows : rows.first(CAP)
 
           tag.span(
-            safe_join(shown.map { |item| item_chip(item, day) } +
+            safe_join(shown.map { |item| item ? item_chip(item, day) : held_lane } +
                       [ rest_chip(items.size) ].compact),
             "data-slot": "event-calendar-day-items", class: CHIPS_CLASS
+          )
+        end
+
+        def cell_rows(items, day)
+          crossing = schedule.crossing_on(day)
+
+          crossing + (items - crossing.compact)
+        end
+
+        # A lane this day does not use, kept open so the day that does use it
+        # finds it in the same place. Invisible rather than absent, and shaped
+        # like a chip rather than given a height, so it cannot drift from one.
+        def held_lane
+          tag.span(
+            safe_join([ tag.span("\u00A0", class: TIME_CLASS), tag.span("\u00A0", class: CHIP_TEXT_CLASS) ]),
+            "data-slot": "event-calendar-day-held", class: [ ITEM_CLASS, "invisible" ],
+            "aria-hidden": "true"
           )
         end
 

@@ -459,10 +459,14 @@ RSpec.describe "reverse parity" do
     "dropdown-menu-content" => %w[w-52 w-56],
     "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
     "event-calendar-day-assignee" => %w[border-border/40],
-    # A job that crosses days is drawn on each day it covers, and wears a flat
-    # edge on the side it runs off — the same two attributes and the same rule
-    # the events reading's bars have used since the first branch, so a reader
-    # learns the vocabulary once.
+    # A job that crosses days is drawn on each day it covers, and says so twice:
+    # a flat edge on the side it runs off, which is the bars' vocabulary, and a
+    # rail of its own colour down the left.
+    #
+    # The rail is not decoration. The flat edge reads where chips sit in a row —
+    # the strip below `lg`, the hours axis — because an edge running off the end
+    # of something is a shape you can see. Stacked at full width in a grid cell
+    # it says nothing, and two days of one job looked like two jobs.
     #
     # The chip, and — in the hours reading — where the clock puts it. An all-day
     # chip is the one whose width means something: it has no hour to be placed
@@ -473,6 +477,9 @@ RSpec.describe "reverse parity" do
       bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)
       left-(--at) top-(--lane) max-w-[13rem] w-(--for)
       data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none
+      data-[continues-before]:border-l-2 data-[continues-after]:border-l-2
+      data-[continues-before]:border-l-[var(--event-color)]
+      data-[continues-after]:border-l-[var(--event-color)]
     ],
     "event-calendar-day-time" => %w[pe-2 text-[0.65rem]],
     "event-calendar-day-text" => %w[text-[0.65rem]],

@@ -25,11 +25,35 @@ module Shadcn
       STACK_AVATAR_CLASS = "size-3.5 lg:size-4"
 
       CELL_CLASS = "gap-1 px-1 pt-1 pb-1"
-      # What a job that crosses days wears on the days it is not starting or
-      # ending: a flat edge on the side it runs off. The events reading's bars
-      # have said it that way since the first branch — same attributes, same
-      # rule, so a reader learns it once.
-      CROSSING_CLASS = "data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none"
+      # What a job that crosses days wears. Two things saying one thing, on
+      # purpose — the same redundancy the events reading's bars have, where the
+      # flat edge and the position both say "this continues".
+      #
+      # **The flat edge alone was not enough here.** It reads when chips sit in
+      # a row — the strip below `lg`, the hours axis — because an edge that
+      # runs off the end of something is a shape you can see. In a grid cell
+      # they are stacked at full width, so a squared corner says nothing, and
+      # two days of one job looked like two jobs.
+      #
+      # So the rail: a thread of the event's own colour down the left of any
+      # chip that continues in either direction, which survives a stacked cell
+      # and a narrow one. `data-[continues-after]` sets it too, so the first day
+      # of a job is marked as much as its middle.
+      CROSSING_CLASS = "data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none " \
+                       "data-[continues-before]:border-l-2 data-[continues-after]:border-l-2 " \
+                       "data-[continues-before]:border-l-[var(--event-color)] " \
+                       "data-[continues-after]:border-l-[var(--event-color)]"
+      # And what the rail cannot say: how long. `date_span` is how the agenda
+      # has always said it, so the two agree.
+      SPAN_CLASS = "min-w-0 shrink truncate text-[0.65rem] text-muted-foreground tabular-nums"
+      # The clock stops shrinking when the span is there to shrink instead.
+      #
+      # `TIME_CLASS` is shrinkable on purpose: below `sm` the title is hidden and
+      # a fixed clock pushes the crew out of a 46px cell, because it is the only
+      # flexible thing left. On a chip that carries a span it is not the only
+      # one — and letting both shrink truncated the hour to "All …" and "9:00 …"
+      # to make room for a date range, which is the wrong half to lose.
+      TIME_FIXED_CLASS = "shrink-0"
 
       def crossing_attributes(item, day)
         { "data-continues-before": ("true" if item.start_date < day),
@@ -225,9 +249,13 @@ module Shadcn
         tag.span(
         safe_join([
           tag.span(day ? chip_clock(item, day) : (chip_time(item) || shadcn_t("event_calendar.all_day")),
-                   "data-slot": "event-calendar-day-time", class: TIME_CLASS),
+                   "data-slot": "event-calendar-day-time",
+                   class: [ TIME_CLASS, (TIME_FIXED_CLASS if day && item.multi_day?) ]),
+          (if day && item.multi_day?
+             tag.span(date_span(item), "data-slot": "event-calendar-day-span", class: SPAN_CLASS)
+           end),
           chip_avatars(item)
-        ]),
+        ].compact),
         class: CHIP_HEAD_CLASS
         )
       end
