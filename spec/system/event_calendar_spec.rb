@@ -247,16 +247,19 @@ RSpec.describe "Event calendar", :js do
         .to eq([ "Monthly", "Daily", "Grid", "Rows", "Hours", "By assignee", "By event" ])
     end
 
-    # A day has one way of being read, so the middle question goes away.
-    it "drops the monthly question in the daily period", :aggregate_failures do
+    # A day has one arrangement, so the monthly question goes; the grouping
+    # stays, because "who is where" is a question a day gets asked more than a
+    # month does.
+    it "swaps the monthly question for the day's own", :aggregate_failures do
       open_panel
       find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
       open_panel
 
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
-        .to eq([ "Show", "Show the day as" ])
+        .to eq([ "Show", "Show the day as", "Group cells by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Monthly", "Daily", "Hours only", "List only", "Hours and list" ])
+        .to eq([ "Monthly", "Daily", "Hours only", "List only", "Hours and list",
+                 "By assignee", "By event" ])
     end
 
     it "carries the month across to the hours view" do

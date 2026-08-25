@@ -100,6 +100,33 @@ the workload and hours readings both include, because hours is not a kind of
 workload: it is a third reading that wants the same chip, so what the two differ
 in is the axis, not what an intervention looks like.
 
+### The period, and the day
+
+The panel narrows in three steps: **the period**, then how to read it, then the
+only question that reading has. A day has one arrangement, so its middle
+question is not drawn at all.
+
+`Daily::Component` inherits `Hours::Component`, because a day is where that axis
+finally has room — the same twenty-four hours that were a twenty-eighth of a
+page in a month are the whole width here. `showing:` picks its halves, because
+they answer different questions: the axis says *when* the day is busy and has
+no room for a name, the list says *what* each job is and cannot show a gap.
+
+Cut by operator it becomes a row each, their jobs along the same hours, with the
+list below cut the same way and in the same order — which is the question a day
+actually gets asked. Not "what is on" but "who is where, and who is free at
+two". A job with two people on it is on both rows, because both are on it.
+
+The operator's name has its own slot rather than the date column's: that column
+is `w-14` and centres what it holds, which is right for "Tue 4" and clipped
+"Katherine Johnson" to "atherine Johnson". Borrowing it would have meant undoing
+three of the frame's rules.
+
+`Groupings` is the module the workload and daily readings share for it, the way
+`Chips` is the one they share for a chip — the same question of the same data,
+drawn differently, and one menu so the two cannot drift apart in what they call
+things.
+
 ### One options panel
 
 The toolbar had a control for the view, one for the grouping and one for the

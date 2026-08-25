@@ -24,6 +24,13 @@ module Shadcn
       # and rubocop has no cop for a reassigned constant.
       STACK_AVATAR_CLASS = "size-3.5 lg:size-4"
 
+      # No `sm:` gate on either of these any more. They were hidden on a phone
+      # because a 46px grid cell could not hold a name — and below `lg` there is
+      # no grid now, there is a row three hundred pixels wide. A breakpoint rule
+      # written for a layout that no longer exists at any width is a rule that
+      # only ever hides things.
+      NAME_CLASS = "min-w-0 flex-1 truncate text-[0.65rem]"
+
       CELL_CLASS = "gap-1 px-1 pt-1 pb-1"
       # What a job that crosses days wears. Two things saying one thing, on
       # purpose — the same redundancy the events reading's bars have, where the

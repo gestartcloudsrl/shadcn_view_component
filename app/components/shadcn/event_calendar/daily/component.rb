@@ -16,6 +16,8 @@ module Shadcn
       # *when the day is busy* and cannot write a name; the agenda says *what
       # each job is* and cannot show a gap.
       class Component < Hours::Component
+        include Groupings
+
         SHOWING = %i[axis agenda both].freeze
 
         # One row, not forty-two, so the frame's month rules have nothing to do
@@ -29,6 +31,14 @@ module Shadcn
         style do
           base { "#{Hours::Component::BASE} #{TOKENS}" }
         end
+
+        # Its own slot, not the date column's. That column is `w-14` and centres
+        # what it holds, which is right for "Tue 4" and wrong for "Katherine
+        # Johnson" — it clipped her to "atherine Johnson" and dropped the count
+        # to the foot of a stretched row. Borrowing the slot would have meant
+        # undoing three of the frame's rules; a name of its own has none to undo.
+        RESOURCE_CLASS = "flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1"
+        RESOURCE_NAME_CLASS = "min-w-0 flex-1 truncate text-[0.7rem] font-medium"
 
         attr_reader :showing
 
@@ -57,9 +67,11 @@ module Shadcn
 
         def agenda? = showing != :axis
 
-        def reading_label = shadcn_t("event_calendar.daily.#{showing}")
+        def reading_label
+          safe_join([ shadcn_t("event_calendar.daily.#{showing}"), grouping_label ], " · ")
+        end
 
-        def reading_options = [ showing_items ]
+        def reading_options = [ showing_items, grouping_items ]
 
         def showing_items
           safe_join([
@@ -108,10 +120,67 @@ module Shadcn
         end
 
         def day_row
-          tag.div(day_cell(selected, on_day: schedule.on(selected),
-                                     assignees: schedule.assignees_on(selected), hidden: 0),
+          rows = by_assignee? ? assignee_rows : [ day_cell(selected, on_day: schedule.on(selected),
+                                                           assignees: [], hidden: 0) ]
+
+          tag.div(safe_join(rows),
                   "data-slot": "event-calendar-weeks", class: WEEKS_CLASS,
                   role: "list", "aria-label": I18n.l(selected, format: agenda_format))
+        end
+
+        # A row per operator, which is the question a day actually gets asked:
+        # not "what is on" but "who is where, and who is free at two". Each row
+        # packs its lanes among that person's own jobs, so two people working at
+        # the same hour do not push each other down.
+        def assignee_rows
+          schedule.assignees_on(selected).map do |assignee, count|
+            tag.div(
+              safe_join([
+                tag.span(safe_join([ tag.span(assignee.name, class: RESOURCE_NAME_CLASS),
+                                     count_chip(count) ].compact),
+                         "data-slot": "event-calendar-resource", class: RESOURCE_CLASS),
+                assignee_axis(assignee)
+              ]),
+              "data-slot": "event-calendar-day", class: [ DAY_CLASS, CELL_CLASS ],
+              "data-day": selected.iso8601, role: "listitem"
+            )
+          end
+        end
+
+        # The list, cut the same way the axis is — a section per operator, in
+        # the same order, so a reader who found someone above can find them
+        # again below. Cut by event it is the parent's list unchanged.
+        def agenda
+          return super unless by_assignee?
+
+          tag.public_send(agenda_as,
+            safe_join(schedule.assignees_on(selected).map { |assignee, count|
+              assignee_section(assignee, count)
+            }),
+            **agenda_attributes, "data-slot": "event-calendar-agenda", class: AGENDA_CLASS)
+        end
+
+        def assignee_section(assignee, count)
+          on_them = schedule.on(selected).select { |event| event.assignees.any? { |a| a.name == assignee.name } }
+
+          safe_join([
+            tag.div(safe_join([ tag.span(assignee.name),
+                                tag.span(agenda_count(count), "data-slot": "event-calendar-agenda-count",
+                                         class: AGENDA_COUNT_CLASS) ]),
+                    "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS),
+            tag.ul(safe_join(on_them.map { |event| agenda_item(event) }),
+                   "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS)
+          ])
+        end
+
+        def assignee_axis(assignee)
+          placed = schedule.track_on(selected, floor: floor_minutes, for_assignee: assignee.name)
+          lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
+
+          tag.span(safe_join(placed.map { |slot| draw(selected, *slot) }),
+                   "data-slot": "event-calendar-day-track",
+                   class: [ AXIS_CLASS, GRIDLINES_CLASS, AXIS_HEIGHT_CLASS ],
+                   style: "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem")
         end
       end
     end
