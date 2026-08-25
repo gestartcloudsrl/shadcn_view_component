@@ -573,6 +573,11 @@ noting that it would not have delivered the component that raised the question:
 
   The day view and the time axis are no longer on this list — they were built,
   and the entry said otherwise for a while after.
+
+  Splitting the event calendar's controller is named there too, with what
+  measuring it changed: the redraw three readings never run is 11 KB of the
+  208 KB of controllers a host registers whatever it uses, so the split is a
+  readability argument and not a payload one.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
   false positives.
 - **Portalling to `document.body`** — unbinds the Stimulus actions inside the
