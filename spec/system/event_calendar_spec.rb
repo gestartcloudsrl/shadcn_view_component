@@ -564,8 +564,18 @@ RSpec.describe "Event calendar", :js do
       expect(heights.uniq).to eq([ 80 ])
     end
 
-    it "draws no held row, having nothing to hold one for" do
-      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-held]")
+    # A held row is `invisible`, which keeps its layout space — so a driver
+    # reporting it as "not displayed" would pass this whether or not the rule
+    # that removes it exists. The computed `display` is the only thing that can
+    # tell those apart, and removing it is the point: in a strip the space is
+    # a meaningless indent.
+    it "takes no space for a held row, having nothing to align" do
+      displays = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("[data-slot=event-calendar-day-held]")]
+          .map((held) => getComputedStyle(held).display)
+      JS
+
+      expect(displays.uniq - [ "none" ]).to be_empty
     end
   end
 

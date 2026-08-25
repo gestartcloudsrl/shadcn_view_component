@@ -60,6 +60,16 @@ module Shadcn
         render_with_template
       end
 
+      # @hidden
+      def hours_bars
+        render_with_template
+      end
+
+      # @hidden
+      def workload_by_assignee
+        render_with_template
+      end
+
       # A host owning the day view: the cells are links, the agenda is the frame
       # they swap, and what comes back carries what the calendar could not. The
       # model, the route and the frame live in `test/dummy` — a preview can

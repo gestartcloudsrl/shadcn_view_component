@@ -262,10 +262,6 @@ RSpec.describe "reverse parity" do
     # where the `overflow-x`, `overscroll`, `touch-pan-x` and scrollbar-hiding
     # rules come from — and `shrink-0` on the chips, without which they squash
     # to fit and the strip never overflows at all.
-    # The toolbar's Rows toggle. Below `lg` the rows are already what is drawn,
-    # so the button has nothing to change — and the server cannot know which
-    # side of the breakpoint it rendered for, so CSS is what hides it.
-    "button" => %w[max-lg:hidden],
     # The hours reading's own parts. None of these had ever been read by a
     # spec: the reading had only a method preview, so no fixture existed and
     # this file — which globs the fixtures — could not see them. Adding
@@ -291,7 +287,14 @@ RSpec.describe "reverse parity" do
     # nothing — a fifteen-minute call on a sixteen-hour axis is under a pixel.
     "event-calendar-day-bar" => %w[
       bg-[var(--event-color)]/70 left-(--at) min-w-[3px] top-(--lane) w-(--for)
+      data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none
+      data-[continues-before]:border-l-2 data-[continues-after]:border-l-2
+      data-[continues-before]:border-l-[var(--event-color)]
+      data-[continues-after]:border-l-[var(--event-color)]
     ],
+    # How long a job that crosses days runs, beside the clock of the day it is
+    # drawn on — `date_span`, the same phrasing the agenda uses.
+    "event-calendar-day-span" => %w[shrink text-[0.65rem]],
     # The hours reading's layout, which now lives on `Hours::Component` and
     # only ever lands on its root — so these carry no `data-[track]:` guard any
     # more. They used to, because every reading shared one class string and a

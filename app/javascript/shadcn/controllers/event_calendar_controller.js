@@ -39,6 +39,12 @@ export default class extends Controller {
     tickSizes: Array,
     denseAbove: Number,
     reading: String,
+    // Whether this month may be redrawn here at all. A reading the server draws
+    // whole ships no events and no prototypes, so there is nothing to draw
+    // from. Crossed as a fact rather than derived from `reading`, because the
+    // list of names that used to decide it went stale the first time a reading
+    // was added.
+    clientDrawn: { type: Boolean, default: true },
     colors: Array,
     events: Array,
     locale: String,
@@ -196,8 +202,8 @@ export default class extends Controller {
     // a tinted count that `#portable_events` does not ship, so there is nothing
     // here to rebuild them from. Redrawing anyway is what filled September with
     // August's people. Until the payload carries them, `month-change` is the
-    // whole of its navigation — see `goTo`.
-    if (this.readingValue === "workload" || this.readingValue === "hours") return
+    // whole of their navigation — see `goTo`.
+    if (!this.clientDrawnValue) return
 
     const first = this.month
     const weeks = this.weeksOf(first)

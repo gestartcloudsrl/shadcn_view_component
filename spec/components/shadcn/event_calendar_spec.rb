@@ -466,18 +466,40 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(bars.first[:style]).to include("--at:0.0%", "--for:100.0%")
     end
 
-    # And the test is what the chip *occupies*, not what the event is flagged:
-    # the middle day of a job that crosses days covers the whole window too, and
-    # said "All day" in 130 pixels until it was measured that way.
-    it "runs the whole width as a chip too" do
+    # The test is what the chip *occupies*, not what the event is flagged — so
+    # the case that matters is the middle day of a *timed* job that crosses
+    # days, where the two answers differ. The all-day one proves nothing: both
+    # tests agree on it.
+    #
+    # Asserted as the class rather than the style, because `--for` is written on
+    # every chip either way. An example that read the style passed for as long
+    # as the bug existed.
+    it "is as wide as the window on a day it covers whole", :aggregate_failures do
       render_inline(described_class.new(
         month: Date.new(2026, 8, 1), reading: :hours, window: (0..24), shape: :chips,
-        events: [ { title: "Depot closed", starts_at: Date.new(2026, 8, 20) } ]
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 19, 9),
+                    ends_at: Time.zone.local(2026, 8, 21, 17) } ]
       ))
-      chip = page.first("[data-slot=event-calendar-day][data-day='2026-08-20'] " \
-                        "[data-slot=event-calendar-day-item]")
+      middle = page.first("[data-slot=event-calendar-day][data-day='2026-08-20'] " \
+                          "[data-slot=event-calendar-day-item]")
 
-      expect(chip[:style]).to include("--at:0.0%", "--for:100.0%")
+      expect(middle[:class].split).to include("w-(--for)")
+      expect(middle[:class].split).not_to include("w-auto")
+    end
+
+    # The other branch, and the only way to reach it: the packer floors every
+    # interval to the room a chip needs, so a chip falls back to its own text
+    # only where the *window* clips it below that floor.
+    it "is as wide as its own text where the window clips it short" do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :hours, window: (7..19), shape: :chips,
+        events: [ { title: "Late callout", starts_at: Time.zone.local(2026, 8, 20, 18, 40),
+                    ends_at: Time.zone.local(2026, 8, 20, 23) } ]
+      ))
+      clipped = page.first("[data-slot=event-calendar-day][data-day='2026-08-20'] " \
+                           "[data-slot=event-calendar-day-item]")
+
+      expect(clipped[:class].split).to include("w-auto")
     end
 
     it "takes the top lane, above what has a clock", :aggregate_failures do

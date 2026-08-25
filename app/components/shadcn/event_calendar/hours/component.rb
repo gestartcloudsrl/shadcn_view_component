@@ -191,8 +191,6 @@ module Shadcn
 
         def client_drawn? = false
 
-        def cell_class = CELL_CLASS
-
         def reading_attributes = { "data-rows" => "true", "data-arrangement" => :rows }
 
         # The one choice this reading has, in the slot the `Rows` toggle would

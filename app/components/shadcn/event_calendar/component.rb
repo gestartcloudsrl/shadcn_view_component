@@ -124,7 +124,6 @@ module Shadcn
         "rows:[&_[data-slot=event-calendar-day-head]]:shrink-0 " \
         "rows:[&_[data-slot=event-calendar-day-head]]:flex-col " \
         "rows:[&_[data-slot=event-calendar-day-head]]:items-center " \
-        "rows:[&_[data-slot=event-calendar-day-head]]:justify-center " \
         "rows:[&_[data-slot=event-calendar-day-head]]:gap-1 " \
         "rows:[&_[data-slot=event-calendar-day-label]]:flex " \
         "rows:[&_[data-slot=event-calendar-day-label]]:w-full " \
@@ -389,6 +388,12 @@ module Shadcn
           # alone, so one press of › stamped `data-labelled` on a workload
           # calendar and ran both readings at once.
           "data-shadcn--event-calendar-reading-value" => reading,
+          # Whether the browser may redraw this month, crossed as the *fact*
+          # rather than as a list of reading names for the controller to check
+          # itself against. It was a list, and a fourth reading was added
+          # without joining it — so `daily` fell through into a redraw it has
+          # no payload for.
+          "data-shadcn--event-calendar-client-drawn-value" => client_drawn?,
           # The order the marks band in. Crossed rather than repeated in the
           # controller for the reason everything else is: one list, in Ruby.
           "data-shadcn--event-calendar-colors-value" => Event::COLORS.to_json,
@@ -625,10 +630,14 @@ module Shadcn
       def reading_style = []
 
       # Whether the browser ever redraws this month. The events reading does —
-      # its controller packs a month the server never rendered. The workload and
-      # hours readings do not: their cells hold crews, clients and clock times
-      # that `#portable_events` cannot carry, so the controller returns before
+      # its controller packs a month the server never rendered. The others do
+      # not: their cells hold crews, clients and clock times that
+      # `#portable_events` cannot carry, so the controller returns before
       # drawing and the month changes by URL.
+      #
+      # Named as a fact rather than listed as readings, and crossed to the
+      # controller as one, because the list is what went stale: `daily` was
+      # added and the guard still named only two.
       #
       # What that was costing was measured before it was fixed: 34 KB on a
       # workload page, 15% of it, in an events payload and a prototypes template
@@ -651,9 +660,6 @@ module Shadcn
 
       # `data-*` a reading needs on the root for its own rules to key off.
       def reading_attributes = {}
-
-      # What a reading adds to every day cell.
-      def cell_class = nil
 
       # The toolbar controls a reading owns. The month nav is every reading's
       # and is not here; these are the ones only one of them can act on — which
@@ -725,7 +731,7 @@ module Shadcn
           **(href ? { href: } : { type: "button", "data-action": "click->shadcn--event-calendar#select" }),
           **day_attributes,
           "data-slot": "event-calendar-day",
-          class: [ DAY_CLASS, cell_class ].compact.join(" "),
+          class: DAY_CLASS,
           "data-day": day.iso8601,
           "data-today": ("true" if day == Date.current),
           "data-selected": ("true" if day == selected),

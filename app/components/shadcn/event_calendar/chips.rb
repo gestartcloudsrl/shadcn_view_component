@@ -31,7 +31,6 @@ module Shadcn
       # only ever hides things.
       NAME_CLASS = "min-w-0 flex-1 truncate text-[0.65rem]"
 
-      CELL_CLASS = "gap-1 px-1 pt-1 pb-1"
       # What a job that crosses days wears. Two things saying one thing, on
       # purpose — the same redundancy the events reading's bars have, where the
       # flat edge and the position both say "this continues".
@@ -52,7 +51,13 @@ module Shadcn
                        "data-[continues-after]:border-l-[var(--event-color)]"
       # And what the rail cannot say: how long. `date_span` is how the agenda
       # has always said it, so the two agree.
-      SPAN_CLASS = "min-w-0 shrink truncate text-[0.65rem] text-muted-foreground tabular-nums"
+      # No colour of its own: it inherits the chip's `--event-ink`, which is the
+      # ink chosen to be readable on that chip's tint. `text-muted-foreground`
+      # was grey on a green chip at 4.22 against a 4.5 threshold — a violation
+      # that only surfaced once a fixture put a crossing job on a coloured chip.
+      # And not the ink at `opacity-70` either, which reads as secondary and
+      # measures 3.48: opacity buys the look by spending the contrast.
+      SPAN_CLASS = "min-w-0 shrink truncate text-[0.65rem] tabular-nums"
       # The clock stops shrinking when the span is there to shrink instead.
       #
       # `TIME_CLASS` is shrinkable on purpose: below `sm` the title is hidden and
