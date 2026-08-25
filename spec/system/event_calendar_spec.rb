@@ -17,8 +17,15 @@ RSpec.describe "Event calendar", :js do
   let(:title) { "#{calendar} [data-slot=event-calendar-title]" }
   let(:agenda) { "#{calendar} [data-slot=event-calendar-agenda]" }
 
+  # Clicking a trigger is not the same as having a menu: the panel's items are
+  # links, so a click that lands while Turbo is still swapping pages hits the
+  # *old* trigger — and because that menu is open, the click closes it rather
+  # than opening anything. Waiting on the content's own state is what tells the
+  # two apart, and turns a silently closed menu into a failure that says so
+  # instead of an empty list three lines further down.
   def open_panel
     find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]").click
+    find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-content][data-state=open]")
   end
 
   def nav_button(label) = find("#{calendar} [data-slot=event-calendar-nav] button[aria-label='#{label}']")
@@ -253,6 +260,12 @@ RSpec.describe "Event calendar", :js do
     it "swaps the monthly question for the day's own", :aggregate_failures do
       open_panel
       find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      # The item is a link, so the day arrives over Turbo — and the trigger is
+      # the one element that says which page you are on, because it names the
+      # state it opens. Without this the panel is opened on whichever page
+      # happens to be mounted, which is the month often enough to pass.
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Daily")
+
       open_panel
 
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))

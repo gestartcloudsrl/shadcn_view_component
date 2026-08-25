@@ -44,9 +44,31 @@ module SystemHelpers
 
   # Stimulus connects after the module graph loads; wait for it rather than
   # sleeping.
+  #
+  # Waiting for `window.Stimulus` is not enough, and the gap is not theoretical:
+  # the dummy assigns it on the line *before* `registerShadcnControllers`, so
+  # the application object exists for a moment in which no controller does. A
+  # click that lands in that moment does nothing at all — no error and no
+  # retry, because the element was simply not listening yet — and the example
+  # fails later, somewhere else, as an empty list.
+  #
+  # So this waits on the thing actually being asked for: every identifier the
+  # page names in a `data-controller` has a module registered to answer it.
   def wait_for_stimulus
     Timeout.timeout(Capybara.default_max_wait_time) do
-      sleep 0.05 until page.evaluate_script("!!window.Stimulus")
+      sleep 0.05 until page.evaluate_script(<<~JS)
+        (() => {
+          const application = window.Stimulus
+          if (!application) return false
+
+          const registered = new Set(application.router.modules.map((module) => module.identifier))
+
+          return [ ...document.querySelectorAll("[data-controller]") ]
+            .flatMap((element) => element.dataset.controller.trim().split(/\\s+/))
+            .filter(Boolean)
+            .every((identifier) => registered.has(identifier))
+        })()
+      JS
     end
   end
 
