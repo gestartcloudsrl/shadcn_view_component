@@ -608,10 +608,17 @@ either: a calendar handed an array works with no server round trip.
 Named rather than left to be discovered:
 
 - **splitting the controller.** 306 of its 571 lines are the redraw, which three
-  of the four readings never run — they ship none of its payload either, so it
-  is downloaded and parsed and not used. Extracting the keyboard and the
-  selection into a module both halves share is the shape; it is the one step of
-  the reading split that was named and not taken.
+  of the four readings never run. That much is true and it is where this entry
+  used to stop — but "so it is downloaded and unused" was measured afterwards
+  and does not follow: `shadcn/index.js` imports all thirty-three controllers
+  eagerly, because a host registers them with one call. A second controller
+  would be imported there too. The redraw is 11 KB of the 208 KB a host gets
+  whichever components it uses, and splitting it moves none of them.
+
+  So the split would buy readability and nothing else, which is a smaller reason
+  than the one first written down. **The byte question is a different one** — a
+  registry a host can register from selectively — and it is the gem's, not this
+  family's.
 - **the week view.** The switcher and the day view are built — see *The period,
   and the day*. A week is the one shape left, and it is the one that needs a
   time axis *across* seven days rather than down one; the hours reading has the
