@@ -173,6 +173,14 @@ starting wherever the day's one-day jobs leave it — so the first band's rows a
 days that need fewer. A five-day job then starts at the same row in every cell,
 measured at 89 pixels from the top of all five.
 
+**And only in the grid.** A held row is a grid idea: there a day is a cell and
+what lines up is a *row index*, since every chip is full width. In the rows
+arrangement a day is a row and what would have to line up is an *x*, decided by
+the widths of the chips before it — 193, 202 and 214 pixels for three of them,
+because a chip is as wide as its client's name and its crew. No placeholder can
+align those, so the strip hides them; the one that was there measured 25 pixels
+and bought a meaningless indent.
+
 **Only on the days that have something to align.** A day with no crossing job is
 not part of any band, so reserving there bought an empty row and nothing else —
 a Monday with eleven jobs and no fit-out opened on a gap. Held rows went from

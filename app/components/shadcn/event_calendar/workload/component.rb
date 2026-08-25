@@ -46,6 +46,23 @@ module Shadcn
         # rule went nowhere: `rows:…day-ticks:block` could not fire, since ticks
         # are the events reading's and `rows:` needs `data-rows`, which only
         # these two set.
+        # A held row is a grid idea. In the strip a day is a row and its jobs
+        # run left to right, so what would have to line up is an *x*, and that
+        # is decided by the widths of the chips before it — 193, 202 and 214
+        # pixels for three of them, because a chip is as wide as its client's
+        # name and its crew. No placeholder can align those; the one that was
+        # there measured 25 pixels and bought a meaningless indent.
+        # A workload row is a fixed 80px of chips that scroll sideways, so it says
+        # so itself — these left `ROWS_TOKENS` when the hours reading needed a
+        # cell that grows with its lanes, and a rule a reading has to undo does
+        # not belong to the frame.
+        CELL_TOKENS =
+          "rows:[&_[data-slot=event-calendar-day]]:items-center " \
+          "rows:[&_[data-slot=event-calendar-day]]:h-20 " \
+          "rows:[&_[data-slot=event-calendar-day]]:min-h-0"
+
+        HELD_TOKENS = "rows:[&_[data-slot=event-calendar-day-held]]:hidden"
+
         STRIP_TOKENS =
           "rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto " \
           "rows:[&_[data-slot=event-calendar-day-assignees]]:flex-row " \
@@ -88,7 +105,7 @@ module Shadcn
 
         style do
           base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
-                 "#{STRIP_TOKENS} #{STRIP_CHIP_TOKENS}" }
+                 "#{CELL_TOKENS} #{STRIP_TOKENS} #{STRIP_CHIP_TOKENS} #{HELD_TOKENS}" }
         end
 
         GROUPINGS = %i[assignees events].freeze
