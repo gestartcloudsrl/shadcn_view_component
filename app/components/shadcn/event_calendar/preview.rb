@@ -79,7 +79,8 @@ module Shadcn
       # `@hidden`: they exist to be diffed and audited, not browsed.
       #
       # @param month text
-      # @param view select [grid, rows, hours]
+      # @param view select [grid, rows, hours, daily]
+      # @param showing select [both, axis, agenda]
       # @param most number
       # @param all_day number
       # @param spanning number
@@ -90,12 +91,13 @@ module Shadcn
       # @param from number
       # @param to number
       def density(month: "2026-08-01", view: "grid", most: 30, all_day: 1, spanning: 3,
-                  colored: false, show_all: false, group: "events", shape: "chips", from: 7, to: 23)
+                  colored: false, show_all: false, group: "events", shape: "chips",
+                  showing: "both", from: 7, to: 23)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         here = lambda do |**changed|
           state = { month:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
-                    show_all: cast.cast(show_all), group:, shape:, from:, to: }.merge(changed)
+                    show_all: cast.cast(show_all), group:, shape:, showing:, from:, to: }.merge(changed)
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -112,7 +114,13 @@ module Shadcn
                    view_url: ->(name) { here.call(view: name) },
                    month_url: ->(date) { here.call(month: date.iso8601) } }
 
-        if view.to_s == "hours"
+        if view.to_s == "daily"
+          render_component(**common, reading: :daily, selected: shown,
+                           window: (from.to_i..to.to_i), shape: shape.to_sym,
+                           showing: showing.to_sym,
+                           shape_url: ->(form) { here.call(shape: form) },
+                           showing_url: ->(half) { here.call(showing: half) })
+        elsif view.to_s == "hours"
           render_component(**common, reading: :hours, window: (from.to_i..to.to_i),
                            shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })
         else

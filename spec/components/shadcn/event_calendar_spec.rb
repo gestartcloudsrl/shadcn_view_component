@@ -579,6 +579,40 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # The day the toolbar's period switch asks for, and what the agenda was
+  # always going to become. It inherits the hours reading because a day is
+  # where that axis finally has room — the same twenty-four hours that were a
+  # twenty-eighth of a page in a month are the whole width here.
+  describe "the daily reading" do
+    def day(showing)
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), reading: :daily,
+        showing:, window: (7..19),
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 4, 9) },
+                  { title: "Stock take", starts_at: Date.new(2026, 8, 4) } ]
+      ))
+      page
+    end
+
+    it "titles itself with the day, not the month" do
+      expect(day(:both).first("[data-slot=event-calendar-title]").text).to eq("Tuesday, August 4")
+    end
+
+    # Each half answers a question the other cannot: the axis says *when* the
+    # day is busy and has no room for a name, the list says *what* each job is
+    # and cannot show a gap.
+    it "draws the halves it is asked for", :aggregate_failures do
+      expect(day(:both)).to have_css("[data-slot=event-calendar-ruler]")
+        .and have_css("[data-slot=event-calendar-agenda]")
+      expect(day(:axis)).to have_no_css("[data-slot=event-calendar-agenda]", visible: :all)
+      expect(day(:agenda)).to have_no_css("[data-slot=event-calendar-ruler]", visible: :all)
+    end
+
+    it "steps a day at a time, not a month" do
+      expect(day(:both).first("[aria-label='Go to the Previous Day']")).to be_present
+    end
+  end
+
   describe "what the controller is handed" do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 

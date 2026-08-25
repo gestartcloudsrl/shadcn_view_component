@@ -52,9 +52,13 @@ module Shadcn
           "[&_[data-slot=event-calendar-ruler-pad]]:self-stretch " \
           "[&_[data-slot=event-calendar-ruler-pad]]:bg-background"
 
+        # Named so the daily reading can build on it: a day is this axis with
+        # room, so it wants every rule and then some of its own.
+        BASE = "#{EventCalendar::Component::BASE_TOKENS} " \
+               "#{EventCalendar::Component::ROWS_TOKENS} #{TOKENS}"
+
         style do
-          base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
-                 "#{TOKENS}" }
+          base { BASE }
         end
 
         AXIS_CLASS = "relative min-w-0 grow self-stretch"
@@ -127,7 +131,7 @@ module Shadcn
         RULER_BODY_CLASS = "relative h-4 grow"
         HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
 
-        attr_reader :window, :shape, :shape_url
+        attr_reader :window, :shape, :shape_url, :showing_url
 
         # @param window [Range] the hours the axis shows. A calendar of field
         #   work spent thirty per cent of its width on midnight-to-seven —
@@ -144,9 +148,10 @@ module Shadcn
         #   state. Present, the menu is links; absent, it dispatches. A shape is
         #   different markup, not a class toggle — drawing both and hiding one
         #   is the trade this reading spent a whole round removing.
-        def initialize(window: (0..24), shape: :chips, shape_url: nil, **attributes)
+        def initialize(window: (0..24), shape: :chips, shape_url: nil, showing_url: nil, **attributes)
           @window = window
           @shape_url = shape_url
+          @showing_url = showing_url
           @shape = LANE_HEIGHTS.key?(shape&.to_sym) ? shape.to_sym : :chips
           super(**attributes)
         end

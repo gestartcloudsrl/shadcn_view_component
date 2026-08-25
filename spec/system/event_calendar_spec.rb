@@ -217,6 +217,7 @@ RSpec.describe "Event calendar", :js do
   # is showing now, and the panel is links to the other state.
   describe "the options panel, as links" do
     before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
       visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=8&colored=true"
       wait_for_stimulus
     end
@@ -234,16 +235,28 @@ RSpec.describe "Event calendar", :js do
       expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-item]", visible: :all)
     end
 
-    # One panel, two questions: which view, and the only question that view has.
-    # The toolbar used to carry a control per answer, and two of them were
-    # always about a view you were not in.
-    it "asks which view first, then the question that view has", :aggregate_failures do
+    # One panel, narrowing: the period, then how to read it, then the only
+    # question that reading has. The toolbar used to carry a control per answer,
+    # and most of them were always about a view you were not in.
+    it "narrows from the period to the question the view has", :aggregate_failures do
       open_panel
 
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
-        .to eq([ "Show the month as", "Group cells by" ])
+        .to eq([ "Show", "Show the month as", "Group cells by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Grid", "Rows", "Hours", "By assignee", "By event" ])
+        .to eq([ "Monthly", "Daily", "Grid", "Rows", "Hours", "By assignee", "By event" ])
+    end
+
+    # A day has one way of being read, so the middle question goes away.
+    it "drops the monthly question in the daily period", :aggregate_failures do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      open_panel
+
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the day as" ])
+      expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
+        .to eq([ "Monthly", "Daily", "Hours only", "List only", "Hours and list" ])
     end
 
     it "carries the month across to the hours view" do
@@ -529,6 +542,10 @@ RSpec.describe "Event calendar", :js do
   # announces the ask and leaves the DOM alone. `month_url:` is the whole of its
   # navigation, and what a host wires to its own route.
   describe "walking the months in a server-drawn reading" do
+    # Explicit, because these examples read a desktop layout and the suite runs
+    # in a random order behind ones that resize the window to a phone.
+    before { page.driver.browser.manage.window.resize_to(1400, 1000) }
+
     it "moves and keeps the view it was in", :aggregate_failures do
       visit "/lookbook/preview/shadcn/event_calendar/density?month=2026-08-01&view=hours&most=4"
       wait_for_stimulus
@@ -556,6 +573,30 @@ RSpec.describe "Event calendar", :js do
 
       expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
                                text: I18n.l(Date.current, format: "%B %Y"))
+    end
+  end
+
+  # A month needs its date column because forty-two rows have to say which is
+  # which; a day does not, and it was charging the axis a `w-14` to repeat what
+  # the title already says. Hidden in CSS, so only a browser can see it gone.
+  describe "the daily reading" do
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/lookbook/preview/shadcn/event_calendar/density" \
+            "?view=daily&month=2026-08-04&most=8&from=7&to=19"
+      wait_for_stimulus
+    end
+
+    it "gives the axis the whole width", :aggregate_failures do
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-head]")
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
+    end
+
+    it "walks a day at a time" do
+      find("#{calendar} [aria-label='Go to the Next Day']").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
+                               text: "Wednesday, August 5")
     end
   end
 
