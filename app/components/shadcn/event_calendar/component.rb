@@ -98,6 +98,23 @@ module Shadcn
       # three ways of being read and a day has one; `PERIODS` is what the panel
       # asks first, and `VIEWS` is only the monthly follow-up.
       PERIODS = %i[monthly daily].freeze
+
+      # Keywords a *reading* owns. A reading that declares one consumes it and
+      # it never arrives here; one that does not would forward it to the element
+      # like any other prop, and `Component.new(reading: :auto, group: :events)`
+      # rendered `group="events"` on the root — an attribute HTML has no idea
+      # what to do with.
+      #
+      # So they are namespaced instead of passed through. The element says
+      # `data-event-calendar-group="events"`, which is at least valid and at
+      # least legible in an inspector; what it does *not* mean is that this
+      # calendar groups by event, because a reading without a grouping has none
+      # — it means someone asked for one here.
+      #
+      # Callables are dropped rather than stringified: a `#{group_url}` in the
+      # markup is a `#<Proc>` and nothing else.
+      READING_KEYWORDS = %i[group group_url show_all show_all_url arrangement
+                            window shape shape_url showing showing_url].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
       # How a day *sits* in a row is each reading's own, and is deliberately not
@@ -342,6 +359,16 @@ module Shadcn
         @reading = :auto if @reading == :events
         @view_url = view_url
         super(**attributes)
+      end
+
+      # Anything a reading owns that reached this far was meant for a different
+      # one — see `READING_KEYWORDS`.
+      def attributes
+        super.to_h do |key, value|
+          next [ key, value ] unless READING_KEYWORDS.include?(key)
+
+          [ :"data-event-calendar-#{key.to_s.tr('_', '-')}", (value unless value.respond_to?(:call)) ]
+        end.compact
       end
 
       def element_attributes(**defaults)

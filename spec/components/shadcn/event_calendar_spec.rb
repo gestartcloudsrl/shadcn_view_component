@@ -667,6 +667,37 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # `**attributes` is `{...props}`: `id:`, `title:`, `href:` and the rest reach
+  # the element untouched, which is the whole point of the bag. But a keyword a
+  # *reading* owns, arriving at one that does not, was forwarded the same way —
+  # so `reading: :auto, group: :events` rendered `group="events"`, an attribute
+  # HTML has no idea what to do with.
+  describe "a keyword meant for another reading" do
+    subject(:root) do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), reading: :auto, events: [],
+        group: :events, show_all: true, group_url: ->(cut) { cut }, id: "cal", title: "A month"
+      ))
+      page.first("[data-slot=event-calendar]")
+    end
+
+    it "is namespaced rather than left as markup HTML cannot read", :aggregate_failures do
+      expect(root["data-event-calendar-group"]).to eq("events")
+      expect(root["group"]).to be_nil
+    end
+
+    # A `#<Proc>` in an attribute is noise with no reader.
+    it "drops one whose value is a callback" do
+      expect(root["data-event-calendar-group-url"]).to be_nil
+    end
+
+    # The bag still is the bag.
+    it "leaves an ordinary prop alone", :aggregate_failures do
+      expect(root["id"]).to eq("cal")
+      expect(root["title"]).to eq("A month")
+    end
+  end
+
   describe "what the controller is handed" do
     let(:template) { Nokogiri::HTML5.fragment(fragment.at_css("template").inner_html) }
 
