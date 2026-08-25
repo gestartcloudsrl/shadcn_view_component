@@ -117,9 +117,10 @@ module Shadcn
         if view.to_s == "daily"
           render_component(**common, reading: :daily, selected: shown,
                            window: (from.to_i..to.to_i), shape: shape.to_sym,
-                           showing: showing.to_sym,
+                           showing: showing.to_sym, group: group.to_sym,
                            shape_url: ->(form) { here.call(shape: form) },
-                           showing_url: ->(half) { here.call(showing: half) })
+                           showing_url: ->(half) { here.call(showing: half) },
+                           group_url: ->(cut) { here.call(group: cut) })
         elsif view.to_s == "hours"
           render_component(**common, reading: :hours, window: (from.to_i..to.to_i),
                            shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })

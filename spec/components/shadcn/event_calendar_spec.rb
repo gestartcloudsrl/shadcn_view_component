@@ -608,6 +608,38 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(day(:agenda)).to have_no_css("[data-slot=event-calendar-ruler]", visible: :all)
     end
 
+    # The question a day actually gets asked is not "what is on" but "who is
+    # where, and who is free at two" — so cut by operator it is a row each,
+    # their jobs along the same hours, and the list below cut the same way and
+    # in the same order, so whoever you found above you find again below.
+    it "draws a row and a list section per operator, in one order", :aggregate_failures do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), reading: :daily,
+        group: :assignees, window: (7..19),
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 4, 9),
+                    assignees: [ "Ada Lovelace", "Grace Hopper" ] },
+                  { title: "Callout", starts_at: Time.zone.local(2026, 8, 4, 14),
+                    assignees: [ "Ada Lovelace" ] } ]
+      ))
+
+      expect(page.all("[data-slot=event-calendar-resource]").map { _1.text[/[A-Z][a-z]+ [A-Z][a-z]+/] })
+        .to eq([ "Ada Lovelace", "Grace Hopper" ])
+      expect(page.all("[data-slot=event-calendar-agenda-title]").map { _1.text[/[A-Z][a-z]+ [A-Z][a-z]+/] })
+        .to eq([ "Ada Lovelace", "Grace Hopper" ])
+    end
+
+    # A job with two people on it is on both their rows, because both are on it.
+    it "puts a shared job on every row it belongs to" do
+      render_inline(described_class.new(
+        month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), reading: :daily,
+        group: :assignees, showing: :axis, window: (7..19),
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 4, 9),
+                    assignees: [ "Ada Lovelace", "Grace Hopper" ] } ]
+      ))
+
+      expect(page.all("[data-slot=event-calendar-day-item]").size).to eq(2)
+    end
+
     it "steps a day at a time, not a month" do
       expect(day(:both).first("[aria-label='Go to the Previous Day']")).to be_present
     end

@@ -203,10 +203,16 @@ module Shadcn
         end
       end
 
-      public def track_on(day, floor: TRACK_FLOOR)
+      # `for_assignee:` narrows it to one person's work, which is what a daily
+      # view cut by operator draws a row of: their lanes are packed among their
+      # own jobs, so two people working at the same hour do not push each other
+      # down a row they are not on.
+      public def track_on(day, floor: TRACK_FLOOR, for_assignee: nil)
         occupied = []
+        listed = ordered_on(day)
+        listed = listed.select { |event| event.assignees.any? { |a| a.name == for_assignee } } if for_assignee
 
-        ordered_on(day).map do |event|
+        listed.map do |event|
           minutes = track_minutes(event, day, floor)
           lane = free_lane(occupied, minutes)
           (occupied[lane] ||= []) << minutes

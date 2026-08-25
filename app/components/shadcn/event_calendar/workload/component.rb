@@ -14,23 +14,17 @@ module Shadcn
       # :workload)` hands over to it.
       class Component < EventCalendar::Component
         include Chips
+        include Groupings
 
-        attr_reader :group, :group_url, :show_all, :show_all_url, :arrangement
+        attr_reader :show_all, :show_all_url, :arrangement
 
-        # @param group [Symbol] `:events` — a chip per intervention, which is
-        #   what a day's work actually is — or `:assignees`, a chip per operator
-        #   with their count.
         # @param show_all [Boolean] render every chip rather than the first
         #   `CAP` and a "+N". Server state, not a class toggle: rendering them
         #   all and hiding the rest cost 1157 KB and 131 ms on 447 events.
         # @param arrangement [Symbol] `:auto` lets the breakpoint decide — rows
         #   below `lg`, the grid above; `:rows` keeps the rows at every width.
-        # @param group_url [#call, nil] given a grouping, the URL of that state
         # @param show_all_url [#call, nil] given the wanted `show_all`, its URL
-        def initialize(group: :events, group_url: nil, show_all: false, show_all_url: nil,
-                       arrangement: :auto, **attributes)
-          @group = GROUPINGS.include?(group&.to_sym) ? group.to_sym : :events
-          @group_url = group_url
+        def initialize(show_all: false, show_all_url: nil, arrangement: :auto, **attributes)
           @show_all = show_all
           @show_all_url = show_all_url
           @arrangement = EventCalendar::Component::ARRANGEMENTS.include?(arrangement&.to_sym) ? arrangement.to_sym : :auto
@@ -99,7 +93,7 @@ module Shadcn
 
         def reading_controls = [ view_panel, show_all_toggle ]
 
-        def reading_label = shadcn_t("event_calendar.group.#{group}")
+        def reading_label = grouping_label
 
         def reading_options = [ grouping_items ]
 
@@ -108,7 +102,6 @@ module Shadcn
                  "#{CELL_TOKENS} #{STRIP_TOKENS} #{STRIP_CHIP_TOKENS} #{HELD_TOKENS}" }
         end
 
-        GROUPINGS = %i[assignees events].freeze
         # How many chips a cell shows before it says "+N", and how many it
         # *renders*. Those used to be different numbers: every chip was rendered
         # and CSS hid the fourth onwards, so "Show all" could be a class toggle.
@@ -223,12 +216,6 @@ module Shadcn
         # the pair `accessibility_spec` excludes as upstream's — 4.34:1 on muted,
         # 4.74:1 on background.
 
-        # No `sm:` gate on either of these any more. They were hidden on a phone
-        # because a 46px grid cell could not hold a name — and below `lg` there is
-        # no grid now, there is a row three hundred pixels wide. A breakpoint rule
-        # written for a layout that no longer exists at any width is a rule that
-        # only ever hides things.
-        NAME_CLASS = "min-w-0 flex-1 truncate text-[0.65rem]"
         # An intervention chip is two levels: the clock and who is on it above,
         # what it is below. It is the one chip with room to be a card — an
         # operator chip is a face and a number and has nothing to put on a second
@@ -322,35 +309,14 @@ module Shadcn
           end
         end
 
-        def grouping_items
-          safe_join([
-            render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.group.label") },
-            render(DropdownMenu::Separator::Component.new),
-            render(DropdownMenu::RadioGroup::Component.new) do
-              safe_join(GROUPINGS.map { |name| grouping_item(name) })
-            end
-          ])
-        end
-
         # Only the extra action goes here: the radio item already carries the
         # dropdown's own, and `data-action` is concatenated rather than replaced.
-
-        # Only the extra action goes here: the radio item already carries the
-        # dropdown's own, and `data-action` is concatenated rather than replaced.
-        def grouping_item(name)
-          href = group_url&.call(name)
-
-          render(DropdownMenu::RadioItem::Component.new(
-            value: name, checked: name == group,
-            **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#regroup" })
-          )) { shadcn_t("event_calendar.group.#{name}") }
-        end
 
         def cell_body(day, on_day:, assignees:, hidden:)
           [
             tag.span(safe_join([ day_marker(day), count_chip(on_day.size) ].compact),
                      "data-slot": "event-calendar-day-head", class: HEAD_CLASS),
-            if group == :assignees then assignee_chips(assignees)
+            if by_assignee? then assignee_chips(assignees)
             else item_chips(on_day, day)
             end
           ].compact
