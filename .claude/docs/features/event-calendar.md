@@ -167,12 +167,19 @@ it is exactly what moved everything below.
 **The order is: one-day all-day, then crossing, then the clock.** A job that is
 true of *this* day and only this day reads above one that is as true tomorrow.
 
-The cost of that order is the continuity the lanes were for: the crossing band
-no longer starts at a fixed row, so a five-day job sits on row one on the days
-below it nothing all-day, and on row two on the days something does — measured
-at 34, 34, 89, 34, 89 pixels from the top of its cells. Holding row one open on
-every day would restore it, at one wasted row on the 24 days of 42 that have no
-one-day all-day job.
+That order would cost the continuity the lanes are for — the crossing band
+starting wherever the day's one-day jobs leave it — so the first band's rows are
+**held open across the week**: as many as its busiest day needs, blank on the
+days that need fewer. A five-day job then starts at the same row in every cell,
+measured at 89 pixels from the top of all five. The price is one empty row on
+the 24 days of 42 that have no one-day all-day job, and on a capped cell that is
+one fewer real chip.
+
+Two things break the band and neither shows in HTML: a held row shorter than a
+real one, and a band that starts wherever the day above it ends. The first cost
+two rounds — the placeholder is built from a chip's own parts now, and every
+chip head carries `min-h-6`, which is what a head with a crew actually measures
+rather than the 16px its avatar class suggests.
 
 **All-day is asked of the day, not of the flag.** A job flagged all-day is one
 everywhere; a timed job that started yesterday and ends tomorrow is one *today*,

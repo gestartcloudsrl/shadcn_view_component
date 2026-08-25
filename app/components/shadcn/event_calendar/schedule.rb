@@ -165,6 +165,25 @@ module Shadcn
       # Returns an array indexed by lane, holes and all: a `nil` is a lane held
       # that day by a job this day does not have, and the cell draws a gap there
       # rather than closing up and moving everything below it.
+      # How many rows the one-day band holds open, across the whole week.
+      #
+      # Without it the crossing band starts wherever that day's one-day jobs
+      # leave it — row one on a day with none, row two on a day with one — and
+      # a five-day job stops reading as one band. Reserving is what a fixed
+      # start costs: an empty row on every day of the week that has fewer
+      # one-day jobs than the week's busiest.
+      #
+      # Per week, because a week is the row a cell is read across. A month-wide
+      # reservation would charge every week for the worst one.
+      public def singles_room(day)
+        week = weeks.find { |candidate| candidate.days.include?(day) }
+        return 0 unless week
+
+        week.days.map { |each| on(each).count { |event| single_day_fact?(event, each) } }.max
+      end
+
+      def single_day_fact?(event, day) = event.all_day_on?(day) && !event.multi_day?
+
       public def crossing_on(day)
         week = weeks.find { |candidate| candidate.days.include?(day) }
         return [] unless week

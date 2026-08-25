@@ -459,6 +459,11 @@ RSpec.describe "reverse parity" do
     "dropdown-menu-content" => %w[w-52 w-56],
     "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
     "event-calendar-day-assignee" => %w[border-border/40],
+    # A lane a day does not use, held open so the day that does use it finds it
+    # in the same place. It wears a chip's own classes because it is a chip with
+    # nothing in it — given a height instead, it came out 45px against a real 53
+    # and put the band it was aligning eight pixels off.
+    "event-calendar-day-held" => %w[bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)],
     # A job that crosses days is drawn on each day it covers, and says so twice:
     # a flat edge on the side it runs off, which is the bars' vocabulary, and a
     # rail of its own colour down the left.
