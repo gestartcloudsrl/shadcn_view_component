@@ -42,15 +42,21 @@ module Shadcn
         RESOURCE_CLASS = "flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1"
         RESOURCE_NAME_CLASS = "min-w-0 flex-1 truncate text-[0.7rem] font-medium"
 
-        attr_reader :showing
+        attr_reader :showing, :showing_url
 
         # @param showing [Symbol] `:both`, `:axis` or `:agenda`
-        def initialize(showing: :both, **attributes)
+        # @param showing_url [#call, nil] given the wanted halves, the URL of
+        #   that state. It lived on `Hours::Component` and only this class ever
+        #   read it, so an hours host could pass one and get nothing.
+        def initialize(showing: :both, showing_url: nil, **attributes)
           @showing = SHOWING.include?(showing&.to_sym) ? showing.to_sym : :both
+          @showing_url = showing_url
           super(**attributes)
         end
 
         def view = :daily
+
+        def cell_role = "listitem"
 
         # The scale has to start where the axes do, and here that is not the
         # date column's `w-14`: cut by operator the left column is the name at
@@ -86,7 +92,15 @@ module Shadcn
 
         def axis? = showing != :agenda
 
-        def agenda? = showing != :axis
+        # `showing` says which halves this reading draws; `@agenda` is the host's
+        # own "not here, I have somewhere better for it". Both have to hold, and
+        # overriding the base with only the first silently ignored a documented
+        # argument.
+        #
+        # Not `super &&`: the base also asks for `day_url`, because there an
+        # agenda is a frame something else fills. Here the reading draws its own
+        # day, server-side, so there is nothing to wait for.
+        def agenda? = @agenda && showing != :axis
 
         def reading_label
           safe_join([ shadcn_t("event_calendar.daily.#{showing}"), grouping_label ], " · ")
@@ -160,7 +174,7 @@ module Shadcn
                 tag.span(safe_join([ tag.span(assignee.name, class: RESOURCE_NAME_CLASS),
                                      count_chip(count) ].compact),
                          "data-slot": "event-calendar-resource", class: RESOURCE_CLASS),
-                assignee_axis(assignee)
+                day_axis(selected, for_assignee: assignee.name)
               ]),
               "data-slot": "event-calendar-day", class: DAY_CLASS,
               "data-day": selected.iso8601, role: "listitem"
@@ -192,16 +206,6 @@ module Shadcn
             tag.ul(safe_join(on_them.map { |event| agenda_item(event) }),
                    "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS)
           ])
-        end
-
-        def assignee_axis(assignee)
-          placed = schedule.track_on(selected, floor: floor_minutes, for_assignee: assignee.name)
-          lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
-
-          tag.span(safe_join(placed.map { |slot| draw(selected, *slot) }),
-                   "data-slot": "event-calendar-day-track",
-                   class: [ AXIS_CLASS, GRIDLINES_CLASS, AXIS_HEIGHT_CLASS ],
-                   style: "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem")
         end
       end
     end

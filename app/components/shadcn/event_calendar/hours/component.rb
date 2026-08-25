@@ -62,11 +62,15 @@ module Shadcn
         end
 
         AXIS_CLASS = "relative min-w-0 grow self-stretch"
-        # Eight gridlines, matching the eight marks `#hour_marks` draws, whatever
-        # window the axis is showing. A gradient rather than twenty-four
-        # elements: they are decoration, and a node each would be a thousand of
-        # them in a month.
-        GRIDLINES_CLASS = "bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_12.5%)]"
+        # One gridline per mark, whatever window the axis is showing — the
+        # spacing is `--gridline`, set from the marks themselves rather than
+        # hard-coded. It was a flat 12.5%, which agrees with `#hour_marks` only
+        # when the window divides into eight: a 07–19 axis drew six labels
+        # against eight lines, each naming an hour the line beside it did not.
+        #
+        # A gradient rather than twenty-four elements: they are decoration, and
+        # a node each would be a thousand of them in a month.
+        GRIDLINES_CLASS = "bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))]"
         AXIS_HEIGHT_CLASS = "h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]"
         BAR_CLASS = "absolute top-(--lane) left-(--at) h-2 w-(--for) min-w-[3px] rounded-full"
         BAR_PAINT_CLASS = "bg-[var(--event-color)]/70 ring-1 ring-background"
@@ -136,7 +140,7 @@ module Shadcn
         RULER_BODY_CLASS = "relative h-4 grow"
         HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
 
-        attr_reader :window, :shape, :shape_url, :showing_url
+        attr_reader :window, :shape, :shape_url
 
         # @param window [Range] the hours the axis shows. A calendar of field
         #   work spent thirty per cent of its width on midnight-to-seven —
@@ -153,10 +157,13 @@ module Shadcn
         #   state. Present, the menu is links; absent, it dispatches. A shape is
         #   different markup, not a class toggle — drawing both and hiding one
         #   is the trade this reading spent a whole round removing.
-        def initialize(window: (0..24), shape: :chips, shape_url: nil, showing_url: nil, **attributes)
-          @window = window
+        # The window is clamped like every other argument here rather than
+        # trusted: `(7..7)` reached `.step(0)` and raised, and a reversed range
+        # drew a negative axis, where every sibling argument falls back.
+        def initialize(window: (0..24), shape: :chips, shape_url: nil, **attributes)
+          first = window.first.to_i.clamp(0, 23)
+          @window = first..window.last.to_i.clamp(first + 1, 24)
           @shape_url = shape_url
-          @showing_url = showing_url
           @shape = LANE_HEIGHTS.key?(shape&.to_sym) ? shape.to_sym : :chips
           super(**attributes)
         end
@@ -227,14 +234,14 @@ module Shadcn
 
         # Position is a percentage of the window rather than a pixel, so the
         # marks stay aligned at every width without anything measuring anything.
-        def day_axis(day)
-          placed = schedule.track_on(day, floor: floor_minutes)
+        def day_axis(day, for_assignee: nil)
+          placed = schedule.track_on(day, floor: floor_minutes, for_assignee:)
           lanes = placed.map { |_, lane, _, _| lane }.max.to_i + 1
 
-          tag.span(safe_join(placed.map { |slot| draw(day, *slot) }),
+          tag.span(safe_join(placed.filter_map { |slot| draw(day, *slot) }),
                    "data-slot": "event-calendar-day-track",
                    class: [ AXIS_CLASS, GRIDLINES_CLASS, AXIS_HEIGHT_CLASS ],
-                   style: "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem")
+                   style: axis_style(lanes))
         end
 
         # Clipped to the window before anything is drawn from it.
@@ -247,8 +254,21 @@ module Shadcn
         def draw(day, event, lane, from, to)
           low, high = window.first * 60, window.last * 60
           slot = [ event, lane, from.clamp(low, high), to.clamp(low, high) ]
+          # Nothing at all when the window does not contain it. Drawn, a job
+          # wholly outside came out zero-length pinned to an edge — and a chip
+          # that short is `w-auto`, so a 5am callout on an 07–19 axis was a
+          # full-width label sitting on the 7:30 job it shares lane zero with.
+          # An axis that does not show an hour cannot show what happened in it.
+          return if slot[2] == slot[3] && !event.all_day?
 
           chips? ? chip(day, *slot) : bar(day, *slot)
+        end
+
+        # `--gridline` is one mark's share of the axis, so the lines and the
+        # labels above them are the same divisions by construction.
+        def axis_style(lanes)
+          "--lanes:#{lanes};--lane-h:#{LANE_HEIGHTS.fetch(shape)}rem;" \
+            "--gridline:#{(100.0 / hour_marks.count).round(4)}%"
         end
 
         def bar(day, event, lane, from, to)

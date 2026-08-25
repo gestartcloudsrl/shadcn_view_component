@@ -50,6 +50,10 @@ module Shadcn
         # date centred in its column, so it says so itself — these left `ROWS_TOKENS` when the hours reading needed a
         # cell that grows with its lanes, and a rule a reading has to undo does
         # not belong to the frame.
+        # The operator's name in a chip. Workload's alone: the daily reading
+        # sizes its own column and `Chips` is for what both draw.
+        NAME_CLASS = "min-w-0 flex-1 truncate text-[0.65rem]"
+
         CELL_TOKENS =
           "rows:[&_[data-slot=event-calendar-day]]:items-center " \
           "rows:[&_[data-slot=event-calendar-day]]:h-20 " \
