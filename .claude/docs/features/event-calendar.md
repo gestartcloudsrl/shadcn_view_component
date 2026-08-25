@@ -164,11 +164,16 @@ lane held that day by a job this day does not have, and the cell draws an
 invisible chip there rather than closing up. The hole is the feature — closing
 it is exactly what moved everything below.
 
-**All-day and crossing, and nothing else.** A timed job that happens to run five
-days is a normal event with a clock: it reads in the third band with the rest,
-in clock order, and moves between rows as the days around it change. Giving it a
-lane bought continuity at the price of the bands — "→ 5:00 PM" sat above "All
-day, van off the road", which is the one thing the bands exist to prevent.
+**All-day is asked of the day, not of the flag.** A job flagged all-day is one
+everywhere; a timed job that started yesterday and ends tomorrow is one *today*,
+because there is no hour of today it is not on — and its own chip has always
+said "All day" there. So the first band holds both, and a timed job drops to the
+third on the days it starts and ends, where "→ 5:00 PM" belongs.
+
+Banding by the flag instead put a chip reading "All day" and crossing days below
+one reading "All day" that did not. Banding every crossing job by its length
+instead put "→ 5:00 PM" above "All day, van off the road". The day is the only
+question that gets both right, and it is the question the clock already asks.
 
 The lanes are ranked among the band's own jobs, not by `pack`'s numbers. Those
 are assigned over *every* event in the week, so a job outside this band holding

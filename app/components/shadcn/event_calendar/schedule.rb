@@ -125,7 +125,7 @@ module Shadcn
       def ordered_on(day)
         events.each_with_index
               .select { |event, _| event.covers?(day) }
-              .sort_by { |event, index| [ *event.day_sort_key, index ] }
+              .sort_by { |event, index| [ *event.day_sort_key(day), index ] }
               .map(&:first)
       end
 
@@ -172,7 +172,9 @@ module Shadcn
         week = weeks.find { |candidate| candidate.days.include?(day) }
         return [] unless week
 
-        crossing = week.segments.select { |segment| segment.event.all_day? && segment.event.multi_day? }
+        crossing = week.segments.select do |segment|
+          segment.event.multi_day? && segment.event.all_day_on?(day)
+        end
         # Ranked among themselves, not by `#pack`'s own lane numbers. Those are
         # assigned over *every* event in the week, so a one-day all-day job
         # holding lane 1 left a hole at the top of five consecutive cells that
