@@ -616,9 +616,14 @@ Named rather than left to be discovered:
   whichever components it uses, and splitting it moves none of them.
 
   So the split would buy readability and nothing else, which is a smaller reason
-  than the one first written down. **The byte question is a different one** — a
-  registry a host can register from selectively — and it is the gem's, not this
-  family's.
+  than the one first written down.
+
+  And the byte question needs nothing built: `CONTROLLERS` is already exported
+  and `pin_all_from` already pins every controller individually, so a host that
+  wants a subset imports them by path and skips `index.js`. What `index.js` buys
+  is one call and no list to maintain; what it costs is all thirty-three, and a
+  host can already decline that trade. Registering is not loading — importing
+  the map pulls every module in either way, because those imports are static.
 - **the week view.** The switcher and the day view are built — see *The period,
   and the day*. A week is the one shape left, and it is the one that needs a
   time axis *across* seven days rather than down one; the hours reading has the

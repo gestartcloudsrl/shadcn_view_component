@@ -577,7 +577,9 @@ noting that it would not have delivered the component that raised the question:
   Splitting the event calendar's controller is named there too, with what
   measuring it changed: the redraw three readings never run is 11 KB of the
   208 KB of controllers a host registers whatever it uses, so the split is a
-  readability argument and not a payload one.
+  readability argument and not a payload one — and the payload has an answer
+  already, since `CONTROLLERS` is exported and every controller is pinned
+  individually.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
   false positives.
 - **Portalling to `document.body`** — unbinds the Stimulus actions inside the
