@@ -171,9 +171,12 @@ That order would cost the continuity the lanes are for — the crossing band
 starting wherever the day's one-day jobs leave it — so the first band's rows are
 **held open across the week**: as many as its busiest day needs, blank on the
 days that need fewer. A five-day job then starts at the same row in every cell,
-measured at 89 pixels from the top of all five. The price is one empty row on
-the 24 days of 42 that have no one-day all-day job, and on a capped cell that is
-one fewer real chip.
+measured at 89 pixels from the top of all five.
+
+**Only on the days that have something to align.** A day with no crossing job is
+not part of any band, so reserving there bought an empty row and nothing else —
+a Monday with eleven jobs and no fit-out opened on a gap. Held rows went from
+eleven to four across a month, with the alignment unchanged.
 
 Two things break the band and neither shows in HTML: a held row shorter than a
 real one, and a band that starts wherever the day above it ends. The first cost
