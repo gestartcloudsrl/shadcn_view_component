@@ -564,13 +564,15 @@ noting that it would not have delivered the component that raised the question:
 
 ## Deliberately not doing
 
-- **The four halves of the event calendar** — week/day/list views, drag to move
+- **The remaining halves of the event calendar** — the week view, drag to move
   and resize, a "+2 more" popover, and recurrence. Each is named with its reason
   in [features/event-calendar.md](features/event-calendar.md#not-done); the
-  short version is that two of them need a write path an application owns, one
-  needs a time axis that is a different component's worth of geometry, and the
-  popover would cost the one-tap-target-per-day property the mobile reading is
-  built on.
+  short version is that two of them need a write path an application owns, and
+  the popover would cost the one-tap-target-per-day property the mobile reading
+  is built on.
+
+  The day view and the time axis are no longer on this list — they were built,
+  and the entry said otherwise for a while after.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
   false positives.
 - **Portalling to `document.body`** — unbinds the Stimulus actions inside the

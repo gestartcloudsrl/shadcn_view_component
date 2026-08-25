@@ -607,12 +607,15 @@ either: a calendar handed an array works with no server round trip.
 
 Named rather than left to be discovered:
 
-- **a view switcher, and the week and day views behind it.** The toolbar has a
-  grouping menu and a Show all toggle but no Month / Week / Day tabs. The day
-  view is the one already half-built: the agenda *is* it, which is why `agenda:`
-  turns it off rather than deleting it — a host that puts the day somewhere else
-  today is not choosing against the tab tomorrow. Week needs a time axis, which
-  is a different component's worth of geometry.
+- **splitting the controller.** 306 of its 571 lines are the redraw, which three
+  of the four readings never run — they ship none of its payload either, so it
+  is downloaded and parsed and not used. Extracting the keyboard and the
+  selection into a module both halves share is the shape; it is the one step of
+  the reading split that was named and not taken.
+- **the week view.** The switcher and the day view are built — see *The period,
+  and the day*. A week is the one shape left, and it is the one that needs a
+  time axis *across* seven days rather than down one; the hours reading has the
+  axis now, so this is smaller than it was, but it is not free.
 - **drag to move, drag to resize.** Both need a write path — a host endpoint, an
   optimistic update, a rollback — which is an application's decision, not a
   library's.
