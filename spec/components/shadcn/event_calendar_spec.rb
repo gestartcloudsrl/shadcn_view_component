@@ -466,6 +466,9 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(bars.first[:style]).to include("--at:0.0%", "--for:100.0%")
     end
 
+    # And the test is what the chip *occupies*, not what the event is flagged:
+    # the middle day of a job that crosses days covers the whole window too, and
+    # said "All day" in 130 pixels until it was measured that way.
     it "runs the whole width as a chip too" do
       render_inline(described_class.new(
         month: Date.new(2026, 8, 1), reading: :hours, window: (0..24), shape: :chips,
