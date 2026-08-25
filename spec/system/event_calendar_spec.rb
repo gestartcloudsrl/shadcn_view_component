@@ -492,6 +492,38 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # A workload row is a fixed 80px of chips that scroll sideways, and nothing
+  # asserted it: its rules moved out of the shared frame when the hours reading
+  # needed a cell that grows with its lanes, the move silently did not land, and
+  # three commits shipped with rows that were as tall as their contents.
+  #
+  # It also has no band to align. A day is a row there, so what would have to
+  # line up is an *x*, and that is decided by the widths of the chips before it
+  # — 193, 202 and 214 pixels for three of them, because a chip is as wide as
+  # its client's name and its crew. The held rows are a grid idea and are
+  # hidden here.
+  describe "the rows arrangement" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density" \
+            "?view=rows&most=6&all_day=1&spanning=3&group=events"
+      wait_for_stimulus
+    end
+
+    it "keeps every row the same fixed height" do
+      heights = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("[data-slot=event-calendar-day]")]
+          .filter((cell) => cell.offsetParent)
+          .map((cell) => Math.round(cell.getBoundingClientRect().height))
+      JS
+
+      expect(heights.uniq).to eq([ 80 ])
+    end
+
+    it "draws no held row, having nothing to hold one for" do
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-held]")
+    end
+  end
+
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
   # and its dots, and the events are read in the agenda — a cell that width can
   # hold a title or be legible, and not both.

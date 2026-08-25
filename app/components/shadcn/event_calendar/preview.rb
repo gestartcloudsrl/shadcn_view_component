@@ -88,7 +88,7 @@ module Shadcn
       # @param shape select [chips, bars]
       # @param from number
       # @param to number
-      def density(view: "grid", most: 30, all_day: 1, spanning: 2, colored: false,
+      def density(view: "grid", most: 30, all_day: 1, spanning: 3, colored: false,
                   show_all: false, group: "events", shape: "chips", from: 7, to: 23)
         cast = ActiveModel::Type::Boolean.new
         here = lambda do |**changed|
