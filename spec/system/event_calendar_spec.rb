@@ -542,6 +542,21 @@ RSpec.describe "Event calendar", :js do
 
       expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "September 2026")
     end
+
+    # `Today` is the same link with `Date.current` in it, so it comes back from
+    # anywhere in one step rather than stepping back a month at a time. It was
+    # dead for as long as the preview passed no `month_url:` — which is also
+    # what a host that passes none gets, by contract: the controller announces
+    # `month-change` and leaves the DOM alone.
+    it "comes back to this month from wherever it is" do
+      visit "/lookbook/preview/shadcn/event_calendar/density?month=2026-10-01&view=grid&most=3"
+      wait_for_stimulus
+
+      find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Today").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
+                               text: I18n.l(Date.current, format: "%B %Y"))
+    end
   end
 
   # Not a narrower desktop: a different reading. Below `sm` a cell is a number
