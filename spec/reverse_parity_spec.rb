@@ -275,10 +275,13 @@ RSpec.describe "reverse parity" do
     "event-calendar-ruler-pad" => %w[w-14],
     # The axis itself. The gridlines are a repeating gradient rather than
     # twenty-four elements, because they are decoration and a DOM node each
-    # would be a thousand of them in a month. Its height is its lanes: a day
+    # would be a thousand of them in a month — spaced by `--gridline`, which is
+    # one mark's share, so the lines and the labels above them are the same
+    # divisions. It was a flat 12.5% and a 07–19 axis drew six labels against
+    # eight lines. Its height is its lanes: a day
     # is as tall as the deepest stack of overlapping jobs it has.
     "event-calendar-day-track" => %w[
-      bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_12.5%)]
+      bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))]
       h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]
     ],
     # A bar is placed and sized by the clock: `--at` is its start as a share of
@@ -343,7 +346,6 @@ RSpec.describe "reverse parity" do
       rows:[&_[data-slot=event-calendar-day-head]]:w-14
       rows:[&_[data-slot=event-calendar-day-item]]:shrink-0
       rows:[&_[data-slot=event-calendar-day-item]]:w-auto
-      rows:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex
       rows:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden
       rows:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none]
       rows:[&_[data-slot=event-calendar-day-items]]:flex-nowrap

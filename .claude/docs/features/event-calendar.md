@@ -249,6 +249,15 @@ to a reader and two different integers to `to_time` — one in the system zone,
 one in the app's — so two all-day jobs on one day used to order by which way
 their start had been written.
 
+The hours axis draws nothing for a job the window does not contain. Clipped to
+an empty interval it came out zero-length pinned to an edge — and a chip that
+short is content-width, so a 5am callout on an 07–19 axis was a full-width label
+sitting on the 7:30 job it shared lane zero with.
+
+Its gridlines are spaced by `--gridline`, one mark's share, so the lines and the
+labels above them are the same divisions. A flat 12.5% agreed with the labels
+only where the window divided into eight: a 07–19 axis drew six against eight.
+
 In the hours reading a chip's width is what it **occupies that day**, not what
 it is flagged: an all-day job and the middle day of a crossing one are both the
 whole axis, and a job with a real duration is drawn at it once there is room to

@@ -132,8 +132,7 @@ module Shadcn
         "rows:[&_[data-slot=event-calendar-day-label]]:gap-0 " \
         "rows:[&_[data-slot=event-calendar-day-weekday]]:block " \
         "rows:[&_[data-slot=event-calendar-day-number]]:text-sm " \
-        "rows:[&_[data-slot=event-calendar-segments]]:hidden " \
-        "rows:[&_[data-slot=event-calendar-day-item]_[data-slot=avatar-group]]:flex"
+        "rows:[&_[data-slot=event-calendar-segments]]:hidden "
       ROWS_LABEL_CLASS = "contents shrink-0 items-center gap-1"
       ROWS_WEEKDAY_CLASS = "hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums"
 
@@ -269,7 +268,7 @@ module Shadcn
         base { BASE_TOKENS }
       end
 
-      attr_reader :month, :selected, :max_events, :schedule, :reading, :group, :month_url,
+      attr_reader :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
                   :view_url
 
@@ -304,12 +303,6 @@ module Shadcn
       #   a button and the controller redraws the agenda in place.
       # @param day_attributes [Hash] merged onto every day cell — where a
       #   `data: { turbo_frame: … }` goes
-      # @param group_url [#call, nil] given a grouping, the URL of that
-      #   grouping. Present, the menu is links; absent, it dispatches.
-      # @param show_all [Boolean] render every chip in a cell rather than the
-      #   first `WORKLOAD_CAP` and a "+N"
-      # @param show_all_url [#call, nil] given the desired `show_all`, the URL
-      #   of that state. Present, the toggle is a link; absent, it dispatches.
       # @param agenda [Boolean] whether to render the built-in day view. `false`
       #   when the host has somewhere better to put it — a Sheet, a panel — and
       #   the day link is what fills it. It is not a leftover: it is what the
@@ -327,13 +320,6 @@ module Shadcn
       #   kind of thing says it once instead of on every row of a `map`
       # @param reading [Symbol] `:auto` picks bars or marks by density;
       #   `:workload` is the spike above, and always draws a row per day
-      # @param arrangement [Symbol] `:auto` lets the breakpoint decide — rows
-      #   below `lg`, the grid above; `:rows` keeps the rows at every width.
-      #   Only the workload reading has two arrangements to pick between.
-      # @param arrangement_url [#call, nil] given the desired arrangement, the
-      #   URL of that state. Present, the toggle is a link; absent, it flips
-      #   the attribute in the browser — which is instant, but the workload
-      #   month is drawn by the server, so the next › puts it back.
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
@@ -343,15 +329,15 @@ module Shadcn
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
         @schedule = Schedule.new(month: @month, events:, max_lanes: @max_events, default_color:)
-        # Checked against its list, like `group:` on the next line. Unchecked,
-        # `reading: :workLoad` off a params hash fell through every branch and
-        # rendered a silent fourth thing: no bars, no `data-labelled`, no rows.
         @month_url = month_url
         @day_url = day_url
         @day_attributes = day_attributes
         @agenda = agenda
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
+        # Checked against its list. Unchecked, `reading: :workLoad` off a params
+        # hash fell through every branch and rendered a silent fourth thing: no
+        # bars, no `data-labelled`, no rows.
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
         @reading = :auto if @reading == :events
         @view_url = view_url
@@ -436,8 +422,6 @@ module Shadcn
       # calendar rather than per cell, because two cells in one grid made of
       # different things would read as two kinds of day.
       def labelled? = reading == :auto && schedule.busiest <= DENSE_ABOVE
-
-      def hours? = reading == :hours
 
       def default_selection
         Date.current.between?(month.first, month.last) ? Date.current : month.first
@@ -661,6 +645,11 @@ module Shadcn
       # `data-*` a reading needs on the root for its own rules to key off.
       def reading_attributes = {}
 
+      # What a day cell *is* to a screen reader. A month is a grid of them; a
+      # single day is a list, and a `gridcell` with no row or grid above it is
+      # a role with nothing to belong to.
+      def cell_role = "gridcell"
+
       # The toolbar controls a reading owns. The month nav is every reading's
       # and is not here; these are the ones only one of them can act on — which
       # is what stopped two of them being drawn where they did nothing.
@@ -736,7 +725,7 @@ module Shadcn
           "data-today": ("true" if day == Date.current),
           "data-selected": ("true" if day == selected),
           "data-outside": ("true" if month.outside?(day)),
-          role: "gridcell",
+          role: cell_role,
           # `aria-selected`, present only when true — what the gem's `Calendar`
           # writes. `aria-pressed` made every one of the other forty-one days
           # announce as "toggle button, not pressed", a state a date grid has no
