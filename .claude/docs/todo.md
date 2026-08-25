@@ -433,19 +433,52 @@ noting that it would not have delivered the component that raised the question:
       percentage of a window, which a week can widen. Smaller than it was, not
       free.
 
-- [ ] **Split `event_calendar_controller.js`, for readability only.** 306 of its
-      571 lines are the redraw that three of the four readings never run: the
-      events reading packs months the server never rendered, and workload, hours
-      and daily are drawn whole and ship no payload to redraw from. A base with
-      the keyboard, the selection and the toolbar announcers, extended by the
-      half that draws, is the shape.
+- [ ] **Split `event_calendar_controller.js` — not yet, and here is the
+      trigger.** The split was built and thrown away rather than argued about,
+      so the numbers below are measured and not estimated. 570 lines come apart
+      cleanly into **298 frame + 308 drawing**: the frame walks between months,
+      selects, handles the keyboard and announces what the options panel asks
+      for; the drawing packs lanes, builds the index and fills the cells, which
+      three of the four readings never run.
 
-      **It saves no bytes**, and the entry said it did until that was measured:
-      `shadcn/index.js` imports all thirty-three controllers eagerly, so a
-      second one would be imported there too — 11 KB of a 208 KB set a host
-      registers whatever it uses. A host that wants fewer already has the door
-      open, since `CONTROLLERS` is exported and every controller is pinned
-      individually; registering is not loading.
+      Four things the spike found that the argument had not:
+
+      - **The dependency runs the wrong way.** The drawing asks the frame for
+        `mark` and `mod`, two helpers of three lines. It is the frame that
+        reaches into the drawing — `next`, `previous`, `today` and `focusDay`
+        through `goTo` to `render`, and `select` to `eventsOn` and
+        `renderAgenda`. Splitting therefore costs three no-op hooks on the base.
+      - **Those hooks would be dead.** Only the subclass is ever registered, and
+        it overrides all three, so the base has one implementation and no
+        caller. It is an abstraction with nothing to abstract over yet.
+      - **`stimulus_contract_spec` goes blind** — 35 failures at once, because it
+        maps an identifier to *one* file by name and half the surface moves
+        elsewhere. Teaching it to follow the base costs about seven lines, and
+        introduces a hole of its own: `static targets` takes the first match, so
+        a subclass declaring its own would silently hide one of the two groups.
+      - **`get month()` is the member that gets misfiled**, and it did: a split
+        that lists methods by name misses the getter, which then travels with
+        whatever it was sitting next to. It went to the drawing, and `next` and
+        `previous` need it — so the base was broken and nothing said so, because
+        the base is never the class that runs. Whoever does this for real should
+        check the seam by *running the frame alone*, which is the one thing this
+        spike could not do.
+
+      **It saves no bytes** — `+835` of them, in fact, for the imports and the
+      class headers. `shadcn/index.js` imports all thirty-three controllers
+      eagerly, so the second file is imported too. A host that wants fewer
+      already has the door open, since `CONTROLLERS` is exported and every
+      controller is pinned individually; registering is not loading.
+
+      And the premise was false: `calendar_controller.js` is **616 lines** and
+      unsplit, so 570 was never an outlier — it was second. Against the bar this
+      repo already holds itself to, that file is not too big.
+
+      **What changes the answer is the week view above.** It needs a `render` of
+      its own, which gives the base its second subclass and brings the three
+      hooks to life — at which point the split pays for itself instead of being
+      paid for in advance. Until then the seam is worth having in the *order of
+      the methods*, which is where it now is, and not in a second file.
 
 - [x] **The Sidebar's mobile sheet has no role and no accessible name.** Fixed:
       the controller writes `role="dialog"`, `aria-modal` and both relationships
