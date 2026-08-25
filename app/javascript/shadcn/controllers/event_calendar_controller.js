@@ -121,6 +121,15 @@ export default class extends Controller {
     this.dispatch("view", { detail: { view: chosen } })
   }
 
+  // Which halves of a day are drawn — the axis, the list, or both. Different
+  // markup again, so the server answers it and this only announces the ask.
+  reshow(event) {
+    const chosen = event.currentTarget.dataset.value
+    if (!chosen) return
+
+    this.dispatch("reshow", { detail: { showing: chosen } })
+  }
+
   // A shape is different markup, so this is the server's to answer: it
   // announces the ask, and a host that gave `shape_url:` never gets here.
   reshape(event) {

@@ -78,7 +78,7 @@ module Shadcn
       # that happens to be square, so this is where `max_events` clamps.
       MAX_EVENTS = (1..6).freeze
 
-      READINGS = %i[auto events workload hours].freeze
+      READINGS = %i[auto events workload hours daily].freeze
 
       # How the workload month is laid out. `:auto` is the breakpoint doing the
       # deciding — rows below `lg`, the seven-column grid above it — and
@@ -93,6 +93,11 @@ module Shadcn
       # reading entirely — a distinction that matters to this file and to
       # nobody using it, which is why `view_url:` is one callback and not two.
       VIEWS = %i[grid rows hours].freeze
+
+      # The period the toolbar switches between, above the views. A month has
+      # three ways of being read and a day has one; `PERIODS` is what the panel
+      # asks first, and `VIEWS` is only the monthly follow-up.
+      PERIODS = %i[monthly daily].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
       # How a day *sits* in a row is each reading's own, and is deliberately not
@@ -275,7 +280,8 @@ module Shadcn
       # extra is rendered and the root stays one element.
       RENDERERS = {
         workload: "Shadcn::EventCalendar::Workload::Component",
-        hours: "Shadcn::EventCalendar::Hours::Component"
+        hours: "Shadcn::EventCalendar::Hours::Component",
+        daily: "Shadcn::EventCalendar::Daily::Component"
       }.freeze
 
       def self.new(reading: :auto, **rest)
@@ -498,10 +504,31 @@ module Shadcn
             ])
           end
           dropdown.with_menu_content(class: "w-56") do
-            safe_join([ view_options, *reading_options ])
+            safe_join([ period_options, (view_options unless daily?), *reading_options ].compact)
           end
         end
       end
+
+      def period_options
+        safe_join([
+          render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.period.label") },
+          render(DropdownMenu::Separator::Component.new),
+          render(DropdownMenu::RadioGroup::Component.new) do
+            safe_join(PERIODS.map { |name| period_option(name) })
+          end
+        ])
+      end
+
+      def period_option(name)
+        href = view_url&.call(name == :daily ? :daily : :grid)
+
+        render(DropdownMenu::RadioItem::Component.new(
+          value: name, checked: (name == :daily) == daily?,
+          **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#changeView" })
+        )) { shadcn_t("event_calendar.period.#{name}") }
+      end
+
+      def daily? = view == :daily
 
       def view_options
         safe_join([
@@ -531,7 +558,10 @@ module Shadcn
       # The trigger says where you are and what you are seeing — the two things
       # the panel decides, so it can be read without opening it.
       def view_label
-        safe_join([ shadcn_t("event_calendar.view.#{view}"), reading_label ].compact, " · ")
+        period = shadcn_t("event_calendar.period.#{daily? ? 'daily' : 'monthly'}")
+        here = shadcn_t("event_calendar.view.#{view}") unless daily?
+
+        safe_join([ period, here, reading_label ].compact, " · ")
       end
 
       def reading_label = nil

@@ -54,6 +54,20 @@ en:
       # The workload reading's arrangement toggle. It names what pressing it
       # does, not the state it is in, so the controller never has to write it.
       # The options panel: which view, and then the one question that view has.
+      # The toolbar's period switch, which is the question above the views.
+      period:
+        label: Show
+        monthly: Monthly
+        daily: Daily
+      # What a day shows: the axis says when it is busy and cannot write a name,
+      # the agenda says what each job is and cannot show a gap.
+      daily:
+        label: Show the day as
+        axis: Hours only
+        agenda: List only
+        both: Hours and list
+      previous_day: Go to the Previous Day
+      next_day: Go to the Next Day
       view:
         label: Show the month as
         grid: Grid
