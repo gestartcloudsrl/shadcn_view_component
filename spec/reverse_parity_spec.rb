@@ -481,7 +481,7 @@ RSpec.describe "reverse parity" do
     # class string does not go through `tailwind_merge`.
     "event-calendar-day-item" => %w[
       bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)
-      left-(--at) top-(--lane) max-w-[13rem] w-(--for)
+      left-(--at) top-(--lane) max-w-[13rem] w-(--for) min-w-max
       data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none
       data-[continues-before]:border-l-2 data-[continues-after]:border-l-2
       data-[continues-before]:border-l-[var(--event-color)]

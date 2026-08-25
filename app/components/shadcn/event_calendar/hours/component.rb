@@ -101,7 +101,12 @@ module Shadcn
         # end of the head — which is the right answer at 124px and absurd at
         # 1270, with the faces a metre from the label they belong to. Not by
         # overriding `ml-auto`: by leaving it no slack to use.
-        CHIP_SPANNING_CLASS = "w-(--for) items-start"
+        # `min-w-max` because the duration is a *floor* for the width, not a
+        # cap. A job long enough to be drawn at its length can still be shorter
+        # than its own clock, three faces and a "+1" — and `overflow-hidden`
+        # was cutting the crew in half rather than letting the chip be as wide
+        # as what it says.
+        CHIP_SPANNING_CLASS = "w-(--for) min-w-max items-start"
         # A share of the window, not a number of minutes — which is the bug the
         # first version had. The packer speaks minutes, but what decides whether
         # two chips collide is *pixels*, and how many pixels a minute is worth
