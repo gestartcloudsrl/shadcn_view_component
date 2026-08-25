@@ -128,9 +128,34 @@ module Shadcn
       # one-day events it would otherwise be interleaved with.
       def sort_key = [ all_day? ? 0 : 1, -duration_days, starts_at.to_time.to_i, title ]
 
-      # Within one day the length no longer matters — what a person reads down
-      # is the clock.
-      def day_sort_key = [ all_day? ? 0 : 1, starts_at.to_time.to_i, title ]
+      # What a person reads down a cell, in three bands rather than two.
+      #
+      # A job that is all day *and* crosses days is the standing fact about that
+      # day — the depot is shut, the crew is away on a fit-out — and it holds
+      # true before and after it, so it goes above the facts that are only
+      # today's. Then the single-day all-day ones. Then everything with a clock,
+      # in clock order, because that is what a person reads a day by.
+      #
+      # Length does not sort within a band the way `sort_key` has it: inside one
+      # day a five-day job and a two-day job are both simply on, and the clock
+      # then the title keep the order stable across renders.
+      def day_sort_key = [ day_band, day_moment, title ]
+
+      # An all-day job is ranked by its date and a timed one by its clock, which
+      # is not pedantry: `Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8,
+      # 20)` are the same midnight to a reader and two different integers to
+      # `to_time`, one in the system zone and one in the app's. Two all-day jobs
+      # on one day were ordered by which way their start had been *written*
+      # rather than by their title.
+      def day_moment = all_day? ? start_date.jd : starts_at.to_time.to_i
+      private :day_moment
+
+      def day_band
+        return 2 unless all_day?
+
+        multi_day? ? 0 : 1
+      end
+      private :day_band
     end
   end
 end

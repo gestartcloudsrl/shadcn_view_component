@@ -152,6 +152,38 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
   # outside the grid used to add an entry — and `busiest` memoised whatever had
   # been asked for by then. Which reading the month rendered in depended on
   # argument-evaluation order.
+  # Ordering a cell is not enough to make a five-day job read as one band across
+  # five cells. As soon as a second crossing job starts halfway through the
+  # first, the first one's position moves on the day the second ends — so a job
+  # needs a lane it *keeps*, and `#pack` already computes one for the grid's
+  # bars.
+  describe "#crossing_on" do
+    subject(:overlapping) do
+      schedule([
+        { title: "A", starts_at: Date.new(2026, 8, 17), ends_at: Date.new(2026, 8, 19) },
+        { title: "B", starts_at: Date.new(2026, 8, 18), ends_at: Date.new(2026, 8, 21) },
+        { title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9) }
+      ], max_lanes: 5)
+    end
+
+    def slots(day) = overlapping.crossing_on(Date.new(2026, 8, day)).map { |event| event&.title }
+
+    it "keeps each job on the lane it holds all week", :aggregate_failures do
+      expect(slots(18)).to eq(%w[B A])
+      expect(slots(19)).to eq(%w[B A])
+    end
+
+    # The hole is the point: closing it up would move `A` on the one day `B`
+    # is not there, which is the whole thing the lanes exist to stop.
+    it "leaves a hole where a lane's job has not started" do
+      expect(slots(17)).to eq([ nil, "A" ])
+    end
+
+    it "leaves out what does not cross days" do
+      expect(slots(20)).to eq([ "B" ])
+    end
+  end
+
   describe "#busiest" do
     subject(:month_of_one) { schedule([ { title: "x", starts_at: Date.new(2026, 8, 5) } ]) }
 
@@ -172,9 +204,35 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
     end
 
     # What the agenda reads down and what the phone's dots count: not the
-    # packing order, which puts the longest first, but the clock.
+    # packing order, which puts the longest first, but three bands.
     it "reads all-day first, then by time" do
       expect(day.map(&:title)).to eq(%w[Conference Standup Lunch])
+    end
+
+    # A job that is all day *and* crosses days is the standing fact about that
+    # day — the depot is shut, the crew is away — and it holds before and after
+    # it, so it reads above the facts that are only today's.
+    it "puts a crossing all-day job above a one-day one" do
+      banded = schedule([
+        { title: "Holiday", starts_at: Date.new(2026, 8, 20) },
+        { title: "Fit-out", starts_at: Date.new(2026, 8, 18), ends_at: Date.new(2026, 8, 22) },
+        { title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9) }
+      ])
+
+      expect(banded.on(Date.new(2026, 8, 20)).map(&:title)).to eq(%w[Fit-out Holiday Standup])
+    end
+
+    # `Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8, 20)` are the same
+    # midnight to a reader and two different integers to `to_time`. Ranking an
+    # all-day job by its date rather than its clock is what stops two of them
+    # sorting by which way their start happened to be written.
+    it "orders two all-day jobs by name, however their start was written" do
+      same_day = schedule([
+        { title: "Holiday", starts_at: Date.new(2026, 8, 20) },
+        { title: "Audit", starts_at: Time.zone.local(2026, 8, 20), all_day: true }
+      ])
+
+      expect(same_day.on(Date.new(2026, 8, 20)).map(&:title)).to eq(%w[Audit Holiday])
     end
 
     it "includes an event whose middle day this is" do

@@ -149,6 +149,37 @@ module Shadcn
       # track has to pack as though every job lasted long enough to draw one.
       TRACK_FLOOR = 45
 
+      # The crossing jobs of a day, **by the lane they hold all week**.
+      #
+      # Ordering a cell is not enough to make a five-day job read as one band
+      # across five cells: as soon as a second crossing job starts halfway
+      # through the first, the first one's position changes on the day the
+      # second ends. What keeps a job on one line is a lane it *keeps* — which
+      # `#pack` already computes for the grid's bars, so this reads it rather
+      # than inventing a second answer.
+      #
+      # Every job that crosses days, not only the all-day ones. The band order
+      # asks for all-day-and-crossing first and `#pack` already delivers it —
+      # its sort leads with all-day and then with length — but a *timed*
+      # five-day job is equally the same job on five days, and leaving it to the
+      # clock-ordered tail is what made one read as three chips on one line and
+      # two on another.
+      #
+      # Returns an array indexed by lane, holes and all: a `nil` is a lane held
+      # that day by a job this day does not have, and the cell draws a gap there
+      # rather than closing up and moving everything below it.
+      public def crossing_on(day)
+        week = weeks.find { |candidate| candidate.days.include?(day) }
+        return [] unless week
+
+        week.segments.each_with_object([]) do |segment, slots|
+          event = segment.event
+          next unless event.multi_day? && event.covers?(day)
+
+          slots[segment.lane - 1] = event
+        end
+      end
+
       public def track_on(day, floor: TRACK_FLOOR)
         occupied = []
 
