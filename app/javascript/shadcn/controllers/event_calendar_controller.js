@@ -195,7 +195,95 @@ export default class extends Controller {
     return sameMonth ? this.todayValue : iso(first)
   }
 
+  // --- the selection, and the keyboard that moves it ------------------------
+
+  // `aria-selected` present only when true, and the single tab stop travels
+  // with it — the pair the gem's `Calendar` writes.
+  markSelected(cell, chosen) {
+    if (chosen) cell.setAttribute("aria-selected", "true")
+    else cell.removeAttribute("aria-selected")
+    cell.setAttribute("tabindex", chosen ? "0" : "-1")
+  }
+
+  markSelection() {
+    this.element.querySelectorAll("[data-slot='event-calendar-day']").forEach((cell) => {
+      const chosen = cell.dataset.day === this.selectedValue
+
+      this.mark(cell, "selected", chosen)
+      this.markSelected(cell, chosen)
+    })
+  }
+
+  // `Calendar`'s own map, minus the year jump it has and the bounds it clamps
+  // to. Without this the month was forty-two tab stops and no way across it.
+  keydown(event) {
+    const from = event.target.closest("[data-slot='event-calendar-day']")?.dataset?.day
+    if (!from) return
+
+    const moves = {
+      ArrowLeft: [ "day", -1 ],
+      ArrowRight: [ "day", 1 ],
+      ArrowUp: [ "week", -1 ],
+      ArrowDown: [ "week", 1 ],
+      Home: [ "weekStart", 0 ],
+      End: [ "weekEnd", 0 ],
+      PageUp: [ "month", -1 ],
+      PageDown: [ "month", 1 ]
+    }
+    const move = moves[event.key]
+    if (!move) return
+
+    event.preventDefault()
+    this.focusDay(this.step(parse(from), ...move))
+  }
+
+  step(from, unit, by) {
+    const to = new Date(from)
+
+    if (unit === "day") to.setDate(to.getDate() + by)
+    if (unit === "week") to.setDate(to.getDate() + by * 7)
+    if (unit === "month") to.setMonth(to.getMonth() + by)
+    if (unit === "weekStart") to.setDate(to.getDate() - this.mod(to.getDay() - this.weekStartsOnValue))
+    if (unit === "weekEnd") to.setDate(to.getDate() + (6 - this.mod(to.getDay() - this.weekStartsOnValue)))
+
+    return to
+  }
+
+  // A step off the edge of the grid is a month change. The workload reading is
+  // server-drawn, so there it announces and stops rather than pretending to
+  // move — the same boundary its nav buttons have.
+  focusDay(date) {
+    const day = iso(date)
+    let cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+
+    if (!cell) {
+      this.goTo(shiftMonths(date, 0), day)
+      cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+      if (!cell) return
+    }
+
+    this.element.querySelectorAll("[data-slot='event-calendar-day']")
+        .forEach((other) => other.setAttribute("tabindex", other === cell ? "0" : "-1"))
+    cell.focus()
+  }
+
   // --- drawing --------------------------------------------------------------
+  //
+  // Everything above walks between months, selects a day and answers the
+  // options panel; everything below redraws one, which only the events reading
+  // ever does — the other three are drawn whole by the server and ship no
+  // payload to redraw from. The order is the seam, and the order is all it is:
+  // two files were tried, measured and dropped, and `.claude/docs/todo.md` has
+  // what that cost and what would change the answer.
+  //
+  // Worth knowing before moving anything across the line: **it is crossed in
+  // both directions**, which is why the two halves are an order and not two
+  // classes. Down, `goTo` calls `render` and `select` calls `eventsOn` and
+  // `renderAgenda` — so navigating and selecting, which every reading does,
+  // run through code only one reading needs. Up, `fillDay` calls
+  // `markSelected`. The three genuinely mutual helpers are at the foot of the
+  // file, under their own heading, rather than pretending to belong to a side.
+
 
   render() {
     // The workload reading is server-drawn: its cells hold crews, clients and
@@ -364,78 +452,6 @@ export default class extends Controller {
     return node
   }
 
-  // `aria-selected` present only when true, and the single tab stop travels
-  // with it — the pair the gem's `Calendar` writes.
-  markSelected(cell, chosen) {
-    if (chosen) cell.setAttribute("aria-selected", "true")
-    else cell.removeAttribute("aria-selected")
-    cell.setAttribute("tabindex", chosen ? "0" : "-1")
-  }
-
-  markSelection() {
-    this.element.querySelectorAll("[data-slot='event-calendar-day']").forEach((cell) => {
-      const chosen = cell.dataset.day === this.selectedValue
-
-      this.mark(cell, "selected", chosen)
-      this.markSelected(cell, chosen)
-    })
-  }
-
-  // --- the keyboard ---------------------------------------------------------
-
-  // `Calendar`'s own map, minus the year jump it has and the bounds it clamps
-  // to. Without this the month was forty-two tab stops and no way across it.
-  keydown(event) {
-    const from = event.target.closest("[data-slot='event-calendar-day']")?.dataset?.day
-    if (!from) return
-
-    const moves = {
-      ArrowLeft: [ "day", -1 ],
-      ArrowRight: [ "day", 1 ],
-      ArrowUp: [ "week", -1 ],
-      ArrowDown: [ "week", 1 ],
-      Home: [ "weekStart", 0 ],
-      End: [ "weekEnd", 0 ],
-      PageUp: [ "month", -1 ],
-      PageDown: [ "month", 1 ]
-    }
-    const move = moves[event.key]
-    if (!move) return
-
-    event.preventDefault()
-    this.focusDay(this.step(parse(from), ...move))
-  }
-
-  step(from, unit, by) {
-    const to = new Date(from)
-
-    if (unit === "day") to.setDate(to.getDate() + by)
-    if (unit === "week") to.setDate(to.getDate() + by * 7)
-    if (unit === "month") to.setMonth(to.getMonth() + by)
-    if (unit === "weekStart") to.setDate(to.getDate() - this.mod(to.getDay() - this.weekStartsOnValue))
-    if (unit === "weekEnd") to.setDate(to.getDate() + (6 - this.mod(to.getDay() - this.weekStartsOnValue)))
-
-    return to
-  }
-
-  // A step off the edge of the grid is a month change. The workload reading is
-  // server-drawn, so there it announces and stops rather than pretending to
-  // move — the same boundary its nav buttons have.
-  focusDay(date) {
-    const day = iso(date)
-    let cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
-
-    if (!cell) {
-      this.goTo(shiftMonths(date, 0), day)
-      cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
-      if (!cell) return
-    }
-
-    this.element.querySelectorAll("[data-slot='event-calendar-day']")
-        .forEach((other) => other.setAttribute("tabindex", other === cell ? "0" : "-1"))
-    cell.focus()
-  }
-
   // --- the grid, and what sits on it ----------------------------------------
 
   // `Calendar::Month#weeks` without `fixed_weeks`: back to the start of the
@@ -524,20 +540,7 @@ export default class extends Controller {
     this.index.forEach((list) => list.sort((left, right) => left.dayOrder - right.dayOrder))
   }
 
-  // --- helpers --------------------------------------------------------------
-
-  get month() {
-    return parse(this.monthValue)
-  }
-
-  mark(element, name, on) {
-    if (on) element.dataset[name] = "true"
-    else delete element.dataset[name]
-  }
-
-  mod(value) {
-    return ((value % 7) + 7) % 7
-  }
+  // --- what the drawing needs to write a cell -------------------------------
 
   // Rounded, because a day either side of a daylight-saving change is 23 or 25
   // hours long and the quotient is not an integer.
@@ -566,5 +569,20 @@ export default class extends Controller {
       monthNames: this.monthNamesValue,
       shortMonthNames: this.shortMonthNamesValue
     })
+  }
+
+  // --- what both halves need ------------------------------------------------
+
+  get month() {
+    return parse(this.monthValue)
+  }
+
+  mark(element, name, on) {
+    if (on) element.dataset[name] = "true"
+    else delete element.dataset[name]
+  }
+
+  mod(value) {
+    return ((value % 7) + 7) % 7
   }
 }
