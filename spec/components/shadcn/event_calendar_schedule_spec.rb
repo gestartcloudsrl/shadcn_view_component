@@ -199,11 +199,9 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
         .to eq([ "Fit-out" ])
     end
 
-    # A timed job is banded by what it is on the day being drawn, not by its
-    # flag: on the middle day of a fit-out there is no hour of that day it is
-    # not on, and its own chip says "All day" there. The two used to disagree,
-    # so a chip reading "All day" and crossing days sat below one reading "All
-    # day" that did not.
+    # The band is "this is not only today", which a five-day fit-out is however
+    # its hours are written — so a timed job that crosses days is in it on every
+    # day of it, first and last included.
     context "with a timed job that crosses days" do
       subject(:fit_out) do
         schedule([
@@ -213,19 +211,15 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
         ], max_lanes: 5)
       end
 
-      it "takes the band on a day it covers whole" do
-        expect(fit_out.crossing_on(Date.new(2026, 8, 19)).map(&:title)).to eq(%w[Fit-out])
+      it "holds its lane on every day of it", :aggregate_failures do
+        (18..20).each do |day|
+          expect(fit_out.crossing_on(Date.new(2026, 8, day)).map(&:title)).to eq(%w[Fit-out])
+        end
       end
 
-      it "leads the cell there, above an all-day job of one day" do
-        expect(fit_out.on(Date.new(2026, 8, 19)).map(&:title)).to eq(%w[Fit-out Stock\ take])
-      end
-
-      # Its first and last days are hours, not a fact about the day, so it
-      # reads with the rest — which is where "→ 5:00 PM" belongs.
-      it "leaves the band on the day it ends", :aggregate_failures do
-        expect(fit_out.crossing_on(Date.new(2026, 8, 20))).to be_empty
-        expect(fit_out.crossing_on(Date.new(2026, 8, 18))).to be_empty
+      # A job that is only today reads above one that is also tomorrow.
+      it "reads below an all-day job of one day" do
+        expect(fit_out.on(Date.new(2026, 8, 19)).map(&:title)).to eq([ "Stock take", "Fit-out" ])
       end
     end
   end
@@ -255,17 +249,16 @@ RSpec.describe Shadcn::EventCalendar::Schedule do
       expect(day.map(&:title)).to eq(%w[Conference Standup Lunch])
     end
 
-    # A job that is all day *and* crosses days is the standing fact about that
-    # day — the depot is shut, the crew is away — and it holds before and after
-    # it, so it reads above the facts that are only today's.
-    it "puts a crossing all-day job above a one-day one" do
+    # A one-day all-day job is what is true of *this* day and only this day, so
+    # it reads above the ones that are as true tomorrow.
+    it "puts a one-day all-day job above a crossing one" do
       banded = schedule([
         { title: "Holiday", starts_at: Date.new(2026, 8, 20) },
         { title: "Fit-out", starts_at: Date.new(2026, 8, 18), ends_at: Date.new(2026, 8, 22) },
         { title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9) }
       ])
 
-      expect(banded.on(Date.new(2026, 8, 20)).map(&:title)).to eq(%w[Fit-out Holiday Standup])
+      expect(banded.on(Date.new(2026, 8, 20)).map(&:title)).to eq(%w[Holiday Fit-out Standup])
     end
 
     # `Date.new(2026, 8, 20)` and `Time.zone.local(2026, 8, 20)` are the same

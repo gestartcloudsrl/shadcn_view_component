@@ -137,13 +137,12 @@ module Shadcn
       # one-day events it would otherwise be interleaved with.
       def sort_key = [ all_day? ? 0 : 1, -duration_days, starts_at.to_time.to_i, title ]
 
-      # What a person reads down a cell, in three bands rather than two.
+      # What a person reads down a cell, in three bands.
       #
-      # A job that is all day *and* crosses days is the standing fact about that
-      # day — the depot is shut, the crew is away on a fit-out — and it holds
-      # true before and after it, so it goes above the facts that are only
-      # today's. Then the single-day all-day ones. Then everything with a clock,
-      # in clock order, because that is what a person reads a day by.
+      # The one-day all-day jobs first — what is true of *this* day and only
+      # this day. Then the ones that cross days, which are as true tomorrow.
+      # Then everything with a clock, in clock order, because that is what a
+      # person reads a day by.
       #
       # Length does not sort within a band the way `sort_key` has it: inside one
       # day a five-day job and a two-day job are both simply on, and the clock
@@ -160,9 +159,10 @@ module Shadcn
       private :day_moment
 
       def day_band(day = nil)
-        return 2 unless day ? all_day_on?(day) : all_day?
+        return 1 if multi_day?
+        return 0 if day ? all_day_on?(day) : all_day?
 
-        multi_day? ? 0 : 1
+        2
       end
       private :day_band
     end

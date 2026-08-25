@@ -158,12 +158,9 @@ module Shadcn
       # `#pack` already computes for the grid's bars, so this reads it rather
       # than inventing a second answer.
       #
-      # All-day *and* crossing, which is lane one, and nothing else. A timed job
-      # that happens to run five days is a normal event with a clock: it reads
-      # in the third band with the rest, in clock order, so it moves between
-      # rows as the days around it change. Giving it a lane put it above the
-      # all-day jobs — "→ 5:00 PM" sitting over "All day, van off the road" —
-      # which is the one thing the bands are for.
+      # Every job that crosses days, whether or not it is flagged all-day: the
+      # band is "this is not only today", which a five-day fit-out is however
+      # its hours are written.
       #
       # Returns an array indexed by lane, holes and all: a `nil` is a lane held
       # that day by a job this day does not have, and the cell draws a gap there
@@ -172,9 +169,7 @@ module Shadcn
         week = weeks.find { |candidate| candidate.days.include?(day) }
         return [] unless week
 
-        crossing = week.segments.select do |segment|
-          segment.event.multi_day? && segment.event.all_day_on?(day)
-        end
+        crossing = week.segments.select { |segment| segment.event.multi_day? }
         # Ranked among themselves, not by `#pack`'s own lane numbers. Those are
         # assigned over *every* event in the week, so a one-day all-day job
         # holding lane 1 left a hole at the top of five consecutive cells that

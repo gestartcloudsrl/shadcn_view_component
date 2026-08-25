@@ -396,10 +396,16 @@ module Shadcn
           )
         end
 
+        # One-day all-day jobs, then the crossing ones on the lanes they keep,
+        # then the rest. `items` is already in band order, so the partition only
+        # has to lift the first band above the lanes.
         def cell_rows(items, day)
           crossing = schedule.crossing_on(day)
+          singles, rest = (items - crossing.compact).partition do |item|
+            item.all_day_on?(day) && !item.multi_day?
+          end
 
-          crossing + (items - crossing.compact)
+          singles + crossing + rest
         end
 
         # A lane this day does not use, kept open so the day that does use it
