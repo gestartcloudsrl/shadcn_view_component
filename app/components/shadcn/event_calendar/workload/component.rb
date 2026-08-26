@@ -254,9 +254,15 @@ module Shadcn
         # `--muted-foreground` and twelve per cent of it over the page is within a
         # hair of `bg-muted` — so a calendar that names no colours looks exactly
         # as it did before this could carry one.
-        ITEM_CLASS = "flex w-full flex-col gap-1.5 overflow-hidden rounded-md " \
-                             "border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 " \
-                             "text-(--event-ink)"
+        # The one class in this gem whose rules live in `shadcn.css` rather than
+        # here, and the stylesheet carries the reason. The short version: this
+        # chip is ours, so no parity check owns its classes, and 390 bytes
+        # repeated on 68 chips was 24 KB of a dense month.
+        #
+        # It absorbs `CROSSING_CLASS` too, which the hours reading still uses
+        # the ordinary way — the two readings draw a cut edge alike and only
+        # this one draws enough chips for it to weigh anything.
+        ITEM_CLASS = "shadcn-event-calendar-chip"
 
 
         # Text tokens, never the ramp's colour: the tint says how much, the
@@ -430,7 +436,7 @@ module Shadcn
         def item_chip(item, day)
           tag.span(
             safe_join([ chip_head(item, day), chip_text(item) ]),
-            "data-slot": "event-calendar-day-item", class: [ ITEM_CLASS, CROSSING_CLASS ],
+            "data-slot": "event-calendar-day-item", class: ITEM_CLASS,
             "data-color": item.color,
             **crossing_attributes(item, day),
             title: "#{item.title} — #{item.assignees.map(&:name).join(', ')}"

@@ -878,3 +878,33 @@
   font-family: monospace;
   font-variant-numeric: tabular-nums;
 }
+
+/* The one component class in this stylesheet, and the exception needs its
+   reason. Everything else here is a token, a variant or an animation utility,
+   because the port is 1:1 on *classes* and not merely on appearance: an
+   inspector on a host's button has to show what ui.shadcn.com shows, and
+   `parity_spec` proves it by reading upstream's TSX and demanding every class
+   React emits be present in the Ruby. A rule moved in here is invisible to
+   that, so nothing upstream owns may move.
+
+   The workload chip has no upstream. Its rules were 390 bytes repeated on
+   every chip — 24 KB of a 246 KB month for something that never varies — and
+   the alternative measured against this one was carrying them on the root
+   behind `[&_:is([data-slot=…],[data-slot=…])]:`, eighteen times. Within
+   0.4 KB of each other and not close on reading.
+
+   A caller's utility still wins: `rounded-none` beside this class computes to
+   `0px`, in either order in the attribute. That matters because
+   `tailwind_merge` cannot see inside a class name, so the contract that a
+   caller beats a component default rests on the cascade here rather than on
+   the postprocessor. */
+@layer components {
+  .shadcn-event-calendar-chip {
+    @apply flex w-full flex-col gap-1.5 overflow-hidden rounded-md;
+    @apply border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1;
+    @apply text-(--event-ink);
+    @apply data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none;
+    @apply data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)];
+    @apply data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)];
+  }
+}
