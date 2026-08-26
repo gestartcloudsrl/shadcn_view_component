@@ -321,6 +321,27 @@ RSpec.describe "Event calendar", :js do
                  "By assignee", "By event" ])
     end
 
+    # The period and the view are two questions, and the answer to one has to
+    # survive the other. It did not: the panel's *Monthly* item was given
+    # `view_url.call(:grid)`, so a host that keeps the two apart could not tell
+    # "show me the month again" from "draw the month as a grid" — leaving the
+    # day sent you back to grid however you had been reading the month. The
+    # callback now says `:monthly`.
+    it "comes back to the view it was reading the month in", :aggregate_failures do
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=4"
+      wait_for_stimulus
+
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Daily")
+
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=monthly]").click
+
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Monthly")
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Hours")
+    end
+
     it "carries the month across to the hours view" do
       open_panel
       find("[data-slot=dropdown-menu-radio-item][data-value=hours]").click
@@ -733,7 +754,7 @@ RSpec.describe "Event calendar", :js do
     before do
       page.driver.browser.manage.window.resize_to(1400, 1000)
       visit "/lookbook/preview/shadcn/event_calendar/density" \
-            "?view=daily&month=2026-08-04&most=8&from=7&to=19"
+            "?period=daily&month=2026-08-04&most=8&from=7&to=19"
       wait_for_stimulus
     end
 
@@ -743,7 +764,7 @@ RSpec.describe "Event calendar", :js do
     %w[assignees events].each do |group|
       it "sits its scale over the axis, cut by #{group}", :aggregate_failures do
         visit "/lookbook/preview/shadcn/event_calendar/density" \
-              "?view=daily&month=2026-08-01&most=10&group=#{group}&from=7&to=19"
+              "?period=daily&month=2026-08-01&most=10&group=#{group}&from=7&to=19"
         wait_for_stimulus
 
         boxes = page.evaluate_script(<<~JS)

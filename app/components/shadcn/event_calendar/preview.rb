@@ -96,9 +96,24 @@ module Shadcn
       # not become a golden. The fixtures are `workload` and `hours`, which are
       # `@hidden`: they exist to be diffed and audited, not browsed.
       #
+      # Two questions, in the order the options panel asks them: `period` is
+      # what you are looking at, `view` is how the month is drawn. They were one
+      # knob — `view select [grid, rows, hours, daily]` — and `daily` is not a
+      # view, it is a period; `monthly` had no spelling at all, being merely the
+      # absence of `daily`.
+      #
+      # The component keeps them apart too (`PERIODS` and `VIEWS`, two menus
+      # with two labels) and joins them only in `view_url:`, which is one
+      # callback on purpose — see the note above `VIEWS`. So the mapping lives
+      # here, in the host, which is where a host's URL scheme belongs.
+      #
+      # Listed in the order of the signature, which they were not: Lookbook
+      # draws the controls in `@param` order, and `showing` sat third, between
+      # `view` and `most`, a long way from the daily knobs it belongs to.
+      #
       # @param month text
-      # @param view select [grid, rows, hours, daily]
-      # @param showing select [both, axis, agenda]
+      # @param period select [monthly, daily]
+      # @param view select [grid, rows, hours]
       # @param most number
       # @param all_day number
       # @param spanning number
@@ -106,16 +121,17 @@ module Shadcn
       # @param show_all toggle
       # @param group select [events, assignees]
       # @param shape select [chips, bars]
+      # @param showing select [both, axis, agenda]
       # @param from number
       # @param to number
       # @param turbo select [off, panel, agenda]
-      def density(month: "2026-08-01", view: "grid", most: 30, all_day: 1, spanning: 3,
-                  colored: false, show_all: false, group: "events", shape: "chips",
+      def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
+                  spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off")
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         here = lambda do |**changed|
-          state = { month:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
+          state = { month:, period:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
                     turbo: }.merge(changed)
 
@@ -141,12 +157,22 @@ module Shadcn
                                     durations: view.to_s == "hours", all_day: all_day.to_i,
                                     spanning: spanning.to_i)
           end
+        # One callback in, two parameters out. `view_url` is handed `:daily` for
+        # the period and one of `:grid`/`:rows`/`:hours` for the view, so
+        # picking a view also says the period is monthly — which is what makes
+        # `monthly` expressible rather than implied.
+        daily = period.to_s == "daily"
         common = { month: shown, events:,
-                   view_url: ->(name) { here.call(view: name) },
+                   view_url: lambda { |name|
+                     case name.to_s
+                     when "daily", "monthly" then here.call(period: name)
+                     else here.call(period: "monthly", view: name)
+                     end
+                   },
                    month_url: ->(date) { here.call(month: date.iso8601) } }
 
         args =
-          if view.to_s == "daily"
+          if daily
             common.merge(reading: :daily, selected: shown,
                          window: (from.to_i..to.to_i), shape: shape.to_sym,
                          showing: showing.to_sym, group: group.to_sym,
