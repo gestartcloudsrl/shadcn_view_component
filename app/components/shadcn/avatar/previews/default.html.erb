@@ -1,4 +1,25 @@
 <div class="flex items-center gap-4">
+  <%#
+    An avatar with a picture, which is what upstream's demo shows and what the
+    `shadcn--avatar` controller exists for: it starts on the fallback and swaps
+    to the image once that has loaded. Without one on this page the controller
+    was never attached at all, and nothing in the suite could see the swap.
+
+    The picture is a data URI rather than a URL. A preview here is also a
+    fixture — the snapshot, accessibility and smoke specs all render it — and a
+    fixture that reaches the network is one the suite cannot depend on.
+  %>
+  <% portrait = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E" \
+                "%3Crect width='32' height='32' fill='%23c4b5fd'/%3E" \
+                "%3Ccircle cx='16' cy='12' r='6' fill='%236d28d9'/%3E" \
+                "%3Cpath d='M4 32c0-7 5-11 12-11s12 4 12 11z' fill='%236d28d9'/%3E%3C/svg%3E" %>
+  <%= render(Shadcn::Avatar::Component.new) do |a| %>
+    <% a.with_image(src: portrait, alt: "Ada Lovelace") %>
+    <% a.with_fallback { "AL" } %>
+  <% end %>
+
+  <%# No image at all: the initials are the avatar, and the component attaches
+      no controller, because there is nothing to wait for. %>
   <% %i[sm default lg].each do |size| %>
     <%= render(Shadcn::Avatar::Component.new(size:)) do |a| %>
       <% a.with_fallback { "CN" } %>
