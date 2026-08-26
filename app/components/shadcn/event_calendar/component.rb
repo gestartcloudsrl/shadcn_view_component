@@ -126,6 +126,9 @@ module Shadcn
                             window shape shape_url showing showing_url].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
+      # The same ranking as `COLORS.index`, resolved once. It sits inside a
+      # comparator, so the linear scan it replaces ran on every comparison.
+      COLOR_RANK = Event::COLORS.each_with_index.to_h.freeze
       # How a day *sits* in a row is each reading's own, and is deliberately not
       # here. Both of them said something about the cell's height, and with the
       # rules at equal specificity the winner was source order: the hours
@@ -420,7 +423,7 @@ module Shadcn
           # The application's today, not the browser's — the same reason the
           # calendar crosses one: `Time.zone` and a laptop's clock disagree by a
           # day for a few hours out of every twenty-four.
-          "data-shadcn--event-calendar-today-value" => Date.current.iso8601,
+          "data-shadcn--event-calendar-today-value" => today.iso8601,
           "data-shadcn--event-calendar-selected-value" => selected.iso8601,
           "data-shadcn--event-calendar-week-starts-on-value" => month.week_starts_on,
           "data-shadcn--event-calendar-max-events-value" => max_events,
@@ -480,8 +483,12 @@ module Shadcn
       # different things would read as two kinds of day.
       def labelled? = reading == :auto && schedule.busiest <= DENSE_ABOVE
 
+      # One `Date.current` per render rather than one per call site: it resolves
+      # a time zone each time, and four places ask.
+      def today = @today ||= Date.current
+
       def default_selection
-        Date.current.between?(month.first, month.last) ? Date.current : month.first
+        today.between?(month.first, month.last) ? today : month.first
       end
 
       # Two rows of lanes need less room than four, and a month with a "+2" in
@@ -522,7 +529,7 @@ module Shadcn
         tag.div(
           safe_join([
             *reading_controls,
-            nav_button(Date.current, size: :sm, action: "click->shadcn--event-calendar#today") do
+            nav_button(today, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
             end,
             step_button(:previous),
@@ -862,7 +869,7 @@ module Shadcn
         # lets through, deliberately, for an already-built Event — and a nil in
         # a sort key is a 500 rather than a bad order. Unknown sorts last, which
         # is where the JavaScript half already put it.
-        on_day.sort_by.with_index { |event, index| [ Event::COLORS.index(event.color) || COLORS_END, index ] }
+        on_day.sort_by.with_index { |event, index| [ COLOR_RANK.fetch(event.color, COLORS_END), index ] }
       end
 
       def tick(event, on_day, index)
@@ -907,12 +914,16 @@ module Shadcn
 
       def event_bar(segment)
         event = segment.event
+        time = chip_time(event)
 
         tag.div(
           safe_join([
             (tag.span("", "data-slot": "event-calendar-event-dot", class: EVENT_DOT_CLASS) unless event.all_day?),
-            (tag.span(chip_time(event), "data-slot": "event-calendar-event-time",
-                      class: EVENT_TIME_CLASS) if chip_time(event)),
+            # Bound once. `chip_time` formats through `I18n.l`, and asking twice
+            # per bar — once for the guard and once for the value — is the same
+            # duplication `portable_events` had measured at 117 ms of a 155 ms
+            # render, left behind here when that one was fixed.
+            (tag.span(time, "data-slot": "event-calendar-event-time", class: EVENT_TIME_CLASS) if time),
             tag.span(event.title, "data-slot": "event-calendar-event-title", class: EVENT_TITLE_CLASS)
           ].compact),
           "data-slot": "event-calendar-event",
