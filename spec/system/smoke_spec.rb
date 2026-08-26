@@ -50,7 +50,13 @@ RSpec.describe "the gallery boots" do
       wait_for_stimulus
 
       errors = page.driver.browser.logs.get(:browser).reject { |log| log.level == "WARNING" }
-      expect(errors.map(&:message)).to be_empty
+
+      # Failed with the message rather than on it, because the useful half is
+      # the end: Stimulus logs "Error connecting controller" and *then* names
+      # the controller and the throw, and a bare `be_empty` on the array shows
+      # RSpec's elided inspection instead. A CI failure nobody can reproduce
+      # locally is one where the whole string is the entire evidence.
+      expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
 
       # Scoped to the identifier on purpose: the gallery layout carries a
       # ModeToggle and a ThemeSelector, so a bare `[data-controller]` is
