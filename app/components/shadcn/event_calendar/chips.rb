@@ -38,10 +38,16 @@ module Shadcn
       # chip that continues in either direction, which survives a stacked cell
       # and a narrow one. `data-[continues-after]` sets it too, so the first day
       # of a job is marked as much as its middle.
+      # A rail on the edges where the chip was *cut*, so a day of a five-day job
+      # says which day of it this is: the first has a rail on its right only,
+      # the last on its left only, the ones between on both. The two rules for
+      # `continues-after` used to name `border-l` as well, which made them
+      # duplicates of the pair above and left the direction undrawn — every day
+      # of a job rendered identically, with a left rail, including the day it
+      # started on, which then read as continuing from a day before it.
       CROSSING_CLASS = "data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none " \
-                       "data-[continues-before]:border-l-2 data-[continues-after]:border-l-2 " \
-                       "data-[continues-before]:border-l-[var(--event-color)] " \
-                       "data-[continues-after]:border-l-[var(--event-color)]"
+                       "data-[continues-before]:border-l-2 data-[continues-before]:border-l-[var(--event-color)] " \
+                       "data-[continues-after]:border-r-2 data-[continues-after]:border-r-[var(--event-color)]"
       # And what the rail cannot say: how long. `date_span` is how the agenda
       # has always said it, so the two agree.
       # No colour of its own: it inherits the chip's `--event-ink`, which is the
