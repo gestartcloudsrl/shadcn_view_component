@@ -425,21 +425,35 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
-- [ ] **The "+N" count filters the week's segments once per cell.** `fillDay`
-      runs `segments.filter(…)` to find what the cell had no room for, and the
-      predicate reads the cell's *column* — so it is genuinely per cell and
-      cannot collapse to one weekly total. What it can collapse to is one pass:
-      tally seven counters over the week's segments, incrementing each column a
-      too-deep segment spans, and let `weekElement` hand `fillDay` the number
-      instead of the array.
+- [x] **Profile the client-side redraw before optimising it.** Done, and the
+      answer is *don't*. A 2,000-event month redraws in **19.4 ms** — one frame,
+      for a density no host should be shipping in the first place, and against
+      54 ms for the server render of a smaller month. Where it goes, nested:
 
-      Seven passes become one, and seven intermediate arrays stop being
-      allocated per week. **Deferred on purpose, and the condition is a
-      measurement**: nothing here has profiled the redraw, the Ruby index that
-      was measured alongside it turned out to be worth 27% of a render, and this
-      is client-side work that only the events reading does at all. Profile the
-      controller first; if the redraw is not where the time goes, this is code
-      added for a number nobody saw.
+      | | ms | of 19.4 |
+      |---|---|---|
+      | `ticksElement` | 9.5 | 49% |
+      | `segmentsIn` | 5.2 | 27% |
+      | `format` | 0.3 | 1.5% |
+      | `eventsOn` | 0.1 | — |
+
+      Inside `ticksElement`, sorting is **0.4 ms** and building the nodes 1.4;
+      the remaining ~7.7 ms is the DOM itself — cloning, writing `data-color`
+      onto two thousand spans, attaching them. No reordering touches that, and
+      the per-span cost is already as low as it goes: the strip carries the
+      classes, which is why a mark has two attributes and nothing else.
+
+      So the three optimisations that looked obvious are worth, measured: a
+      colour-rank `Map` instead of `colorsValue.indexOf` — **0.4 ms against
+      0.4 ms**, because it scans six elements; caching the locale arrays that
+      `format` rebuilds — 1.5% at the absolute most; a single pass over a week's
+      segments instead of nine — a slice of the 3.7 ms `fillDay` spends outside
+      `ticksElement`. The one with headroom is `segmentsIn`, six full scans of
+      every event per redraw, and it is 27% of a number that was never the
+      problem.
+
+      Kept as a closed entry rather than deleted, because the proposal is
+      re-derivable from the code in about a minute and the measurement is not.
 
 - [ ] **`agenda` means two things in `density`'s parameters.** It is a value of
       `showing` — the daily reading's list half, labelled *List only* — and a

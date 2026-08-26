@@ -433,6 +433,14 @@ What is *not* solved is that a dense month still ships every event to the
 browser so the controller can redraw it. At this density a host should feed
 months on demand instead, and `month-change` is the hook for it.
 
+**The redraw is not where the time is, and that is measured.** A 2,000-event
+month redraws in 19.4 ms in the browser — against 54 ms to render a smaller one
+on the server. Half of it is `ticksElement`, and inside that the sort is 0.4 ms
+and the nodes 1.4: the rest is the DOM taking two thousand spans. The obvious
+client-side optimisations were profiled and are worth between nothing and 1.5%;
+the numbers are in [the todo](../todo.md) so nobody re-derives the proposal
+without them.
+
 **The index is an index.** `Schedule#by_day` used to be a Hash whose default
 block scanned *every* event for the ones covering that day — once per day, so
 forty-two full scans over a month, rebuilding an enumerator and its pairs each
