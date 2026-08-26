@@ -61,6 +61,43 @@ module Shadcn
           "rows:[&_[data-slot=event-calendar-day-head]]:justify-center"
 
         HELD_TOKENS = "rows:[&_[data-slot=event-calendar-day-held]]:hidden"
+        # The band closes up. On the side where a chip was cut, cancel the
+        # cell's own padding and half the grid's line — 13px of nothing used to
+        # sit in the middle of one job, six from each cell and one from the line
+        # between them. Half a line each side rather than a whole one from
+        # either, so neither day owns the join.
+        #
+        # The tint cannot cover that line by itself: a chip's background is the
+        # event colour at 12%, and translucent paint over a border shows the
+        # border. What covers it is the rail — 2px of the colour at full
+        # strength — which the two chips now bring to the same pixel from both
+        # sides. The ends of the band stay open and rounded; every day boundary
+        # inside it reads as a tick.
+        #
+        # Conditioned so it cannot apply in rows rather than applied and undone
+        # there. A reset was written first and lost: `rows:` expands to
+        # `&:where([data-rows])`, and `:where()` weighs nothing, so the reset
+        # scored 0,2,0 against this rule's 0,3,0 — the extra `[data-continues-*]`
+        # attribute — and no ordering could have saved it. The cost of not
+        # having a reset is this line restating the variant's own 64rem, which
+        # will drift if `@custom-variant rows` ever moves; the two are checked
+        # together or not at all.
+        #
+        # `w-auto` alongside each margin, and it is not decoration: the chip
+        # carries `w-full`, and a box with an explicit width does not grow when
+        # you give it a negative margin — it stays put and moves what follows.
+        # Left to stretch inside the column flex it fills the cell by itself,
+        # and then the margin does widen it. Measured: with the margins alone
+        # the gap stayed at 13.
+        #
+        # In rows a day is a row, its chips scroll sideways in a flex strip, and
+        # there is no next cell to meet — the margin would only pull the first
+        # chip out from under the scroll edge.
+        BAND_TOKENS =
+          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-before]]:-ml-[calc(var(--spacing)*1.5_+_0.5px)] " \
+          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto " \
+          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-after]]:-mr-[calc(var(--spacing)*1.5_+_0.5px)] " \
+          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-after]]:w-auto"
 
         STRIP_TOKENS =
           "rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto " \
@@ -102,7 +139,8 @@ module Shadcn
 
         style do
           base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
-                 "#{CELL_TOKENS} #{STRIP_TOKENS} #{STRIP_CHIP_TOKENS} #{HELD_TOKENS}" }
+                 "#{CELL_TOKENS} #{STRIP_TOKENS} #{STRIP_CHIP_TOKENS} #{HELD_TOKENS} " \
+                 "#{BAND_TOKENS}" }
         end
 
         # How many chips a cell shows before it says "+N", and how many it
