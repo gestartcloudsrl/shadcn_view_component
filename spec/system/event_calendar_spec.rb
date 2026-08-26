@@ -363,7 +363,8 @@ RSpec.describe "Event calendar", :js do
     let(:sheet) { "[data-slot=sheet-content]" }
 
     before do
-      visit_preview("event_calendar", :with_turbo)
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=panel&month=2026-08-01"
       wait_for_stimulus
     end
 
@@ -410,7 +411,7 @@ RSpec.describe "Event calendar", :js do
   describe "a host owning the day view, in the agenda" do
     before do
       page.driver.browser.manage.window.resize_to(1300, 900)
-      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=true&month=2026-08-01"
+      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=agenda&month=2026-08-01"
       wait_for_stimulus
     end
 
@@ -692,9 +693,16 @@ RSpec.describe "Event calendar", :js do
       visit "/lookbook/preview/shadcn/event_calendar/density?month=2026-08-01&view=hours&most=4"
       wait_for_stimulus
 
-      2.times { find("#{calendar} [aria-label='Go to the Next Month']").click }
-
-      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "October 2026")
+      # One month at a time, each waited for. Clicking twice in a row raced the
+      # navigation the first click starts: the second `find` could resolve
+      # against the page on its way out, and the month it asked for was the one
+      # already being left — August to September, twice. Roughly one run in
+      # four, and the same shape as the options panel's flake, which is why the
+      # cure is the same one: wait for the page you are about to click on.
+      %w[September October].each do |month|
+        find("#{calendar} [aria-label='Go to the Next Month']").click
+        expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "#{month} 2026")
+      end
       expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
 
       find("#{calendar} [aria-label='Go to the Previous Month']").click
