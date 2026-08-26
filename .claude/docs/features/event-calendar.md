@@ -648,12 +648,23 @@ navigation, and Turbo announces those itself.
 What does not change is the grid: a cell is still `role="gridcell"`, still
 carries the roving tab stop, and the arrows still move across it.
 
-The worked example is **`density` with `turbo` on**, which is the switch that
-turns its cells into links and its agenda into the frame they swap. There is a
-second, `with_turbo`, kept out of the gallery's list and driven only by the
-specs: it puts the day in a *Sheet* rather than in the agenda, which is a host's
-choice the playground cannot show — a preview method renders one component and
-cannot wrap it in another's slot.
+The worked example is **`density` with `turbo` set**, and it offers the two
+shapes a host can give the day, which are different things rather than two
+skins:
+
+- **panel** — a Sheet that opens *over* the page, so one click both fills the
+  frame and opens it. `density` assembles the calendar's arguments and hands
+  them to a template, because a Sheet's content is a slot and a slot needs a
+  block, which a preview method cannot write.
+- **agenda** — the component's own agenda *is* the frame, through `agenda_as:`.
+  No markup at all, but it sits under six weeks of grid: it updated 335px below
+  the fold and the click read as nothing happening, which is what Turbo's
+  `autoscroll` is for and what a panel never needs.
+
+That template is also the `panel` preview, `@hidden` so the gallery keeps one
+playground. It has to exist rather than being a loose template: `snapshot_spec`
+reads the file, but `accessibility_spec` visits `family/name` as a *preview*, so
+a template with no method of that name has no URL and its axe example 404s.
 
 The half a preview cannot hold — a model, a route, a controller and the frame's own
 markup — is in `test/dummy`, for the reason `/chat` is there for the message

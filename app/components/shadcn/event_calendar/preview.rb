@@ -70,19 +70,19 @@ module Shadcn
         render_with_template
       end
 
-      # A host owning the day view, with the day inside a *Sheet*: one click
-      # both swaps the frame and opens the panel, and the calendar is rendered
-      # inside the Sheet's root to reach its controller.
+      # The day in a Sheet, at its default month — the same template `density`
+      # renders when its `turbo` knob asks for a panel, with the locals left
+      # out so the defaults stand.
       #
-      # `@hidden`, and only that half is why: `density` has the wiring now and
-      # is the page to browse. What this keeps is the Sheet, which `density`
-      # cannot show — a preview method renders one component and cannot wrap it
-      # in another's slot, and giving `density` a template would make a month of
-      # eight hundred events a golden. It stays as the fixture the four sheet
-      # examples in `spec/system/event_calendar_spec.rb` are driven through.
+      # `@hidden` because `density` is the page to browse; this exists to be
+      # *driven*. It has to exist, though, and that is not obvious: both
+      # `snapshot_spec` and `accessibility_spec` derive their lists from the
+      # template files on disk, and the second visits `family/name` as a
+      # preview — so a template with no method of the same name has no URL, and
+      # the axe example 404s rather than saying what is wrong.
       #
       # @hidden
-      def with_turbo
+      def panel
         render_with_template
       end
 
@@ -108,16 +108,16 @@ module Shadcn
       # @param shape select [chips, bars]
       # @param from number
       # @param to number
-      # @param turbo toggle
+      # @param turbo select [off, panel, agenda]
       def density(month: "2026-08-01", view: "grid", most: 30, all_day: 1, spanning: 3,
                   colored: false, show_all: false, group: "events", shape: "chips",
-                  showing: "both", from: 7, to: 23, turbo: false)
+                  showing: "both", from: 7, to: 23, turbo: "off")
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         here = lambda do |**changed|
           state = { month:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
-                    turbo: cast.cast(turbo) }.merge(changed)
+                    turbo: }.merge(changed)
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -132,7 +132,7 @@ module Shadcn
         # that has never heard of it. The density knobs go inert for the same
         # reason, and the appointments live in August 2026 — walk to another
         # month and the calendar is honestly empty.
-        owned = cast.cast(turbo)
+        owned = turbo.to_s != "off"
         events =
           if owned
             Appointment.for_calendar
@@ -141,47 +141,53 @@ module Shadcn
                                     durations: view.to_s == "hours", all_day: all_day.to_i,
                                     spanning: spanning.to_i)
           end
-        # A host owning the day view. The cells become links, and the agenda
-        # *is* the frame they swap — `agenda_as:` is what lets the component's
-        # own agenda be the thing Turbo replaces, so this needs no markup of its
-        # own and `density` stays a method. `with_turbo` is the same wiring with
-        # the day in a Sheet instead, which does need markup.
-        day =
-          if owned
-            # `autoscroll` because the agenda sits under six weeks of grid: the
-            # frame updates 335px below the fold, and a click reads as nothing
-            # happening. Turbo's own attribute, so the page follows the answer
-            # rather than the component learning to scroll. A host with the day
-            # in a panel — `with_turbo` — needs none of this, which is the
-            # difference between the two.
-            { day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
-              day_attributes: { data: { turbo_frame: "day" } },
-              agenda_as: :"turbo-frame",
-              agenda_attributes: { id: "day", autoscroll: true,
-                                   data: { autoscroll_block: "center" } } }
-          else
-            {}
-          end
-        common = { month: shown, events:, **day,
+        common = { month: shown, events:,
                    view_url: ->(name) { here.call(view: name) },
                    month_url: ->(date) { here.call(month: date.iso8601) } }
 
-        if view.to_s == "daily"
-          render_component(**common, reading: :daily, selected: shown,
-                           window: (from.to_i..to.to_i), shape: shape.to_sym,
-                           showing: showing.to_sym, group: group.to_sym,
-                           shape_url: ->(form) { here.call(shape: form) },
-                           showing_url: ->(half) { here.call(showing: half) },
-                           group_url: ->(cut) { here.call(group: cut) })
-        elsif view.to_s == "hours"
-          render_component(**common, reading: :hours, window: (from.to_i..to.to_i),
-                           shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })
-        else
-          render_component(**common, reading: :workload, group: group.to_sym,
-                           arrangement: view.to_s == "rows" ? :rows : :auto,
-                           show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
-                           group_url: ->(cut) { here.call(group: cut) })
+        args =
+          if view.to_s == "daily"
+            common.merge(reading: :daily, selected: shown,
+                         window: (from.to_i..to.to_i), shape: shape.to_sym,
+                         showing: showing.to_sym, group: group.to_sym,
+                         shape_url: ->(form) { here.call(shape: form) },
+                         showing_url: ->(half) { here.call(showing: half) },
+                         group_url: ->(cut) { here.call(group: cut) })
+          elsif view.to_s == "hours"
+            common.merge(reading: :hours, window: (from.to_i..to.to_i),
+                         shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })
+          else
+            common.merge(reading: :workload, group: group.to_sym,
+                         arrangement: view.to_s == "rows" ? :rows : :auto,
+                         show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
+                         group_url: ->(cut) { here.call(group: cut) })
+          end
+
+        # Two shapes a host can give the day, and they are genuinely different
+        # rather than two skins.
+        #
+        # **panel** — a Sheet that opens over the page, so one click both fills
+        # the frame and opens it. A preview method cannot build this: a Sheet's
+        # content is a slot and a slot needs a block, so the arguments are
+        # assembled here and handed to a template that supplies the markup.
+        #
+        # **agenda** — the component's own agenda *is* the frame, via
+        # `agenda_as:`. No markup, but it sits under six weeks of grid: it
+        # updated 335px below the fold and a click read as nothing happening,
+        # which is what `autoscroll` is for and what a panel never needs.
+        return render_component(**args) unless owned
+
+        if turbo.to_s == "agenda"
+          return render_component(**args,
+                                  day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
+                                  day_attributes: { data: { turbo_frame: "day" } },
+                                  agenda_as: :"turbo-frame",
+                                  agenda_attributes: { id: "day", autoscroll: true,
+                                                       data: { autoscroll_block: "center" } })
         end
+
+        render_with_template(template: "shadcn/event_calendar/previews/panel",
+                             locals: { calendar: args })
       end
 
       # A roster of six over a month of work, seeded so the gallery shows

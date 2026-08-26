@@ -24,10 +24,22 @@
     </turbo-frame>
   <% end %>
 
+  <%# The calendar's own arguments come in as one local, so `density` can hand
+      over whatever the toolbar is set to — month, reading, grouping, window —
+      and this template only adds the three things that make the day open here:
+      no built-in agenda, a link per cell, and the two attributes that make one
+      click both fill the frame and open the panel.
+
+      A default for every one of them, because this is rendered two ways:
+      `density` passes locals, and `snapshot_spec` renders it with none —
+      `ApplicationController.renderer.render(inline:)` has none to give. The
+      golden is the default state. %>
+  <% calendar = local_assigns.fetch(:calendar,
+                                    { month: Date.new(2026, 8, 1),
+                                      selected: Date.new(2026, 8, 20),
+                                      events: Appointment.for_calendar }) %>
   <%= render(Shadcn::EventCalendar::Component.new(
-        month: Date.new(2026, 8, 1),
-        selected: Date.new(2026, 8, 20),
-        events: Appointment.for_calendar,
+        **calendar,
         agenda: false,
         day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
         day_attributes: { data: { turbo_frame: "day", action: "shadcn--dialog#open" } }
