@@ -44,18 +44,6 @@
       <% group.with_separator if index.positive? %>
 
       <% group.with_item(size: :sm, class: "items-start") do %>
-        <%= render(Shadcn::Item::Media::Component.new(class: "pt-0.5")) do %>
-          <%= render(Shadcn::Avatar::Group::Component.new) do %>
-            <% appointment.assignees.each do |name| %>
-              <%= render(Shadcn::Avatar::Component.new(size: :sm)) do |avatar| %>
-                <% avatar.with_fallback(class: "bg-background text-[0.6rem]") do %>
-                  <%= name.split.first(2).map { |part| part[0] }.join %>
-                <% end %>
-              <% end %>
-            <% end %>
-          <% end %>
-        <% end %>
-
         <%= render(Shadcn::Item::Content::Component.new) do %>
           <%= render(Shadcn::Item::Title::Component.new) do %>
             <span class="size-2 shrink-0 rounded-full bg-(--event-color)"
@@ -65,7 +53,6 @@
           <%= render(Shadcn::Item::Description::Component.new(class: "line-clamp-none")) do %>
             <%= l(appointment.starts_at, format: "%-l:%M %p") %> –
             <%= l(appointment.ends_at, format: "%-l:%M %p") %> · <%= appointment.location %>
-            · <%= appointment.assignees.to_sentence %>
           <% end %>
           <%= render(Shadcn::Item::Description::Component.new(class: "line-clamp-none")) do %>
             <%= appointment.notes %>
@@ -76,6 +63,24 @@
         <%= render(Shadcn::Item::Actions::Component.new) do %>
           <%= render(Shadcn::Badge::Component.new(
                 variant: appointment.status == "done" ? :secondary : :outline)) { appointment.status } %>
+        <% end %>
+
+        <%# The crew reads last, in the footer: `ItemFooter` is `basis-full`, so
+            it takes its own line under the rest rather than a column beside it.
+            Who is going matters less than what and when, and it is the one
+            field whose length varies most — a crew of five stretched the media
+            column and pushed the title in. %>
+        <%= render(Shadcn::Item::Footer::Component.new(class: "justify-start gap-2")) do %>
+          <%= render(Shadcn::Avatar::Group::Component.new) do %>
+            <% appointment.assignees.each do |name| %>
+              <%= render(Shadcn::Avatar::Component.new(size: :sm)) do |avatar| %>
+                <% avatar.with_fallback(class: "bg-background text-[0.6rem]") do %>
+                  <%= name.split.first(2).map { |part| part[0] }.join %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+          <span class="text-xs text-muted-foreground"><%= appointment.assignees.to_sentence %></span>
         <% end %>
       <% end %>
     <% end %>
