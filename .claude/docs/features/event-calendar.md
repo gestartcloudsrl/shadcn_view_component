@@ -433,6 +433,31 @@ What is *not* solved is that a dense month still ships every event to the
 browser so the controller can redraw it. At this density a host should feed
 months on demand instead, and `month-change` is the hook for it.
 
+**Before any of that, turn compression on.** It is worth more than everything
+else here put together and it is one line in a host, not a line in this gem.
+Measured on a real payload extended to two thousand events:
+
+| | over the wire |
+|---|---|
+| as it ships today | 294 KB → **9.7 KB** compressed |
+| re-encoded column-wise, keys dropped | 218 KB → **9.4 KB** compressed |
+
+Thirty times against three and a half percent. Repeated JSON keys are the thing
+gzip removes best, so an encoding invented to remove them by hand buys almost
+nothing and costs a payload no one can read in an inspector and a decoder in the
+controller. It was measured rather than assumed, and the measurement is the
+reason the payload is still an array of objects.
+
+The catch, and it is why this paragraph exists: **Rails does not compress by
+default.** `Rack::Deflater` is not in a new application's middleware and the
+dummy here has none, so a bare Rails app serving a dense month sends the whole
+294 KB. Compression usually arrives from a proxy or a CDN rather than from the
+application, which is exactly why it is easy to assume and worth checking — a
+response with no `Content-Encoding` header is the check.
+
+What the `.compact` above still buys is the half compression cannot reach: the
+bytes never built, never parsed, and never turned into objects on the far side.
+
 ### An all-day event, in each of the three readings
 
 Marked with `all_day: true`, or inferred from a `Date` — which has no time of
