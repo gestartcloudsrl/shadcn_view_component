@@ -32,6 +32,20 @@ RSpec.describe "Event calendar", :js do
 
   def day(date) = find("#{calendar} [data-day='#{date}']")
 
+  # Read twice in one example, before and after a scroll, so it cannot be a
+  # `let`.
+  def frame_offscreen?
+    page.evaluate_script(<<~JS)
+      (() => {
+        const frame = document.querySelector("turbo-frame#day")
+        if (!frame) return null
+
+        const box = frame.getBoundingClientRect()
+        return box.top >= window.innerHeight || box.bottom <= 0
+      })()
+    JS
+  end
+
   # A method, not a `let`: it is asked the same question about two cells and in
   # two palettes within one example. The cell is found inside the script rather
   # than passed in — Capybara hands an element argument to a wrapper this does
@@ -410,6 +424,21 @@ RSpec.describe "Event calendar", :js do
 
       find("#{calendar} [data-day='2026-08-20']").click
       expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 20")
+    end
+
+    # The half that swapping does not cover, and the half a person notices: the
+    # agenda sits under six weeks of grid, so the frame updated 335px below the
+    # fold and the click read as nothing happening. Turbo's `autoscroll` brings
+    # it up. Asserted as *in the viewport* rather than as "the attribute is
+    # there", because the attribute was never the claim.
+    it "brings the day into view rather than updating it off-screen" do
+      expect(frame_offscreen?).to be(true)
+
+      find("#{calendar} [data-day='2026-08-13']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
+
+      expect(page.document).to have_selector(:xpath, "//*", wait: 0) # settle
+      expect(frame_offscreen?).to be(false)
     end
   end
 
