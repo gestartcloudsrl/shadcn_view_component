@@ -384,6 +384,21 @@ Two lists became derived rather than typed: the accessibility audit reads the
 preview families off disk (which added `aspect_ratio`, and covers anything added
 later), and the smoke spec derives its families from the controllers directory.
 
+Deriving the list left an assumption in it: that a family's `default` preview
+*exercises* its controller. Avatar broke it. Its controller became conditional —
+attached only when there is an image to wait for, so a wall of initials stops
+paying for instances with nothing to do — and its one preview had no image
+anywhere, so `shadcn--avatar` stopped attaching and the example went red. It
+stayed red for a while, because the full system suite is not what you run while
+working on one family.
+
+The spec was right and the preview was wrong: the swap the controller exists for
+had no fixture at all, in any suite. `default` now leads with a picture. A
+picture that *fails* needed its own preview rather than a sixth avatar beside
+them, because a failing image writes to the browser console however you break it
+— a 404, an undecodable data URI — and this same spec reads every family's
+console and expects it silent. Only it listens, and only to `default`.
+
 One correction while doing it: **`<label for>` does name a `<button>`** — button
 is a labelable element, so `ThemeSelector`'s original id-and-`for` trigger
 worked and axe accepted it. It has since been switched to `aria-labelledby` to
@@ -493,6 +508,49 @@ covers. Two details it needs: `Capybara::ExpectationNotMet` is a subclass of
 `ElementNotFound`, so `synchronize` rescues it and re-raises the message on
 timeout, and elements with no height — `sidebar-gap` is a spacer with a width
 and nothing in it — need `visible: :all` or `find` will not return them.
+
+### A click can land in a page that is on its way out
+
+`open_panel`, click a menu item that is a **link**, `open_panel` again. The
+second one raced the Turbo visit, and when it won it clicked the *old* trigger —
+whose menu was still open, so the click **closed** it. Turbo then swapped in the
+new page, whose own panel had never been asked to open, and the assertion three
+lines later came back an empty list. It passed alone every time and failed
+roughly one full run in several.
+
+Two things it taught. The first is that the fix is to wait for the *new* page
+before touching it — here the trigger names the state it opens, so it reads
+"Daily · …" only once the day is mounted, and that is the thing to wait on. The
+second is that `page.all(…).map(&:text)` never waits, so a UI that has not
+finished arriving reports as a UI that is wrong: `open_panel` now waits for the
+content to reach `data-state=open`, which turns the next occurrence into "the
+menu never opened" rather than into a confusing empty list.
+
+`wait_for_stimulus` was rewritten while chasing this, for a real gap that turned
+out **not** to be the cause: it waited on `window.Stimulus`, which the dummy
+assigns on the line *before* `registerShadcnControllers`, so it could return
+while no controller existed. It now waits until every identifier the page names
+in a `data-controller` has a module registered. Under Turbo the application
+persists across visits, so this was already satisfied here — worth having,
+worth not crediting.
+
+### An interrupted run still prints a summary
+
+RSpec traps the interrupt and reports what it managed to run, so a killed suite
+ends in `629 examples, 0 failures` that looks exactly like a finished one. A
+green number is only a green suite if the run reached the end; when a background
+job is involved, read the file after it exits rather than grepping it while it
+is being written. Reporting "274 examples, 0 failures" from a half-written
+output file is how this got written down.
+
+Chrome dying mid-run looks like failing tests and is not. A full system run that
+came back with nine failures had **18** `InvalidSessionIdError` in it and a
+baseline with the same seed had zero; the five that looked like a theming
+regression were the last file in that seed's order collecting the wreckage. Grep
+the output for `InvalidSessionIdError` before believing a cluster of failures,
+and clean up stray `chromedriver`/headless processes between heavy runs —
+leftovers also make the *user's* Chrome refuse to open a window, since they run
+from the same application bundle.
 
 ### `visible:` reads `display`, not opacity
 
