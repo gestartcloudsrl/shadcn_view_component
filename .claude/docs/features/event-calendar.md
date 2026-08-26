@@ -648,8 +648,14 @@ navigation, and Turbo announces those itself.
 What does not change is the grid: a cell is still `role="gridcell"`, still
 carries the roving tab stop, and the arrows still move across it.
 
-The worked example is `event_calendar/with_turbo` in the gallery, and the half a
-preview cannot hold — a model, a route, a controller and the frame's own
+The worked example is **`density` with `turbo` on**, which is the switch that
+turns its cells into links and its agenda into the frame they swap. There is a
+second, `with_turbo`, kept out of the gallery's list and driven only by the
+specs: it puts the day in a *Sheet* rather than in the agenda, which is a host's
+choice the playground cannot show — a preview method renders one component and
+cannot wrap it in another's slot.
+
+The half a preview cannot hold — a model, a route, a controller and the frame's own
 markup — is in `test/dummy`, for the reason `/chat` is there for the message
 scroller. The model is a plain object rather than an ActiveRecord one, which is
 the more useful shape for the thing being shown: **a component never sees a
