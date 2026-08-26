@@ -46,6 +46,14 @@ RSpec.describe "the gallery boots" do
 
   controllers.each do |family, identifier|
     it "loads #{family} with #{identifier} connected and no JavaScript error" do
+      # Drained *before* the visit, not only after. The session is one browser
+      # for the whole suite and this buffer is per session, so an error raised
+      # by any earlier page — in any spec file — sits there until something
+      # reads it, and the something is whichever family's example ran next.
+      # That is how a controller throwing on the event calendar's server-drawn
+      # previews was reported, for months of CI runs, as `dropdown_menu`.
+      page.driver.browser.logs.get(:browser)
+
       visit_preview(family)
       wait_for_stimulus
 

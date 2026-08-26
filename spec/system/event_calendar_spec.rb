@@ -464,6 +464,30 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # A reading the server draws whole ships no `prototypes` template, because
+  # there is nothing to redraw from — and `connect` read it regardless, so the
+  # controller threw on every one of them. Nothing visibly broke, which is why
+  # it lasted: Stimulus catches the throw and `data-action` binds independently,
+  # so the keyboard and the selection went on working. What shipped was a
+  # console error on every page a host puts one of these on.
+  #
+  # Asserted per reading rather than once, because the three arrive at it
+  # differently — two arrangements of workload and a different component for
+  # hours — and a guard that covered one would look like it covered all.
+  describe "a reading the server draws whole" do
+    %w[workload workload_by_assignee hours].each do |preview|
+      it "connects its controller without throwing, on #{preview}" do
+        page.driver.browser.logs.get(:browser)
+        visit "/lookbook/preview/shadcn/event_calendar/#{preview}"
+        wait_for_stimulus
+
+        errors = page.driver.browser.logs.get(:browser).reject { |log| log.level == "WARNING" }
+
+        expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
+      end
+    end
+  end
+
   # The one option whose effect is a stylesheet rather than a render. `rows:`
   # in `shadcn.css` carries the breakpoint and the override behind one name, so
   # what is asserted here is that both halves still fire: the width alone below
