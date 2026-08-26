@@ -425,6 +425,22 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **The "+N" count filters the week's segments once per cell.** `fillDay`
+      runs `segments.filter(…)` to find what the cell had no room for, and the
+      predicate reads the cell's *column* — so it is genuinely per cell and
+      cannot collapse to one weekly total. What it can collapse to is one pass:
+      tally seven counters over the week's segments, incrementing each column a
+      too-deep segment spans, and let `weekElement` hand `fillDay` the number
+      instead of the array.
+
+      Seven passes become one, and seven intermediate arrays stop being
+      allocated per week. **Deferred on purpose, and the condition is a
+      measurement**: nothing here has profiled the redraw, the Ruby index that
+      was measured alongside it turned out to be worth 27% of a render, and this
+      is client-side work that only the events reading does at all. Profile the
+      controller first; if the redraw is not where the time goes, this is code
+      added for a number nobody saw.
+
 - [ ] **`agenda` means two things in `density`'s parameters.** It is a value of
       `showing` — the daily reading's list half, labelled *List only* — and a
       value of `turbo`, where the day view lands. They never collide in the UI,
