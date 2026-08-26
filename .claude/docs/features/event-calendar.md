@@ -184,6 +184,28 @@ stops here, and *All day* if it does neither.
 the bars have always carried, and `rounded-l-none`/`rounded-r-none` the same
 rule, so the flat edge means one thing everywhere.
 
+A flat edge says *cut*; it does not say **which** cut. A rail does — 2px of the
+event's own colour on the side the chip was severed — so the first day of a job
+is marked on its right, the last on its left, and the days between on both. It
+was written and did not work for a while: the two rules for `continues-after`
+named `border-l` as well, duplicating the pair above them, so all three cases
+rendered a left rail and the day a job *started* on claimed to continue from the
+day before it. Measured, not read — see [bugs fixed](../decisions/04-bugs-fixed.md).
+
+And the pieces close up. On the cut side a workload chip takes back its cell's
+padding and half the grid's line, so five days of one job are one strip rather
+than five islands with 13px between each pair. Half a line from each side, so
+neither day owns the join; the tint cannot cover that line by itself — a chip's
+background is the colour at 12%, and translucent paint over a border shows the
+border — but the two rails meeting on the same pixel can. The ends of the band
+stay rounded and open; every boundary inside it reads as a tick.
+
+Only in a grid. In `rows` a day *is* a row, its chips scroll sideways, and there
+is no next cell to meet — the rule is conditioned so it never applies there
+rather than applied and undone, because the `rows:` variant expands through
+`:where()`, which weighs nothing, and a reset written that way loses on
+specificity whatever order it is given.
+
 ### One job, one line across the week
 
 Ordering a cell is not enough to make a five-day job read as one band across

@@ -425,6 +425,24 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **`BAND_TOKENS` restates the `rows` variant's own 64rem.** The rule that
+      closes a crossing chip's gap must not apply in the rows arrangement, and
+      it is conditioned rather than reset — `@custom-variant rows` expands
+      through `&:where([data-rows])`, and `:where()` weighs nothing, so a
+      `rows:` reset scores 0,2,0 against the rule's 0,3,0 and loses whatever
+      order it is given. The price is a literal `lg:` where the variant says
+      `64rem`. Nothing checks that the two agree: move the variant's breakpoint
+      and the band silently reopens on tablets. A shared token, or a `not-rows`
+      variant defined beside `rows` so both read from one place, would close it.
+
+- [ ] **The event calendar is not in `direction_spec`, and writes physical
+      edges.** `border-l`/`border-r` and `-ml`/`-mr` say *left* and *right*
+      where the meaning is *before* and *after* — a crossing chip in an RTL
+      locale marks the wrong end of itself. The whole family is physical, so
+      this is one job for the family and not five tokens smuggled into a fix.
+      The logical spellings exist (`border-s`/`border-e`, `-ms`/`-me`); what is
+      missing is a reading direction the family has ever been looked at in.
+
 - [ ] **The event calendar's week view.** The one shape the family does not
       have. It was blocked on a time axis "that is a different component's
       worth of geometry"; the hours reading has that axis now, so what is left

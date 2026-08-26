@@ -449,3 +449,36 @@ three days took the top lane over a one-day holiday. All-day leads now, and
 length leads within each of the two groups. That ordering is also the order
 events cross to the browser in, so the fix reached the client-side packer
 without it being touched — it re-packs lanes and never re-sorts.
+
+## A rail that marked every cut on the same side
+
+`CROSSING_CLASS` gives a crossing chip a 2px rail of the event's colour on the
+edge where it was severed — left when it continues before, right when it
+continues after. The `continues-after` pair named `border-l` too, so the two
+rules were duplicates of the two above them: **the direction was never drawn**.
+First day, middle day and last day rendered identically, and the day a job
+started on read as continuing from the day before it.
+
+The lesson is not the typo but where it was caught. The class string had been
+read several times without anyone seeing it — `border-l` beside `border-l` looks
+like a pair, not like a mistake. What found it was asking the browser for
+`getComputedStyle(chip).borderLeftWidth` on the three cases and seeing one answer
+come back three times.
+
+`hours` renders the same class on its bars and chips, and was wrong in the same
+way for the same reason.
+
+## An attribute a component had decided against, shipped empty
+
+`append_controller` and `append_action` join a caller's value onto the
+component's own, because Stimulus reads a space-separated list. Joining nothing
+onto nothing gave `""`, not `nil` — and `element_attributes`' `.compact` is
+looking for a nil, so it could no longer see it.
+
+Avatar is where it showed. It attaches `shadcn--avatar` only when there is an
+image to wait for, precisely so an initials-only avatar does not pay for a
+Stimulus instance with nothing to do — and shipped `data-controller=""` anyway,
+155 of them on one preview page. Harmless to the browser, which is why it
+lasted; not harmless to anything reading the DOM for which controllers a page
+wants, since `[data-controller]` matches an element that named none. `.presence`
+on both appenders, so the join gives back a nil for `compact` to remove.
