@@ -74,6 +74,31 @@ export default class extends Controller {
   }
 
   connect() {
+    // Only a reading that redraws ships shapes to redraw from. Workload, hours
+    // and daily are drawn whole by the server and carry no `prototypes`
+    // template — and this used to read it regardless, so `connect` threw on
+    // every one of them.
+    //
+    // Nothing visibly broke, which is why it lasted: Stimulus catches the
+    // throw, and `data-action` binds independently of `connect`, so the
+    // keyboard, the selection and the month announce all still worked. What
+    // shipped instead was a console error on every page a server-drawn reading
+    // appears on, and a `this.plurals` left undefined for anything that later
+    // wants it.
+    if (this.hasPrototypesTarget) this.readPrototypes()
+
+    // `Intl.PluralRules` rather than a two-branch ternary: the count is one the
+    // server never saw, and "one or other" is wrong in every language with a
+    // few and a many. A locale the browser does not know throws, and falling
+    // back to its own is better than failing to draw the month.
+    try {
+      this.plurals = new Intl.PluralRules(this.localeValue)
+    } catch {
+      this.plurals = new Intl.PluralRules()
+    }
+  }
+
+  readPrototypes() {
     const shapes = this.prototypesTarget.content
 
     this.weekPrototype = shapes.querySelector("[data-slot='event-calendar-week']")
@@ -87,16 +112,6 @@ export default class extends Controller {
     const rows = shapes.querySelectorAll("[data-slot='event-calendar-agenda-item']")
     this.agendaItemPrototype = rows[0]
     this.agendaLinkPrototype = rows[1]
-
-    // `Intl.PluralRules` rather than a two-branch ternary: the count is one the
-    // server never saw, and "one or other" is wrong in every language with a
-    // few and a many. A locale the browser does not know throws, and falling
-    // back to its own is better than failing to draw the month.
-    try {
-      this.plurals = new Intl.PluralRules(this.localeValue)
-    } catch {
-      this.plurals = new Intl.PluralRules()
-    }
   }
 
   // --- navigation -----------------------------------------------------------
