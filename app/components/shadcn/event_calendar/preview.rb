@@ -148,9 +148,17 @@ module Shadcn
         # the day in a Sheet instead, which does need markup.
         day =
           if owned
+            # `autoscroll` because the agenda sits under six weeks of grid: the
+            # frame updates 335px below the fold, and a click reads as nothing
+            # happening. Turbo's own attribute, so the page follows the answer
+            # rather than the component learning to scroll. A host with the day
+            # in a panel — `with_turbo` — needs none of this, which is the
+            # difference between the two.
             { day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
               day_attributes: { data: { turbo_frame: "day" } },
-              agenda_as: :"turbo-frame", agenda_attributes: { id: "day" } }
+              agenda_as: :"turbo-frame",
+              agenda_attributes: { id: "day", autoscroll: true,
+                                   data: { autoscroll_block: "center" } } }
           else
             {}
           end
