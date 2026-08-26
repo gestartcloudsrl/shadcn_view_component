@@ -781,6 +781,32 @@ and `month_url:` is the version of it that needs no JavaScript at all — the na
 becomes links and Turbo does the rest. Nothing about the default path needs
 either: a calendar handed an array works with no server round trip.
 
+**What to load, when the table holds years.** Without `month_url:` the nav is
+client-side, so the browser must already hold every month it can reach — which
+is why `buildIndex` is deliberately not clipped to the month on screen. Hand a
+five-year table to a calendar showing one month and every one of those events is
+queried, wrapped, serialised, parsed and indexed to draw thirty-one days. With
+`month_url:` the host queries a grid at a time:
+
+```ruby
+month = Shadcn::Calendar::Month.new(Date.parse(params.fetch(:month, Date.current.to_s)))
+grid = month.days.first.beginning_of_day..month.days.last.end_of_day
+
+Appointment.where(starts_at: ..grid.last).where("ends_at IS NULL OR ends_at >= ?", grid.first)
+```
+
+Two traps, and both are silent — the calendar draws, it is just missing things.
+
+**Query the overlap, not the start.** A job that began last month and runs into
+this one starts outside the range and belongs inside it. `starts_at` between two
+dates loses exactly the multi-day events the lane packing exists for.
+
+**The range is the grid, not the month.** `month.days` is 35 or 42 days, not 28
+to 31: August 2026 runs 27 July to 6 September, eleven days of it outside the
+month, and those cells show their events like any other. `Schedule` indexes the
+grid's own first and last day for the same reason. A query bounded by
+`month.first..month.last` leaves the first and last rows wrong.
+
 ## Not done
 
 Named rather than left to be discovered:
