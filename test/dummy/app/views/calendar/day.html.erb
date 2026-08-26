@@ -20,27 +20,31 @@
 
   <%# Four fields the calendar never carried: where it is, who to ring, what
       state it is in, and the note from last time. That is the example — a cell
-      shows what a cell can show, and the rest is one request away. %>
-  <% @appointments.each do |appointment| %>
-    <%= render(Shadcn::Card::Component.new(class: "gap-3 py-3")) do |card| %>
-      <% card.with_header(class: "px-3") do |header| %>
-        <% header.with_title(class: "flex items-center gap-2 text-sm") do %>
-          <span class="size-2 shrink-0 rounded-full bg-(--event-color)"
-                data-color="<%= appointment.color %>"></span>
-          <%= appointment.title %>
-        <% end %>
-        <% header.with_description do %>
-          <%= l(appointment.starts_at, format: "%-l:%M %p") %> –
-          <%= l(appointment.ends_at, format: "%-l:%M %p") %> · <%= appointment.location %>
-        <% end %>
-        <% header.with_action do %>
-          <%= render(Shadcn::Badge::Component.new(
-                variant: appointment.status == "done" ? :secondary : :outline)) { appointment.status } %>
-        <% end %>
-      <% end %>
+      shows what a cell can show, and the rest is one request away.
 
-      <% card.with_card_content(class: "flex flex-col gap-2 px-3") do %>
-        <div class="flex items-center gap-2">
+      An `ItemGroup` rather than a stack of Cards. A Card is a surface for one
+      thing; this is a list of several, and Item is the family shadcn gives a
+      list of things: media, content, actions, with a separator between rather
+      than a border around each. It also puts the three parts in fixed places,
+      so a long client name and a short one line up. %>
+  <%# `COLOR_TOKENS` because the calendar declares `--event-color` as a
+      *descendant* rule on its own root, and this list is the Sheet's child, not
+      the calendar's — so the dot came out transparent, in the Card version too.
+      The gem's own constant rather than a copy of the palette, so a host
+      wanting an event's colour outside the calendar cannot drift from it.
+
+      On the group and not on the `<turbo-frame>`: Turbo replaces a frame's
+      *contents*, and the element that stays is the one the Sheet rendered, with
+      the classes it was given. Anything written on this frame's own tag is
+      discarded on the first swap — which is why the first attempt changed
+      nothing. %>
+  <%= render(Shadcn::Item::Group::Component.new(
+        class: Shadcn::EventCalendar::Component::COLOR_TOKENS)) do |group| %>
+    <% @appointments.each_with_index do |appointment, index| %>
+      <% group.with_separator if index.positive? %>
+
+      <% group.with_item(size: :sm, class: "items-start") do %>
+        <%= render(Shadcn::Item::Media::Component.new(class: "pt-0.5")) do %>
           <%= render(Shadcn::Avatar::Group::Component.new) do %>
             <% appointment.assignees.each do |name| %>
               <%= render(Shadcn::Avatar::Component.new(size: :sm)) do |avatar| %>
@@ -50,13 +54,29 @@
               <% end %>
             <% end %>
           <% end %>
-          <span class="text-xs text-muted-foreground"><%= appointment.assignees.to_sentence %></span>
-        </div>
+        <% end %>
 
-        <p class="text-xs text-muted-foreground"><%= appointment.notes %></p>
-        <a class="text-xs underline underline-offset-4" href="tel:<%= appointment.phone.delete(' ') %>">
-          <%= appointment.phone %>
-        </a>
+        <%= render(Shadcn::Item::Content::Component.new) do %>
+          <%= render(Shadcn::Item::Title::Component.new) do %>
+            <span class="size-2 shrink-0 rounded-full bg-(--event-color)"
+                  data-color="<%= appointment.color %>"></span>
+            <%= appointment.title %>
+          <% end %>
+          <%= render(Shadcn::Item::Description::Component.new(class: "line-clamp-none")) do %>
+            <%= l(appointment.starts_at, format: "%-l:%M %p") %> –
+            <%= l(appointment.ends_at, format: "%-l:%M %p") %> · <%= appointment.location %>
+            · <%= appointment.assignees.to_sentence %>
+          <% end %>
+          <%= render(Shadcn::Item::Description::Component.new(class: "line-clamp-none")) do %>
+            <%= appointment.notes %>
+            <a href="tel:<%= appointment.phone.delete(' ') %>"><%= appointment.phone %></a>
+          <% end %>
+        <% end %>
+
+        <%= render(Shadcn::Item::Actions::Component.new) do %>
+          <%= render(Shadcn::Badge::Component.new(
+                variant: appointment.status == "done" ? :secondary : :outline)) { appointment.status } %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
