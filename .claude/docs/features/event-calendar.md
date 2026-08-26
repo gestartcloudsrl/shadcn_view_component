@@ -204,7 +204,16 @@ Only in a grid. In `rows` a day *is* a row, its chips scroll sideways, and there
 is no next cell to meet — the rule is conditioned so it never applies there
 rather than applied and undone, because the `rows:` variant expands through
 `:where()`, which weighs nothing, and a reset written that way loses on
-specificity whatever order it is given.
+specificity whatever order it is given. `not-rows` is a variant of its own,
+defined under `rows` so the breakpoint they share is written on one screen.
+
+Both are **logical** edges — `border-s`/`border-e`, `-ms`/`-me` — because
+*before* and *after* are positions in time, and in a right-to-left locale before
+is the right-hand end. That is a free choice here in a way it is not elsewhere:
+these parts are the port's own, and the families that are 1:1 stay physical
+because upstream is. `direction_spec` holds it, reading the computed border
+rather than the class name, which is identical either way. The hours reading's
+axis is still physical and is a separate job — see the todo.
 
 ### Why the workload does not draw one bar instead
 
