@@ -188,10 +188,31 @@ module Shadcn
       WEEKS_CLASS = "flex flex-col gap-px bg-border"
       WEEK_CLASS = "relative"
       DAYS_CLASS = "grid grid-cols-7 gap-px"
+      # The selected day wears an **outline**, not a second ring, and both halves
+      # of that were measured rather than chosen.
+      #
+      # `bg-accent` alone separates a selected cell from a plain one by 0.030 of
+      # perceptual lightness in the light palette — `oklch(0.97)` against
+      # `oklch(1)` — where the dark palette gets 0.124. A quarter of the signal,
+      # in the palette most people are looking at, which is why clicking a day
+      # read as nothing happening at all.
+      #
+      # `ring-2` was tried first and collapsed two states into one: it and
+      # `focus-visible:ring-[3px]` are the same property, so Tailwind's order
+      # decides and selection won — a focused cell and a merely selected one
+      # rendered identically. `outline` is a different property, so the two now
+      # stack: focus keeps its 3px translucent ring, selection carries a 2px
+      # solid one, and a cell that is both shows both.
+      #
+      # `--ring` rather than `--primary`, because the day *number* already wears
+      # primary when it is today and two primaries on one cell say one thing
+      # twice.
       DAY_CLASS = "group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 " \
                   "pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 " \
                   "focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 " \
                   "focus-visible:ring-inset data-[selected]:bg-accent " \
+                  "data-[selected]:z-10 data-[selected]:[outline:2px_solid_var(--ring)] " \
+                  "data-[selected]:[outline-offset:-2px] " \
                   "sm:items-start sm:px-1.5 " \
                   "group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) " \
                   "sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)"
