@@ -10,7 +10,7 @@ written.
 |---|---|
 | [decisions/01-architecture.md](decisions/01-architecture.md) | project shape, the cva/`cn` mapping, `Shadcn::` namespacing, no-npm rule, the `part` macro, FormBuilder, when a component grows a second reading and where that seam is, performance, tooling |
 | [decisions/02-javascript.md](decisions/02-javascript.md) | how Radix was reimplemented: `display: contents` roots, why nothing is portalled, the Popover API top layer, `turbo:morph` |
-| [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the rejected reverse-parity check, system-spec pitfalls, what each `vendor/` reference is worth and why a control measurement is not optional |
+| [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the reverse-parity *token-set diff* that was rejected — the spec itself exists and gates CI — system-spec pitfalls, what each `vendor/` reference is worth and why a control measurement is not optional |
 | [decisions/04-bugs-fixed.md](decisions/04-bugs-fixed.md) | the council's findings and their fixes — a list of things not to reintroduce |
 | [features/README.md](features/README.md) | per component: 1:1, adapted, extended or ours — the answer a host wants, written to be lifted into the public README |
 | [todo.md](todo.md) | open work, ordered by what blocks a release, plus what is deliberately not being done |

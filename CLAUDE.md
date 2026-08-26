@@ -199,6 +199,8 @@ These bite while editing, so they are here rather than in the docs.
 | `stimulus_contract_spec.rb` | does every `shadcn--x#action`, target and value exist in the JS |
 | `icons_spec.rb` | is the bundled icon set exactly what the components draw, in both directions |
 | `install_generator_spec.rb` | does what the installer writes into a host's Tailwind entrypoint actually compile |
+| `reverse_parity_spec.rb` | does the port render a class **no** vendored source contains — the direction `parity_spec` cannot see. Anything genuinely ours is declared in its `ours` list *with its reason*, so adding a class of your own means adding an entry, and forgetting is a red CI rather than a silent divergence |
+| `form_builder_spec.rb` | the `shadcn_*` field helpers: what each emits, and the `aria-labelledby` that gives a `role`-carrying control its name |
 | `reduced_motion_spec.rb` | does the *compiled* bundle still collapse `animate-in`/`animate-out`/`animate-accordion-*` under `prefers-reduced-motion` — those four names only, and no transition |
 | `system/` | does it behave, in headless Chrome |
 | `system/accessibility_spec.rb` | axe, every preview, in both palettes, at rest and with each layer open |
@@ -219,7 +221,8 @@ what gets it covered by the snapshot, preview and accessibility specs.
 - [JavaScript](.claude/docs/decisions/02-javascript.md) — why nothing is
   portalled, the Popover API top layer, `turbo:morph`, and the cascade-layer trap
 - [Testing](.claude/docs/decisions/03-testing.md) — including the rejected
-  reverse-parity check, the system-spec pitfalls, what each `vendor/` reference
+  reverse-parity *token-set diff* — the variant that was rejected, not the spec,
+  which exists and gates CI — the system-spec pitfalls, what each `vendor/` reference
   is and is not evidence for, and why a control measurement comes first
 - [Bugs fixed](.claude/docs/decisions/04-bugs-fixed.md) — things not to
   reintroduce
