@@ -32,6 +32,22 @@ RSpec.describe "Event calendar", :js do
 
   def day(date) = find("#{calendar} [data-day='#{date}']")
 
+  # A method, not a `let`: it is asked the same question about two cells and in
+  # two palettes within one example. The cell is found inside the script rather
+  # than passed in — Capybara hands an element argument to a wrapper this does
+  # not sit inside, and the call comes back empty.
+  def outline_of(date)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const el = document.querySelector("[data-slot=event-calendar-day][data-day='#{date}']")
+        if (!el) return "assente"
+
+        const s = getComputedStyle(el)
+        return s.outlineStyle === "none" ? "none" : `${s.outlineWidth} ${s.outlineStyle}`
+      })()
+    JS
+  end
+
   def agenda_titles = all("#{calendar} [data-slot=event-calendar-agenda-event-title]", visible: :all).map(&:text)
 
   # Normalised, because the two renderers write attributes in their own order
@@ -202,6 +218,22 @@ RSpec.describe "Event calendar", :js do
       expect(day("2026-08-21")["aria-selected"]).to eq("true")
       expect(day("2026-08-20")["aria-selected"]).to be_nil
       expect(all("#{calendar} [data-slot=event-calendar-day][tabindex='0']", visible: :all).size).to eq(1)
+    end
+
+    # `aria-selected` is the fact; this is whether anyone can see it. The tint
+    # alone separated a selected cell from a plain one by 0.030 of perceptual
+    # lightness in the light palette against 0.124 in the dark, which is why
+    # clicking a day read as nothing happening. Asserted in both palettes for
+    # that reason — the one that was too weak is the one the specs emulate.
+    it "marks the selected day with something visible, in either palette", :aggregate_failures do
+      day("2026-08-21").click
+
+      %w[light dark].each do |palette|
+        page.execute_script("document.documentElement.classList.toggle('dark', #{palette == 'dark'})")
+
+        expect(outline_of("2026-08-21")).to eq("2px solid")
+        expect(outline_of("2026-08-20")).to eq("none")
+      end
     end
 
     it "says so when there is nothing on the day", :aggregate_failures do
