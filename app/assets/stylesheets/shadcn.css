@@ -25,6 +25,19 @@
   &:where([data-rows][data-arrangement="rows"]) { @slot }
 }
 
+/* The complement, for the rules that must not apply in a row rather than apply
+ * and be undone there. A reset cannot do that job: `:where()` above keeps `rows`
+ * at zero specificity, so a `rows:` reset loses to any rule carrying one more
+ * attribute, whatever order the two are written in.
+ *
+ * Written out rather than derived — a media query has no negation — so the two
+ * agree only because they are edited together. That is why this is here and not
+ * spelled `lg:` at the call site: five lines apart it is a pairing someone can
+ * see, and 64rem appears twice on one screen instead of twice in two files. */
+@custom-variant not-rows {
+  @media (width >= 64rem) { &:where([data-rows]:not([data-arrangement="rows"])) { @slot } }
+}
+
 /* --------------------------------------------------------------------------
  * Design tokens
  * ------------------------------------------------------------------------ */

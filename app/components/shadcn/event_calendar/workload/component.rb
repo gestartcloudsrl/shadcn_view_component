@@ -74,14 +74,14 @@ module Shadcn
         # sides. The ends of the band stay open and rounded; every day boundary
         # inside it reads as a tick.
         #
-        # Conditioned so it cannot apply in rows rather than applied and undone
-        # there. A reset was written first and lost: `rows:` expands to
-        # `&:where([data-rows])`, and `:where()` weighs nothing, so the reset
+        # `not-rows:`, a variant of its own defined directly under `rows` in
+        # shadcn.css, rather than a reset here. A reset was written first and
+        # lost: `rows:` expands through `:where()`, which weighs nothing, so it
         # scored 0,2,0 against this rule's 0,3,0 — the extra `[data-continues-*]`
-        # attribute — and no ordering could have saved it. The cost of not
-        # having a reset is this line restating the variant's own 64rem, which
-        # will drift if `@custom-variant rows` ever moves; the two are checked
-        # together or not at all.
+        # attribute — and no ordering could have saved it. The breakpoint was
+        # then restated as `lg:` here, which put 64rem in two files with nothing
+        # holding them together; the variant puts it back beside the one it is
+        # the complement of.
         #
         # `w-auto` alongside each margin, and it is not decoration: the chip
         # carries `w-full`, and a box with an explicit width does not grow when
@@ -94,10 +94,10 @@ module Shadcn
         # there is no next cell to meet — the margin would only pull the first
         # chip out from under the scroll edge.
         BAND_TOKENS =
-          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-before]]:-ml-[calc(var(--spacing)*1.5_+_0.5px)] " \
-          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto " \
-          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-after]]:-mr-[calc(var(--spacing)*1.5_+_0.5px)] " \
-          "lg:[&:not([data-arrangement=rows])_[data-slot=event-calendar-day-item][data-continues-after]]:w-auto"
+          "not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:-ms-[calc(var(--spacing)*1.5_+_0.5px)] " \
+          "not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto " \
+          "not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:-me-[calc(var(--spacing)*1.5_+_0.5px)] " \
+          "not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:w-auto"
 
         STRIP_TOKENS =
           "rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto " \

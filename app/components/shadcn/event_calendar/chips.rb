@@ -45,9 +45,19 @@ module Shadcn
       # duplicates of the pair above and left the direction undrawn — every day
       # of a job rendered identically, with a left rail, including the day it
       # started on, which then read as continuing from a day before it.
-      CROSSING_CLASS = "data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none " \
-                       "data-[continues-before]:border-l-2 data-[continues-before]:border-l-[var(--event-color)] " \
-                       "data-[continues-after]:border-r-2 data-[continues-after]:border-r-[var(--event-color)]"
+      # Logical edges, not physical ones. `continues-before` and
+      # `continues-after` are positions in *time*, and in a right-to-left locale
+      # "before" is the right-hand end — `border-s`/`border-e` follow the reading
+      # direction the browser has already resolved, `border-l`/`border-r` cannot.
+      # These parts are the port's own, with no upstream class string to stay
+      # identical to, so the choice is free here in a way it is not in the
+      # families that are 1:1 — and upstream is physical almost everywhere.
+      # `direction_spec` holds it: with `border-l` restored, its RTL example is
+      # the one that fails. The hours axis still positions with `left`, which is
+      # a separate job — see the todo.
+      CROSSING_CLASS = "data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none " \
+                       "data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] " \
+                       "data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)]"
       # And what the rail cannot say: how long. `date_span` is how the agenda
       # has always said it, so the two agree.
       # No colour of its own: it inherits the chip's `--event-ink`, which is the
