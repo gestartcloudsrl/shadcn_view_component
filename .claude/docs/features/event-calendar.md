@@ -807,6 +807,139 @@ month, and those cells show their events like any other. `Schedule` indexes the
 grid's own first and last day for the same reason. A query bounded by
 `month.first..month.last` leaves the first and last rows wrong.
 
+### A host's half, end to end
+
+Three things in the controller and nothing else: normalise the month, query the
+grid, map.
+
+```ruby
+class CalendarController < ApplicationController
+  def show
+    @month = Shadcn::Calendar::Month.new(month_param)
+    grid = @month.days.first.beginning_of_day..@month.days.last.end_of_day
+
+    @appointments = Appointment.includes(:client, :assignees)
+                               .where(starts_at: ..grid.last)
+                               .where("ends_at IS NULL OR ends_at >= ?", grid.first)
+  end
+
+  def day
+    @date = Date.parse(params[:date])
+    @appointment_list = Appointment.includes(:client, :assignees).on(@date)
+  end
+
+  private
+
+  # `Date.current` when absent or unparseable: a bad `?month=` in a URL someone
+  # pasted should show this month, not a 500.
+  def month_param
+    Date.parse(params[:month].to_s)
+  rescue Date::Error, TypeError
+    Date.current
+  end
+end
+```
+
+```erb
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: @month.date,
+      selected: params[:day],
+      events: @appointments.map { |appointment| calendar_event(appointment) },
+
+      # ‹ and › become links: the server answers with the month, and the browser
+      # is handed only what it can show.
+      month_url: ->(date) { calendar_path(month: date.strftime("%Y-%m")) },
+
+      # The cell becomes a link and the built-in agenda is the frame it swaps.
+      day_url: ->(date) { calendar_day_path(date) },
+      day_attributes: { data: { turbo_frame: "day" } },
+      agenda_as: :"turbo-frame", agenda_attributes: { id: "day" }
+    )) %>
+```
+
+The mapping is the part a host writes, and it belongs in a helper rather than on
+the model:
+
+```ruby
+def calendar_event(appointment)
+  { id: appointment.id,
+    title: appointment.client.name,
+    starts_at: appointment.starts_at,
+    ends_at: appointment.ends_at,
+    color: appointment.service.calendar_color,
+    assignees: appointment.assignees.map(&:full_name) }
+end
+```
+
+**The component never sees a record.** Six fields of ten make the trip; where it
+is, who to ring, what state it is in and the note from last time stay on the
+model and appear when a day is opened. That is the whole of `day_url:`.
+
+**`includes` is not a detail.** A component may not query — there is a linter
+that raises on it — so every `appointment.assignees` inside that `map` is a
+query the host issued. On a dense grid it is hundreds.
+
+**`selected: params[:day]`** is what makes a day's URL shareable. Without it the
+calendar picks today when the month contains it, and the first of the month
+otherwise.
+
+### The `month-change` variant, and what it costs
+
+No `month_url:`. The arrows stay buttons, the controller redraws the month from
+what it already has, and *then* announces:
+
+```erb
+<div data-controller="calendar-loader"
+     data-action="shadcn--event-calendar:month-change->calendar-loader#load">
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: @month.date,
+        events: @appointments.map { |appointment| calendar_event(appointment) }
+      )) %>
+</div>
+```
+
+```js
+// app/javascript/controllers/calendar_loader_controller.js
+import { Controller } from "@hotwired/stimulus"
+import { visit } from "@hotwired/turbo"
+
+export default class extends Controller {
+  load({ detail: { month } }) {
+    visit(`/calendar?month=${month.slice(0, 7)}`, { frame: "calendar" })
+  }
+}
+```
+
+The application controller is the one above, unchanged.
+
+**The order inside `goTo` decides the experience**, and it is not visible from
+the host's side:
+
+```js
+this.monthValue = iso(first)
+this.render()                    // draws from what the browser holds
+this.dispatch("month-change", …) // and only then says so
+```
+
+So the browser paints the new month with the events it has, and the server's
+answer replaces it afterwards. With one month loaded that is an empty month and
+then a full one — a flash. It cannot be turned off from outside: `client_drawn?`
+is a method, `false` only on the readings the server draws whole, not an
+argument a host can pass.
+
+**Which is exactly why preloading a window exists.** Load the month either side
+and the intermediate draw is *correct*, so the swap is invisible; the flash
+returns only when someone steps past the window.
+
+```ruby
+grid = (@month.days.first - 1.month).beginning_of_day..(@month.days.last + 1.month).end_of_day
+```
+
+| | |
+|---|---|
+| **`month_url:`** | the ordinary case. No JavaScript, no flash, the browser is handed only the month it shows, and without JS the link still works |
+| **`month-change`** | when the page around it must not reload — filters, a map beside it, state living in the DOM — and you will preload a window to avoid the flash |
+
 ## Not done
 
 Named rather than left to be discovered:
