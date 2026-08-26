@@ -591,6 +591,20 @@ One tab stop for the month; the arrows move within it, `Home`/`End` reach the
 ends of a week, and `PageUp`/`PageDown` cross a month — a step off the grid's own
 edge navigates, and the tab stop travels with the selection.
 
+`aria-selected` is the fact; the **outline** is whether anyone can see it. The
+tint alone separated a selected cell from a plain one by 0.030 of perceptual
+lightness in the light palette — `oklch(0.97)` against `oklch(1)` — where the
+dark palette got 0.124, so clicking a day read as nothing happening in the
+palette most people use. A 2px solid `--ring` outline carries it now, and each
+half of that was forced rather than chosen: a *ring* would have been the same
+CSS property as `focus-visible:ring-[3px]`, so Tailwind's order decided between
+them and selection won — a focused cell and a merely selected one rendered
+identically, which is worse than the fault being fixed. An outline is a
+different property, so the two stack. And `--ring` rather than `--primary`
+because the day *number* already wears primary when it is today; the gem's
+`Calendar` spends primary on selection precisely because its today is the quiet
+one, and this family made the opposite trade first.
+
 The roles describe the seven-column month. When the workload reading lays the
 same DOM out as one row per day, what a screen reader reports and what an eye
 sees disagree there. That is the price of one tree serving two arrangements, and
@@ -646,6 +660,21 @@ the day view they swap:
       agenda_as: :"turbo-frame", agenda_attributes: { id: "day" }
     ) %>
 ```
+
+Two things a host meets on the way, neither of them guessable from the markup.
+
+**`--event-color` does not reach outside the calendar.** It is declared as a
+descendant rule on the calendar's own root, so a day view rendered in a panel —
+a sibling, not a child — gets nothing, and a dot painted `bg-(--event-color)`
+comes out transparent. `EventCalendar::Component::COLOR_TOKENS` is the same
+declaration as a constant: a host applies it to whatever container holds the
+colours and cannot drift from the palette by copying it.
+
+**Turbo replaces a frame's contents, not the frame.** The element that stays in
+the DOM is the one the host rendered, with the classes it was given, so anything
+written on the response's own `<turbo-frame>` tag is discarded on the first
+swap. Both facts were found the same way: applying the constant to the frame
+changed nothing, and applying it to the list inside worked.
 
 Nothing here names Turbo — `agenda_as:` takes an element and the host chooses
 which. It is the same shape `as:` has everywhere else in this gem, and the same

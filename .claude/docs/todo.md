@@ -425,6 +425,17 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **`agenda` means two things in `density`'s parameters.** It is a value of
+      `showing` — the daily reading's list half, labelled *List only* — and a
+      value of `turbo`, where the day view lands. They never collide in the UI,
+      because the label is "List only" and the panel never shows the second at
+      all; they collide in the URL, where `showing=agenda&turbo=agenda` is two
+      unrelated facts wearing one word. Renaming `turbo`'s value — `inline`,
+      say, for "in the flow of the page" — costs three spec URLs and takes a
+      word back. Found beside the `view`/`period` merge and left alone
+      deliberately: one incongruence at a time, and this one misleads a reader
+      rather than the code.
+
 - [ ] **The hours axis positions with `left`, and the family has never been
       seen in RTL.** The crossing rail and the band's margins now use logical
       edges, and `direction_spec` holds them — but `Hours::Component` places
