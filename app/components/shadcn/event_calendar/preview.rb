@@ -70,10 +70,18 @@ module Shadcn
         render_with_template
       end
 
-      # A host owning the day view: the cells are links, the agenda is the frame
-      # they swap, and what comes back carries what the calendar could not. The
-      # model, the route and the frame live in `test/dummy` — a preview can
-      # render a calendar but cannot answer its links.
+      # A host owning the day view, with the day inside a *Sheet*: one click
+      # both swaps the frame and opens the panel, and the calendar is rendered
+      # inside the Sheet's root to reach its controller.
+      #
+      # `@hidden`, and only that half is why: `density` has the wiring now and
+      # is the page to browse. What this keeps is the Sheet, which `density`
+      # cannot show — a preview method renders one component and cannot wrap it
+      # in another's slot, and giving `density` a template would make a month of
+      # eight hundred events a golden. It stays as the fixture the four sheet
+      # examples in `spec/system/event_calendar_spec.rb` are driven through.
+      #
+      # @hidden
       def with_turbo
         render_with_template
       end
@@ -100,14 +108,16 @@ module Shadcn
       # @param shape select [chips, bars]
       # @param from number
       # @param to number
+      # @param turbo toggle
       def density(month: "2026-08-01", view: "grid", most: 30, all_day: 1, spanning: 3,
                   colored: false, show_all: false, group: "events", shape: "chips",
-                  showing: "both", from: 7, to: 23)
+                  showing: "both", from: 7, to: 23, turbo: false)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         here = lambda do |**changed|
           state = { month:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
-                    show_all: cast.cast(show_all), group:, shape:, showing:, from:, to: }.merge(changed)
+                    show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
+                    turbo: cast.cast(turbo) }.merge(changed)
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -116,11 +126,35 @@ module Shadcn
         # not carry, so the controller announces the ask and leaves the DOM
         # alone. A host wires `month_url:` to its own route; this wires it to
         # the same preview in another month.
-        events = Preview.workload_events(month: shown, per_day: 0..most.to_i,
-                                         colored: cast.cast(colored),
-                                         durations: view.to_s == "hours", all_day: all_day.to_i,
-                                         spanning: spanning.to_i)
-        common = { month: shown, events:,
+        # With `turbo` on the events come from the dummy's own table instead of
+        # the generator, because the whole point is that the day link is
+        # answered: a cell drawn from an invented event would open a day page
+        # that has never heard of it. The density knobs go inert for the same
+        # reason, and the appointments live in August 2026 — walk to another
+        # month and the calendar is honestly empty.
+        owned = cast.cast(turbo)
+        events =
+          if owned
+            Appointment.for_calendar
+          else
+            Preview.workload_events(month: shown, per_day: 0..most.to_i, colored: cast.cast(colored),
+                                    durations: view.to_s == "hours", all_day: all_day.to_i,
+                                    spanning: spanning.to_i)
+          end
+        # A host owning the day view. The cells become links, and the agenda
+        # *is* the frame they swap — `agenda_as:` is what lets the component's
+        # own agenda be the thing Turbo replaces, so this needs no markup of its
+        # own and `density` stays a method. `with_turbo` is the same wiring with
+        # the day in a Sheet instead, which does need markup.
+        day =
+          if owned
+            { day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
+              day_attributes: { data: { turbo_frame: "day" } },
+              agenda_as: :"turbo-frame", agenda_attributes: { id: "day" } }
+          else
+            {}
+          end
+        common = { month: shown, events:, **day,
                    view_url: ->(name) { here.call(view: name) },
                    month_url: ->(date) { here.call(month: date.iso8601) } }
 

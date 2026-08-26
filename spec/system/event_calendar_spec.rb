@@ -355,6 +355,32 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The other half of the same idea, and the cheaper one: the day view goes into
+  # the agenda the calendar already has, rather than into a Sheet. `agenda_as:`
+  # is what makes that possible, and it was asserted only at the component level
+  # — that the element is a `turbo-frame` and the cell names it. Whether a click
+  # then actually swaps a day into it is a browser's question, and nothing was
+  # asking it.
+  describe "a host owning the day view, in the agenda" do
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=true&month=2026-08-01"
+      wait_for_stimulus
+    end
+
+    it "makes the day a link rather than a button" do
+      expect(page).to have_css("a[data-slot=event-calendar-day][data-day='2026-08-13']")
+    end
+
+    it "swaps the day into the agenda, and swaps it again", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
+
+      find("#{calendar} [data-day='2026-08-20']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 20")
+    end
+  end
+
   # The one option whose effect is a stylesheet rather than a render. `rows:`
   # in `shadcn.css` carries the breakpoint and the override behind one name, so
   # what is asserted here is that both halves still fire: the width alone below
