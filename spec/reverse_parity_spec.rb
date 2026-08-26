@@ -290,10 +290,9 @@ RSpec.describe "reverse parity" do
     # nothing — a fifteen-minute call on a sixteen-hour axis is under a pixel.
     "event-calendar-day-bar" => %w[
       bg-[var(--event-color)]/70 left-(--at) min-w-[3px] top-(--lane) w-(--for)
-      data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none
-      data-[continues-before]:border-l-2 data-[continues-after]:border-l-2
-      data-[continues-before]:border-l-[var(--event-color)]
-      data-[continues-after]:border-l-[var(--event-color)]
+      data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none
+      data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)]
+      data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)]
     ],
     # How long a job that crosses days runs, beside the clock of the day it is
     # drawn on — `date_span`, the same phrasing the agenda uses.
@@ -303,7 +302,16 @@ RSpec.describe "reverse parity" do
     # more. They used to, because every reading shared one class string and a
     # plain calendar was carrying all twenty-two of them: the guard was the
     # symptom, and the split is what removed the need for it.
+    # The band closes up: on the side a chip was cut, it takes back the cell's
+    # padding and half the grid line, so five days of one job read as one strip.
+    # `w-auto` is load-bearing — the chip carries `w-full`, and a box with an
+    # explicit width does not grow when given a negative margin. `not-rows:`
+    # because in a row a day has no neighbour to meet.
     "event-calendar" => %w[
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:-ms-[calc(var(--spacing)*1.5_+_0.5px)]
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:-me-[calc(var(--spacing)*1.5_+_0.5px)]
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:w-auto
       group/event-calendar
       [--event-calendar-hour:0px]
       max-lg:[--event-calendar-hour:22vw]
@@ -400,7 +408,14 @@ RSpec.describe "reverse parity" do
     # meet, and a month grid cannot have lines of two widths.
     "event-calendar-weeks" => %w[gap-px],
     "event-calendar-days" => %w[gap-px grid-cols-7],
+    # The selection is an outline as well as a tint, and both halves are
+    # measured: `bg-accent` alone separated a selected cell from a plain one by
+    # 0.030 of perceptual lightness in the light palette against 0.124 in the
+    # dark. An `outline` rather than a second `ring` because a ring is the same
+    # property as the focus ring and would have replaced it.
     "event-calendar-day" => %w[
+      data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px]
+      data-[selected]:z-10
       data-[selected]:bg-accent focus-visible:ring-inset hover:bg-accent/50 min-h-14 pb-1 pt-1.5 px-0.5
       sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)
       sm:items-start sm:px-1.5 pt-1
@@ -467,7 +482,10 @@ RSpec.describe "reverse parity" do
     # in the same place. It wears a chip's own classes because it is a chip with
     # nothing in it — given a height instead, it came out 45px against a real 53
     # and put the band it was aligning eight pixels off.
-    "event-calendar-day-held" => %w[bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)],
+    # Nothing of its own any more: the chip's rules moved into
+    # `.shadcn-event-calendar-chip` in `shadcn.css`, and an invisible lane is
+    # that class plus `invisible`. See the note on `event-calendar-day-item`.
+    "event-calendar-day-held" => %w[shadcn-event-calendar-chip],
     # A job that crosses days is drawn on each day it covers, and says so twice:
     # a flat edge on the side it runs off, which is the bars' vocabulary, and a
     # rail of its own colour down the left.
@@ -482,13 +500,20 @@ RSpec.describe "reverse parity" do
     # at, so it is the whole axis rather than as wide as its own text — and it
     # carries exactly one of `w-auto` and `w-(--for)`, never both, because this
     # class string does not go through `tailwind_merge`.
+    # `shadcn-event-calendar-chip` is the one component class in this port, and
+    # the only one there will be while the rest is 1:1 on classes: this chip is
+    # ours, so no vendored source owns its rules, and 390 bytes repeated on 68
+    # chips was 24 KB of a dense month. `shadcn.css` carries the reasoning.
+    #
+    # The tokens beside it are the hours reading, which renders this same slot
+    # the ordinary way — it draws too few chips for the weight to matter.
     "event-calendar-day-item" => %w[
+      shadcn-event-calendar-chip
       bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)
       left-(--at) top-(--lane) max-w-[13rem] w-(--for) min-w-max
-      data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none
-      data-[continues-before]:border-l-2 data-[continues-after]:border-l-2
-      data-[continues-before]:border-l-[var(--event-color)]
-      data-[continues-after]:border-l-[var(--event-color)]
+      data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none
+      data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)]
+      data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)]
     ],
     "event-calendar-day-time" => %w[pe-2 text-[0.65rem]],
     "event-calendar-day-text" => %w[text-[0.65rem]],
