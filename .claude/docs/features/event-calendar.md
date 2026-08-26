@@ -433,6 +433,20 @@ What is *not* solved is that a dense month still ships every event to the
 browser so the controller can redraw it. At this density a host should feed
 months on demand instead, and `month-change` is the hook for it.
 
+**The index is an index.** `Schedule#by_day` used to be a Hash whose default
+block scanned *every* event for the ones covering that day — once per day, so
+forty-two full scans over a month, rebuilding an enumerator and its pairs each
+time. One walk now drops each event into the days it covers, clamped to the grid
+so an event running for years costs the days on screen rather than the days it
+lasts. Measured on 1,182 events: building the schedule 23.9 ms → 8.8 ms, the
+whole render 74.2 ms → 54.3 ms, allocations 149,114 → 102,032. The 147 snapshots
+are byte-identical, which is what says the ordering survived.
+
+The default block stays, and it is not vestigial: `#on` is public and `busiest`
+was once broken by a day outside the grid, so a scan still answers for those.
+`Hash#merge` keeps the receiver's default proc — that is what lets the index
+answer for the grid and the scan for everything else.
+
 **Before any of that, turn compression on.** It is worth more than everything
 else here put together and it is one line in a host, not a line in this gem.
 Measured on a real payload extended to two thousand events:

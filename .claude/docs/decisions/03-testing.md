@@ -728,6 +728,27 @@ shipped](04-bugs-fixed.md). `getComputedStyle` is available through
 `evaluate_script` and is the only instrument here that would have caught it.
 Reach for it whenever the thing under test is *shown* rather than *recorded*.
 
+## A spec that is not in the table does not get run
+
+`reverse_parity_spec` failed on CI after a branch that never ran it once. It was
+not hidden: six documents reference it, it gates every CI run, and it is the
+only thing standing between a class of one's own and a silent divergence from
+upstream. It was missing from one place — the *Which spec to reach for* table in
+`CLAUDE.md`, which is the list a session actually reads before choosing what to
+run. `form_builder_spec` was missing from it too.
+
+Two words made it worse. Both `CLAUDE.md` and `docs/README.md` described
+`03-testing.md` as covering "the **rejected** reverse-parity check". What was
+rejected is the *token-set diff* variant — measured, 12 of 13 families dirty
+with false positives, and it is under *Deliberately not doing* for that reason.
+Read plainly, the phrase says the check itself was rejected, which is the
+opposite of true. Both now name the variant.
+
+The general form is worth more than the instance: **an index that is nearly
+complete is read as complete.** A spec absent from the table is not read as "look
+elsewhere", it is read as "there is nothing else", and the cost lands on CI
+rather than on the person who wrote the table.
+
 ## What is still unverified
 
 - Parity in the removal direction (above).
