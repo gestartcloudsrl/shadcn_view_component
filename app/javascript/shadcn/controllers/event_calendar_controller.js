@@ -531,8 +531,21 @@ export default class extends Controller {
   buildIndex() {
     this.index = new Map()
 
+    // Walked as dates and formatted once per day, not parsed back from the
+    // string it just wrote: the old loop did `parse(iso(...))` every step, so a
+    // job running a year paid three hundred and sixty-five round trips through
+    // both.
+    //
+    // Not clipped to the month on screen, though it is tempting: the index is
+    // built once per payload and `eventsValueChanged` is the only thing that
+    // clears it, so it has to answer for every month this calendar can step to
+    // without a request.
     for (const event of this.events) {
-      for (let day = event.from; day <= event.to; day = iso(addDays(parse(day), 1))) {
+      const last = parse(event.to)
+
+      for (let date = parse(event.from); date <= last; date = addDays(date, 1)) {
+        const day = iso(date)
+
         if (!this.index.has(day)) this.index.set(day, [])
         this.index.get(day).push(event)
       }
