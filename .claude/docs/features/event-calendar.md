@@ -206,6 +206,39 @@ rather than applied and undone, because the `rows:` variant expands through
 `:where()`, which weighs nothing, and a reset written that way loses on
 specificity whatever order it is given.
 
+### Why the workload does not draw one bar instead
+
+The events reading draws a crossing job as a single element: `week_row` puts a
+**segments layer** over each week — a seven-column grid, absolutely positioned,
+`pointer-events-none` and `aria-hidden` — and a bar places itself in it with
+`grid-column: n / span m`. One object, spanning, cut only at the week boundary.
+
+The workload reading inherits that layer and renders it *empty*, because
+`labelled?` is `reading == :auto`. Filling it was tried, measured and thrown
+away.
+
+The geometry was not the problem. Bars landed within 2px of the lane the cells
+were holding. Three costs showed up anyway: the layer's row rhythm is the events
+bar (22px) and a workload chip is 53px, because the chip carries a client and a
+crew; reserving the band's lanes inside every cell comes out of the same `CAP`
+the chips are drawn from, so with a two-deep band the cells rendered **60 chips
+fewer — that is, none**; and the reservation is per month, so every cell inflates
+to the tallest.
+
+What settles it is none of those. **The workload has no agenda.** The events
+reading has one, and that is what earns its overlay the right to be
+`aria-hidden`: whatever the bars do not say, the agenda reads out in full. In
+the workload the chips in the cells *are* the only accessible representation
+there is, so a crossing job moved into a hidden layer would simply cease to
+exist for a screen reader.
+
+Using it would mean either giving the workload an agenda — but that reading is
+"a month as a measure", deliberately without one — or making the layer real
+content, which means dropping `aria-hidden` and `pointer-events-none`, and with
+them the one-tap-target-per-day property the mobile reading is built on. Worth
+knowing that the second is the direction dragging would need anyway: to drag a
+job you need one object, and today a five-day job is five chips.
+
 ### One job, one line across the week
 
 Ordering a cell is not enough to make a five-day job read as one band across
@@ -636,23 +669,31 @@ either: a calendar handed an array works with no server round trip.
 
 Named rather than left to be discovered:
 
-- **splitting the controller.** 306 of its 571 lines are the redraw, which three
-  of the four readings never run. That much is true and it is where this entry
-  used to stop — but "so it is downloaded and unused" was measured afterwards
-  and does not follow: `shadcn/index.js` imports all thirty-three controllers
-  eagerly, because a host registers them with one call. A second controller
-  would be imported there too. The redraw is 11 KB of the 208 KB a host gets
-  whichever components it uses, and splitting it moves none of them.
+- **splitting the controller.** Roughly 308 of its lines are the redraw, which
+  three of the four readings never run. That much is true and it is where this
+  entry used to stop — but "so it is downloaded and unused" was measured
+  afterwards and does not follow: `shadcn/index.js` imports all thirty-three
+  controllers eagerly, because a host registers them with one call. A second
+  controller would be imported there too, and splitting moves none of the 208 KB
+  a host gets whichever components it uses.
 
-  So the split would buy readability and nothing else, which is a smaller reason
-  than the one first written down.
+  The byte question needs nothing built: `CONTROLLERS` is already exported and
+  `pin_all_from` already pins every controller individually, so a host that
+  wants a subset imports them by path and skips `index.js`. Registering is not
+  loading — importing the map pulls every module in either way, because those
+  imports are static.
 
-  And the byte question needs nothing built: `CONTROLLERS` is already exported
-  and `pin_all_from` already pins every controller individually, so a host that
-  wants a subset imports them by path and skips `index.js`. What `index.js` buys
-  is one call and no list to maintain; what it costs is all thirty-three, and a
-  host can already decline that trade. Registering is not loading — importing
-  the map pulls every module in either way, because those imports are static.
+  "Readability and nothing else" is where this entry stopped next, and that was
+  a guess too. The split has since been **built and thrown away**, and what it
+  cost is in [the todo](../todo.md): the frame depends on the drawing rather
+  than the other way round, so the base needs three hooks and all three would be
+  dead; `stimulus_contract_spec` goes blind on 35 examples until taught to
+  follow a base class; and the premise was false, because `calendar_controller.js`
+  is longer and unsplit. What was done instead is the part that was actually
+  worth having — the methods are in the order of the two halves, with the four
+  edges that cross the seam named at it. The trigger for revisiting is the week
+  view below: it needs a `render` of its own, which is the second subclass the
+  base does not have today.
 - **the week view.** The switcher and the day view are built — see *The period,
   and the day*. A week is the one shape left, and it is the one that needs a
   time axis *across* seven days rather than down one; the hours reading has the
