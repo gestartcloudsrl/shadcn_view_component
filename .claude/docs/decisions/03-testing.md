@@ -552,6 +552,23 @@ and clean up stray `chromedriver`/headless processes between heavy runs —
 leftovers also make the *user's* Chrome refuse to open a window, since they run
 from the same application bundle.
 
+### A selector that depends on another knob is not a check of this one
+
+Verifying every `density` parameter in the browser, `period` came back broken:
+zero `event-calendar-resource` under both `monthly` and `daily`. The parameter
+was fine. `resource` is the operator's name row, which the daily reading draws
+only when it is *also* grouping by assignee — so the selector was asking about
+two knobs and reporting on one.
+
+The row above it already said so: the `showing` check ran under `period=daily`
+and found a ruler and an agenda, neither of which a month has. When two checks
+of the same page disagree, the one with the narrower selector is usually the one
+that is wrong.
+
+Same shape as measuring a bar against a cell from a different week, which is how
+a spike lost an afternoon on the wrong side of a comparison: **the fixture has
+to be the thing the parameter changes, and nothing else.**
+
 ### `visible:` reads `display`, not opacity
 
 `visible: :visible` and `visible: :hidden` ask the driver whether the element is

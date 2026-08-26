@@ -482,3 +482,22 @@ Stimulus instance with nothing to do — and shipped `data-controller=""` anyway
 lasted; not harmless to anything reading the DOM for which controllers a page
 wants, since `[data-controller]` matches an element that named none. `.presence`
 on both appenders, so the join gives back a nil for `compact` to remove.
+
+## The options panel said monthly meant grid
+
+`view_url:` is one callback for both the period and the view, deliberately — the
+distinction between "two arrangements of the workload reading" and "a different
+reading" is this port's business and not a host's. But the *Monthly* item was
+handed `:grid`, so the callback could not tell "show me the month again" from
+"draw the month as a grid".
+
+Invisible while the only host merged the two questions into one parameter, and
+wrong the moment one kept them apart: leaving the day view sent you back to grid
+however you had been reading the month. It now receives `:monthly`, and the
+callback's vocabulary is exactly `PERIODS + VIEWS`.
+
+The lesson is about the comment, not the line. The one above `VIEWS` justified
+the merge with "a distinction that matters to this file and to nobody using it"
+— true when written, and a claim about *everyone who would ever use it*. The
+first host to model the two questions as two produced the somebody, and the bug
+was already there waiting.

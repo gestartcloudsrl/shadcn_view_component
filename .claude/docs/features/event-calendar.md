@@ -152,6 +152,20 @@ using it, which is why `view_url:` is one callback rather than two. `:grid` is
 `arrangement: :auto`, not a third arrangement — below `lg` it is rows anyway,
 because forcing seven columns onto a phone is what rows were built to avoid.
 
+One callback, but its vocabulary is **`PERIODS + VIEWS`**: it is handed
+`:monthly`, `:daily`, `:grid`, `:rows` or `:hours`, and nothing stands in for
+anything else. That last part was learned rather than designed. The *Monthly*
+item used to be given `:grid`, which reads as "monthly means grid" — harmless
+while the only host merged the two questions into one parameter, and wrong the
+moment one kept them apart, because "show me the month again" and "draw the
+month as a grid" arrived identical. Leaving the day view sent you back to grid
+however you had been reading the month.
+
+A host is therefore free to model the two as two, and the gallery's `density`
+does: `period` and `view`, in the order the panel asks them. The comment above
+`VIEWS` that justified the merge said the distinction mattered "to nobody using
+it"; the first host to keep them apart was the somebody.
+
 ### What the server-drawn readings do not ship
 
 The workload and hours readings are drawn whole by the server: their cells hold
