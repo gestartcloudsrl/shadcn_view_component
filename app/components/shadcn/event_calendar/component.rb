@@ -90,8 +90,17 @@ module Shadcn
       # The three views the options panel offers, which is one list because a
       # person picking one is answering one question. Two of them are the
       # workload reading at two arrangements and the third is a different
-      # reading entirely — a distinction that matters to this file and to
-      # nobody using it, which is why `view_url:` is one callback and not two.
+      # reading entirely — a distinction that matters to this file and to nobody
+      # using it, which is why `view_url:` is one callback and not two.
+      #
+      # It is handed a *period* or a *view*, though, and it used to be handed
+      # `:grid` for the monthly period — which reads as "monthly means grid" and
+      # is the one thing it must not say. A host that keeps the two questions
+      # apart, as the panel does, could not tell "show me the month again" from
+      # "draw the month as a grid", so leaving the daily view sent you back to
+      # grid however you had been reading the month. It now receives `:monthly`,
+      # and the callback's vocabulary is `PERIODS + VIEWS` with nothing standing
+      # in for anything else.
       VIEWS = %i[grid rows hours].freeze
 
       # The period the toolbar switches between, above the views. A month has
@@ -557,7 +566,7 @@ module Shadcn
       end
 
       def period_option(name)
-        href = view_url&.call(name == :daily ? :daily : :grid)
+        href = view_url&.call(name)
 
         render(DropdownMenu::RadioItem::Component.new(
           value: name, checked: (name == :daily) == daily?,
