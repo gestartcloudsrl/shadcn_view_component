@@ -1008,10 +1008,26 @@ Named rather than left to be discovered:
   counterexample — the calendar takes that lambda to draw an `<a href>`, not to
   make a request, and a drag has no no-JavaScript form for a URL to serve. A
   `revert()` in the event's `detail` is the half the library *can* own, since
-  the only thing that knows where the chip was is the controller. Under a morph
-  refresh it is not even needed: the server re-renders with the dates it
-  accepted — the old ones if it refused — and the redraw is the rollback. That
-  much was measured; the Turbo Frame variant was reasoned about and not.
+  the only thing that knows where the chip was is the controller — and it is
+  **not optional**, which took two measurements to find out.
+
+  A morph refresh looked like it made `revert()` unnecessary: the server
+  re-renders with the dates it accepted, and the redraw is the rollback. That
+  holds for an *accepted* move and fails for the case it exists for. An
+  optimistic move mutates `this.events` and never the
+  `data-…-events-value` attribute, so the controller and the DOM disagree; a
+  morph reconciles the DOM, and `eventsValueChanged` fires only when the
+  attribute *changes*. A refusal sends back exactly the payload the page
+  already had — no change, no callback — so the controller keeps the move the
+  server threw away and goes on drawing it, `pending` and all. Measured: server
+  `2026-08-11`, controller `2026-08-10`, chip on the 10th.
+
+  Which names the shape the redraw would have to take: **the value is the
+  source of truth**, assigned rather than mutated behind, so that a morph
+  delivering the original payload is a change and says so. Whether that is
+  cheaper than calling `revert()` is the question a design would open with.
+
+  The Turbo Frame variant was reasoned about and not measured at all.
 - **a "+2 more" popover.** The agenda already shows everything on the day, the
   dense reading shows every event without opening anything, and a second way in
   would cost the one-tap-target-per-day property both depend on.
