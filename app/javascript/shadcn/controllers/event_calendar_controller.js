@@ -45,6 +45,11 @@ export default class extends Controller {
     // list of names that used to decide it went stale the first time a reading
     // was added.
     clientDrawn: { type: Boolean, default: true },
+    // Whether this calendar's events can be moved. Crossed rather than derived,
+    // for the reason `clientDrawn` is: it decides whether an identity is in the
+    // DOM at all, and a controller guessing that would guess wrong on a
+    // calendar a host has deliberately left read-only.
+    movable: { type: Boolean, default: false },
     colors: Array,
     events: Array,
     locale: String,
@@ -455,10 +460,12 @@ export default class extends Controller {
   eventElement(segment) {
     const node = this.eventPrototype.cloneNode(true)
     const { event } = segment
+
     const dot = node.querySelector("[data-slot='event-calendar-event-dot']")
     const time = node.querySelector("[data-slot='event-calendar-event-time']")
 
     node.dataset.color = event.color
+    if (this.movableValue) node.dataset.eventId = event.id
     node.style.gridColumn = `${segment.column} / span ${segment.span}`
     node.style.gridRow = String(segment.lane)
     this.mark(node, "continuesBefore", segment.continuesBefore)
@@ -491,6 +498,7 @@ export default class extends Controller {
     const node = (event.url ? this.agendaLinkPrototype : this.agendaItemPrototype).cloneNode(true)
 
     node.dataset.color = event.color
+    if (this.movableValue) node.dataset.eventId = event.id
     if (event.url) node.querySelector("a").setAttribute("href", event.url)
     node.querySelector("[data-slot='event-calendar-agenda-event-title']").textContent = event.title
     node.querySelector("[data-slot='event-calendar-agenda-meta']").textContent = event.meta

@@ -332,7 +332,7 @@ module Shadcn
         base { BASE_TOKENS }
       end
 
-      attr_reader :month, :selected, :max_events, :schedule, :reading, :month_url,
+      attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
                   :view_url
 
@@ -388,7 +388,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     view_url: nil, **attributes)
+                     view_url: nil, movable: false, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -405,7 +405,25 @@ module Shadcn
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
         @reading = :auto if @reading == :events
         @view_url = view_url
+        @movable = !!movable
+        require_identities! if @movable
         super(**attributes)
+      end
+
+      def movable? = movable
+
+      # A move dispatches the host's own id, and `Event#id` is `nil` unless the
+      # host passed one — it has existed for `#portable_events` and nothing has
+      # needed it since. Left alone this ships `id: null` inside a `CustomEvent`,
+      # which fails as "dragging does nothing" days later and in somebody else's
+      # code. So it is a render-time error, and it names the event rather than
+      # counting them.
+      def require_identities!
+        nameless = schedule.events.find { |event| event.id.blank? }
+        return unless nameless
+
+        raise ArgumentError,
+              "EventCalendar(movable: true) needs an id on every event; #{nameless.title.inspect} has none"
       end
 
       # Anything a reading owns that reached this far was meant for a different
@@ -447,6 +465,10 @@ module Shadcn
           # that were bugs: the controller re-derived `labelled` from density
           # alone, so one press of › stamped `data-labelled` on a workload
           # calendar and ran both readings at once.
+          # Omitted rather than `"false"`, like `data-labelled` above: the
+          # controller's own default is false, and every calendar in a host's
+          # app that never moves anything would otherwise carry the byte.
+          "data-shadcn--event-calendar-movable-value" => ("true" if movable?),
           "data-shadcn--event-calendar-reading-value" => reading,
           # Whether the browser may redraw this month, crossed as the *fact*
           # rather than as a list of reading names for the controller to check
@@ -941,6 +963,7 @@ module Shadcn
             tag.span(event.title, "data-slot": "event-calendar-event-title", class: EVENT_TITLE_CLASS)
           ].compact),
           "data-slot": "event-calendar-event",
+          "data-event-id": (event.id if movable?),
           class: EVENT_CLASS,
           # The one place this component positions with a style rather than a
           # class, and the reason is the controller: `col-start-#{n}` cannot be
@@ -1006,7 +1029,8 @@ module Shadcn
       end
 
       def agenda_item(event)
-        tag.li(agenda_row(event), "data-slot": "event-calendar-agenda-item", "data-color": event.color)
+        tag.li(agenda_row(event), "data-slot": "event-calendar-agenda-item", "data-color": event.color,
+               "data-event-id": (event.id if movable?))
       end
 
       def agenda_row(event)
