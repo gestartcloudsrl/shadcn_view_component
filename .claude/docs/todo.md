@@ -680,8 +680,10 @@ noting that it would not have delivered the component that raised the question:
 
   The short version used to be that two of them need a write path an
   application owns. A spike says otherwise: the write path is the easy half —
-  dispatch and let the host save, and under a morph refresh the server's
-  re-render *is* the rollback. What blocks the drag is that the tab stop is on
+  dispatch and let the host save — though not for the reason first written
+  down: a morph refresh is *not* the rollback, because a refusal re-sends the
+  payload the page already had and the controller never hears it. What blocks
+  the drag is that the tab stop is on
   the day rather than on the event, so there is no keyboard equivalent to
   build; that a crossing event is a bar per week rather than one object, which
   a pointer has to answer for; that a chip carries no id on either side; and
