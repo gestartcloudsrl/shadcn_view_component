@@ -987,8 +987,13 @@ Named rather than left to be discovered:
     gem has a keyboard equivalent (slider, resizable, carousel), and axe cannot
     see the absence of one: `accessibility_spec` runs `wcag21aa`, and dragging
     movements are a 2.2 criterion.
-  - **A crossing event is not an object.** Five chips in five cells, as *One
-    job, one line across the week* above already says of the workload.
+  - **A crossing event is more than one bar.** One per week it crosses — not
+    one per day: the "five chips in five cells" of *One job, one line across
+    the week* is the **workload**, where a chip sits in a cell. Measured here:
+    a 4–8 August event drew a single bar spanning five columns, and became two
+    when it was moved across a Sunday. So a pointer still has to answer "which
+    object did you grab" for anything longer than a week — and a keyboard
+    picking from the agenda never asks, because there the event is one row.
   - **A chip carries no identity.** `eventElement` writes no id and neither does
     the Ruby, so there is nothing for a move to name. It has to be on both
     sides: a JS-only attribute is gone at the first morph, because the server
