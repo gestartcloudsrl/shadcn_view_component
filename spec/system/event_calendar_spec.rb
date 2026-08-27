@@ -50,6 +50,33 @@ RSpec.describe "Event calendar", :js do
   # two palettes within one example. The cell is found inside the script rather
   # than passed in — Capybara hands an element argument to a wrapper this does
   # not sit inside, and the call comes back empty.
+  # Which element is painted on top, over the middle of a named bar. No
+  # attribute records that, and the layer the bars live in is
+  # `pointer-events-none`, so a hit test cannot reach them — switching that on
+  # for the length of the question changes what *answers* a hit test, not what
+  # is drawn above what.
+  def topmost_over(title)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const chip = document.querySelector("#{calendar} [data-slot=event-calendar-event][title='#{title}']")
+        if (!chip) return "assente"
+
+        const layer = chip.closest("[data-slot=event-calendar-segments]")
+        const was = layer.style.pointerEvents
+
+        chip.scrollIntoView({ block: "center" })
+        const box = chip.getBoundingClientRect()
+
+        layer.style.pointerEvents = "auto"
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+        layer.style.pointerEvents = was
+
+        if (hit?.closest("[data-slot=event-calendar-event]")) return "event-calendar-event"
+        return hit?.closest("[data-slot]")?.dataset?.slot ?? "nothing"
+      })()
+    JS
+  end
+
   def outline_of(date)
     page.evaluate_script(<<~JS)
       (() => {
@@ -248,6 +275,29 @@ RSpec.describe "Event calendar", :js do
         expect(outline_of("2026-08-21")).to eq("2px solid")
         expect(outline_of("2026-08-20")).to eq("none")
       end
+    end
+
+    # The outline that makes the selection visible sits on the cell, and the cell
+    # is opaque — so raising it above the bar layer to keep the outline off its
+    # neighbours hid every bar crossing it. "Conference" runs the 19th to the
+    # 21st, so its middle is over the selected day rather than beside it.
+    it "still draws the bars crossing the day it selected" do
+      expect(topmost_over("Conference")).to eq("event-calendar-event")
+    end
+
+    # The same cell property, reached the other way: `focus-visible` raises a
+    # cell too, and it is the older of the two — so the day a keyboard is
+    # standing on hid its own events before a selection could.
+    it "still draws them under the day the keyboard is on", :aggregate_failures do
+      day("2026-08-20").click
+      press(:arrow_right)
+
+      expect(page.evaluate_script("document.activeElement.dataset.day")).to eq("2026-08-21")
+      expect(topmost_over("Birthday Party")).to eq("event-calendar-event")
+      # And the ring the cell was being raised for is still drawn, which is the
+      # half of the fix that is an argument rather than an observation
+      # everywhere else: it is `ring-inset`, so it was never at risk.
+      expect(page.evaluate_script("getComputedStyle(document.activeElement).boxShadow")).to include("inset")
     end
 
     it "says so when there is nothing on the day", :aggregate_failures do

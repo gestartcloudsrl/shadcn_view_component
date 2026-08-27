@@ -652,6 +652,16 @@ because the day *number* already wears primary when it is today; the gem's
 `Calendar` spends primary on selection precisely because its today is the quiet
 one, and this family made the opposite trade first.
 
+**Neither state raises the cell**, and that took a second pass to get right.
+Both `focus-visible` and `data-[selected]` carried `z-10`, to keep their
+decoration off the neighbouring cells — and a cell is opaque and sits under the
+absolutely positioned bar layer, so raising it painted its own background over
+every bar crossing it. A selected day showed no events at all while the agenda
+underneath listed them, and the same was true, for longer, of the day a keyboard
+was standing on. The lift bought nothing either time: both decorations are drawn
+*inside* the cell's box — `outline-offset: -2px`, `ring-inset` — so no neighbour
+could ever have clipped them.
+
 The roles describe the seven-column month. When the workload reading lays the
 same DOM out as one row per day, what a screen reader reports and what an eye
 sees disagree there. That is the price of one tree serving two arrangements, and

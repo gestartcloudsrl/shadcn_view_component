@@ -526,3 +526,32 @@ tab stop back afterwards, when that day is still in the grid it drew. The fix is
 in `render()` rather than in `resyncOnMorph` because a resync generic over every
 controller cannot know how to find the element again — only the one redrawing
 can.
+
+## A selected day painted over its own events
+
+`DAY_CLASS` raised the cell with `z-10` in two states — `focus-visible` and
+`data-[selected]` — so that the ring and the outline would not be clipped by the
+neighbouring cells. A day cell is opaque (`bg-background`) and the bars live in
+`[data-slot=event-calendar-segments]`, an absolutely positioned later sibling at
+`z-index: auto` inside the same `relative` week. A cell at `z-10` therefore
+painted its own background over every bar crossing it: click a day and its
+events disappear, while the agenda underneath goes on listing them.
+
+`focus-visible:z-10` is the older of the two, so the day a keyboard was standing
+on had been hiding its own events since before a selection could.
+
+The lift bought nothing either time. `outline-offset: -2px` and `ring-inset`
+both draw *inside* the cell's own box, where a neighbour cannot reach them —
+verified by the example that already asserts the outline in both palettes, which
+still passes with the `z-10` gone.
+
+**Nothing in the suite could have seen it**, which is why it shipped: the
+snapshot compares HTML and those classes are meant to be there, `parity` reads
+class strings, and axe does not do occlusion. The example that holds it now asks
+the only question that can see a paint order — it hit-tests the middle of a bar
+and expects the bar to answer. The layer is `pointer-events-none`, so the helper
+switches that on for the length of the question: it changes what answers a hit
+test, not what is drawn above what.
+
+Found by a person clicking a cell, like the two preview-ordering defects
+`CLAUDE.md` names.

@@ -219,11 +219,25 @@ module Shadcn
       # `--ring` rather than `--primary`, because the day *number* already wears
       # primary when it is today and two primaries on one cell say one thing
       # twice.
+      #
+      # **And neither state raises the cell.** Both used to carry `z-10`, to keep
+      # their decoration off the neighbouring cells — and a cell is opaque
+      # (`bg-background`) and sits under the absolutely positioned bar layer, so
+      # raising it painted its own background over every bar crossing it: a
+      # selected day, and the day a keyboard was standing on, showed no events at
+      # all while the agenda underneath listed them.
+      #
+      # The `z-10` bought nothing either time. Both decorations are drawn
+      # *inside* the cell's own box — `outline-offset: -2px` and `ring-inset` —
+      # so no neighbour can clip them and nothing needs to be lifted over
+      # anything. `topmost_over` in `system/event_calendar_spec.rb` holds it, by
+      # hit-testing the middle of a bar rather than reading an attribute, which
+      # is the only thing that can see a paint order.
       DAY_CLASS = "group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 " \
                   "pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 " \
-                  "focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 " \
+                  "focus-visible:ring-[3px] focus-visible:ring-ring/50 " \
                   "focus-visible:ring-inset data-[selected]:bg-accent " \
-                  "data-[selected]:z-10 data-[selected]:[outline:2px_solid_var(--ring)] " \
+                  "data-[selected]:[outline:2px_solid_var(--ring)] " \
                   "data-[selected]:[outline-offset:-2px] " \
                   "sm:items-start sm:px-1.5 " \
                   "group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) " \
