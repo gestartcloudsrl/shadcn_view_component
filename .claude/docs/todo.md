@@ -683,9 +683,9 @@ noting that it would not have delivered the component that raised the question:
   dispatch and let the host save, and under a morph refresh the server's
   re-render *is* the rollback. What blocks the drag is that the tab stop is on
   the day rather than on the event, so there is no keyboard equivalent to
-  build; that a crossing event is five chips rather than one object; that a
-  chip carries no id on either side; and that a drop onto a day already at
-  `max_events` draws nothing at all. The popover is unchanged: it would cost
+  build; that a crossing event is a bar per week rather than one object, which
+  a pointer has to answer for; that a chip carries no id on either side; and
+  that a drop onto a day already at `max_events` draws nothing at all. The popover is unchanged: it would cost
   the one-tap-target-per-day property the mobile reading is built on.
 
   The fourth was the week view, and it is under *Smaller things* now rather than
