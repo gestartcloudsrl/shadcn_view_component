@@ -125,11 +125,20 @@ that lambda exists to *draw an `<a href>`* on the server and a drag has no
 no-JavaScript form for a URL to serve. Owning a URL convention, a verb and a
 payload shape inside the gem is the thing this library does not do.
 
-### An event needs an identity on both sides
+### An event needs an identity on both sides, and today it has none
 
-`data-event-id` on the chip and on the agenda row, written by the Ruby *and* by
-the controller. A JS-only attribute is gone at the first morph, because the
-server wins.
+`Event#id` is `nil` unless the host passed one (`event.rb:47`) — it exists for
+`portable_events` and nothing has needed it since. A move without one dispatches
+`id: null`, which the host cannot act on.
+
+So `movable: true` **requires** an id on every event, and raises at render when
+one is missing, naming the event's title. A library that let this through would
+turn a host's omission into a silent no-op inside a `CustomEvent` — the failure
+would surface as "dragging does nothing", days later, in someone else's code.
+
+`data-event-id` then goes on the chip and on the agenda row, written by the Ruby
+*and* by the controller. A JS-only attribute is gone at the first morph, because
+the server wins.
 
 ### Pending is state on the event, not a class on the node
 
