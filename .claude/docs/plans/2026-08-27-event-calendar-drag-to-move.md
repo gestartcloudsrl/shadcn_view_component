@@ -215,8 +215,11 @@ something is writing the attribute unconditionally.
 ### Task 2: the agenda row becomes an `Item`
 
 The grip in Task 5 needs somewhere to live. The row is an `Item` written out by
-hand; make it one. **Host-visible**: `event-calendar-agenda-mark` goes, and the
-title and the meta become `item-title` and `item-description`.
+hand; make it one. **Host-visible**: the title and the meta become `item-title` and
+`item-description`. `event-calendar-agenda-mark` **stays** — the dot becomes a
+bar and keeps its slot, because it keeps its job. Removing it and inventing a
+grip slot in Task 3 would have left a calendar without `movable:` with no colour
+on its agenda at all, which is what the first draft of this task did.
 
 **Files:**
 - Modify: `app/components/shadcn/event_calendar/component.rb` — the four
@@ -241,7 +244,8 @@ covers the agenda:
     it "describes a row with the Item family's own parts", :aggregate_failures do
       expect(parts("item-title").map(&:text)).to eq(%w[Conference Meeting])
       expect(parts("item-description").map(&:text).last).to eq("10:30 AM – 11:30 AM")
-      expect(parts("event-calendar-agenda-mark")).to be_empty
+      expect(parts("event-calendar-agenda-mark").map { |mark| mark["class"] })
+        .to all(include("self-stretch"))
     end
 ```
 
@@ -253,15 +257,21 @@ Expected: FAIL — `item-title` finds nothing.
 - [ ] **Step 3: Replace the constants**
 
 ```ruby
-      # What the agenda wants that `Item`'s own `size: :sm` does not give it:
-      # its rows are dense, and its two lines are top-aligned.
+      # What the agenda wants that `Item`'s own `size: :sm` does not give it: its
+      # rows are dense, and a row is two lines that have to reach the same
+      # height, so the colour beside them can run their length.
       AGENDA_ITEM_CLASS = "items-stretch px-2 py-2"
+      # A dot marks a line and a bar marks a row. Same slot, same job.
+      AGENDA_MARK_CLASS = "w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)"
       AGENDA_CONTENT_CLASS = "min-w-0 gap-0.5"
       AGENDA_EVENT_TITLE_CLASS = "truncate font-medium"
+      # `Item::Description` is already `text-muted-foreground`; only the size is
+      # the agenda's own.
       AGENDA_META_CLASS = "truncate text-xs"
 ```
 
-Delete `AGENDA_MARK_CLASS` and `AGENDA_BODY_CLASS`.
+Delete `AGENDA_BODY_CLASS`. Keep the mark's `ours` entry in
+`reverse_parity_spec` — the slot survives.
 
 - [ ] **Step 4: Rewrite the row**
 
@@ -312,9 +322,8 @@ SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb
 bundle exec rspec spec/reverse_parity_spec.rb
 ```
 
-Delete the now-dead `"event-calendar-agenda-mark"` entry from `ours`. Add
-nothing else unless the run asks for it by name — it prints the slot and the
-classes.
+Add nothing unless the run asks for it by name — it prints the slot and the
+classes. The mark's entry stays; only its shape changed.
 
 - [ ] **Step 7: Run everything and commit**
 

@@ -500,8 +500,8 @@ export default class extends Controller {
     node.dataset.color = event.color
     if (this.movableValue) node.dataset.eventId = event.id
     if (event.url) node.querySelector("a").setAttribute("href", event.url)
-    node.querySelector("[data-slot='event-calendar-agenda-event-title']").textContent = event.title
-    node.querySelector("[data-slot='event-calendar-agenda-meta']").textContent = event.meta
+    node.querySelector("[data-slot='item-title']").textContent = event.title
+    node.querySelector("[data-slot='item-description']").textContent = event.meta
 
     return node
   }

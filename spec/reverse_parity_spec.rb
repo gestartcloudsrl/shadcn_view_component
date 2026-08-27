@@ -452,7 +452,9 @@ RSpec.describe "reverse parity" do
     "event-calendar-agenda" => %w[mt-3],
     "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
-    "event-calendar-agenda-mark" => %w[bg-(--event-color)],
+    # `w-1.5` because the mark is a bar the height of the row rather than a dot
+    # beside its first line — a row here is a title and a time.
+    "event-calendar-agenda-mark" => %w[bg-(--event-color) w-1.5],
     "event-calendar-agenda-empty" => %w[py-8],
 
     # The workload reading, which had no template preview until now and so was

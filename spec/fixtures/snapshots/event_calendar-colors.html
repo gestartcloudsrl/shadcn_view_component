@@ -479,15 +479,15 @@
 </div>
 <ul data-slot="event-calendar-agenda-list" class="flex flex-col" data-shadcn--event-calendar-target="agendaList">
 <li data-slot="event-calendar-agenda-item" data-color="blue">
-<a href="#retrospective" data-slot="event-calendar-agenda-row" class="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-<span data-slot="event-calendar-agenda-mark" class="mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)">
+<a data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" href="#retrospective" class="group/item flex flex-wrap rounded-md border border-transparent text-sm duration-100 outline-none focus-visible:border-ring [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
 </span>
-<span data-slot="event-calendar-agenda-body" class="flex min-w-0 flex-col gap-0.5">
-<span data-slot="event-calendar-agenda-event-title" class="truncate font-medium">Retrospective
-</span>
-<span data-slot="event-calendar-agenda-meta" class="truncate text-xs text-muted-foreground">2:00 PM – 3:00 PM
-</span>
-</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Retrospective
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">2:00 PM – 3:00 PM
+</p>
+</div>
 </a>
 </li>
 </ul>
@@ -572,27 +572,27 @@
 <span data-slot="event-calendar-day-more" class="mt-auto hidden w-full truncate text-left text-[0.7rem] font-medium select-none group-data-[labelled]/event-calendar:sm:block">+1
 </span>
 <li data-slot="event-calendar-agenda-item" data-color="default">
-<div data-slot="event-calendar-agenda-row" class="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm">
-<span data-slot="event-calendar-agenda-mark" class="mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
 </span>
-<span data-slot="event-calendar-agenda-body" class="flex min-w-0 flex-col gap-0.5">
-<span data-slot="event-calendar-agenda-event-title" class="truncate font-medium">
-</span>
-<span data-slot="event-calendar-agenda-meta" class="truncate text-xs text-muted-foreground">12:00 AM
-</span>
-</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
+</p>
+</div>
 </div>
 </li>
 <li data-slot="event-calendar-agenda-item" data-color="default">
-<a href="#" data-slot="event-calendar-agenda-row" class="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-<span data-slot="event-calendar-agenda-mark" class="mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)">
+<a data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" href="#" class="group/item flex flex-wrap rounded-md border border-transparent text-sm duration-100 outline-none focus-visible:border-ring [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
 </span>
-<span data-slot="event-calendar-agenda-body" class="flex min-w-0 flex-col gap-0.5">
-<span data-slot="event-calendar-agenda-event-title" class="truncate font-medium">
-</span>
-<span data-slot="event-calendar-agenda-meta" class="truncate text-xs text-muted-foreground">12:00 AM
-</span>
-</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
+</p>
+</div>
 </a>
 </li>
 </template>
@@ -1065,15 +1065,15 @@
 </div>
 <ul data-slot="event-calendar-agenda-list" class="flex flex-col" data-shadcn--event-calendar-target="agendaList">
 <li data-slot="event-calendar-agenda-item" data-color="green">
-<div data-slot="event-calendar-agenda-row" class="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm">
-<span data-slot="event-calendar-agenda-mark" class="mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
 </span>
-<span data-slot="event-calendar-agenda-body" class="flex min-w-0 flex-col gap-0.5">
-<span data-slot="event-calendar-agenda-event-title" class="truncate font-medium">Retro
-</span>
-<span data-slot="event-calendar-agenda-meta" class="truncate text-xs text-muted-foreground">2:00 PM
-</span>
-</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Retro
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">2:00 PM
+</p>
+</div>
 </div>
 </li>
 </ul>
@@ -1158,27 +1158,27 @@
 <span data-slot="event-calendar-day-more" class="mt-auto hidden w-full truncate text-left text-[0.7rem] font-medium select-none group-data-[labelled]/event-calendar:sm:block">+1
 </span>
 <li data-slot="event-calendar-agenda-item" data-color="default">
-<div data-slot="event-calendar-agenda-row" class="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm">
-<span data-slot="event-calendar-agenda-mark" class="mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
 </span>
-<span data-slot="event-calendar-agenda-body" class="flex min-w-0 flex-col gap-0.5">
-<span data-slot="event-calendar-agenda-event-title" class="truncate font-medium">
-</span>
-<span data-slot="event-calendar-agenda-meta" class="truncate text-xs text-muted-foreground">12:00 AM
-</span>
-</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
+</p>
+</div>
 </div>
 </li>
 <li data-slot="event-calendar-agenda-item" data-color="default">
-<a href="#" data-slot="event-calendar-agenda-row" class="flex items-start gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-<span data-slot="event-calendar-agenda-mark" class="mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)">
+<a data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" href="#" class="group/item flex flex-wrap rounded-md border border-transparent text-sm duration-100 outline-none focus-visible:border-ring [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
 </span>
-<span data-slot="event-calendar-agenda-body" class="flex min-w-0 flex-col gap-0.5">
-<span data-slot="event-calendar-agenda-event-title" class="truncate font-medium">
-</span>
-<span data-slot="event-calendar-agenda-meta" class="truncate text-xs text-muted-foreground">12:00 AM
-</span>
-</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
+</p>
+</div>
 </a>
 </li>
 </template>
