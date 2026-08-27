@@ -813,6 +813,13 @@ RSpec.describe Shadcn::EventCalendar::Component do
         expect(parts("event-calendar-agenda-item").map { |row| row["data-event-id"] }).to eq(%w[a b])
       end
 
+      it "offers a grip on every bar and a tab stop on every row", :aggregate_failures do
+        expect(parts("event-calendar-event-grip").size).to eq(parts("event-calendar-event").size)
+        expect(parts("event-calendar-agenda-item").map { |row| row["tabindex"] }).to all(eq("0"))
+        expect(parts("event-calendar-agenda-mark").map { |mark| mark["class"] })
+          .to all(include("cursor-grab"))
+      end
+
       it "crosses the switch to the controller" do
         expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-movable-value"])
           .to eq("true")
@@ -837,6 +844,13 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
       it "writes no identity at all" do
         expect(parts("event-calendar-event").map { |bar| bar["data-event-id"] }).to all(be_nil)
+      end
+
+      it "offers nothing to take hold of", :aggregate_failures do
+        expect(parts("event-calendar-event-grip")).to be_empty
+        expect(parts("event-calendar-agenda-item").map { |row| row["tabindex"] }).to all(be_nil)
+        expect(parts("event-calendar-agenda-mark").map { |mark| mark["class"] }.join)
+          .not_to include("cursor-grab")
       end
     end
   end

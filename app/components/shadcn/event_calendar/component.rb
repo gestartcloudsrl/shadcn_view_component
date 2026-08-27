@@ -282,6 +282,15 @@ module Shadcn
                     "bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium " \
                     "text-(--event-ink) data-[continues-before]:rounded-l-none " \
                     "data-[continues-after]:rounded-r-none"
+      # What a bar wears only when it can be moved, so a read-only calendar's
+      # markup is the markup it always was.
+      EVENT_MOVING_CLASS = "data-[picked]:ring-2 data-[picked]:ring-ring data-[pending]:opacity-50"
+      # The grip, and only the grip, takes the pointer: the layer around it stays
+      # `pointer-events-none`, so the gaps between bars still belong to the day.
+      # Making the whole bar grabbable took the centre of 17 of the 27 days that
+      # had events — the measurement is in the design.
+      EVENT_GRIP_CLASS = "pointer-events-auto -ml-0.5 h-full w-2 shrink-0 cursor-grab rounded-l-sm " \
+                         "bg-(--event-color)/40 hover:bg-(--event-color)"
       EVENT_DOT_CLASS = "size-1.5 shrink-0 rounded-full bg-(--event-color)"
       # No `opacity-70` on the time, however much it wants one: dimming the ink
       # this chip already tinted its background for takes it under AA.
@@ -305,6 +314,12 @@ module Shadcn
       # name because it keeps its job — a host styling the colour of an agenda
       # row still has the same thing to reach for.
       AGENDA_MARK_CLASS = "w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)"
+      # The mark is the row's grip when the row can be moved — the colour and the
+      # handle are the same bar, as they are on a chip.
+      AGENDA_MARK_GRIP_CLASS = "cursor-grab"
+      # A row a keyboard can reach, and can see it has taken hold of.
+      AGENDA_PICK_CLASS = "rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 " \
+                          "data-[picked]:bg-accent data-[picked]:ring-2 data-[picked]:ring-ring"
       AGENDA_CONTENT_CLASS = "min-w-0 gap-0.5"
       AGENDA_EVENT_TITLE_CLASS = "truncate font-medium"
       # `Item::Description` is already `text-muted-foreground`; only the size is
@@ -963,6 +978,7 @@ module Shadcn
 
         tag.div(
           safe_join([
+            (tag.span("", "data-slot": "event-calendar-event-grip", class: EVENT_GRIP_CLASS) if movable?),
             (tag.span("", "data-slot": "event-calendar-event-dot", class: EVENT_DOT_CLASS) unless event.all_day?),
             # Bound once. `chip_time` formats through `I18n.l`, and asking twice
             # per bar — once for the guard and once for the value — is the same
@@ -973,7 +989,7 @@ module Shadcn
           ].compact),
           "data-slot": "event-calendar-event",
           "data-event-id": (event.id if movable?),
-          class: EVENT_CLASS,
+          class: [ EVENT_CLASS, (EVENT_MOVING_CLASS if movable?) ],
           # The one place this component positions with a style rather than a
           # class, and the reason is the controller: `col-start-#{n}` cannot be
           # built at runtime on either side — Tailwind never sees it here, and
@@ -1039,7 +1055,8 @@ module Shadcn
 
       def agenda_item(event)
         tag.li(agenda_row(event), "data-slot": "event-calendar-agenda-item", "data-color": event.color,
-               "data-event-id": (event.id if movable?))
+               "data-event-id": (event.id if movable?),
+               class: (AGENDA_PICK_CLASS if movable?), tabindex: ("0" if movable?))
       end
 
       # The row *is* an `Item` — a content, a title and a description was the
@@ -1048,7 +1065,8 @@ module Shadcn
       # own parts keep working.
       def agenda_row(event)
         body = safe_join([
-          tag.span("", "data-slot": "event-calendar-agenda-mark", class: AGENDA_MARK_CLASS),
+          tag.span("", "data-slot": "event-calendar-agenda-mark",
+                   class: [ AGENDA_MARK_CLASS, (AGENDA_MARK_GRIP_CLASS if movable?) ]),
           render(Item::Content::Component.new(class: AGENDA_CONTENT_CLASS).with_content(
           safe_join([
             render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS).with_content(event.title)),

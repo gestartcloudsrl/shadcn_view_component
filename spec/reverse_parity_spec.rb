@@ -447,14 +447,24 @@ RSpec.describe "reverse parity" do
     "event-calendar-event" => %w[
       bg-[var(--event-color)]/12 data-[continues-after]:rounded-r-none data-[continues-before]:rounded-l-none
       h-5.5 mx-px text-(--event-ink) text-[0.7rem]
+      data-[pending]:opacity-50 data-[picked]:ring-2 data-[picked]:ring-ring
     ],
+    # What a movable calendar adds, and only it: a bar taken hold of, a move the
+    # server has not answered yet, and the two grips. `--event-color` is this
+    # family's own custom property, so anything painted from it is ours by
+    # construction; `cursor-grab` is what a thing you can drag looks like, and
+    # no vendored source has anything draggable in it.
+    "event-calendar-event-grip" => %w[
+      -ml-0.5 bg-(--event-color)/40 cursor-grab hover:bg-(--event-color) pointer-events-auto rounded-l-sm
+    ],
+    "event-calendar-agenda-item" => %w[data-[picked]:bg-accent data-[picked]:ring-2 data-[picked]:ring-ring],
     "event-calendar-event-dot" => %w[bg-(--event-color) size-1.5],
     "event-calendar-agenda" => %w[mt-3],
     "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
     # `w-1.5` because the mark is a bar the height of the row rather than a dot
     # beside its first line — a row here is a title and a time.
-    "event-calendar-agenda-mark" => %w[bg-(--event-color) w-1.5],
+    "event-calendar-agenda-mark" => %w[bg-(--event-color) w-1.5 cursor-grab],
     "event-calendar-agenda-empty" => %w[py-8],
 
     # The workload reading, which had no template preview until now and so was
