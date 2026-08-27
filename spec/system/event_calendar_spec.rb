@@ -315,6 +315,97 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # `Space` on a row of the agenda, the arrows, `Space` again. The agenda is the
+  # only place a keyboard can take hold of an event: the bars carry
+  # `aria-hidden`, so a tab stop on one would be a violation rather than a
+  # choice, and a crossing event is one *row* there rather than a bar a week.
+  describe "moving an event from the keyboard" do
+    before do
+      visit_preview("event_calendar", :movable)
+      wait_for_stimulus
+    end
+
+    def agenda_row(id) = find("#{calendar} [data-slot=event-calendar-agenda-item][data-event-id='#{id}']")
+
+    # Read either side of a move, so it cannot be a `let`.
+    def dates_of(id)
+      page.evaluate_script(<<~JS)
+        (() => {
+          const root = document.querySelector("#{calendar}")
+          const one = JSON.parse(root.getAttribute("data-shadcn--event-calendar-events-value"))
+            .find((event) => event.id === "#{id}")
+          return [ one.from, one.to || one.from ]
+        })()
+      JS
+    end
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    # `e5` is Standup, on the 20th, which is the day the preview selects — so it
+    # is in the agenda, and the arrows carry it one day on from there.
+    it "takes a row and puts it on another day", :aggregate_failures do
+      expect(dates_of("e5")).to eq(%w[2026-08-20 2026-08-20])
+
+      agenda_row("e5").send_keys(:space)
+      expect(focused).to eq("2026-08-20")
+
+      press(:arrow_right)
+      press(:space)
+
+      expect(dates_of("e5")).to eq(%w[2026-08-21 2026-08-21])
+      expect(focused).to eq("2026-08-21")
+    end
+
+    it "puts the focus back on the row it came from when it is cancelled", :aggregate_failures do
+      agenda_row("e5").send_keys(:space)
+      press(:arrow_right)
+      press(:escape)
+
+      expect(dates_of("e5")).to eq(%w[2026-08-20 2026-08-20])
+      expect(page.evaluate_script("document.activeElement?.dataset?.eventId")).to eq("e5")
+    end
+
+    it "carries the whole of a crossing event, which is one row and two bars" do
+      agenda_row("e4").send_keys(:space)
+      press(:arrow_right)
+      press(:space)
+
+      expect(dates_of("e4")).to eq(%w[2026-08-20 2026-08-22])
+    end
+
+    it "hands the host an id, two dates and a way back", :aggregate_failures do
+      page.execute_script(<<~JS)
+        window.__moves = []
+        document.addEventListener("shadcn--event-calendar:event-move", (event) => {
+          window.__moves.push([ event.detail.id, event.detail.from, event.detail.to ])
+          window.__revert = event.detail.revert
+        })
+      JS
+
+      agenda_row("e5").send_keys(:space)
+      press(:arrow_right)
+      press(:space)
+
+      expect(page.evaluate_script("window.__moves")).to eq([ %w[e5 2026-08-21 2026-08-21] ])
+
+      page.execute_script("window.__revert()")
+
+      expect(dates_of("e5")).to eq(%w[2026-08-20 2026-08-20])
+    end
+
+    it "says nothing at all when nothing is moved" do
+      page.execute_script(<<~JS)
+        window.__moves = []
+        document.addEventListener("shadcn--event-calendar:event-move", () => window.__moves.push(1))
+      JS
+
+      agenda_row("e5").send_keys(:space)
+      press(:space)
+
+      expect(page.evaluate_script("window.__moves")).to be_empty
+    end
+  end
+
   # Both cuts of a cell used to be rendered with one hidden, which made the menu
   # free and everything else twice as expensive. A cell renders the grouping it
   # is showing now, and the panel is links to the other state.

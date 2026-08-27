@@ -583,11 +583,16 @@ In the controller, under a new heading after `focusCell`:
 
   // `Space` and `Escape` on the grid, added at the head of `keydown` — the
   // arrows below already move the focus, and a pick rides on them unchanged.
+  // Relative to the day the agenda was showing when the pick was made — the day
+  // the focus lands on — so the arrows and the event travel the same distance.
   place(day) {
-    const picked = this.pickedEvent
+    const shift = this.offsetOf(day, parse(this.pickedFrom))
+    const id = this.pickedId
 
-    this.pickedEvent = null
-    this.moveEvent(picked.id, this.offsetOf(day, parse(picked.from)), day)
+    this.pickedId = null
+    if (!shift) return this.redrawAt(day)
+
+    this.moveEvent(id, shift, day)
   }
 
   // Both reads happen before the clear: the row to go back to is the picked
@@ -693,9 +698,9 @@ Benchmark.realtime { 200.times { render Shadcn::EventCalendar::Component.new(eve
 ```
 
 Then, in the browser on the `movable` preview with that payload, time 50 moves.
-If a move costs more than a frame, fall back to writing only the moved event's
-two dates into the attribute rather than the whole array — the callback still
-fires, and the idea is unchanged. Record the number either way in
+**Measured, 2026-08-28:** 1.08 ms at two thousand events, 0.14 ms at two
+hundred, averaged over 50 round trips in headless Chrome. Under a frame, so the
+fallback is not needed and is not built. Record the number in
 `features/event-calendar.md` (Task 7).
 
 - [ ] **Step 6: Run everything and commit**

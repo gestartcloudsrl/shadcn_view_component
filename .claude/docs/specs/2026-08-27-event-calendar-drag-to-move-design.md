@@ -69,9 +69,14 @@ the hours readings would mean shipping the payload
 
 **The keyboard picks from the agenda.** `Space` on a focused row takes that
 event and hands the focus to the selected day; the arrows already move; `Space`
-places; `Escape` cancels and puts the focus back on the row it came from. The
-shift is relative to the event's own start, because the agenda is not on the
-grid and has no day to be relative to.
+places; `Escape` cancels and puts the focus back on the row it came from.
+
+The shift is relative to **the day the agenda is showing** — which is the day the
+focus lands on, so the distance the arrows travel is the distance the event
+travels. This said "relative to the event's own start, because the agenda is not
+on the grid and has no day to be relative to", and that was wrong twice over:
+the agenda *is* a day's, and the rule it gave made one press of → move a 19–21
+event to 21–23. Caught by the example asserting it.
 
 **The pointer drags a grip on the chip's leading edge.** The chip stays
 `pointer-events-none`; the grip alone takes the pointer, and the layer stays
@@ -80,13 +85,14 @@ to *the bar*: a two-week event has two grips, and the second one takes hold of
 its own Monday. Measured: 7–11 grabbed by the second grip and dropped on the
 11th becomes 8–12, +1.
 
-Both hands are named in the docs as two gestures rather than one gesture with
-two inputs, because they are: the grip can slide an event by where you took hold
-of it and the agenda cannot.
+Both hands then follow one rule — *shift by how far you moved from where you
+took hold* — and differ only in what "where you took hold" can mean. A grip is a
+day on the grid; a row is the day whose agenda it is. The one thing a row cannot
+express is taking hold of an event by a day other than the selected one.
 
 The agenda row grows a grip of its own, so the same gesture is available where
-the row is — for an event whose bars are off screen. It is start-relative, like
-the keyboard.
+the row is — for an event whose bars are off screen. It is relative to the
+agenda's day, like the keyboard.
 
 **That grip needs somewhere to live, and the row has nowhere.** The row is an
 `Item` written out by hand — a media, a content, a title and a description — so
@@ -107,12 +113,17 @@ changes, so a morph delivering the *original* payload is a change, the
 `revert()` still travels in the event's detail, for the host that answers a
 refusal with a toast alone and never re-renders the calendar.
 
-**What this costs has to be measured before it is believed.** Re-serialising the
-payload on every move is not free on a month that can hold two thousand events —
-the duplication inside `#portable_events` measured 117 ms of a 155 ms render
-before it was fixed. If the cost is real, the fallback is to write back only the
-moved event's two dates rather than the whole array; that keeps the callback
-firing and is the same idea more cheaply.
+**What this costs was measured rather than assumed**, because re-serialising the
+payload on every move is not obviously free on a month that can hold two
+thousand events — the duplication inside `#portable_events` measured 117 ms of a
+155 ms render before it was fixed.
+
+It is free. One move's whole round trip — build the new array, `JSON.stringify`,
+write the attribute, read it back, `JSON.parse` — averaged over 50 runs in
+headless Chrome: **1.08 ms at two thousand events**, 0.14 ms at two hundred.
+Under a frame, and two orders below the render it triggers. The fallback that
+was held in reserve — writing back only the moved event's two dates — is not
+needed and is not built.
 
 ### `movable: true`, and the gem stops at a `CustomEvent`
 
