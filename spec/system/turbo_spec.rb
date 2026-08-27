@@ -113,6 +113,9 @@ RSpec.describe "Under Turbo", :js do
   end
 
   describe "morph refresh" do
+    # Read either side of the morph, so it cannot be a `let`.
+    def focused_day = page.evaluate_script("document.activeElement?.dataset?.day")
+
     def morph
       page.execute_script("window.Turbo.visit(window.location.href, { action: 'replace' })")
       # The morph rewrites attributes in place, so wait on the effect rather than
@@ -146,6 +149,22 @@ RSpec.describe "Under Turbo", :js do
 
       expect(find("[data-slot=accordion-content]")["data-state"]).to eq("open")
       expect(find("[data-slot=accordion-trigger]")["aria-expanded"]).to eq("true")
+    end
+
+    # The event calendar redraws from `render()`, which rebuilds every cell —
+    # so the cell holding the focus and the roving tab stop is destroyed, the
+    # focus falls to the body and `fillDay` puts the tab stop back on the
+    # *selected* day. The keyboard's own path never shows it because `focusDay`
+    # refocuses on the way out; a morph has nothing to refocus with.
+    it "leaves the calendar's focus and tab stop where the keyboard put them" do
+      find("[data-slot=event-calendar] [data-day='2026-08-03']").click
+      press(:arrow_right)
+      expect(focused_day).to eq("2026-08-04")
+
+      morph
+
+      expect(focused_day).to eq("2026-08-04")
+      expect(find("[data-slot=event-calendar] [data-day='2026-08-04']")["tabindex"]).to eq("0")
     end
 
     it "does not leave a dialog half-open" do
