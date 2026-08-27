@@ -340,10 +340,20 @@ git commit -m "Describe an agenda row with the Item family it already was"
 Nothing moves yet. This is the markup and the CSS, so that Tasks 4 and 5 have
 something to drive and a reviewer can look at it.
 
+**No `data-action` here.** They name `grab`, `grabRow` and `agendaKeydown`,
+which arrive in Tasks 4 and 5 — and `stimulus_contract_spec` fails on an action
+whose method does not exist. Each action ships with the method that answers it.
+
+**The preview is part of this task**, not of Task 4: without it no golden holds
+the new classes, so `reverse_parity_spec` — which reads the goldens — has
+nothing to check, and there is nothing in the gallery for a reviewer to look at.
+
 **Files:**
-- Modify: `app/components/shadcn/event_calendar/component.rb` — `EVENT_CLASS`,
-  new `EVENT_GRIP_CLASS`, `AGENDA_GRIP_CLASS`, `AGENDA_PICK_CLASS`,
-  `#event_bar`, `#agenda_item`, `#agenda_row`
+- Modify: `app/components/shadcn/event_calendar/component.rb` — new
+  `EVENT_MOVING_CLASS`, `EVENT_GRIP_CLASS`, `AGENDA_MARK_GRIP_CLASS`,
+  `AGENDA_PICK_CLASS`, `#event_bar`, `#agenda_item`, `#agenda_row`
+- Create: `app/components/shadcn/event_calendar/previews/movable.html.erb`
+- Modify: `app/components/shadcn/event_calendar/preview.rb`
 - Modify: `spec/reverse_parity_spec.rb`
 - Test: `spec/components/shadcn/event_calendar_spec.rb`
 
@@ -461,42 +471,14 @@ git commit -m "Draw what a movable calendar offers, before anything moves"
 **Files:**
 - Modify: `app/javascript/shadcn/controllers/event_calendar_controller.js`
 - Test: `spec/system/event_calendar_spec.rb`
-- Modify: `app/components/shadcn/event_calendar/preview.rb` + a new
-  `app/components/shadcn/event_calendar/previews/movable.html.erb`
+- Drives the `movable` preview created in Task 3
 
 **Interfaces:**
 - Consumes: `movableValue`, `data-event-id`, `agendaKeydown` (Task 3).
 - Produces: `moveEvent(id, shift, focusOn)`, `pickedEvent`, and the dispatched
   `event-move` with `{ id, from, to, revert }`. Task 5 calls `moveEvent`.
 
-- [ ] **Step 1: Add the preview the system spec will drive**
-
-`previews/movable.html.erb`:
-
-```erb
-<%# `movable:` needs ids, so this preview names its events — which is also the
-    smallest example of what a host has to do. %>
-<%= render(Shadcn::EventCalendar::Component.new(
-      month: Date.new(2026, 8, 1),
-      selected: Date.new(2026, 8, 20),
-      movable: true,
-      events: Shadcn::EventCalendar::Preview.sample_events.each_with_index.map { |event, index|
-        event.merge(id: "e#{index}")
-      }
-    )) %>
-```
-
-In `preview.rb`, beside the other examples:
-
-```ruby
-      # Moving an event: `Space` on an agenda row takes it, the arrows move, and
-      # `Space` puts it down. The bars carry a grip for a pointer.
-      def movable
-        render_with_template
-      end
-```
-
-- [ ] **Step 2: Write the failing test**
+- [ ] **Step 1: Write the failing test**
 
 In `spec/system/event_calendar_spec.rb`:
 
@@ -570,12 +552,12 @@ In `spec/system/event_calendar_spec.rb`:
   end
 ```
 
-- [ ] **Step 3: Run them and watch them fail**
+- [ ] **Step 2: Run them and watch them fail**
 
 Run: `bundle exec rspec spec/system/event_calendar_spec.rb -e "moving an event"`
 Expected: FAIL — `Space` does nothing; the dates do not change.
 
-- [ ] **Step 4: Implement the hand**
+- [ ] **Step 3: Implement the hand**
 
 In the controller, under a new heading after `focusCell`:
 
@@ -692,7 +674,7 @@ and the same two lines in `agendaElement`.
 `eventsValueChanged` already rebuilds `this.events` and clears the index, so an
 assignment redraws from the value and nothing else has to know.
 
-- [ ] **Step 5: Run the tests**
+- [ ] **Step 4: Run the tests**
 
 Run: `bundle exec rspec spec/system/event_calendar_spec.rb -e "moving an event"`
 Expected: PASS.
@@ -701,7 +683,7 @@ If an example fails on the focus rather than on the dates, the cause is almost
 certainly a read of `this.pickedEvent` after it was cleared — `cancelPick` above
 destructures first for exactly that reason.
 
-- [ ] **Step 6: Measure what assigning the value costs**
+- [ ] **Step 5: Measure what assigning the value costs**
 
 The design says this has to be measured before it is believed. In `bin/console`:
 
@@ -716,7 +698,7 @@ two dates into the attribute rather than the whole array — the callback still
 fires, and the idea is unchanged. Record the number either way in
 `features/event-calendar.md` (Task 7).
 
-- [ ] **Step 7: Run everything and commit**
+- [ ] **Step 6: Run everything and commit**
 
 ```bash
 bundle exec rake && bin/rubocop && bin/eslint

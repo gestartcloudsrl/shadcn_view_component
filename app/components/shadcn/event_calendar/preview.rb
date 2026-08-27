@@ -11,6 +11,14 @@ module Shadcn
         render_with_template
       end
 
+      # Moving an event. `Space` on a row of the agenda takes it, the arrow keys
+      # choose a day and `Space` puts it down; a pointer drags the grip on a
+      # bar. The calendar dispatches and stops there — saving is the host's, and
+      # this preview has no host, so a move survives until the page reloads.
+      def movable
+        render_with_template
+      end
+
       # One of each colour, then the same calendar with `default_color:` — the
       # level FullCalendar puts on an event source. The palette is fixed rather
       # than free-form; the reason is in `Event::COLORS`.
