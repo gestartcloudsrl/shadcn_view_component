@@ -1030,6 +1030,7 @@ module Shadcn
             ),
             tag.ul(safe_join(on_day.map { |event| agenda_item(event) }),
                    "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS,
+                   "data-action": ("keydown->shadcn--event-calendar#agendaKeydown" if movable?),
                    "data-shadcn--event-calendar-target": ("agendaList" unless day_url)),
             tag.p(shadcn_t("event_calendar.empty"),
                   "data-slot": "event-calendar-agenda-empty", class: AGENDA_EMPTY_CLASS,

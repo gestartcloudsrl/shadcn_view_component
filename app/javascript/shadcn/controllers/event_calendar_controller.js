@@ -69,6 +69,16 @@ export default class extends Controller {
   // — so this fills the rest back in, once, rather than at every one of the
   // several thousand places that read an event.
   eventsValueChanged() {
+    // Guarded on the attribute rather than on the parsed value, because this
+    // runs twice for every write the controller makes: once from the call
+    // below `this.eventsValue = …`, which has to be synchronous so the focus
+    // can land on a cell that exists, and once when the attribute observer
+    // catches up. A month can hold two thousand events; drawing it twice for
+    // one move is the thing this compare is for.
+    const source = this.eventsAttribute
+    if (source === this.eventsSource) return
+
+    this.eventsSource = source
     this.events = this.eventsValue.map((event) => ({
       ...event,
       to: event.to || event.from,
@@ -76,6 +86,21 @@ export default class extends Controller {
       meta: event.meta || event.time || ""
     }))
     this.index = null
+
+    // The value is the source of truth, so a change to it *is* a redraw — and
+    // on a morph this is the only thing that draws the server's answer.
+    // `turbo:morph` fires before the attribute observer does, so the resync in
+    // `index.js` renders the events from before the morph; without this, a
+    // refusal — which sends back the payload the page already had — would never
+    // reach the screen and the browser would go on drawing a move the server
+    // threw away.
+    if (this.weekPrototype) this.render()
+  }
+
+  // Stimulus's own naming, through its own identifier: reading the raw string
+  // is what makes the guard above cheap.
+  get eventsAttribute() {
+    return this.element.getAttribute(`data-${this.identifier}-events-value`)
   }
 
   connect() {
@@ -240,6 +265,17 @@ export default class extends Controller {
     const from = event.target.closest("[data-slot='event-calendar-day']")?.dataset?.day
     if (!from) return
 
+    if (this.pickedId && event.key === " ") {
+      event.preventDefault()
+      this.place(from)
+      return
+    }
+    if (this.pickedId && event.key === "Escape") {
+      event.preventDefault()
+      this.cancelPick()
+      return
+    }
+
     const moves = {
       ArrowLeft: [ "day", -1 ],
       ArrowRight: [ "day", 1 ],
@@ -297,6 +333,110 @@ export default class extends Controller {
     this.element.querySelectorAll("[data-slot='event-calendar-day']")
         .forEach((other) => other.setAttribute("tabindex", other === cell ? "0" : "-1"))
     cell.focus()
+  }
+
+  // --- moving an event ------------------------------------------------------
+  //
+  // The agenda is the one place an event is an element. The bars carry
+  // `aria-hidden`, because the agenda reads the day out in full and that is
+  // what earns them the right to be decoration — so a tab stop on a bar is an
+  // `aria-hidden-focus` violation rather than a design choice. It costs
+  // nothing: a crossing event is one *row* in the agenda where it is a bar per
+  // week on the grid, so picking there never has to ask which object was meant.
+
+  agendaKeydown(event) {
+    if (!this.movableValue || event.key !== " ") return
+
+    const row = event.target.closest("[data-slot='event-calendar-agenda-item']")
+    if (!row) return
+
+    event.preventDefault()
+    this.pickedId = row.dataset.eventId
+    // The day the pick was made *from*, which is the agenda's own — and the day
+    // the focus is about to land on. The distance the arrows travel is then the
+    // distance the event travels, which is the only rule a person can hold: a
+    // three-day event picked from its middle and nudged once moves one day, not
+    // three. Against the event's start instead, one press of → moved
+    // 19–21 to 21–23, and that is the version this began as.
+    this.pickedFrom = this.selectedValue
+    this.render()
+    this.focusDay(parse(this.selectedValue))
+  }
+
+  place(day) {
+    const shift = this.offsetOf(day, parse(this.pickedFrom))
+    const id = this.pickedId
+
+    this.pickedId = null
+    if (!shift) return this.redrawAt(day)
+
+    this.moveEvent(id, shift, day)
+  }
+
+  // Both reads happen before the clear, and the row is found again after the
+  // redraw: `render` rebuilds the agenda, so an element held across it is a
+  // node nobody can see any more.
+  cancelPick() {
+    const id = this.pickedId
+    const picked = this.events.find((event) => event.id === id)
+
+    this.pickedId = null
+    this.render()
+
+    const row = this.element.querySelector(
+      `[data-slot='event-calendar-agenda-item'][data-event-id='${id}']`
+    )
+
+    if (row) row.focus()
+    else this.focusDay(parse(picked.from))
+  }
+
+  // The value, assigned — not `this.events`, mutated behind it. That is what
+  // lets a morph correct the browser without the host's help, and it is the
+  // thing the design got wrong first: an optimistic move that mutates the copy
+  // never touches the attribute, so a morph carrying the server's *original*
+  // payload back is not a change, and a refusal never arrives.
+  moveEvent(id, shift, focusOn) {
+    const before = this.eventsValue
+    const after = before.map((event) => (
+      event.id === id
+        ? {
+            ...event,
+            from: iso(addDays(parse(event.from), shift)),
+            to: iso(addDays(parse(event.to || event.from), shift)),
+            pending: true
+          }
+        : event
+    ))
+    const moved = after.find((event) => event.id === id)
+
+    this.writeEvents(after, focusOn)
+
+    this.dispatch("event-move", {
+      detail: {
+        id,
+        from: moved.from,
+        to: moved.to,
+        // The half the library can own, since the only thing that knows where
+        // the event was is this. The host decides *when* — a refusal answered
+        // with a toast alone never redraws the calendar, and then nothing else
+        // would put it back.
+        revert: () => this.writeEvents(before, before.find((event) => event.id === id).from)
+      }
+    })
+  }
+
+  writeEvents(events, focusOn) {
+    this.eventsValue = events
+    // The attribute observer is a microtask, and the focus below needs a cell
+    // that exists now.
+    this.eventsValueChanged()
+    this.focusDay(parse(focusOn))
+  }
+
+  redrawAt(day) {
+    this.render()
+    this.focusDay(parse(day))
   }
 
   // --- drawing --------------------------------------------------------------
@@ -466,6 +606,8 @@ export default class extends Controller {
 
     node.dataset.color = event.color
     if (this.movableValue) node.dataset.eventId = event.id
+    this.mark(node, "picked", event.id === this.pickedId)
+    this.mark(node, "pending", !!event.pending)
     node.style.gridColumn = `${segment.column} / span ${segment.span}`
     node.style.gridRow = String(segment.lane)
     this.mark(node, "continuesBefore", segment.continuesBefore)
@@ -499,6 +641,7 @@ export default class extends Controller {
 
     node.dataset.color = event.color
     if (this.movableValue) node.dataset.eventId = event.id
+    this.mark(node, "picked", event.id === this.pickedId)
     if (event.url) node.querySelector("a").setAttribute("href", event.url)
     node.querySelector("[data-slot='item-title']").textContent = event.title
     node.querySelector("[data-slot='item-description']").textContent = event.meta
