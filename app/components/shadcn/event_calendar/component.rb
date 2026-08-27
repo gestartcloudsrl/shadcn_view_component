@@ -294,13 +294,22 @@ module Shadcn
       # deep before you start scrolling it.
       AGENDA_COUNT_CLASS = "text-xs font-normal text-muted-foreground"
       AGENDA_LIST_CLASS = "flex flex-col"
-      AGENDA_ITEM_CLASS = "flex items-start gap-2.5 rounded-md px-2 py-2 text-sm"
+      # What the agenda wants that `Item`'s own `size: :sm` does not give it: its
+      # rows are dense, and a row is two lines that have to reach the same
+      # height, so the colour beside them can run their length.
+      AGENDA_ITEM_CLASS = "items-stretch px-2 py-2"
       AGENDA_LINK_CLASS = "transition-colors hover:bg-accent focus-visible:outline-none " \
                           "focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      AGENDA_MARK_CLASS = "mt-1.5 size-2 shrink-0 rounded-full bg-(--event-color)"
-      AGENDA_BODY_CLASS = "flex min-w-0 flex-col gap-0.5"
+      # The colour, and the reason the row is `items-stretch`: a dot marks a line
+      # and a bar marks a row, and a row here is two lines. It keeps its slot
+      # name because it keeps its job — a host styling the colour of an agenda
+      # row still has the same thing to reach for.
+      AGENDA_MARK_CLASS = "w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)"
+      AGENDA_CONTENT_CLASS = "min-w-0 gap-0.5"
       AGENDA_EVENT_TITLE_CLASS = "truncate font-medium"
-      AGENDA_META_CLASS = "truncate text-xs text-muted-foreground"
+      # `Item::Description` is already `text-muted-foreground`; only the size is
+      # the agenda's own.
+      AGENDA_META_CLASS = "truncate text-xs"
       AGENDA_EMPTY_CLASS = "px-2 py-8 text-center text-sm text-muted-foreground"
 
       MONTH_FORMAT = "%B %Y"
@@ -1033,27 +1042,34 @@ module Shadcn
                "data-event-id": (event.id if movable?))
       end
 
+      # The row *is* an `Item` — a content, a title and a description was the
+      # shape it had already, spelled out by hand. Rendering the family instead
+      # means the vocabulary is upstream's, and the rules `Item` carries for its
+      # own parts keep working.
       def agenda_row(event)
         body = safe_join([
           tag.span("", "data-slot": "event-calendar-agenda-mark", class: AGENDA_MARK_CLASS),
-          tag.span(
-            safe_join([
-              tag.span(event.title, "data-slot": "event-calendar-agenda-event-title",
-                       class: AGENDA_EVENT_TITLE_CLASS),
-              tag.span(agenda_meta(event), "data-slot": "event-calendar-agenda-meta",
-                       class: AGENDA_META_CLASS)
-            ]),
-            "data-slot": "event-calendar-agenda-body", class: AGENDA_BODY_CLASS
-          )
+          render(Item::Content::Component.new(class: AGENDA_CONTENT_CLASS).with_content(
+          safe_join([
+            render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS).with_content(event.title)),
+            render(Item::Description::Component.new(class: AGENDA_META_CLASS)
+                                              .with_content(agenda_meta(event)))
+          ])
+          ))
         ])
 
         # The `<li>` carries the colour and this carries the classes, because
         # only one of the two can be an `<a>` and a clone cannot change its own
         # tag name — which is why the `<template>` at the bottom holds both.
-        return tag.div(body, "data-slot": "event-calendar-agenda-row", class: AGENDA_ITEM_CLASS) if event.url.blank?
+        return render(agenda_item_component.with_content(body)) if event.url.blank?
 
-        tag.a(body, href: event.url, "data-slot": "event-calendar-agenda-row",
-              class: "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}")
+        render(agenda_item_component(as: :a, href: event.url,
+                                     class: "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}").with_content(body))
+      end
+
+      def agenda_item_component(**attributes)
+        Item::Component.new(size: :sm, "data-slot": "event-calendar-agenda-row",
+                            **{ class: AGENDA_ITEM_CLASS }.merge(attributes))
       end
 
       # --- what the controller clones -------------------------------------------

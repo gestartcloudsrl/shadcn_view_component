@@ -89,7 +89,7 @@ RSpec.describe "Event calendar", :js do
     JS
   end
 
-  def agenda_titles = all("#{calendar} [data-slot=event-calendar-agenda-event-title]", visible: :all).map(&:text)
+  def agenda_titles = all("#{calendar} [data-slot=item-title]", visible: :all).map(&:text)
 
   # Normalised, because the two renderers write attributes in their own order
   # and one of them goes through Rails' escaping. What is compared is everything

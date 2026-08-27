@@ -109,16 +109,27 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
     before { render_inline(calendar) }
 
+    # The row is an `Item`: a content, a title and a description, which is the
+    # shape it had already when it was written out by hand.
+    it "describes a row with the Item family's own parts", :aggregate_failures do
+      expect(parts("item-title").map(&:text)).to eq(%w[Conference Meeting])
+      expect(parts("item-description").map(&:text).last).to eq("10:30 AM – 11:30 AM")
+      # The colour is still a slot of the calendar's own — a bar now rather than
+      # a dot, because a row is two lines and a dot marks one.
+      expect(parts("event-calendar-agenda-mark").map { |mark| mark["class"] })
+        .to all(include("self-stretch"))
+    end
+
     it "lists the selected day's events and nothing else" do
-      expect(parts("event-calendar-agenda-event-title").map(&:text)).to eq(%w[Conference Meeting])
+      expect(parts("item-title").map(&:text)).to eq(%w[Conference Meeting])
     end
 
     it "reads a timed event as a span of the clock" do
-      expect(parts("event-calendar-agenda-meta").map(&:text).last).to eq("10:30 AM – 11:30 AM")
+      expect(parts("item-description").map(&:text).last).to eq("10:30 AM – 11:30 AM")
     end
 
     it "reads a multi-day event as a span of days" do
-      expect(parts("event-calendar-agenda-meta").map(&:text).first).to eq("Aug 19 – Aug 21")
+      expect(parts("item-description").map(&:text).first).to eq("Aug 19 – Aug 21")
     end
 
     it "hides the empty line" do
@@ -257,7 +268,7 @@ RSpec.describe Shadcn::EventCalendar::Component do
       it "says nothing rather than midnight" do
         render_inline(calendar)
 
-        expect(parts("event-calendar-agenda-meta").map(&:text)).to eq([ "9:30 AM" ])
+        expect(parts("item-description").map(&:text)).to eq([ "9:30 AM" ])
       end
     end
 
