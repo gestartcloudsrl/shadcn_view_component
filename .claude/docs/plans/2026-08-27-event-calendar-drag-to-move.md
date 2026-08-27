@@ -70,8 +70,13 @@ describe:
         { id: "b", title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9, 0) } ]
     end
 
-    context "when it is on" do
+    # Three siblings rather than a nest, because the middle one raises in `.new`:
+    # a `before` that renders, shared with it, would take the error outside the
+    # example's own block and fail it there.
+    context "with an id on every event" do
       let(:options) { { events:, selected: Date.new(2026, 8, 20), movable: true } }
+
+      before { render_inline(calendar) }
 
       it "names the event on every bar and every agenda row", :aggregate_failures do
         expect(parts("event-calendar-event").map { |bar| bar["data-event-id"] }).to eq(%w[a b])
@@ -82,18 +87,23 @@ describe:
         expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-movable-value"])
           .to eq("true")
       end
+    end
 
-      context "with an event carrying no id" do
-        let(:events) { [ { title: "Nameless", starts_at: Date.new(2026, 8, 20) } ] }
+    context "with an event carrying no id" do
+      let(:options) do
+        { events: [ { title: "Nameless", starts_at: Date.new(2026, 8, 20) } ], movable: true }
+      end
 
-        it "says which event, rather than moving nothing" do
-          expect { rendered_content }.to raise_error(ArgumentError, /Nameless/)
-        end
+      it "says which event, rather than moving nothing" do
+        expect { described_class.new(month: Date.new(2026, 8, 1), **options) }
+          .to raise_error(ArgumentError, /Nameless/)
       end
     end
 
-    context "when it is off" do
+    context "without movable" do
       let(:options) { { events:, selected: Date.new(2026, 8, 20) } }
+
+      before { render_inline(calendar) }
 
       it "writes no identity at all" do
         expect(parts("event-calendar-event").map { |bar| bar["data-event-id"] }).to all(be_nil)
@@ -105,7 +115,9 @@ describe:
 - [ ] **Step 2: Run them and watch them fail**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e movable`
-Expected: FAIL — `unknown keyword: :movable`.
+Expected: FAIL — four failures, and **not** `unknown keyword`: the component
+takes `**attributes`, so an unknown keyword is rendered as a stray HTML
+attribute rather than raised. The failure to look for is `got: []`.
 
 - [ ] **Step 3: Take the keyword, and check it**
 
@@ -154,7 +166,10 @@ In `#agenda_item`, on the `tag.li`:
 In `#element_attributes`, beside the other values:
 
 ```ruby
-          "data-shadcn--event-calendar-movable-value" => movable?.to_s,
+          # Omitted rather than `"false"`, like `data-labelled`: the
+          # controller defaults to false, and a calendar that never moves
+          # anything should not carry the byte.
+          "data-shadcn--event-calendar-movable-value" => ("true" if movable?),
 ```
 
 - [ ] **Step 5: Give the controller the value and the clone half**

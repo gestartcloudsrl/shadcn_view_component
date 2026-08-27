@@ -779,4 +779,54 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(crossed).to have_key("dayOrder")
     end
   end
+
+  # A move dispatches the host's own id, and an event has none unless the host
+  # gave it one. These are the two halves of that: the identity travelling into
+  # the DOM, and the render refusing to go on without it.
+  describe "#movable" do
+    let(:events) do
+      [ { id: "a", title: "Conference", starts_at: Date.new(2026, 8, 19), ends_at: Date.new(2026, 8, 21) },
+        { id: "b", title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9, 0) } ]
+    end
+
+    # Three siblings rather than a nest, because the middle one raises in `.new`:
+    # a `before` that renders, shared with it, would take the error outside the
+    # example's own block and fail it there.
+    context "with an id on every event" do
+      let(:options) { { events:, selected: Date.new(2026, 8, 20), movable: true } }
+
+      before { render_inline(calendar) }
+
+      it "names the event on every bar and every agenda row", :aggregate_failures do
+        expect(parts("event-calendar-event").map { |bar| bar["data-event-id"] }).to eq(%w[a b])
+        expect(parts("event-calendar-agenda-item").map { |row| row["data-event-id"] }).to eq(%w[a b])
+      end
+
+      it "crosses the switch to the controller" do
+        expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-movable-value"])
+          .to eq("true")
+      end
+    end
+
+    context "with an event carrying no id" do
+      let(:options) do
+        { events: [ { title: "Nameless", starts_at: Date.new(2026, 8, 20) } ], movable: true }
+      end
+
+      it "says which event, rather than moving nothing" do
+        expect { described_class.new(month: Date.new(2026, 8, 1), **options) }
+          .to raise_error(ArgumentError, /Nameless/)
+      end
+    end
+
+    context "without movable" do
+      let(:options) { { events:, selected: Date.new(2026, 8, 20) } }
+
+      before { render_inline(calendar) }
+
+      it "writes no identity at all" do
+        expect(parts("event-calendar-event").map { |bar| bar["data-event-id"] }).to all(be_nil)
+      end
+    end
+  end
 end
