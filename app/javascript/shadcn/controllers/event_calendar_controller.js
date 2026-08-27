@@ -269,14 +269,26 @@ export default class extends Controller {
   // move — the same boundary its nav buttons have.
   focusDay(date) {
     const day = iso(date)
-    let cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+    let cell = this.cellFor(day)
 
     if (!cell) {
       this.goTo(shiftMonths(date, 0), day)
-      cell = this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+      cell = this.cellFor(day)
       if (!cell) return
     }
 
+    this.focusCell(cell)
+  }
+
+  cellFor(day) {
+    return this.element.querySelector(`[data-slot='event-calendar-day'][data-day='${day}']`)
+  }
+
+  // The tab stop and the focus travel together — one cell is tabbable and it is
+  // the one focused. Reached from two directions, which is why it is a method
+  // rather than the tail of `focusDay`: the arrows move it, and `render` puts
+  // it back after rebuilding the cell it was on.
+  focusCell(cell) {
     this.element.querySelectorAll("[data-slot='event-calendar-day']")
         .forEach((other) => other.setAttribute("tabindex", other === cell ? "0" : "-1"))
     cell.focus()
@@ -308,6 +320,19 @@ export default class extends Controller {
     // whole of their navigation — see `goTo`.
     if (!this.clientDrawnValue) return
 
+    // Every cell is replaced below, so the one holding the focus stops existing
+    // and the focus falls to the body — and `fillDay` hands the roving tab stop
+    // back to the *selected* day, which is not where the arrows left it.
+    //
+    // The keyboard's own path hides both: `focusDay` calls `goTo` and refocuses
+    // afterwards. A `turbo:morph` resync has nothing to refocus with, so a
+    // morph refresh of a page holding a client-drawn month sent the reader
+    // back to the body — no drag and no navigation involved. Measured on
+    // `/turbo-probe/one` with none of this file's other paths running.
+    const focused = this.element.contains(document.activeElement)
+      ? document.activeElement.closest("[data-slot='event-calendar-day']")?.dataset?.day
+      : null
+
     const first = this.month
     const weeks = this.weeksOf(first)
 
@@ -322,6 +347,12 @@ export default class extends Controller {
     // whose cells all fit gets its row back, and one that does not reserves it.
     this.mark(this.element, "overflow", this.labelled && this.overflowed)
     this.renderAgenda()
+
+    // Only when the day survived the redraw. A month stepped off the edge of
+    // does not hold the cell that was focused, and there this is `goTo` running
+    // inside `focusDay`, which is already on its way to the right one.
+    const cell = focused && this.cellFor(focused)
+    if (cell) this.focusCell(cell)
   }
 
   weekElement(days, first) {

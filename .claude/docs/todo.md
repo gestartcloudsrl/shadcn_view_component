@@ -487,8 +487,9 @@ noting that it would not have delivered the component that raised the question:
 
 - [ ] **Split `event_calendar_controller.js` — not yet, and here is the
       trigger.** The split was built and thrown away rather than argued about,
-      so the numbers below are measured and not estimated. 570 lines come apart
-      cleanly into **298 frame + 308 drawing**: the frame walks between months,
+      so the numbers below are measured and not estimated. 570 lines came apart
+      cleanly into **298 frame + 308 drawing** — the file is 647 now, and the
+      split was not re-measured after the focus fix: the frame walks between months,
       selects, handles the keyboard and announces what the options panel asks
       for; the drawing packs lanes, builds the index and fills the cells, which
       three of the four readings never run.
@@ -496,10 +497,12 @@ noting that it would not have delivered the component that raised the question:
       Four things the spike found that the argument had not:
 
       - **The dependency runs the wrong way.** The drawing asks the frame for
-        `mark` and `mod`, two helpers of three lines. It is the frame that
-        reaches into the drawing — `next`, `previous`, `today` and `focusDay`
-        through `goTo` to `render`, and `select` to `eventsOn` and
-        `renderAgenda`. Splitting therefore costs three no-op hooks on the base.
+        `mark` and `mod`, two helpers of three lines — and, since the focus fix,
+        for `cellFor` and `focusCell` as well, which is four rather than two but
+        the same shape. It is the frame that reaches into the drawing — `next`,
+        `previous`, `today` and `focusDay` through `goTo` to `render`, and
+        `select` to `eventsOn` and `renderAgenda`. Splitting therefore costs
+        three no-op hooks on the base.
       - **Those hooks would be dead.** Only the subclass is ever registered, and
         it overrides all three, so the base has one implementation and no
         caller. It is an abstraction with nothing to abstract over yet.
@@ -673,10 +676,17 @@ noting that it would not have delivered the component that raised the question:
 
 - **Three of the event calendar's four halves** — drag to move and resize, a
   "+2 more" popover, and recurrence. Each is named with its reason in
-  [features/event-calendar.md](features/event-calendar.md#not-done); the short
-  version is that two of them need a write path an application owns, and the
-  popover would cost the one-tap-target-per-day property the mobile reading is
-  built on.
+  [features/event-calendar.md](features/event-calendar.md#not-done).
+
+  The short version used to be that two of them need a write path an
+  application owns. A spike says otherwise: the write path is the easy half —
+  dispatch and let the host save, and under a morph refresh the server's
+  re-render *is* the rollback. What blocks the drag is that the tab stop is on
+  the day rather than on the event, so there is no keyboard equivalent to
+  build; that a crossing event is five chips rather than one object; that a
+  chip carries no id on either side; and that a drop onto a day already at
+  `max_events` draws nothing at all. The popover is unchanged: it would cost
+  the one-tap-target-per-day property the mobile reading is built on.
 
   The fourth was the week view, and it is under *Smaller things* now rather than
   here: it was listed as blocked on a time axis that has since been built. The

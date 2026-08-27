@@ -501,3 +501,28 @@ the merge with "a distinction that matters to this file and to nobody using it"
 — true when written, and a claim about *everyone who would ever use it*. The
 first host to model the two questions as two produced the somebody, and the bug
 was already there waiting.
+
+## A morph refresh sent the calendar's keyboard back to the body
+
+`resyncOnMorph` re-runs `render()`, and `render()` rebuilds the month with
+`weeksTarget.replaceChildren(...)` — so the cell holding the focus stopped
+existing and the focus fell to `<body>`, while `fillDay` handed the roving tab
+stop back to the *selected* day rather than the one the arrows had reached.
+
+Nothing about dragging or navigating: a plain `Turbo.visit(here, { action:
+"replace" })` on a page holding a client-drawn month was enough, and it is what
+`turbo_spec` now asserts. What had been hiding it is that no other caller of
+`render()` loses anything — the arrows reach it through `focusDay`, which
+refocuses afterwards, and the nav buttons hold the focus on a button `render()`
+does not touch. The morph is the one caller with a focused cell and nothing to
+refocus with.
+
+Named as the cause by a control rather than by reading: with the resync
+switched off the same morph left the focus and the tab stop where they were, so
+it is `render()` and not idiomorph.
+
+`render()` now reads the focused day before rebuilding and puts focus and the
+tab stop back afterwards, when that day is still in the grid it drew. The fix is
+in `render()` rather than in `resyncOnMorph` because a resync generic over every
+controller cannot know how to find the element again — only the one redrawing
+can.

@@ -286,6 +286,19 @@ was not reassigned.
 The server wins, which is what a refresh means; `data-turbo-permanent` is the
 application's escape hatch, not the library's decision.
 
+**What that costs is whatever the re-render throws away.** A `render()` that
+rebuilds its children destroys the element holding the focus, and idiomorph had
+just gone to the trouble of preserving it — measured on the event calendar,
+where a morph refresh sent a focused day cell's focus to `<body>` and handed the
+roving tab stop back to the selected day. Turning the resync off left both
+where they were, with the same morph, which is what named the resync rather
+than idiomorph as the cause.
+
+So a controller whose `render()` replaces children owns putting the focus back;
+`resyncOnMorph` cannot do it for them, because finding the element again needs
+to know what it was, and only the controller redrawing knows that. See
+[04-bugs-fixed.md](04-bugs-fixed.md#a-morph-refresh-sent-the-calendars-keyboard-back-to-the-body).
+
 ## `focusout` can mean the focus was taken away
 
 A component that stays open while it holds the focus has to answer `focusout`,

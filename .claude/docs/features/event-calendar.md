@@ -973,9 +973,40 @@ Named rather than left to be discovered:
   and the day*. A week is the one shape left, and it is the one that needs a
   time axis *across* seven days rather than down one; the hours reading has the
   axis now, so this is smaller than it was, but it is not free.
-- **drag to move, drag to resize.** Both need a write path — a host endpoint, an
-  optimistic update, a rollback — which is an application's decision, not a
-  library's.
+- **drag to move, drag to resize.** This used to say both were blocked on a
+  write path — an endpoint, an optimistic update, a rollback — being an
+  application's decision. A throwaway spike says the write path is the *easy*
+  half, and names four things that are not:
+
+  - **There is nowhere for a keyboard to take hold of an event.** The tab stop
+    is on the *day* — `keydown` resolves `closest("[data-slot=event-calendar-day]")`
+    and `component.rb` puts `tabindex` on the cell — so a two-press pick-and-place
+    on a day holding three events picks one of them with no way for anyone to
+    say which. Measured: it took the day-order first, which is neither the first
+    id nor anything a person could predict. Every other draggable thing in this
+    gem has a keyboard equivalent (slider, resizable, carousel), and axe cannot
+    see the absence of one: `accessibility_spec` runs `wcag21aa`, and dragging
+    movements are a 2.2 criterion.
+  - **A crossing event is not an object.** Five chips in five cells, as *One
+    job, one line across the week* above already says of the workload.
+  - **A chip carries no identity.** `eventElement` writes no id and neither does
+    the Ruby, so there is nothing for a move to name. It has to be on both
+    sides: a JS-only attribute is gone at the first morph, because the server
+    wins.
+  - **A drop can be invisible.** `weekElement` draws only `lane <= max_events`,
+    so an event dropped on a day already at the cap is not drawn at all — it
+    joins the "+N more". The event moves, the server agrees, and nothing
+    appears.
+
+  What the write path would be, if the rest is ever built: **dispatch and
+  stop**, the shape `month-change` already has. `month_url:` is not a
+  counterexample — the calendar takes that lambda to draw an `<a href>`, not to
+  make a request, and a drag has no no-JavaScript form for a URL to serve. A
+  `revert()` in the event's `detail` is the half the library *can* own, since
+  the only thing that knows where the chip was is the controller. Under a morph
+  refresh it is not even needed: the server re-renders with the dates it
+  accepted — the old ones if it refused — and the redraw is the rollback. That
+  much was measured; the Turbo Frame variant was reasoned about and not.
 - **a "+2 more" popover.** The agenda already shows everything on the day, the
   dense reading shows every event without opening anything, and a second way in
   would cost the one-tap-target-per-day property both depend on.
