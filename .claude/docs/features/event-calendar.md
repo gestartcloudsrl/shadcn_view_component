@@ -156,15 +156,25 @@ panel: **which view**, then the only question that view has.
 
 | view | its question |
 |---|---|
-| Grid | group cells by assignee or by event |
+| Grid | group by assignee or by event |
 | Rows | the same |
-| Hours | draw each job as chips or as bars |
+| Timeline | draw each job as chips or as bars |
 
-`Grid` and `Rows` are the workload reading at its two arrangements and `Hours`
-is a different reading; that distinction matters to this port and to nobody
-using it, which is why `view_url:` is one callback rather than two. `:grid` is
-`arrangement: :auto`, not a third arrangement — below `lg` it is rows anyway,
-because forcing seven columns onto a phone is what rows were built to avoid.
+`Grid` and `Rows` are the workload reading at its two arrangements and the
+timeline is a different reading; that distinction matters to this port and to
+nobody using it, which is why `view_url:` is one callback rather than two.
+`:grid` is `arrangement: :auto`, not a third arrangement — below `lg` it is rows
+anyway, because forcing seven columns onto a phone is what rows were built to
+avoid.
+
+**The third view reads *Timeline* and is called `hours` everywhere else** — the
+key, the reading, the class, and the value a host's `view_url:` is handed. The
+divergence is deliberate: "Hours" named the axis it is drawn on, which is a fact
+about how it works rather than about what it shows, and the callback's
+vocabulary is public API that a rename would break. The day's own halves follow
+the label rather than the key for the same reason — *Timeline only* and
+*Timeline and list*, not *Hours only* — so the same thing is called the same
+thing in the month and in the day.
 
 One callback, but its vocabulary is **`PERIODS + VIEWS`**: it is handed
 `:monthly`, `:daily`, `:grid`, `:rows` or `:hours`, and nothing stands in for

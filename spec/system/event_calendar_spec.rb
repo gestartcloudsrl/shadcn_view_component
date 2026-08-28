@@ -535,7 +535,7 @@ RSpec.describe "Event calendar", :js do
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
         .to eq([ "Show", "Show the month as", "Group by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Monthly", "Daily", "Grid", "Rows", "Hours", "By assignee", "By event" ])
+        .to eq([ "Monthly", "Daily", "Grid", "Rows", "Timeline", "By assignee", "By event" ])
     end
 
     # A day has one arrangement, so the monthly question goes; the grouping
@@ -561,7 +561,7 @@ RSpec.describe "Event calendar", :js do
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
         .to eq([ "Show", "Show the day as", "Show each job as", "Group by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Monthly", "Daily", "Hours only", "List only", "Hours and list",
+        .to eq([ "Monthly", "Daily", "Timeline only", "List only", "Timeline and list",
                  "Chips", "Bars", "By assignee", "By event" ])
     end
 
@@ -601,7 +601,7 @@ RSpec.describe "Event calendar", :js do
       find("[data-slot=dropdown-menu-radio-item][data-value=monthly]").click
 
       expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Monthly")
-      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Hours")
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Timeline")
     end
 
     it "carries the month across to the hours view" do

@@ -67,19 +67,27 @@ en:
         monthly: Monthly
         daily: Daily
       # What a day shows: the axis says when it is busy and cannot write a name,
-      # the agenda says what each job is and cannot show a gap.
+      # the agenda says what each job is and cannot show a gap. Named after the
+      # month's view rather than after the hours, so the same thing is called
+      # the same thing in both — see `view.hours` below.
       daily:
         label: Show the day as
-        axis: Hours only
+        axis: Timeline only
         agenda: List only
-        both: Hours and list
+        both: Timeline and list
       previous_day: Go to the Previous Day
       next_day: Go to the Next Day
+      # The label is **Timeline** and the key, the reading and the value that
+      # reaches `view_url:` are all still `hours`, deliberately: "Hours"
+      # described the axis it is drawn on, which is a fact about how it works
+      # rather than about what it shows, and the vocabulary a host's callback is
+      # handed is public API that a rename would break. So the divergence is on
+      # purpose and it lives here, in the one place a person reads.
       view:
         label: Show the month as
         grid: Grid
         rows: Rows
-        hours: Hours
+        hours: Timeline
       # The hours reading's shape menu — see `Hours::Component::LANE_HEIGHTS`.
       # A bar is as wide as the job lasts and says nothing else; a chip says who
       # and for whom, and is as wide as that takes.
