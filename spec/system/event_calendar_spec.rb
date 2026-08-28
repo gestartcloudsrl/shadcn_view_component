@@ -541,6 +541,12 @@ RSpec.describe "Event calendar", :js do
     # A day has one arrangement, so the monthly question goes; the grouping
     # stays, because "who is where" is a question a day gets asked more than a
     # month does.
+    #
+    # The shape stayed too, and this example used to assert that it did not —
+    # fixing a defect in place as though it were the design. A day inherits both
+    # the `shape:` argument and the drawing of it from `Hours`, so leaving it off
+    # the panel did not mean a day had no shape: it meant a day had one nobody
+    # could see or change.
     it "swaps the monthly question for the day's own", :aggregate_failures do
       open_panel
       find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
@@ -553,10 +559,28 @@ RSpec.describe "Event calendar", :js do
       open_panel
 
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
-        .to eq([ "Show", "Show the day as", "Group cells by" ])
+        .to eq([ "Show", "Show the day as", "Show each job as", "Group cells by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
         .to eq([ "Monthly", "Daily", "Hours only", "List only", "Hours and list",
-                 "By assignee", "By event" ])
+                 "Chips", "Bars", "By assignee", "By event" ])
+    end
+
+    # And it goes again when there is no axis for it to decide, which is the
+    # rule the rest of the panel follows: a question is drawn when the view it
+    # belongs to is the view you are in.
+    it "drops the shape when the day is showing its list alone", :aggregate_failures do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Daily")
+
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=agenda]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "List only")
+
+      open_panel
+
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the day as", "Group cells by" ])
     end
 
     # The period and the view are two questions, and the answer to one has to

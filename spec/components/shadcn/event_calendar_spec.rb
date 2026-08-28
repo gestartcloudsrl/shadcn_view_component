@@ -627,6 +627,22 @@ RSpec.describe Shadcn::EventCalendar::Component do
       page
     end
 
+    def option_values(showing)
+      day(showing).all("[data-slot=dropdown-menu-radio-item]", visible: :all).map { |item| item["data-value"] }
+    end
+
+    # The shape is `Hours`'s and this inherits it, so a `shape:` a host passed
+    # was being *drawn* and could not be changed — the panel showed the period,
+    # the halves and the grouping, and never it. It belongs exactly where the
+    # panel's own rule puts every other question: where there is something for
+    # it to decide, which is wherever there is an axis.
+    it "offers the shape exactly where there is an axis to shape", :aggregate_failures do
+      expect(option_values(:both)).to include("chips", "bars")
+      expect(option_values(:axis)).to include("chips", "bars")
+      expect(option_values(:agenda)).not_to include("chips")
+      expect(option_values(:agenda)).not_to include("bars")
+    end
+
     it "titles itself with the day, not the month" do
       expect(day(:both).first("[data-slot=event-calendar-title]").text).to eq("Tuesday, August 4")
     end

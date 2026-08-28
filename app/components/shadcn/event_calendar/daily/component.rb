@@ -106,7 +106,13 @@ module Shadcn
           safe_join([ shadcn_t("event_calendar.daily.#{showing}"), grouping_label ], " · ")
         end
 
-        def reading_options = [ showing_items, grouping_items ]
+        # The shape comes from `Hours` and this inherits both the argument and
+        # the drawing — so leaving it out of the panel did not mean a day had no
+        # shape, it meant a day had one nobody could see or change. Drawn where
+        # there is an axis for it to decide, which is the same rule that keeps
+        # the arrangement question off a day: a question is on the panel when
+        # the view it belongs to is the view you are in.
+        def reading_options = [ showing_items, (shape_items if axis?), grouping_items ].compact
 
         def showing_items
           safe_join([

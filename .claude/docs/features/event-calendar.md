@@ -129,6 +129,20 @@ is `w-14` and centres what it holds, which is right for "Tue 4" and clipped
 "Katherine Johnson" to "atherine Johnson". Borrowing it would have meant undoing
 three of the frame's rules.
 
+**The shape is on a day's panel too, and was not.** `Daily` inherits `Hours` —
+the `shape:` argument and the drawing of it both — and its panel listed the
+period, the halves and the grouping and never the shape. That did not mean a day
+had no shape: it meant a day had one nobody could see or change, and a choice
+made in the monthly timeline reached the daily one silently. Measured before it
+was believed: the same day rendered at `shape: :bars` and `shape: :chips`
+differs, 24,763 bytes against 25,727, one `event-calendar-day-bar` apart.
+
+It is drawn where there is an axis for it to decide — `showing: :axis` or
+`:both`, gone under `:agenda` — which is the panel's own rule rather than an
+exception to it: a question is on the panel when the view it belongs to is the
+view you are in. A system example asserted the panel's exact contents and so had
+been holding the defect in place; it now asserts both halves.
+
 `Groupings` is the module the workload and daily readings share for it, the way
 `Chips` is the one they share for a chip — the same question of the same data,
 drawn differently, and one menu so the two cannot drift apart in what they call
