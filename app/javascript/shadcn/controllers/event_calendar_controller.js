@@ -439,6 +439,84 @@ export default class extends Controller {
     this.focusDay(parse(day))
   }
 
+  // --- and the pointer's half of it -----------------------------------------
+
+  // A grip rather than the whole bar. With the bar grabbable the day underneath
+  // lost the centre of 17 of the 27 days that had events, and clicking one
+  // stopped working at all — the layer stays `pointer-events-none`, so only
+  // what the grip is standing on is taken from the day.
+  //
+  // The shift comes from the day *under the grip*, because a bar is clipped to
+  // its week: an event crossing a Sunday has two of them, and the second one's
+  // grip is on a Monday that is not the event's start.
+  grab(event) {
+    if (!this.movableValue) return
+
+    const chip = event.currentTarget.closest("[data-slot='event-calendar-event']")
+    const from = this.dayUnder(event.clientX, event.clientY)
+    if (!chip || !from) return
+
+    this.startDrag(event, chip.dataset.eventId, from, chip)
+  }
+
+  // The row's grip is its colour bar. It is nowhere on the grid, so it is
+  // relative to the day the agenda is showing — the rule the keyboard follows,
+  // and for the same reason.
+  grabRow(event) {
+    if (!this.movableValue) return
+
+    const row = event.currentTarget.closest("[data-slot='event-calendar-agenda-item']")
+    if (!row) return
+
+    this.startDrag(event, row.dataset.eventId, this.selectedValue, row)
+  }
+
+  startDrag(event, id, from, marked) {
+    const handle = event.currentTarget
+
+    event.preventDefault()
+    handle.setPointerCapture(event.pointerId)
+
+    this.drag = { id, from, handle }
+    this.mark(marked, "picked", true)
+
+    this.onDrop = (dropped) => this.drop(dropped)
+    handle.addEventListener("pointerup", this.onDrop)
+    handle.addEventListener("pointercancel", this.onDrop)
+  }
+
+  drop(event) {
+    const { id, from, handle } = this.drag
+
+    handle.removeEventListener("pointerup", this.onDrop)
+    handle.removeEventListener("pointercancel", this.onDrop)
+    this.drag = null
+
+    // A cancel is not a drop. The browser sends one when it takes the gesture
+    // over — a scroll it decided was a scroll, a system gesture — and the
+    // pointer's last position is then wherever it happened to be rather than
+    // anywhere anybody chose. It is also the one branch here no spec can reach:
+    // Selenium cannot cancel a pointer, and a synthetic `pointercancel` cannot
+    // be preceded by a `setPointerCapture` that does not throw.
+    const over = event.type === "pointercancel"
+      ? from
+      : (this.dayUnder(event.clientX, event.clientY) || from)
+    const shift = this.offsetOf(over, parse(from))
+
+    if (!shift) return this.redrawAt(over)
+
+    this.moveEvent(id, shift, over)
+  }
+
+  // The bars sit in a `pointer-events-none` layer over the days, so the day is
+  // *behind* whatever the pointer is on. `elementsFromPoint` gives the stack
+  // rather than the top of it, which is the only way to read through a grip.
+  dayUnder(x, y) {
+    return document.elementsFromPoint(x, y)
+                   .find((element) => element.dataset?.slot === "event-calendar-day")
+                   ?.dataset?.day
+  }
+
   // --- drawing --------------------------------------------------------------
   //
   // Everything above walks between months, selects a day and answers the

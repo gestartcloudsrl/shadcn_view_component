@@ -406,6 +406,59 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The other hand. A grip rather than the whole bar, and the second example is
+  # the reason why: with the bar grabbable, the day underneath lost its centre
+  # on 17 of the 27 days that had events, and clicking one stopped working.
+  describe "moving an event with a pointer" do
+    before do
+      visit_preview("event_calendar", :movable)
+      wait_for_stimulus
+    end
+
+    def dates_of(id)
+      page.evaluate_script(<<~JS)
+        (() => {
+          const one = JSON.parse(document.querySelector("#{calendar}")
+            .getAttribute("data-shadcn--event-calendar-events-value"))
+            .find((event) => event.id === "#{id}")
+          return [ one.from, one.to || one.from ]
+        })()
+      JS
+    end
+
+    def haul(handle, to)
+      page.driver.browser.action.click_and_hold(handle.native).move_to(day(to).native).release.perform
+    end
+
+    # `e4` is Conference, 19–21 August: one bar over three columns, its grip on
+    # the 19th. Dropping it on the 20th is one day, not two — the shift comes
+    # from the day the grip is on and not from anywhere else.
+    it "shifts by the day the grip is on" do
+      haul(find("#{calendar} [data-slot=event-calendar-event][data-event-id='e4'] " \
+                "[data-slot=event-calendar-event-grip]", match: :first), "2026-08-20")
+
+      expect(dates_of("e4")).to eq(%w[2026-08-20 2026-08-22])
+    end
+
+    it "leaves the day underneath its bars clickable", :aggregate_failures do
+      expect(topmost_over("Conference")).to eq("event-calendar-event")
+
+      day("2026-08-13").click
+
+      expect(day("2026-08-13")["aria-selected"]).to eq("true")
+    end
+
+    # The agenda's colour bar is the row's grip. It has no day on the grid, so
+    # it is relative to the day the agenda is showing — the same rule the
+    # keyboard follows, for the same reason.
+    it "drags a row by the bar it leads with" do
+      haul(find("#{calendar} [data-slot=event-calendar-agenda-item][data-event-id='e5'] " \
+                "[data-slot=event-calendar-agenda-mark]"), "2026-08-22")
+
+      expect(dates_of("e5")).to eq(%w[2026-08-22 2026-08-22])
+    end
+  end
+
   # Both cuts of a cell used to be rendered with one hidden, which made the menu
   # free and everything else twice as expensive. A cell renders the grouping it
   # is showing now, and the panel is links to the other state.
