@@ -978,7 +978,10 @@ module Shadcn
 
         tag.div(
           safe_join([
-            (tag.span("", "data-slot": "event-calendar-event-grip", class: EVENT_GRIP_CLASS) if movable?),
+            (if movable?
+               tag.span("", "data-slot": "event-calendar-event-grip", class: EVENT_GRIP_CLASS,
+                        "data-action": "pointerdown->shadcn--event-calendar#grab")
+             end),
             (tag.span("", "data-slot": "event-calendar-event-dot", class: EVENT_DOT_CLASS) unless event.all_day?),
             # Bound once. `chip_time` formats through `I18n.l`, and asking twice
             # per bar — once for the guard and once for the value — is the same
@@ -1067,7 +1070,8 @@ module Shadcn
       def agenda_row(event)
         body = safe_join([
           tag.span("", "data-slot": "event-calendar-agenda-mark",
-                   class: [ AGENDA_MARK_CLASS, (AGENDA_MARK_GRIP_CLASS if movable?) ]),
+                   class: [ AGENDA_MARK_CLASS, (AGENDA_MARK_GRIP_CLASS if movable?) ],
+                   "data-action": ("pointerdown->shadcn--event-calendar#grabRow" if movable?)),
           render(Item::Content::Component.new(class: AGENDA_CONTENT_CLASS).with_content(
           safe_join([
             render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS).with_content(event.title)),
