@@ -25,7 +25,7 @@ import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 // "lowest free lane" rather than "next free lane".
 export default class extends Controller {
   static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
-                     "prototypes", "groupLabel" ]
+                     "prototypes", "groupLabel", "announcer" ]
 
   static values = {
     month: String,
@@ -62,7 +62,8 @@ export default class extends Controller {
     agendaFormat: String,
     dayLabel: String,
     moreLabel: String,
-    eventCount: Object
+    eventCount: Object,
+    moveLabels: Object
   }
 
   // The server ships only what cannot be worked out — see `#portable_events`
@@ -352,6 +353,7 @@ export default class extends Controller {
 
     event.preventDefault()
     this.pickedId = row.dataset.eventId
+    this.announce("picked", this.events.find((candidate) => candidate.id === this.pickedId))
     // The day the pick was made *from*, which is the agenda's own — and the day
     // the focus is about to land on. The distance the arrows travel is then the
     // distance the event travels, which is the only rule a person can hold: a
@@ -382,6 +384,7 @@ export default class extends Controller {
 
     this.pickedId = null
     this.render()
+    this.announce("returned", picked, picked.from)
 
     const row = this.element.querySelector(
       `[data-slot='event-calendar-agenda-item'][data-event-id='${id}']`
@@ -411,6 +414,7 @@ export default class extends Controller {
     const moved = after.find((event) => event.id === id)
 
     this.writeEvents(after, focusOn)
+    this.announce("moved", moved, moved.from)
 
     this.dispatch("event-move", {
       detail: {
@@ -421,7 +425,12 @@ export default class extends Controller {
         // the event was is this. The host decides *when* — a refusal answered
         // with a toast alone never redraws the calendar, and then nothing else
         // would put it back.
-        revert: () => this.writeEvents(before, before.find((event) => event.id === id).from)
+        revert: () => {
+          const was = before.find((event) => event.id === id)
+
+          this.writeEvents(before, was.from)
+          this.announce("returned", was, was.from)
+        }
       }
     })
   }
@@ -437,6 +446,17 @@ export default class extends Controller {
   redrawAt(day) {
     this.render()
     this.focusDay(parse(day))
+  }
+
+  // Into a region of the move's own. The title is the calendar's other
+  // `role="status"` and the month lives there — writing a sentence into it
+  // would take the month off the page until the next navigation put it back.
+  announce(key, event, day) {
+    if (!this.hasAnnouncerTarget) return
+
+    this.announcerTarget.textContent = (this.moveLabelsValue[key] || "")
+      .replace("%{title}", event.title)
+      .replace("%{date}", day ? this.format(parse(day), this.agendaFormatValue) : "")
   }
 
   // --- and the pointer's half of it -----------------------------------------
