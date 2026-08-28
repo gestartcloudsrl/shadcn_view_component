@@ -55,7 +55,7 @@ keeps catching itself in.
 | [chart.md](chart.md) | **adapted** / ours | `chart.tsx` is a frame around recharts and draws nothing; the frame is 1:1 and the pie, bar, line and area are drawn here |
 | [calendar.md](calendar.md) | **adapted** | `react-day-picker` is mostly date arithmetic and locale data, which Ruby has; the markup is 1:1 and the grid is rendered on both sides |
 | [toaster.md](toaster.md) | **ours** | `sonner.tsx` emits no markup at all, so there is nothing to be 1:1 with; sonner's measurements and stacking, Rails' three ways in |
-| [event-calendar.md](event-calendar.md) | **ours** | shadcn has the day picker and no event calendar; FullCalendar's `dayGridMonth` as the reference, the lane packing in Ruby, a cell that either names its events or shows their shape, and a third reading that measures the day rather than listing it |
+| [event-calendar.md](event-calendar.md) | **ours** | shadcn has the day picker and no event calendar; FullCalendar's `dayGridMonth` as the reference, the lane packing in Ruby, a cell that either names its events or shows their shape, a third reading that measures the day rather than listing it, and `movable:` — a keyboard hand through the agenda and a pointer's through a grip |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:

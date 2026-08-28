@@ -258,9 +258,16 @@ exist for a screen reader.
 Using it would mean either giving the workload an agenda — but that reading is
 "a month as a measure", deliberately without one — or making the layer real
 content, which means dropping `aria-hidden` and `pointer-events-none`, and with
-them the one-tap-target-per-day property the mobile reading is built on. Worth
-knowing that the second is the direction dragging would need anyway: to drag a
-job you need one object, and today a five-day job is five chips.
+them the one-tap-target-per-day property the mobile reading is built on.
+
+That last sentence was written when dragging did not exist, guessing that this
+was the direction it would need. It is not what happened: the events reading
+drags by a **grip** rather than by the chip, so the layer keeps
+`pointer-events-none` and the day keeps its target — and the workload has no
+grips because it has no client-drawn payload to move anything in. What stays
+true here is the shape of the problem: a five-day job is five chips in a
+workload cell, and anything that wanted to drag one would still need it to be
+one object first.
 
 ### One job, one line across the week
 
@@ -546,6 +553,101 @@ in Ruby. There the rows are already what is drawn, so it has nothing to change �
 and the server cannot know which side of the breakpoint it rendered for, so CSS
 is the only place that can decide.
 
+## Moving an event
+
+`movable: true` and nothing else. The calendar dispatches
+`shadcn--event-calendar:event-move` and stops there; saving is the host's, the
+way `month-change` is.
+
+```erb
+<%= render(Shadcn::EventCalendar::Component.new(events:, movable: true)) %>
+```
+
+```js
+move({ detail: { id, from, to, revert } }) {
+  patch(`/appointments/${id}`, { starts_at: from, ends_at: to })
+    .catch(() => revert())
+}
+```
+
+**It needs an id on every event, and raises without one.** `Event#id` is `nil`
+unless a host passed one — it existed for the payload the controller reads and
+nothing had needed it since. A move without one would dispatch `id: null` and
+fail as "dragging does nothing", days later and in somebody else's code, so it
+is an `ArgumentError` at render naming the event that has none.
+
+### Two hands, one rule
+
+**From the keyboard, through the agenda.** `Space` on a row takes that event and
+hands the focus to the selected day; the arrows move; `Space` puts it down;
+`Escape` puts it back and returns the focus to the row. The agenda is not a
+convenience here, it is the only place available: the bars are `aria-hidden`,
+because the agenda reads the day out in full and that is what earns them the
+right to be decoration — so a tab stop on a bar would be an `aria-hidden-focus`
+violation rather than a choice. It costs nothing, and it pays: a crossing event
+is one *row* in the agenda where it is a bar per week on the grid, so picking
+there never has to ask which object was meant.
+
+**From a pointer, through a grip.** The leading edge of a bar, and the agenda
+row's colour bar. Not the whole bar: with the bar grabbable, the day underneath
+lost the centre of **17 of the 27 days that had events** and clicking one
+stopped working at all — the one-tap-target-per-day property this component is
+built on, gone. With a grip it is 0 of 27, and 1% of the cell rather than 40%.
+The layer stays `pointer-events-none`; only what a grip stands on is taken.
+
+**Both shift by how far you moved from where you took hold**, and differ only in
+what taking hold can mean. A grip on the grid is a day, so a bar grabbed on the
+Wednesday of a Monday–Friday event and dropped on the Thursday moves one day;
+and a bar is clipped to its week, so a crossing event has a grip per week and
+the second takes hold of its own Monday. A row is the day whose agenda it is.
+
+That rule was arrived at twice. The design first said the agenda shifts against
+the event's own *start*, "because the agenda is not on the grid and has no day
+to be relative to" — and it is a day's agenda, so it has one. The example that
+caught it: a 19–21 event picked from the agenda of the 20th, one press of →,
+21–23.
+
+### The value is the state
+
+A move assigns the events value rather than mutating the controller's copy of
+it. That is what lets a Turbo morph correct the browser without the host's
+help — and it was the other thing arrived at twice, because a move that mutates
+the copy never touches the attribute, so a morph carrying the server's answer
+back is a change only when the server disagreed with what the page already had.
+A refusal, by definition, does not. See
+[02-javascript.md](../decisions/02-javascript.md#controllers-re-sync-on-turbomorph).
+
+Writing the whole payload was measured before it was believed: 1.08 ms at two
+thousand events for the round trip, 0.14 ms at two hundred. Under a frame.
+
+`pending` rides on the event until the server's payload lands, drawn as
+`data-pending`. `revert()` travels in the detail for the host that answers a
+refusal with a toast alone and never redraws the calendar.
+
+A picking, a move and a putting-back each say so in an `sr-only`
+`role="status"` of their own. Not the caption's: that is the calendar's other
+status region, it holds the month, and the controller rewrites it on every
+navigation.
+
+### What it does not do
+
+- **A drop onto a full day is invisible.** Only `lane <= max_events` is drawn,
+  so an event dropped on a day already at the cap joins the "+N more". The move
+  succeeds and nothing appears.
+- **A morph resets the selection** to what the server rendered — measured, the
+  20th chosen and the 3rd after a refresh. A host doing morph refreshes has to
+  round-trip the selected day.
+- **Touch at `sm` and above is unmeasured.** Below `sm` the bar layer is
+  `display: none` and there is nothing to grab, so a phone is not the question;
+  a tablet at ≥640 CSS px has bars and a finger, and nobody has run it.
+- **The grip is 8×22 px**, under WCAG 2.2's 24×24 for Target Size (Minimum). The
+  argument for it is the "equivalent control" exception — the agenda row's grip
+  is larger and the keyboard does the same job — and it is an argument, not a
+  measurement.
+- **A `pointercancel` puts it back** rather than dropping it where the pointer
+  happened to be. It is the one branch here no spec can reach: Selenium cannot
+  cancel a pointer.
+
 ## Where it diverges from FullCalendar
 
 **`ends_at` is inclusive.** FullCalendar's `end` is exclusive, which is right for
@@ -553,8 +655,9 @@ arithmetic and wrong for everyone who has ever typed a date: an event held on th
 19th, 20th and 21st is written here as `starts_at: 19th, ends_at: 21st`. This is
 the only deliberate divergence in the data model.
 
-**No `+N more` popover, no week/day/list views, no drag, no resize, no
-recurrence.** Named here rather than left to be discovered — see *Not done*.
+**No `+N more` popover, no week/day/list views, no resize, no recurrence.**
+Named here rather than left to be discovered — see *Not done*. Moving an event
+*is* here, behind `movable:`, and it is the one of these that came off the list.
 
 **Colours cascade over two levels, where FullCalendar has three.** An event's
 own `color:` wins; failing that the calendar's `default_color:` applies; failing
@@ -983,61 +1086,10 @@ Named rather than left to be discovered:
   and the day*. A week is the one shape left, and it is the one that needs a
   time axis *across* seven days rather than down one; the hours reading has the
   axis now, so this is smaller than it was, but it is not free.
-- **drag to move, drag to resize.** This used to say both were blocked on a
-  write path — an endpoint, an optimistic update, a rollback — being an
-  application's decision. A throwaway spike says the write path is the *easy*
-  half, and names four things that are not:
-
-  - **There is nowhere for a keyboard to take hold of an event.** The tab stop
-    is on the *day* — `keydown` resolves `closest("[data-slot=event-calendar-day]")`
-    and `component.rb` puts `tabindex` on the cell — so a two-press pick-and-place
-    on a day holding three events picks one of them with no way for anyone to
-    say which. Measured: it took the day-order first, which is neither the first
-    id nor anything a person could predict. Every other draggable thing in this
-    gem has a keyboard equivalent (slider, resizable, carousel), and axe cannot
-    see the absence of one: `accessibility_spec` runs `wcag21aa`, and dragging
-    movements are a 2.2 criterion.
-  - **A crossing event is more than one bar.** One per week it crosses — not
-    one per day: the "five chips in five cells" of *One job, one line across
-    the week* is the **workload**, where a chip sits in a cell. Measured here:
-    a 4–8 August event drew a single bar spanning five columns, and became two
-    when it was moved across a Sunday. So a pointer still has to answer "which
-    object did you grab" for anything longer than a week — and a keyboard
-    picking from the agenda never asks, because there the event is one row.
-  - **A chip carries no identity.** `eventElement` writes no id and neither does
-    the Ruby, so there is nothing for a move to name. It has to be on both
-    sides: a JS-only attribute is gone at the first morph, because the server
-    wins.
-  - **A drop can be invisible.** `weekElement` draws only `lane <= max_events`,
-    so an event dropped on a day already at the cap is not drawn at all — it
-    joins the "+N more". The event moves, the server agrees, and nothing
-    appears.
-
-  What the write path would be, if the rest is ever built: **dispatch and
-  stop**, the shape `month-change` already has. `month_url:` is not a
-  counterexample — the calendar takes that lambda to draw an `<a href>`, not to
-  make a request, and a drag has no no-JavaScript form for a URL to serve. A
-  `revert()` in the event's `detail` is the half the library *can* own, since
-  the only thing that knows where the chip was is the controller — and it is
-  **not optional**, which took two measurements to find out.
-
-  A morph refresh looked like it made `revert()` unnecessary: the server
-  re-renders with the dates it accepted, and the redraw is the rollback. That
-  holds for an *accepted* move and fails for the case it exists for. An
-  optimistic move mutates `this.events` and never the
-  `data-…-events-value` attribute, so the controller and the DOM disagree; a
-  morph reconciles the DOM, and `eventsValueChanged` fires only when the
-  attribute *changes*. A refusal sends back exactly the payload the page
-  already had — no change, no callback — so the controller keeps the move the
-  server threw away and goes on drawing it, `pending` and all. Measured: server
-  `2026-08-11`, controller `2026-08-10`, chip on the 10th.
-
-  Which names the shape the redraw would have to take: **the value is the
-  source of truth**, assigned rather than mutated behind, so that a morph
-  delivering the original payload is a change and says so. Whether that is
-  cheaper than calling `revert()` is the question a design would open with.
-
-  The Turbo Frame variant was reasoned about and not measured at all.
+- **drag to resize.** Moving is built — see *Moving an event* above — and this
+  is the gesture that did not come with it: a second handle on the end of a bar,
+  and a rule for what a resize means to a `to` that is inclusive here and
+  exclusive in FullCalendar. The machinery it would need already exists.
 - **a "+2 more" popover.** The agenda already shows everything on the day, the
   dense reading shows every event without opening anything, and a second way in
   would cost the one-tap-target-per-day property both depend on.

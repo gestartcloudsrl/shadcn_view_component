@@ -217,6 +217,16 @@ the roles are on the thumbs (`slider/component.rb:111`) and not on the root.
 Ruby cannot help here: `**attributes` is what makes the caller's HTML pass
 through, and it swallows a typo just as willingly.
 
+### A value an optional feature needs is not written when it is off
+
+Twice in one branch, and the same shape both times: `movable:` crossed as
+`"false"`, and its three announcement templates crossed as `{}`. Both were
+correct and both moved every golden in the suite — for calendars that will never
+read either. The snapshots are the thing that says so, which makes the check
+free: **if a switch nobody turned on changes a fixture, it is being written when
+it should be omitted.** `data-labelled` and `data-overflow` are the shape to
+copy — present when true, absent otherwise.
+
 ## A component that is ours, not a port
 
 The searchable select — `Select::Component.new(searchable: true)` — is the first

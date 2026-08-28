@@ -674,21 +674,24 @@ noting that it would not have delivered the component that raised the question:
 
 ## Deliberately not doing
 
-- **Three of the event calendar's four halves** — drag to move and resize, a
-  "+2 more" popover, and recurrence. Each is named with its reason in
-  [features/event-calendar.md](features/event-calendar.md#not-done).
+- **Two of the event calendar's four halves** — a "+2 more" popover and
+  recurrence. Each is named with its reason in
+  [features/event-calendar.md](features/event-calendar.md#not-done); the popover
+  would cost the one-tap-target-per-day property the mobile reading is built on,
+  and expanding a recurrence rule into occurrences is a job `ice_cube` already
+  does.
 
-  The short version used to be that two of them need a write path an
-  application owns. A spike says otherwise: the write path is the easy half —
-  dispatch and let the host save — though not for the reason first written
-  down: a morph refresh is *not* the rollback, because a refusal re-sends the
-  payload the page already had and the controller never hears it. What blocks
-  the drag is that the tab stop is on
-  the day rather than on the event, so there is no keyboard equivalent to
-  build; that a crossing event is a bar per week rather than one object, which
-  a pointer has to answer for; that a chip carries no id on either side; and
-  that a drop onto a day already at `max_events` draws nothing at all. The popover is unchanged: it would cost
-  the one-tap-target-per-day property the mobile reading is built on.
+  **Drag to move came off this list**, and what it cost to find that out is
+  worth keeping: the reason it was on it — that a write path is an application's
+  — turned out to be the easy half. See
+  [the design](specs/2026-08-27-event-calendar-drag-to-move-design.md) for what
+  actually blocked it and [the plan](plans/2026-08-27-event-calendar-drag-to-move.md)
+  for what building it corrected in both.
+
+  **Drag to resize is still not done**, and now for a smaller reason than it
+  had: the machinery exists — `movable:`, the identity, the value as the source
+  of truth, the two grips — and what is missing is a second gesture on the end
+  of a bar and a rule for what a resize means to a `to` that is inclusive.
 
   The fourth was the week view, and it is under *Smaller things* now rather than
   here: it was listed as blocked on a time axis that has since been built. The
