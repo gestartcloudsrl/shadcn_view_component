@@ -406,6 +406,50 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # A move is silent otherwise. The agenda's own `aria-live` says the day's list
+  # changed, which is a side effect of a move and not a message about one — and
+  # the only `role="status"` this component had is the title, which holds the
+  # month and is rewritten on every navigation.
+  describe "what a move says out loud" do
+    before do
+      visit_preview("event_calendar", :movable)
+      wait_for_stimulus
+    end
+
+    def announced
+      page.evaluate_script(
+        "document.querySelector(\"#{calendar} [data-slot=event-calendar-announcer]\")?.textContent"
+      )
+    end
+
+    def agenda_row(id) = find("#{calendar} [data-slot=event-calendar-agenda-item][data-event-id='#{id}']")
+
+    it "names the event when it is taken and the day when it lands", :aggregate_failures do
+      expect(announced).to eq("")
+
+      agenda_row("e5").send_keys(:space)
+      expect(announced).to include("Standup")
+
+      press(:arrow_right)
+      press(:space)
+      expect(announced).to include("Standup").and include("August 21")
+    end
+
+    it "says so when it is put back" do
+      agenda_row("e5").send_keys(:space)
+      press(:arrow_right)
+      press(:escape)
+
+      expect(announced).to include("August 20")
+    end
+
+    it "leaves the month's own region to the month" do
+      agenda_row("e5").send_keys(:space)
+
+      expect(find("#{calendar} [data-slot=event-calendar-title]").text).to eq("August 2026")
+    end
+  end
+
   # The other hand. A grip rather than the whole bar, and the second example is
   # the reason why: with the bar grabbable, the day underneath lost its centre
   # on 17 of the 27 days that had events, and clicking one stopped working.

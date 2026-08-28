@@ -44,6 +44,13 @@ en:
       # server never drew.
       more: "+%{count}"
       day_label: "%{date}, %{events}"
+      # What a move says out loud, into a region of its own — the calendar's
+      # other `role="status"` is the title, and the month lives there.
+      # Templates rather than sentences, like `more` above: the controller
+      # renders them for an event and a day the server never saw.
+      picked: "%{title} picked. Choose a day with the arrow keys, then press Space."
+      moved: "%{title} moved to %{date}."
+      returned: "%{title} put back on %{date}."
       event_count:
         one: 1 event
         other: "%{count} events"

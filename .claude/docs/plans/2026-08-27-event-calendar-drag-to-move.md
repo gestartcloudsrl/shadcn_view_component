@@ -849,6 +849,12 @@ git commit -m "Move an event with a pointer, by a grip rather than the bar"
 A move is silent to a screen reader: the agenda's `aria-live` announces the
 day's list changing, which is a side effect and not a message.
 
+**And it needs a region of its own.** This task first said "the region that
+already exists" — the calendar's only `role="status"` is the *title*, which
+holds the month and is rewritten on every navigation, so a sentence written
+there takes the month off the page until the next press of ›. A `sr-only`
+`[data-slot=event-calendar-announcer]`, rendered only when `movable?`.
+
 **Files:**
 - Modify: `app/components/shadcn/event_calendar/component.rb` — the i18n keys
   and the value that crosses them
@@ -863,14 +869,30 @@ day's list changing, which is a side effect and not a message.
 - [ ] **Step 1: Write the failing test**
 
 ```ruby
-    it "says what it did, for a reader that cannot see it", :aggregate_failures do
-      row("e5").send_keys(:space)
-      expect(find("#{calendar} [role=status]", visible: :all).text).to include("Standup")
+    def announced
+      page.evaluate_script(
+        "document.querySelector(\"#{calendar} [data-slot=event-calendar-announcer]\")?.textContent"
+      )
+    end
+
+    it "names the event when it is taken and the day when it lands", :aggregate_failures do
+      expect(announced).to eq("")
+
+      agenda_row("e5").send_keys(:space)
+      expect(announced).to include("Standup")
 
       press(:arrow_right)
       press(:space)
+      expect(announced).to include("Standup").and include("August 21")
+    end
 
-      expect(find("#{calendar} [role=status]", visible: :all).text).to include("August 21")
+    # `sr-only` is clipped rather than hidden, so Selenium calls it invisible
+    # and Capybara's own `.text` comes back empty. `textContent` is the reading
+    # that matches what a screen reader gets.
+    it "leaves the month's own region to the month" do
+      agenda_row("e5").send_keys(:space)
+
+      expect(find("#{calendar} [data-slot=event-calendar-title]").text).to eq("August 2026")
     end
 ```
 
@@ -912,8 +934,12 @@ Cross them as one value — the controller has no text of its own:
   }
 ```
 
-Call it from `agendaKeydown` (`picked`), from `moveEvent` (`moved`) and from the
-`revert` closure (`returned`).
+Call it from `agendaKeydown` (`picked`), from `moveEvent` (`moved`), from
+`cancelPick` and from the `revert` closure (both `returned`).
+
+And omit `move-labels-value` entirely when nothing moves, the way Task 1 omits
+the switch: written as `{}` it moved every golden in the suite, for calendars
+that will never say any of it.
 
 - [ ] **Step 5: Run and commit**
 

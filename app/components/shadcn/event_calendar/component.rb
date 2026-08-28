@@ -527,12 +527,17 @@ module Shadcn
           # pluralise a count the server never saw. It does it with
           # `Intl.PluralRules` over the locale above, which is the only way to
           # be right in a language with more than two forms.
-          "data-shadcn--event-calendar-event-count-value" => event_count_forms.to_json
+          "data-shadcn--event-calendar-event-count-value" => event_count_forms.to_json,
+          # One value rather than three, and templates rather than sentences —
+          # the same shape `day_label` crosses in, for the same reason. Omitted
+          # entirely when nothing moves, like the switch above: a calendar that
+          # never says any of this should not carry the strings.
+          "data-shadcn--event-calendar-move-labels-value" => (move_labels.to_json if movable?)
         }.compact.merge(defaults))
       end
 
       def call
-        render_element(body: safe_join([ header, grid, (agenda if agenda?),
+        render_element(body: safe_join([ header, grid, (agenda if agenda?), announcer,
                                         (prototypes if client_drawn?) ].compact))
       end
 
@@ -573,6 +578,24 @@ module Shadcn
 
       def header
         tag.div(safe_join([ title, nav ]), "data-slot": "event-calendar-header", class: HEADER_CLASS)
+      end
+
+      def move_labels
+        { picked: shadcn_t("event_calendar.picked", title: "%{title}"),
+          moved: shadcn_t("event_calendar.moved", title: "%{title}", date: "%{date}"),
+          returned: shadcn_t("event_calendar.returned", title: "%{title}", date: "%{date}") }
+      end
+
+      # A move needs somewhere to be said, and it cannot be the title: that is
+      # the calendar's other `role="status"`, it holds the month, and the
+      # controller rewrites it on every navigation. So a region of its own,
+      # empty until something happens in it.
+      def announcer
+        return unless movable?
+
+        tag.div("", "data-slot": "event-calendar-announcer", class: "sr-only",
+                role: "status", "aria-live": "polite",
+                "data-shadcn--event-calendar-target": "announcer")
       end
 
       # `role="status"`, as the calendar's caption carries: the month is the one
