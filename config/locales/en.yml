@@ -87,10 +87,15 @@ en:
         label: Show each job as
         bars: Bars
         chips: Chips
-      # The workload reading's grouping menu — see
-      # `EventCalendar::Component::WORKLOAD_GROUPINGS`.
+      # The grouping menu, shared by the workload and daily readings through
+      # `EventCalendar::Groupings` — see its `GROUPINGS`. `show_all` below is
+      # the workload's alone.
+      #
+      # "Group by" rather than "Group cells by": a cell is what the workload
+      # groups, and a day has no cells — it groups its rows and the sections of
+      # its agenda. The label was written from the reading that had it first.
       group:
-        label: Group cells by
+        label: Group by
         assignees: By assignee
         events: By event
         show_all: Show all
