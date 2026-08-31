@@ -167,6 +167,16 @@ nobody using it, which is why `view_url:` is one callback rather than two.
 anyway, because forcing seven columns onto a phone is what rows were built to
 avoid.
 
+**Which makes the two items asymmetric, and only one of them is about now.**
+`Rows` forces rows at any width; there is no value that forces the grid below
+`lg`, because the `rows` variant's first rule matches on `[data-rows]` alone and
+never looks at `data-arrangement`. So *Grid* does not mean "a grid": it means
+**wherever there is room for one**. Choosing it on a tablet is not a no-op — the
+grid appears when the window passes 64rem — but its effect is deferred, and the
+label reads as an instruction about the present. Worth knowing before anyone
+"fixes" the item by hiding it under `lg`: that would take away the only way to
+say *when it fits, use the grid*.
+
 **The third view reads *Timeline* and is called `hours` everywhere else** — the
 key, the reading, the class, and the value a host's `view_url:` is handed. The
 divergence is deliberate: "Hours" named the axis it is drawn on, which is a fact
