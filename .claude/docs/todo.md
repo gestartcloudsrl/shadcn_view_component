@@ -488,8 +488,7 @@ noting that it would not have delivered the component that raised the question:
 - [ ] **Split `event_calendar_controller.js` — not yet, and here is the
       trigger.** The split was built and thrown away rather than argued about,
       so the numbers below are measured and not estimated. 570 lines came apart
-      cleanly into **298 frame + 308 drawing** — the file is 647 now, and the
-      split was not re-measured after the focus fix: the frame walks between months,
+      cleanly into **298 frame + 308 drawing**: the frame walks between months,
       selects, handles the keyboard and announces what the options panel asks
       for; the drawing packs lanes, builds the index and fills the cells, which
       three of the four readings never run.
@@ -525,9 +524,23 @@ noting that it would not have delivered the component that raised the question:
       already has the door open, since `CONTROLLERS` is exported and every
       controller is pinned individually; registering is not loading.
 
-      And the premise was false: `calendar_controller.js` is **616 lines** and
-      unsplit, so 570 was never an outlier — it was second. Against the bar this
-      repo already holds itself to, that file is not too big.
+      And the premise was false *then*: `calendar_controller.js` is **616 lines**
+      and unsplit, so 570 was never an outlier — it was second. Against the bar
+      this repo already holds itself to, that file was not too big.
+
+      **That half has since stopped being true, and the numbers should be read
+      with the date on them.** 570 was the file when the split was measured; the
+      focus fix took it to 647 and moving an event took it to **896**. It is not
+      second any more — it is the longest controller here by 45%, and the
+      measured 298/308 seam was cut through a file two thirds this size, so
+      those two numbers are stale as well.
+
+      What does *not* change is the rest of the entry, and that is the point: the
+      size was never the argument. The hooks would still be dead, the dependency
+      would still run the wrong way, and `stimulus_contract_spec` would still go
+      blind. Size was the one reason **against** splitting, and it has gone —
+      which moves this from "the case is weak" to "the case is untested", and
+      the test is still the week view above.
 
       **What changes the answer is the week view above.** It needs a `render` of
       its own, which gives the base its second subclass and brings the three
