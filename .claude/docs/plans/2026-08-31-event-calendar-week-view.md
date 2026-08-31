@@ -77,10 +77,17 @@ describe:
              .find { |value| Shadcn::EventCalendar::Component::PERIODS.map(&:to_s).include?(value) }
     end
 
+    # The readings that have a panel at all: it is a `reading_control`, and the
+    # events reading declares none — a plain month renders no trigger and no
+    # items, so asking it which period is checked has no answer rather than a
+    # wrong one.
     it "is the month's for every monthly reading", :aggregate_failures do
-      expect(checked_period({})).to eq("monthly")
       expect(checked_period(reading: :workload)).to eq("monthly")
       expect(checked_period(reading: :hours)).to eq("monthly")
+    end
+
+    it "is nothing at all for a reading with no panel" do
+      expect(checked_period({})).to be_nil
     end
 
     it "is the day's for the daily reading" do
@@ -89,15 +96,24 @@ describe:
   end
 ```
 
-- [ ] **Step 2: Run it and see how it fails**
+- [ ] **Step 2: Run it, and expect it to pass**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "#period"`
 
-**Do not assume the failure.** The radio item may mark itself with something
-other than `data-checked` — read `DropdownMenu::RadioItem::Component` and fix the
-selector before touching anything else. The failure you want is a wrong or
-missing *value*, not an empty node set: an empty set means the selector is wrong
-and the example would pass for the wrong reason once it is.
+**It goes green before the implementation, and that is correct.** This task
+changes no output, so its examples characterise what is already true and their
+job is to *stay* green through the refactor — a red-first is not available.
+
+The red comes from a control instead, in Step 4: break `period` deliberately and
+confirm the examples notice. Without that, an example that asserts nothing is
+indistinguishable from one that passes.
+
+Two things this step is guarding against, both found the first time it ran: the
+radio item marks itself `data-state="checked"` and **not** `data-checked`, so the
+obvious selector finds an empty node set and passes for the wrong reason; and a
+plain events calendar has **no options panel at all** — the panel is a
+`reading_control` and that reading declares none — so asking it which period is
+checked has no answer rather than a wrong one.
 
 - [ ] **Step 3: Introduce `period` and use it**
 
@@ -137,12 +153,16 @@ In `daily/component.rb`, beside `def view = :daily`:
         def period = :daily
 ```
 
-- [ ] **Step 4: Run the tests, and the ones that watch the panel**
+- [ ] **Step 4: Run the tests, then break it on purpose**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb spec/system/event_calendar_spec.rb`
 Expected: PASS, all of them. This task changes no output — `daily?` and
 `period == :daily` answer identically while there are two periods, which is
 exactly why it is worth doing before the week rather than inside it.
+
+Then the control the green cannot give you: make `Daily#period` return
+`:monthly`, run the `#period` examples again, and confirm the failure reads
+`expected "daily", got "monthly"`. Put it back.
 
 - [ ] **Step 5: Commit**
 

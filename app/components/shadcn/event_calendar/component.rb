@@ -640,7 +640,7 @@ module Shadcn
             ])
           end
           dropdown.with_menu_content(class: "w-56") do
-            safe_join([ period_options, (view_options unless daily?), *reading_options ].compact)
+            safe_join([ period_options, (view_options if period == :monthly), *reading_options ].compact)
           end
         end
       end
@@ -659,12 +659,17 @@ module Shadcn
         href = view_url&.call(name)
 
         render(DropdownMenu::RadioItem::Component.new(
-          value: name, checked: (name == :daily) == daily?,
+          value: name, checked: name == period,
           **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#changeView" })
         )) { shadcn_t("event_calendar.period.#{name}") }
       end
 
       def daily? = view == :daily
+
+      # Which of `PERIODS` this reading is. The panel decided it with
+      # `(name == :daily) == daily?` — a comparison that can only ever answer
+      # for two, and the reason a third could not be added without this.
+      def period = :monthly
 
       def view_options
         safe_join([
@@ -694,10 +699,10 @@ module Shadcn
       # The trigger says where you are and what you are seeing — the two things
       # the panel decides, so it can be read without opening it.
       def view_label
-        period = shadcn_t("event_calendar.period.#{daily? ? 'daily' : 'monthly'}")
-        here = shadcn_t("event_calendar.view.#{view}") unless daily?
+        where = shadcn_t("event_calendar.period.#{period}")
+        here = shadcn_t("event_calendar.view.#{view}") if period == :monthly
 
-        safe_join([ period, here, reading_label ].compact, " · ")
+        safe_join([ where, here, reading_label ].compact, " · ")
       end
 
       def reading_label = nil

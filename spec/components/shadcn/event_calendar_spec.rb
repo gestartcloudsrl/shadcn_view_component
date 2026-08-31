@@ -870,4 +870,38 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
   end
+
+  # The panel used to decide the checked period with `(name == :daily) ==
+  # daily?`, which says "there are two of these" in a comparison rather than in
+  # a list. Asserted per reading, because the reading is what answers it.
+  #
+  # `data-state`, not `data-checked`: that is what `DropdownMenu::RadioItem`
+  # writes, and a selector for the other one finds nothing and passes.
+  describe "#period" do
+    def checked_period(options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), **options))
+
+      periods = described_class::PERIODS.map(&:to_s)
+      painted.css("[data-slot=dropdown-menu-radio-item][data-state=checked]")
+             .map { |item| item["data-value"] }
+             .find { |value| periods.include?(value) }
+    end
+
+    # The readings that have a panel at all: it is a `reading_control`, and the
+    # events reading declares none — a plain month renders no trigger and no
+    # items, so asking it which period is checked has no answer rather than a
+    # wrong one.
+    it "is the month's for every monthly reading", :aggregate_failures do
+      expect(checked_period(reading: :workload)).to eq("monthly")
+      expect(checked_period(reading: :hours)).to eq("monthly")
+    end
+
+    it "is nothing at all for a reading with no panel" do
+      expect(checked_period({})).to be_nil
+    end
+
+    it "is the day's for the daily reading" do
+      expect(checked_period(reading: :daily)).to eq("daily")
+    end
+  end
 end

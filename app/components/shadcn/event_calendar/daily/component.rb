@@ -56,6 +56,8 @@ module Shadcn
 
         def view = :daily
 
+        def period = :daily
+
         def cell_role = "listitem"
 
         # The scale has to start where the axes do, and here that is not the
