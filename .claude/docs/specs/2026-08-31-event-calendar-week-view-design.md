@@ -79,6 +79,19 @@ A week that straddles two months is not a special case — the month's grid
 already carries the days either side, and a week is seven real days with no
 notion of being outside anything.
 
+### An empty day keeps a full row
+
+Measured before it was decided, and it is the one thing looking at it changed.
+The rows are ragged — each grows with its lanes — so a week is not seven equal
+bands: on the fixture month a row runs from nothing to 185px, typically 84, and
+two adjacent empty days ate about 160px of an 802px screen saying nothing.
+
+They keep it. *Thursday is free* is an answer to the question a week is asked,
+and it deserves the same weight on the page as *Tuesday is full*; a thin strip
+would say it in a whisper. The alignment argument does not apply either way —
+"Tuesday at ten above Thursday at ten" is horizontal, and row height cannot
+disturb it — so this is a choice about emphasis and nothing else.
+
 ### The title reads a span, and the nav steps a week
 
 "17 – 23 August 2026", and "31 August – 6 September 2026" when the week crosses
@@ -100,6 +113,28 @@ no prototypes to clone and the drag's optimistic redraw *is* `render()`.
 
 `reading_options` comes from `Hours` unchanged, so the panel asks the week the
 same one question it asks the monthly timeline: chips or bars.
+
+## What looking at it settled
+
+The geometry was checked against the running `hours` reading rather than by
+building a throwaway `Weekly`: those rows *are* these rows, and a subclass would
+have shown the same seven with a different heading. Three things came out of it.
+
+**A week is about one screen.** The five weeks of the fixture month measure 214,
+811, 719, 672 and 856 pixels against an 802px viewport — the first and last
+short because they are mostly days from the neighbouring months. So the busiest
+week overflows a little and the rest fit. That is what makes seven rows a
+sensible shape; at three screens it would have been the wrong one.
+
+**The rows are ragged**, which the phrase "seven rows, one per day" does not
+convey, and which decided the section above.
+
+**An event outside `window` is reached by scrolling the track sideways.** The
+track already scrolls horizontally and a week does not change that — but a month
+is a page you are scrolling anyway, and a week is one you expect to have taken
+in at a glance, so the same behaviour reads worse here. `window` stays exactly
+as `Hours` has it, host-settable and unchanged; this is named as a consequence a
+host should know about when choosing one, not as something this design fixes.
 
 ## Public API
 
