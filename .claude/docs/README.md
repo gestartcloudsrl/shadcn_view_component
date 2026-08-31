@@ -36,6 +36,7 @@ written.
 | [specs/2026-08-27-event-calendar-drag-to-move-design.md](specs/2026-08-27-event-calendar-drag-to-move-design.md) | moving an event: what a spike found once the write path turned out to be the easy half — the bars that cannot hold a focus, the agenda that can, the morph that is not a rollback, and what making a chip grabbable costs the day |
 | [plans/2026-08-27-event-calendar-drag-to-move.md](plans/2026-08-27-event-calendar-drag-to-move.md) | the plan moving an event was built from — and, unusually, a record of what building it corrected in the design: the shift the arrows travel, the region an announcement goes in, and a colour the first draft deleted |
 | [specs/2026-08-31-event-calendar-week-view-design.md](specs/2026-08-31-event-calendar-week-view-design.md) | the week: seven aligned day-rows rather than a continuous axis or seven columns, why a third period breaks a panel built for two, and the two pieces deliberately left for later |
+| [plans/2026-08-31-event-calendar-week-view.md](plans/2026-08-31-event-calendar-week-view.md) | the week, built from a spike that had already run it — three tasks, the boolean the panel decided the period with, and two steps that deliberately refuse to predict their own failure |
 | [features/toaster.md](features/toaster.md) | the toaster, which is ours rather than a port: why there was nothing to reproduce, what was kept from sonner, and the three ways a Rails app raises one |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
