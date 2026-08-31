@@ -112,7 +112,9 @@ is re-packed in JavaScript; and `movable:` does not reach it, because there are
 no prototypes to clone and the drag's optimistic redraw *is* `render()`.
 
 `reading_options` comes from `Hours` unchanged, so the panel asks the week the
-same one question it asks the monthly timeline: chips or bars.
+same one question it asks the monthly timeline: chips or bars — and the default
+answer is the one `Hours` gives, `chips`. See *What looking at it settled* for
+what the two cost a week, which is not the same as what they cost a month.
 
 ## What looking at it settled
 
@@ -128,6 +130,20 @@ sensible shape; at three screens it would have been the wrong one.
 
 **The rows are ragged**, which the phrase "seven rows, one per day" does not
 convey, and which decided the section above.
+
+**How tall a week is depends on the shape, and by a lot.** The first
+measurement above came from a light calendar. Built and measured on a busy one —
+ten to twenty-four events a day — the same week is **1565px at `chips` and 577px
+at `bars`**, against an 802px viewport: two screens against seven tenths of one.
+A row's height follows its *lanes*, so it is concurrency and not count that
+decides, and chips are as tall as a title and a crew where a bar is a line.
+
+**The default stays `chips`**, inherited from `Hours` and unchanged — the week
+alters nothing about the reading it is drawn with. Recorded here because it is
+the number a host needs when the promise the week makes, *all seven at once*,
+matters more than what each bar says: `shape:` is an argument and the panel
+offers it, so a busy calendar can take the other one without this design
+choosing for it.
 
 **An event outside `window` is reached by scrolling the track sideways.** The
 track already scrolls horizontally and a week does not change that — but a month
