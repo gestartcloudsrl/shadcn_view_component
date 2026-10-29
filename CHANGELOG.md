@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- A floating layer is placed again when **its own** size changes, not only the
+  trigger's. A searchable `Select` opened above its trigger computes its top
+  edge from its height, so when the search hid rows the panel shrank towards
+  its top and its bottom edge climbed away from the field — 132px in the
+  gallery, 329px on a host's form. The resize observer in `FloatingLayer` now
+  watches the content as well as the anchor, which is what floating-ui's
+  `autoUpdate` does, so every component built on it (Select, Combobox,
+  Popover, DropdownMenu, HoverCard, Tooltip) follows its own size.
+
+  `spec/system/select_spec.rb` opens the searchable select above its trigger,
+  filters it down to one row, and checks the panel is still against the field.
+
 ## [0.3.3] — 2026-08-20
 
 ### Fixed
