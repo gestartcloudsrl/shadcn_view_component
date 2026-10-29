@@ -580,4 +580,53 @@ RSpec.describe "Select", :js do
       end
     end
   end
+
+  # Placed above its trigger, the panel's top edge is computed from its own
+  # height. When the search hides rows the panel gets shorter, and unless the
+  # layer is placed again its bottom edge climbs away from the trigger.
+  context "when searchable and opened above the trigger" do
+    def gap_to_trigger
+      page.evaluate_script(<<~JS)
+        (() => {
+          const root = [...document.querySelectorAll("[data-slot=select]")].pop();
+          const t = root.querySelector("[data-slot=select-trigger]").getBoundingClientRect();
+          const c = document.getElementById(
+            root.querySelector("[data-slot=select-trigger]").getAttribute("aria-controls")
+          ).getBoundingClientRect();
+          return Math.round(t.top - c.bottom);
+        })()
+      JS
+    end
+
+    before do
+      visit_preview(:select, :searchable)
+      wait_for_stimulus
+      page.execute_script(<<~JS)
+        const root = [...document.querySelectorAll("[data-slot=select]")].pop();
+        const controller = root.getAttribute("data-controller");
+        document.body.style.paddingTop = "480px";
+        root.setAttribute("data-shadcn--select-side-value", "top");
+        root.removeAttribute("data-controller");
+        requestAnimationFrame(() => root.setAttribute("data-controller", controller));
+      JS
+      sleep 0.1
+      within(preview) { find(trigger).click }
+      expect(page).to have_css(content)
+    end
+
+    it "opens against the trigger" do
+      expect(gap_to_trigger).to be_between(0, 8)
+    end
+
+    it "stays against the trigger when the search shortens the list" do
+      fill_in_search("err")
+      expect(visible_item_values).to eq(%w[blueberry])
+
+      page.evaluate_async_script(
+        "requestAnimationFrame(() => requestAnimationFrame(arguments[0]))"
+      )
+
+      expect(gap_to_trigger).to be_between(0, 8)
+    end
+  end
 end
