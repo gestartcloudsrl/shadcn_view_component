@@ -1,0 +1,684 @@
+<div data-slot="event-calendar" data-controller="shadcn--event-calendar" style="--event-calendar-cell:7.125rem;--event-calendar-cell-more:8.75rem;--event-calendar-tick:0.4375rem" data-overflow="true" data-labelled="true" data-shadcn--event-calendar-month-value="2026-08-01" data-shadcn--event-calendar-today-value="2026-08-12" data-shadcn--event-calendar-selected-value="2026-08-20" data-shadcn--event-calendar-week-starts-on-value="1" data-shadcn--event-calendar-max-events-value="3" data-shadcn--event-calendar-tick-sizes-value="[[8,&quot;0.4375rem&quot;],[24,&quot;0.375rem&quot;],[60,&quot;0.3125rem&quot;],[null,&quot;0.25rem&quot;]]" data-shadcn--event-calendar-dense-above-value="12" data-shadcn--event-calendar-reading-value="auto" data-shadcn--event-calendar-client-drawn-value="true" data-shadcn--event-calendar-colors-value="[&quot;default&quot;,&quot;blue&quot;,&quot;green&quot;,&quot;amber&quot;,&quot;rose&quot;,&quot;violet&quot;]" data-shadcn--event-calendar-events-value="[{&quot;dayOrder&quot;:1,&quot;title&quot;:&quot;Long Event&quot;,&quot;color&quot;:&quot;blue&quot;,&quot;from&quot;:&quot;2026-08-07&quot;,&quot;to&quot;:&quot;2026-08-09&quot;,&quot;allDay&quot;:true,&quot;meta&quot;:&quot;Aug 07 – Aug 09&quot;},{&quot;dayOrder&quot;:2,&quot;title&quot;:&quot;Conference&quot;,&quot;color&quot;:&quot;violet&quot;,&quot;from&quot;:&quot;2026-08-19&quot;,&quot;to&quot;:&quot;2026-08-21&quot;,&quot;allDay&quot;:true,&quot;meta&quot;:&quot;Aug 19 – Aug 21&quot;},{&quot;dayOrder&quot;:0,&quot;title&quot;:&quot;All Day Event&quot;,&quot;color&quot;:&quot;default&quot;,&quot;from&quot;:&quot;2026-08-01&quot;,&quot;allDay&quot;:true,&quot;meta&quot;:&quot;All day&quot;},{&quot;dayOrder&quot;:3,&quot;title&quot;:&quot;Team Sync&quot;,&quot;color&quot;:&quot;rose&quot;,&quot;from&quot;:&quot;2026-08-12&quot;,&quot;time&quot;:&quot;9:00 AM&quot;},{&quot;dayOrder&quot;:4,&quot;title&quot;:&quot;Repeating Event&quot;,&quot;color&quot;:&quot;violet&quot;,&quot;from&quot;:&quot;2026-08-16&quot;,&quot;time&quot;:&quot;4:00 PM&quot;},{&quot;dayOrder&quot;:5,&quot;title&quot;:&quot;Standup&quot;,&quot;color&quot;:&quot;rose&quot;,&quot;from&quot;:&quot;2026-08-20&quot;,&quot;time&quot;:&quot;9:00 AM&quot;},{&quot;dayOrder&quot;:6,&quot;title&quot;:&quot;Meeting&quot;,&quot;color&quot;:&quot;green&quot;,&quot;from&quot;:&quot;2026-08-20&quot;,&quot;time&quot;:&quot;10:30 AM&quot;,&quot;meta&quot;:&quot;10:30 AM – 11:30 AM&quot;},{&quot;dayOrder&quot;:7,&quot;title&quot;:&quot;Lunch&quot;,&quot;color&quot;:&quot;default&quot;,&quot;from&quot;:&quot;2026-08-20&quot;,&quot;time&quot;:&quot;12:00 PM&quot;},{&quot;dayOrder&quot;:8,&quot;title&quot;:&quot;Birthday Party&quot;,&quot;color&quot;:&quot;amber&quot;,&quot;from&quot;:&quot;2026-08-21&quot;,&quot;time&quot;:&quot;7:00 AM&quot;},{&quot;dayOrder&quot;:9,&quot;title&quot;:&quot;Release&quot;,&quot;color&quot;:&quot;green&quot;,&quot;from&quot;:&quot;2026-08-28&quot;,&quot;time&quot;:&quot;3:00 PM&quot;}]" data-shadcn--event-calendar-locale-value="en" data-shadcn--event-calendar-day-names-value="[&quot;Sunday&quot;,&quot;Monday&quot;,&quot;Tuesday&quot;,&quot;Wednesday&quot;,&quot;Thursday&quot;,&quot;Friday&quot;,&quot;Saturday&quot;]" data-shadcn--event-calendar-short-day-names-value="[&quot;Sun&quot;,&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;]" data-shadcn--event-calendar-month-names-value="[&quot;January&quot;,&quot;February&quot;,&quot;March&quot;,&quot;April&quot;,&quot;May&quot;,&quot;June&quot;,&quot;July&quot;,&quot;August&quot;,&quot;September&quot;,&quot;October&quot;,&quot;November&quot;,&quot;December&quot;]" data-shadcn--event-calendar-short-month-names-value="[&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;,&quot;Oct&quot;,&quot;Nov&quot;,&quot;Dec&quot;]" data-shadcn--event-calendar-month-format-value="%B %Y" data-shadcn--event-calendar-day-format-value="%A, %B %d, %Y" data-shadcn--event-calendar-agenda-format-value="%A, %B %-d" data-shadcn--event-calendar-day-label-value="%{date}, %{events}" data-shadcn--event-calendar-more-label-value="+%{count}" data-shadcn--event-calendar-event-count-value="{&quot;one&quot;:&quot;1 event&quot;,&quot;other&quot;:&quot;%{count} events&quot;}" class="group/event-calendar w-full text-foreground [&amp;_[data-color=default]]:[--event-color:var(--muted-foreground)] [&amp;_[data-color=default]]:[--event-ink:var(--foreground)] [&amp;_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&amp;_[data-color=blue]]:[--event-ink:var(--color-blue-800)] dark:[&amp;_[data-color=blue]]:[--event-ink:var(--color-blue-300)] [&amp;_[data-color=green]]:[--event-color:var(--color-emerald-500)] [&amp;_[data-color=green]]:[--event-ink:var(--color-emerald-800)] dark:[&amp;_[data-color=green]]:[--event-ink:var(--color-emerald-300)] [&amp;_[data-color=amber]]:[--event-color:var(--color-amber-500)] [&amp;_[data-color=amber]]:[--event-ink:var(--color-amber-800)] dark:[&amp;_[data-color=amber]]:[--event-ink:var(--color-amber-300)] [&amp;_[data-color=rose]]:[--event-color:var(--color-rose-500)] [&amp;_[data-color=rose]]:[--event-ink:var(--color-rose-800)] dark:[&amp;_[data-color=rose]]:[--event-ink:var(--color-rose-300)] [&amp;_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&amp;_[data-color=violet]]:[--event-ink:var(--color-violet-800)] dark:[&amp;_[data-color=violet]]:[--event-ink:var(--color-violet-300)]">
+<div data-slot="event-calendar-header" class="flex flex-wrap items-center justify-between gap-2 pb-3">
+<div data-slot="event-calendar-title" class="text-base leading-none font-semibold sm:text-lg" role="status" aria-live="polite" data-shadcn--event-calendar-target="title">August 2026
+</div>
+<div data-slot="event-calendar-nav" class="flex items-center gap-1">
+<button data-slot="button" data-variant="outline" data-size="sm" data-action="click-&gt;shadcn--event-calendar#today" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">Today
+</button>
+<button data-slot="button" data-variant="outline" data-size="icon-sm" data-action="click-&gt;shadcn--event-calendar#previous" aria-label="Go to the Previous Month" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4">
+<path d="m15 18-6-6 6-6"/>
+</svg>
+</button>
+<button data-slot="button" data-variant="outline" data-size="icon-sm" data-action="click-&gt;shadcn--event-calendar#next" aria-label="Go to the Next Month" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4">
+<path d="m9 18 6-6-6-6"/>
+</svg>
+</button>
+</div>
+</div>
+<div data-slot="event-calendar-grid" class="overflow-hidden rounded-md border">
+<div data-slot="event-calendar-weekdays" class="grid grid-cols-7 border-b bg-muted/50" aria-hidden="true">
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Mon
+</div>
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Tue
+</div>
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Wed
+</div>
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Thu
+</div>
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Fri
+</div>
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Sat
+</div>
+<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Sun
+</div>
+</div>
+<div data-slot="event-calendar-weeks" class="flex flex-col gap-px bg-border" role="grid" aria-label="August 2026" data-shadcn--event-calendar-target="weeks" data-action="keydown-&gt;shadcn--event-calendar#keydown">
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-27" data-outside="true" role="gridcell" tabindex="-1" aria-label="Monday, July 27, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">27
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-28" data-outside="true" role="gridcell" tabindex="-1" aria-label="Tuesday, July 28, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">28
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-29" data-outside="true" role="gridcell" tabindex="-1" aria-label="Wednesday, July 29, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">29
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-30" data-outside="true" role="gridcell" tabindex="-1" aria-label="Thursday, July 30, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">30
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-31" data-outside="true" role="gridcell" tabindex="-1" aria-label="Friday, July 31, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">31
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-01" role="gridcell" tabindex="-1" aria-label="Saturday, August 01, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">1
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="default">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-02" role="gridcell" tabindex="-1" aria-label="Sunday, August 02, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">2
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:6 / span 1;grid-row:1" data-color="default" title="All Day Event">
+<span data-slot="event-calendar-event-title" class="truncate">All Day Event
+</span>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-03" role="gridcell" tabindex="-1" aria-label="Monday, August 03, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">3
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-04" role="gridcell" tabindex="-1" aria-label="Tuesday, August 04, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">4
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-05" role="gridcell" tabindex="-1" aria-label="Wednesday, August 05, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">5
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-06" role="gridcell" tabindex="-1" aria-label="Thursday, August 06, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">6
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-07" role="gridcell" tabindex="-1" aria-label="Friday, August 07, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">7
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="blue">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-08" role="gridcell" tabindex="-1" aria-label="Saturday, August 08, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">8
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="blue">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-09" role="gridcell" tabindex="-1" aria-label="Sunday, August 09, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">9
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="blue">
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:5 / span 3;grid-row:1" data-color="blue" title="Long Event">
+<span data-slot="event-calendar-event-title" class="truncate">Long Event
+</span>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-10" role="gridcell" tabindex="-1" aria-label="Monday, August 10, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">10
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-11" role="gridcell" tabindex="-1" aria-label="Tuesday, August 11, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">11
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-12" data-today="true" role="gridcell" aria-current="date" tabindex="-1" aria-label="Wednesday, August 12, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">12
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="rose">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-13" role="gridcell" tabindex="-1" aria-label="Thursday, August 13, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">13
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-14" role="gridcell" tabindex="-1" aria-label="Friday, August 14, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">14
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-15" role="gridcell" tabindex="-1" aria-label="Saturday, August 15, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">15
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-16" role="gridcell" tabindex="-1" aria-label="Sunday, August 16, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">16
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="violet">
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:3 / span 1;grid-row:1" data-color="rose" title="Team Sync">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">9:00 AM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">Team Sync
+</span>
+</div>
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:7 / span 1;grid-row:1" data-color="violet" title="Repeating Event">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">4:00 PM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">Repeating Event
+</span>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-17" role="gridcell" tabindex="-1" aria-label="Monday, August 17, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">17
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-18" role="gridcell" tabindex="-1" aria-label="Tuesday, August 18, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">18
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-19" role="gridcell" tabindex="-1" aria-label="Wednesday, August 19, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">19
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="violet">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-20" data-selected="true" role="gridcell" aria-selected="true" tabindex="0" aria-label="Thursday, August 20, 2026, 4 events">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">20
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="default">
+</span>
+<span data-slot="event-calendar-day-tick" data-color="green">
+</span>
+<span data-slot="event-calendar-day-tick" data-color="rose">
+</span>
+<span data-slot="event-calendar-day-tick" data-color="violet">
+</span>
+</span>
+<span data-slot="event-calendar-day-more" class="mt-auto hidden w-full truncate text-left text-[0.7rem] font-medium select-none group-data-[labelled]/event-calendar:sm:block">+1
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-21" role="gridcell" tabindex="-1" aria-label="Friday, August 21, 2026, 2 events">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">21
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="amber">
+</span>
+<span data-slot="event-calendar-day-tick" data-color="violet">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-22" role="gridcell" tabindex="-1" aria-label="Saturday, August 22, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">22
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-23" role="gridcell" tabindex="-1" aria-label="Sunday, August 23, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">23
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:3 / span 3;grid-row:1" data-color="violet" title="Conference">
+<span data-slot="event-calendar-event-title" class="truncate">Conference
+</span>
+</div>
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:4 / span 1;grid-row:2" data-color="rose" title="Standup">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">9:00 AM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">Standup
+</span>
+</div>
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:4 / span 1;grid-row:3" data-color="green" title="Meeting">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">10:30 AM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">Meeting
+</span>
+</div>
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:5 / span 1;grid-row:2" data-color="amber" title="Birthday Party">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">7:00 AM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">Birthday Party
+</span>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-24" role="gridcell" tabindex="-1" aria-label="Monday, August 24, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">24
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-25" role="gridcell" tabindex="-1" aria-label="Tuesday, August 25, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">25
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-26" role="gridcell" tabindex="-1" aria-label="Wednesday, August 26, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">26
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-27" role="gridcell" tabindex="-1" aria-label="Thursday, August 27, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">27
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-28" role="gridcell" tabindex="-1" aria-label="Friday, August 28, 2026, 1 event">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">28
+</span>
+</span>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="green">
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-29" role="gridcell" tabindex="-1" aria-label="Saturday, August 29, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">29
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-30" role="gridcell" tabindex="-1" aria-label="Sunday, August 30, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">30
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:5 / span 1;grid-row:1" data-color="green" title="Release">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">3:00 PM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">Release
+</span>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-31" role="gridcell" tabindex="-1" aria-label="Monday, August 31, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">31
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-01" data-outside="true" role="gridcell" tabindex="-1" aria-label="Tuesday, September 01, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">1
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-02" data-outside="true" role="gridcell" tabindex="-1" aria-label="Wednesday, September 02, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">2
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-03" data-outside="true" role="gridcell" tabindex="-1" aria-label="Thursday, September 03, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">3
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-04" data-outside="true" role="gridcell" tabindex="-1" aria-label="Friday, September 04, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">4
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-05" data-outside="true" role="gridcell" tabindex="-1" aria-label="Saturday, September 05, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">5
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-06" data-outside="true" role="gridcell" tabindex="-1" aria-label="Sunday, September 06, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">6
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+</div>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-agenda" class="mt-3" role="region" aria-live="polite" aria-label="Events on the selected day">
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium">
+<span data-shadcn--event-calendar-target="agendaDate">Thursday, August 20
+</span>
+<span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground" data-shadcn--event-calendar-target="agendaCount">4 events
+</span>
+</div>
+<ul data-slot="event-calendar-agenda-list" class="flex flex-col" data-shadcn--event-calendar-target="agendaList">
+<li data-slot="event-calendar-agenda-item" data-color="violet">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Conference
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">Aug 19 – Aug 21
+</p>
+</div>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="rose">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Standup
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">9:00 AM
+</p>
+</div>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="green">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Meeting
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">10:30 AM – 11:30 AM
+</p>
+</div>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Lunch
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 PM
+</p>
+</div>
+</div>
+</li>
+</ul>
+<p data-slot="event-calendar-agenda-empty" class="px-2 py-8 text-center text-sm text-muted-foreground" hidden="hidden" data-shadcn--event-calendar-target="agendaEmpty">Nothing scheduled.
+</p>
+</div>
+<template data-shadcn--event-calendar-target="prototypes">
+<div data-slot="event-calendar-week" class="relative" role="presentation">
+<div data-slot="event-calendar-days" class="grid grid-cols-7 gap-px" role="row">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-27" data-outside="true" role="gridcell" tabindex="-1" aria-label="Monday, July 27, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">27
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-28" data-outside="true" role="gridcell" tabindex="-1" aria-label="Tuesday, July 28, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">28
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-29" data-outside="true" role="gridcell" tabindex="-1" aria-label="Wednesday, July 29, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">29
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-30" data-outside="true" role="gridcell" tabindex="-1" aria-label="Thursday, July 30, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">30
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-07-31" data-outside="true" role="gridcell" tabindex="-1" aria-label="Friday, July 31, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">31
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-01" role="gridcell" tabindex="-1" aria-label="Saturday, August 01, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">1
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-02" role="gridcell" tabindex="-1" aria-label="Sunday, August 02, 2026">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">2
+</span>
+</span>
+</button>
+</div>
+<div data-slot="event-calendar-segments" class="pointer-events-none absolute inset-x-0 top-8 hidden auto-rows-[1.625rem] grid-cols-7 gap-x-px px-px group-data-[labelled]/event-calendar:sm:grid" aria-hidden="true">
+</div>
+</div>
+<div data-slot="event-calendar-event" class="mx-px flex h-5.5 min-w-0 items-center gap-1 self-start rounded-sm bg-[var(--event-color)]/12 px-1.5 text-[0.7rem] leading-none font-medium text-(--event-ink) data-[continues-before]:rounded-l-none data-[continues-after]:rounded-r-none" style="grid-column:1 / span 1;grid-row:1" data-color="default" title="">
+<span data-slot="event-calendar-event-dot" class="size-1.5 shrink-0 rounded-full bg-(--event-color)">
+</span>
+<span data-slot="event-calendar-event-time" class="shrink-0 tabular-nums">12:00 AM
+</span>
+<span data-slot="event-calendar-event-title" class="truncate">
+</span>
+</div>
+<span data-slot="event-calendar-day-ticks" class="flex w-full flex-wrap content-start justify-center gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden [&amp;&gt;span]:size-(--event-calendar-tick) [&amp;&gt;span]:shrink-0 [&amp;&gt;span]:rounded-[1px] [&amp;&gt;span]:bg-(--event-color) [&amp;&gt;span[data-run-after]]:-me-px [&amp;&gt;span[data-run-after]]:rounded-r-none [&amp;&gt;span[data-run-before]]:rounded-l-none" aria-hidden="true">
+<span data-slot="event-calendar-day-tick" data-color="default">
+</span>
+</span>
+<span data-slot="event-calendar-day-more" class="mt-auto hidden w-full truncate text-left text-[0.7rem] font-medium select-none group-data-[labelled]/event-calendar:sm:block">+1
+</span>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
+</p>
+</div>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<a data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" href="#" class="group/item flex flex-wrap rounded-md border border-transparent text-sm duration-100 outline-none focus-visible:border-ring [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
+</p>
+</div>
+</a>
+</li>
+</template>
+</div>

@@ -30,6 +30,73 @@ en:
       next: Next slide
     dialog:
       close: Close
+    event_calendar:
+      previous: Go to the Previous Month
+      next: Go to the Next Month
+      today: Today
+      empty: Nothing scheduled.
+      all_day: All day
+      # A job that started before this day and stops during it.
+      until: "→ %{time}"
+      agenda_label: Events on the selected day
+      # The "+2" a cell shows when it has more events than lanes. A template
+      # rather than a sentence: the controller re-renders it for a month the
+      # server never drew.
+      more: "+%{count}"
+      day_label: "%{date}, %{events}"
+      # What a move says out loud, into a region of its own — the calendar's
+      # other `role="status"` is the title, and the month lives there.
+      # Templates rather than sentences, like `more` above: the controller
+      # renders them for an event and a day the server never saw.
+      picked: "%{title} picked. Choose a day with the arrow keys, then press Space."
+      moved: "%{title} moved to %{date}."
+      returned: "%{title} put back on %{date}."
+      event_count:
+        one: 1 event
+        other: "%{count} events"
+      # Read by the controller's `strftime` shim as well as by `I18n.l`, so it
+      # is limited to the date tokens that shim knows: %A %a %B %b %d %-d %e
+      # %m %-m %Y %y.
+      agenda_format: "%A, %B %-d"
+      # The workload reading's arrangement toggle. It names what pressing it
+      # does, not the state it is in, so the controller never has to write it.
+      # The options panel: which view, and then the one question that view has.
+      # The toolbar's period switch, which is the question above the views.
+      period:
+        label: Show
+        monthly: Monthly
+        daily: Daily
+      # What a day shows: the axis says when it is busy and cannot write a name,
+      # the agenda says what each job is and cannot show a gap.
+      daily:
+        label: Show the day as
+        axis: Hours only
+        agenda: List only
+        both: Hours and list
+      previous_day: Go to the Previous Day
+      next_day: Go to the Next Day
+      view:
+        label: Show the month as
+        grid: Grid
+        rows: Rows
+        hours: Hours
+      # The hours reading's shape menu — see `Hours::Component::LANE_HEIGHTS`.
+      # A bar is as wide as the job lasts and says nothing else; a chip says who
+      # and for whom, and is as wide as that takes.
+      hours:
+        label: Show each job as
+        bars: Bars
+        chips: Chips
+      # The workload reading's grouping menu — see
+      # `EventCalendar::Component::WORKLOAD_GROUPINGS`.
+      group:
+        label: Group cells by
+        assignees: By assignee
+        events: By event
+        show_all: Show all
+      # Times never reach the shim — the server formats every one of them and
+      # ships it with the event — so this may use any token `strftime` has.
+      time_format: "%-l:%M %p"
     pagination:
       label: pagination
       previous: Previous

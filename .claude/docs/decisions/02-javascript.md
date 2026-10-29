@@ -286,6 +286,41 @@ was not reassigned.
 The server wins, which is what a refresh means; `data-turbo-permanent` is the
 application's escape hatch, not the library's decision.
 
+**What that costs is whatever the re-render throws away.** A `render()` that
+rebuilds its children destroys the element holding the focus, and idiomorph had
+just gone to the trouble of preserving it — measured on the event calendar,
+where a morph refresh sent a focused day cell's focus to `<body>` and handed the
+roving tab stop back to the selected day. Turning the resync off left both
+where they were, with the same morph, which is what named the resync rather
+than idiomorph as the cause.
+
+So a controller whose `render()` replaces children owns putting the focus back;
+`resyncOnMorph` cannot do it for them, because finding the element again needs
+to know what it was, and only the controller redrawing knows that. See
+[04-bugs-fixed.md](04-bugs-fixed.md#a-morph-refresh-sent-the-calendars-keyboard-back-to-the-body).
+
+**And a controller that keeps its own copy of a value puts itself out of a
+morph's reach.** A morph reconciles the *DOM*; Stimulus fires a value callback
+only when the attribute changes. So a controller that mutates its parsed copy —
+an optimistic edit, say — leaves the attribute holding what the server last
+sent, and a morph carrying the server's answer back is then a change only when
+the server disagreed with that. The case where it does not: a refusal, which by
+definition re-sends the payload the page already had. Measured on the event
+calendar, whose browser went on drawing a move the server had thrown away.
+
+The way out is to treat the **value** as the state and assign it, so every edit
+is a change the observer sees, and to redraw from `[name]ValueChanged`. Two
+things fall out of that and are worth knowing before doing it:
+
+- the observer is a microtask, so a write followed by something that needs the
+  new DOM — moving the focus onto an element that must exist — has to call the
+  callback itself;
+- which means the callback runs twice per write, so it wants a guard, and the
+  cheap one is the **raw attribute string** rather than the parsed value.
+  Measured on a month of two thousand events, the whole round trip — build,
+  stringify, write, read back, parse — is 1.08 ms, so the cost worth avoiding is
+  the second *render*, not the serialising.
+
 ## `focusout` can mean the focus was taken away
 
 A component that stays open while it holds the focus has to answer `focusout`,

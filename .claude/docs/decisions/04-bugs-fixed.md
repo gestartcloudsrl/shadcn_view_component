@@ -382,3 +382,176 @@ the DOM changes.
 Not to reintroduce: `<title>` inside an SVG a pointer will hover. It is not
 `<title>`'s fault — it is the only element whose *rendered* behaviour differs
 from what a DOM assertion sees, which is why no spec here had a chance.
+
+## A frozen column that stopped after 62 pixels
+
+The hours reading freezes its date column so scrolling the hours away does not
+take the day with them. Left to its content the column was 56×62 inside a 239px
+row, so a hundred and seventy-seven pixels of it covered nothing and chips on
+the lower lanes scrolled out from under it. A frozen column has to be as tall as
+the row it freezes — `self-stretch`, not a box that happens to stay put.
+
+## The hour scale pointed where the gridlines were not
+
+The scale is drawn once above the month, so it is not inside a day cell and had
+neither the `px-2` nor the `gap-2` a cell carries: it started 16px left of the
+axis and ran 24px wider. Every label named an hour the lines below disagreed
+with. Measured rather than eyeballed — scale left 81 width 1294 against axis
+left 97 width 1270 — and the browser example asserts the two boxes are one box,
+because nothing else in the suite compares two elements that both render fine.
+
+## An all-day chip that said it was the whole day and was not
+
+Its style attribute carried `--for:100%` and it rendered 124px inside a 1270px
+axis: the class held both `w-auto` and `w-(--for)`, both `width`, on a string
+that does not go through `tailwind_merge`, so the winner was whichever Tailwind
+emitted last. **A component spec cannot see this** — it asserts what the style
+attribute says and passed the whole time. Only a rendered page tells a declared
+width from an applied one.
+
+The same shape had already appeared twice: `h-20` against `h-auto` on a cell,
+and before that a `data-[track]:` prefix that had been silently winning those
+races until it was removed as redundant scoping. The fix is never more
+specificity. A rule a reading has to undo does not belong to the shared frame.
+
+## A month drawn outside the axis it was windowed to
+
+`Schedule#track_on` answers in minutes of the day, having no idea what the hours
+axis is showing, so an all-day job came back as `0..1440` and on a 07–19 axis
+was drawn at −58% and two hundred per cent wide. Everything is clipped to the
+window before it is drawn. It was never only an all-day problem — any job
+outside the window did the same; the all-day one is just always outside.
+
+## An agenda emptied by a payload that stopped being sent
+
+The workload and hours readings stopped shipping the events payload, which their
+own controller returns before reading — 34 KB, 15% of a page. But `select`
+redraws the agenda *from that payload*, so a day with three jobs opened an empty
+agenda and every spec stayed green: no example opens a workload day.
+
+The agenda now goes where the month already is. A server-drawn reading renders
+one only when `day_url:` names where a day lives; drawing an agenda that cannot
+be filled is worse than not drawing it.
+
+## Two toolbar controls that changed nothing
+
+The grouping menu and "Show all" were guarded by "is this the workload
+reading", which the hours reading implied — so hours drew both and neither did
+anything: 141 chips whichever way either was set. Naming hours as a reading of
+its own fixed them for free, and the options panel made the class of bug
+unreachable: a reading declares its own controls, so one for a reading that
+cannot act on it can no longer exist.
+
+## An all-day event underneath a longer timed one
+
+`Event#sort_key` compared duration before all-day, so a *timed* event running
+three days took the top lane over a one-day holiday. All-day leads now, and
+length leads within each of the two groups. That ordering is also the order
+events cross to the browser in, so the fix reached the client-side packer
+without it being touched — it re-packs lanes and never re-sorts.
+
+## A rail that marked every cut on the same side
+
+`CROSSING_CLASS` gives a crossing chip a 2px rail of the event's colour on the
+edge where it was severed — left when it continues before, right when it
+continues after. The `continues-after` pair named `border-l` too, so the two
+rules were duplicates of the two above them: **the direction was never drawn**.
+First day, middle day and last day rendered identically, and the day a job
+started on read as continuing from the day before it.
+
+The lesson is not the typo but where it was caught. The class string had been
+read several times without anyone seeing it — `border-l` beside `border-l` looks
+like a pair, not like a mistake. What found it was asking the browser for
+`getComputedStyle(chip).borderLeftWidth` on the three cases and seeing one answer
+come back three times.
+
+`hours` renders the same class on its bars and chips, and was wrong in the same
+way for the same reason.
+
+## An attribute a component had decided against, shipped empty
+
+`append_controller` and `append_action` join a caller's value onto the
+component's own, because Stimulus reads a space-separated list. Joining nothing
+onto nothing gave `""`, not `nil` — and `element_attributes`' `.compact` is
+looking for a nil, so it could no longer see it.
+
+Avatar is where it showed. It attaches `shadcn--avatar` only when there is an
+image to wait for, precisely so an initials-only avatar does not pay for a
+Stimulus instance with nothing to do — and shipped `data-controller=""` anyway,
+155 of them on one preview page. Harmless to the browser, which is why it
+lasted; not harmless to anything reading the DOM for which controllers a page
+wants, since `[data-controller]` matches an element that named none. `.presence`
+on both appenders, so the join gives back a nil for `compact` to remove.
+
+## The options panel said monthly meant grid
+
+`view_url:` is one callback for both the period and the view, deliberately — the
+distinction between "two arrangements of the workload reading" and "a different
+reading" is this port's business and not a host's. But the *Monthly* item was
+handed `:grid`, so the callback could not tell "show me the month again" from
+"draw the month as a grid".
+
+Invisible while the only host merged the two questions into one parameter, and
+wrong the moment one kept them apart: leaving the day view sent you back to grid
+however you had been reading the month. It now receives `:monthly`, and the
+callback's vocabulary is exactly `PERIODS + VIEWS`.
+
+The lesson is about the comment, not the line. The one above `VIEWS` justified
+the merge with "a distinction that matters to this file and to nobody using it"
+— true when written, and a claim about *everyone who would ever use it*. The
+first host to model the two questions as two produced the somebody, and the bug
+was already there waiting.
+
+## A morph refresh sent the calendar's keyboard back to the body
+
+`resyncOnMorph` re-runs `render()`, and `render()` rebuilds the month with
+`weeksTarget.replaceChildren(...)` — so the cell holding the focus stopped
+existing and the focus fell to `<body>`, while `fillDay` handed the roving tab
+stop back to the *selected* day rather than the one the arrows had reached.
+
+Nothing about dragging or navigating: a plain `Turbo.visit(here, { action:
+"replace" })` on a page holding a client-drawn month was enough, and it is what
+`turbo_spec` now asserts. What had been hiding it is that no other caller of
+`render()` loses anything — the arrows reach it through `focusDay`, which
+refocuses afterwards, and the nav buttons hold the focus on a button `render()`
+does not touch. The morph is the one caller with a focused cell and nothing to
+refocus with.
+
+Named as the cause by a control rather than by reading: with the resync
+switched off the same morph left the focus and the tab stop where they were, so
+it is `render()` and not idiomorph.
+
+`render()` now reads the focused day before rebuilding and puts focus and the
+tab stop back afterwards, when that day is still in the grid it drew. The fix is
+in `render()` rather than in `resyncOnMorph` because a resync generic over every
+controller cannot know how to find the element again — only the one redrawing
+can.
+
+## A selected day painted over its own events
+
+`DAY_CLASS` raised the cell with `z-10` in two states — `focus-visible` and
+`data-[selected]` — so that the ring and the outline would not be clipped by the
+neighbouring cells. A day cell is opaque (`bg-background`) and the bars live in
+`[data-slot=event-calendar-segments]`, an absolutely positioned later sibling at
+`z-index: auto` inside the same `relative` week. A cell at `z-10` therefore
+painted its own background over every bar crossing it: click a day and its
+events disappear, while the agenda underneath goes on listing them.
+
+`focus-visible:z-10` is the older of the two, so the day a keyboard was standing
+on had been hiding its own events since before a selection could.
+
+The lift bought nothing either time. `outline-offset: -2px` and `ring-inset`
+both draw *inside* the cell's own box, where a neighbour cannot reach them —
+verified by the example that already asserts the outline in both palettes, which
+still passes with the `z-10` gone.
+
+**Nothing in the suite could have seen it**, which is why it shipped: the
+snapshot compares HTML and those classes are meant to be there, `parity` reads
+class strings, and axe does not do occlusion. The example that holds it now asks
+the only question that can see a paint order — it hit-tests the middle of a bar
+and expects the bar to answer. The layer is `pointer-events-none`, so the helper
+switches that on for the length of the question: it changes what answers a hit
+test, not what is drawn above what.
+
+Found by a person clicking a cell, like the two preview-ordering defects
+`CLAUDE.md` names.

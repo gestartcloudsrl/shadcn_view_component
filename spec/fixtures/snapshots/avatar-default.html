@@ -1,30 +1,35 @@
 <div class="flex items-center gap-4">
-<span data-slot="avatar" data-size="sm" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<img data-slot="avatar-image" data-shadcn--avatar-target="image" src="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%23c4b5fd&#39;/%3E%3Ccircle cx=&#39;16&#39; cy=&#39;12&#39; r=&#39;6&#39; fill=&#39;%236d28d9&#39;/%3E%3Cpath d=&#39;M4 32c0-7 5-11 12-11s12 4 12 11z&#39; fill=&#39;%236d28d9&#39;/%3E%3C/svg%3E" alt="Ada Lovelace" class="aspect-square size-full">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">CN
 </span>
 </span>
-<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar" data-size="default" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">CN
 </span>
 </span>
-<span data-slot="avatar" data-size="lg" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar" data-size="lg" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">CN
 </span>
 </span>
-<div data-slot="avatar-group" class="group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background">
-<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar-group" class="group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background">
+<span data-slot="avatar" data-size="default" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">AB
 </span>
 </span>
-<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar" data-size="default" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">AB
 </span>
 </span>
-<span data-slot="avatar" data-size="default" data-controller="shadcn--avatar" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
+<span data-slot="avatar" data-size="default" class="group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6">
 <span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs">AB
 </span>
 </span>
-<div data-slot="avatar-group-count" class="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3">+3
-</div>
-</div>
+<span data-slot="avatar-group-count" class="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3">+3
+</span>
+</span>
 </div>

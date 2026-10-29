@@ -1,0 +1,15 @@
+<%# The workload reading cut by operator, with jobs that cross days.
+
+    A fixture rather than an example, and it covers three things nothing else
+    reached: the `assignees` grouping, the held rows that keep a crossing job on
+    one line, and the "+N" that counts what the cap hid. All three were listed
+    in `reverse_parity_spec` and drawn by no golden — and the cap miscounted for
+    three commits without anything going red. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      reading: :workload,
+      group: :assignees,
+      events: Shadcn::EventCalendar::Preview.workload_events(per_day: 0..4, crew: 1..4,
+                                                             colored: true, spanning: 2)
+    )) %>

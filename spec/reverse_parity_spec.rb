@@ -39,9 +39,19 @@ RSpec.describe "reverse parity" do
     Dir[Pathname(__dir__).join("fixtures/snapshots/*.html")].each_with_object(
       Hash.new { |hash, key| hash[key] = Set.new }
     ) do |path, slots|
-      File.read(path).scan(/data-slot="([^"]+)"([^>]*)/) do |slot, attributes|
-        classes = attributes[/\sclass="([^"]*)"/, 1]
-        slots[slot].merge(CGI.unescapeHTML(classes).split(/\s+/)) if classes
+      # The whole tag, not what follows `data-slot`. Reading forward only meant
+      # an element that wrote its class *first* was silently unchecked — and
+      # nothing said so, because an unchecked slot looks exactly like a clean
+      # one. Sixty-eight elements were, across eight slots, `toast-title` and
+      # `toast-description` among them: the very family whose exemption block
+      # this spec cites as its precedent.
+      #
+      # `[^>]*` is safe because every `>` a Rails-rendered attribute can hold —
+      # `click->…`, `[&>span]:…` — arrives here as `&gt;`.
+      File.read(path).scan(/<[a-zA-Z][^>]*>/) do |element|
+        slot = element[/\sdata-slot="([^"]*)"/, 1]
+        classes = element[/\sclass="([^"]*)"/, 1]
+        slots[slot].merge(CGI.unescapeHTML(classes).split(/\s+/)) if slot && classes
       end
     end
   end
@@ -79,7 +89,6 @@ RSpec.describe "reverse parity" do
 
     "field-group" => %w[w-[420px]],
     "tabs" => %w[w-[420px]],
-    "dropdown-menu-content" => %w[w-56],
     "select-trigger" => %w[w-[200px] w-[220px] w-[240px]],
     # The two floating panels the previews size at the call site, for the same
     # reason the dropdown's content is sized above: a panel does not know how
@@ -217,7 +226,317 @@ RSpec.describe "reverse parity" do
 
     # `Icon::Component` stamps `lucide lucide-<name>` itself, where upstream
     # mounts a React component whose classes never appear in the TSX text.
-    "native-select-icon" => %w[lucide lucide-chevron-down]
+    "native-select-icon" => %w[lucide lucide-chevron-down],
+
+    # The whole event-calendar family, and — like the toaster's above — listed
+    # one slot at a time rather than waved through. There is no upstream event
+    # calendar at all: `calendar.tsx` is the day picker, so nothing this family
+    # renders can be a copy of anything, and a blanket exemption would make the
+    # newest component the one nobody checks.
+    #
+    # Most of what is listed is the same two kinds as everywhere else — a size
+    # upstream never needed (`min-h-14`, `h-5.5`, `top-8`, `auto-rows-…`), and a
+    # breakpoint upstream never has to write because React renders the phone and
+    # the desktop as two trees where this renders one. Three are judgements:
+    #
+    # 1. `group/event-calendar` and its `sm:group-data-[overflow]` partner. A
+    #    cell reserves a row for its "+2" line only in a month that has one, and
+    #    whether the month has one is not knowable from inside a cell.
+    # 2. The colour custom properties. An event's colour is *data*, so it cannot
+    #    be a Tailwind class — Tailwind never sees a string built at runtime —
+    #    and it cannot be a hex either, because a hex has no answer for the dark
+    #    palette. Two properties per name, declared once on the root, is what is
+    #    left. See `Component::COLOR_TOKENS`.
+    # 3. `bg-[var(--event-color)]/12` and `text-(--event-ink)`, which read them.
+    #
+    # The `rows:` block below is the rows-are-days spike: the workload reading
+    # is one row per day when it is narrow or when the toolbar says so, and the
+    # seven-column month otherwise. Declared as descendant rules on the root for
+    # the same reason the colours are, and inert on any calendar that is not the
+    # workload reading. `rows:` is the gem's own variant, declared in
+    # `shadcn.css` beside `dark`; it carries the breakpoint *and* the override,
+    # so each rule below is written once. The default is still a width decision
+    # a server cannot make — `arrangement:` only overrules it.
+    #
+    # A row is a fixed 80px and its chips scroll sideways inside it, which is
+    # where the `overflow-x`, `overscroll`, `touch-pan-x` and scrollbar-hiding
+    # rules come from — and `shrink-0` on the chips, without which they squash
+    # to fit and the strip never overflows at all.
+    # The hours reading's own parts. None of these had ever been read by a
+    # spec: the reading had only a method preview, so no fixture existed and
+    # this file — which globs the fixtures — could not see them. Adding
+    # `previews/hours.html.erb` is what surfaced them.
+    #
+    # The ruler is the hour scale, drawn once above the month rather than once
+    # per row: it is the same hours on every row and forty-two copies would be
+    # forty-two chances to disagree. Its pad is the width of the date column,
+    # so tick zero starts where the tracks do.
+    "event-calendar-ruler" => %w[pb-1 text-[0.6rem]],
+    "event-calendar-ruler-pad" => %w[w-14],
+    # The axis itself. The gridlines are a repeating gradient rather than
+    # twenty-four elements, because they are decoration and a DOM node each
+    # would be a thousand of them in a month — spaced by `--gridline`, which is
+    # one mark's share, so the lines and the labels above them are the same
+    # divisions. It was a flat 12.5% and a 07–19 axis drew six labels against
+    # eight lines. Its height is its lanes: a day
+    # is as tall as the deepest stack of overlapping jobs it has.
+    "event-calendar-day-track" => %w[
+      bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))]
+      h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]
+    ],
+    # A bar is placed and sized by the clock: `--at` is its start as a share of
+    # the window, `--for` its duration, `--lane` which row of the stack it got.
+    # `min-w-[3px]` is the floor at which a job is still a mark rather than
+    # nothing — a fifteen-minute call on a sixteen-hour axis is under a pixel.
+    "event-calendar-day-bar" => %w[
+      bg-[var(--event-color)]/70 left-(--at) min-w-[3px] top-(--lane) w-(--for)
+      data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none
+      data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)]
+      data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)]
+    ],
+    # How long a job that crosses days runs, beside the clock of the day it is
+    # drawn on — `date_span`, the same phrasing the agenda uses.
+    "event-calendar-day-span" => %w[shrink text-[0.65rem]],
+    # The hours reading's layout, which now lives on `Hours::Component` and
+    # only ever lands on its root — so these carry no `data-[track]:` guard any
+    # more. They used to, because every reading shared one class string and a
+    # plain calendar was carrying all twenty-two of them: the guard was the
+    # symptom, and the split is what removed the need for it.
+    # The band closes up: on the side a chip was cut, it takes back the cell's
+    # padding and half the grid line, so five days of one job read as one strip.
+    # `w-auto` is load-bearing — the chip carries `w-full`, and a box with an
+    # explicit width does not grow when given a negative margin. `not-rows:`
+    # because in a row a day has no neighbour to meet.
+    "event-calendar" => %w[
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:-ms-[calc(var(--spacing)*1.5_+_0.5px)]
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:-me-[calc(var(--spacing)*1.5_+_0.5px)]
+      not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:w-auto
+      group/event-calendar
+      [--event-calendar-hour:0px]
+      max-lg:[--event-calendar-hour:22vw]
+      [&_[data-slot=event-calendar-grid]]:overflow-x-auto
+      [&_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track)
+      [&_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track)
+      [&_[data-slot=event-calendar-day]]:min-h-14
+      [&_[data-slot=event-calendar-day]]:items-start
+      [&_[data-slot=event-calendar-day-head]]:sticky
+      [&_[data-slot=event-calendar-day-head]]:left-0
+      [&_[data-slot=event-calendar-day-head]]:z-10
+      [&_[data-slot=event-calendar-day-head]]:self-stretch
+      [&_[data-slot=event-calendar-day-head]]:justify-start
+      [&_[data-slot=event-calendar-day-head]]:pt-1.5
+      [&_[data-slot=event-calendar-day-head]]:bg-background
+      [&_[data-slot=event-calendar-ruler-pad]]:sticky
+      [&_[data-slot=event-calendar-ruler-pad]]:left-0
+      [&_[data-slot=event-calendar-ruler-pad]]:z-10
+      [&_[data-slot=event-calendar-ruler-pad]]:self-stretch
+      [&_[data-slot=event-calendar-ruler-pad]]:bg-background
+      [&_[data-color=default]]:[--event-color:var(--muted-foreground)] [&_[data-color=default]]:[--event-ink:var(--foreground)]
+      [&_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&_[data-color=blue]]:[--event-ink:var(--color-blue-800)]
+      dark:[&_[data-color=blue]]:[--event-ink:var(--color-blue-300)]
+      [&_[data-color=green]]:[--event-color:var(--color-emerald-500)] [&_[data-color=green]]:[--event-ink:var(--color-emerald-800)]
+      dark:[&_[data-color=green]]:[--event-ink:var(--color-emerald-300)]
+      [&_[data-color=amber]]:[--event-color:var(--color-amber-500)] [&_[data-color=amber]]:[--event-ink:var(--color-amber-800)]
+      dark:[&_[data-color=amber]]:[--event-ink:var(--color-amber-300)]
+      [&_[data-color=rose]]:[--event-color:var(--color-rose-500)] [&_[data-color=rose]]:[--event-ink:var(--color-rose-800)]
+      dark:[&_[data-color=rose]]:[--event-ink:var(--color-rose-300)]
+      [&_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&_[data-color=violet]]:[--event-ink:var(--color-violet-800)]
+      dark:[&_[data-color=violet]]:[--event-ink:var(--color-violet-300)]
+
+      rows:[&_[data-slot=event-calendar-day-head]]:flex
+      rows:[&_[data-slot=event-calendar-day-head]]:flex-col
+      rows:[&_[data-slot=event-calendar-day-head]]:gap-1
+      rows:[&_[data-slot=event-calendar-day-head]]:items-center
+      rows:[&_[data-slot=event-calendar-day-head]]:justify-center
+      rows:[&_[data-slot=event-calendar-day-head]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-head]]:w-14
+      rows:[&_[data-slot=event-calendar-day-item]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-item]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-items]]:[&::-webkit-scrollbar]:hidden
+      rows:[&_[data-slot=event-calendar-day-items]]:[scrollbar-width:none]
+      rows:[&_[data-slot=event-calendar-day-items]]:flex-nowrap
+      rows:[&_[data-slot=event-calendar-day-items]]:flex-row
+      rows:[&_[data-slot=event-calendar-day-items]]:min-w-0
+      rows:[&_[data-slot=event-calendar-day-items]]:overflow-x-auto
+      rows:[&_[data-slot=event-calendar-day-items]]:overscroll-x-contain
+      rows:[&_[data-slot=event-calendar-day-items]]:touch-pan-x
+      rows:[&_[data-slot=event-calendar-day-items]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-label]]:flex
+      rows:[&_[data-slot=event-calendar-day-label]]:flex-col
+      rows:[&_[data-slot=event-calendar-day-label]]:gap-0
+      rows:[&_[data-slot=event-calendar-day-label]]:items-center
+      rows:[&_[data-slot=event-calendar-day-label]]:w-full
+      rows:[&_[data-slot=event-calendar-day-number]]:text-sm
+      rows:[&_[data-slot=event-calendar-day-assignee]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-assignee]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-assignees]]:[&::-webkit-scrollbar]:hidden
+      rows:[&_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none]
+      rows:[&_[data-slot=event-calendar-day-assignees]]:flex-nowrap
+      rows:[&_[data-slot=event-calendar-day-assignees]]:flex-row
+      rows:[&_[data-slot=event-calendar-day-assignees]]:min-w-0
+      rows:[&_[data-slot=event-calendar-day-assignees]]:overflow-x-auto
+      rows:[&_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain
+      rows:[&_[data-slot=event-calendar-day-assignees]]:touch-pan-x
+      rows:[&_[data-slot=event-calendar-day-assignees]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-rest]]:shrink-0
+      rows:[&_[data-slot=event-calendar-day-rest]]:w-auto
+      rows:[&_[data-slot=event-calendar-day-weekday]]:block
+      rows:[&_[data-slot=event-calendar-day][data-outside]]:hidden
+      rows:[&_[data-slot=event-calendar-day]]:flex-row
+      rows:[&_[data-slot=event-calendar-day]]:gap-2
+      rows:[&_[data-slot=event-calendar-day]]:h-20
+      rows:[&_[data-slot=event-calendar-day]]:items-center
+      rows:[&_[data-slot=event-calendar-day-held]]:hidden
+      rows:[&_[data-slot=event-calendar-day]]:min-h-0
+      rows:[&_[data-slot=event-calendar-day]]:px-2
+      rows:[&_[data-slot=event-calendar-day]]:py-2
+      rows:[&_[data-slot=event-calendar-days]]:contents
+      rows:[&_[data-slot=event-calendar-segments]]:hidden
+      rows:[&_[data-slot=event-calendar-week]]:contents
+      rows:[&_[data-slot=event-calendar-weekdays]]:hidden
+
+
+    ],
+    "event-calendar-day-label" => %w[contents],
+    "event-calendar-day-weekday" => %w[text-[0.7rem]],
+    "event-calendar-title" => %w[sm:text-lg],
+    "event-calendar-weekdays" => %w[grid-cols-7],
+    "event-calendar-weekday" => %w[sm:text-xs text-[0.7rem]],
+    # The 1px rules between cells, drawn as gaps over a `bg-border` parent
+    # rather than as borders on each cell — borders double up where two cells
+    # meet, and a month grid cannot have lines of two widths.
+    "event-calendar-weeks" => %w[gap-px],
+    "event-calendar-days" => %w[gap-px grid-cols-7],
+    # The selection is an outline as well as a tint, and both halves are
+    # measured: `bg-accent` alone separated a selected cell from a plain one by
+    # 0.030 of perceptual lightness in the light palette against 0.124 in the
+    # dark. An `outline` rather than a second `ring` because a ring is the same
+    # property as the focus ring and would have replaced it.
+    "event-calendar-day" => %w[
+      data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px]
+      data-[selected]:z-10
+      data-[selected]:bg-accent focus-visible:ring-inset hover:bg-accent/50 min-h-14 pb-1 pt-1.5 px-0.5
+      sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)
+      sm:items-start sm:px-1.5 pt-1
+      group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell)
+    ],
+    "event-calendar-day-number" => %w[
+      group-data-[outside]/day:text-muted-foreground
+      group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold
+      group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]
+    ],
+    # `top-8` clears the day number, and the row height is one bar plus its gap
+    # — the two figures `Component#cell_height` derives a cell's height from.
+    "event-calendar-segments" => %w[
+      auto-rows-[1.625rem] gap-x-px grid-cols-7 px-px top-8
+      group-data-[labelled]/event-calendar:sm:grid
+    ],
+    # The phone's whole vocabulary: one mark per event, all of them. Every rule
+    # a mark obeys is here on the strip rather than on each mark — at eighty
+    # events a day the class string below repeated is half a megabyte of HTML
+    # for a rule that never varies.
+    "event-calendar-day-ticks" => %w[
+      content-start gap-px pt-0.5 group-data-[labelled]/event-calendar:sm:hidden
+      [&>span]:size-(--event-calendar-tick) [&>span]:shrink-0 [&>span]:rounded-[1px]
+      [&>span]:bg-(--event-color)
+      [&>span[data-run-after]]:-me-px [&>span[data-run-after]]:rounded-r-none
+      [&>span[data-run-before]]:rounded-l-none
+    ],
+    "event-calendar-day-more" => %w[text-[0.7rem] group-data-[labelled]/event-calendar:sm:block],
+    "event-calendar-event" => %w[
+      bg-[var(--event-color)]/12 data-[continues-after]:rounded-r-none data-[continues-before]:rounded-l-none
+      h-5.5 mx-px text-(--event-ink) text-[0.7rem]
+      data-[pending]:opacity-50 data-[picked]:ring-2 data-[picked]:ring-ring
+    ],
+    # What a movable calendar adds, and only it: a bar taken hold of, a move the
+    # server has not answered yet, and the two grips. `--event-color` is this
+    # family's own custom property, so anything painted from it is ours by
+    # construction; `cursor-grab` is what a thing you can drag looks like, and
+    # no vendored source has anything draggable in it.
+    "event-calendar-event-grip" => %w[
+      -ml-0.5 bg-(--event-color)/40 cursor-grab hover:bg-(--event-color) pointer-events-auto rounded-l-sm
+    ],
+    "event-calendar-agenda-item" => %w[data-[picked]:bg-accent data-[picked]:ring-2 data-[picked]:ring-ring],
+    "event-calendar-event-dot" => %w[bg-(--event-color) size-1.5],
+    "event-calendar-agenda" => %w[mt-3],
+    "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
+    "event-calendar-agenda-row" => %w[focus-visible:outline-none],
+    # `w-1.5` because the mark is a bar the height of the row rather than a dot
+    # beside its first line — a row here is a title and a time.
+    "event-calendar-agenda-mark" => %w[bg-(--event-color) w-1.5 cursor-grab],
+    "event-calendar-agenda-empty" => %w[py-8],
+
+    # The workload reading, which had no template preview until now and so was
+    # in none of these lists — 450 lines of shipped classes that nothing
+    # checked. A cell there is a measure rather than a list: a count chip
+    # wearing a sequential ramp, and one chip per assignee or per event.
+    #
+    # `border-border/40` is the hairline that keeps a chip a chip at the pale
+    # end of the ramp; `data-[heavy]:text-primary-foreground` is the ink flip
+    # past halfway, which is what let the ramp use its whole length instead of
+    # the fifth that keeps dark-on-light readable.
+    # The avatar, shrunk a step for the crew stack on a workload chip and given
+    # two initials to hold at fourteen pixels: the group's overlap is a quarter
+    # of upstream's `size-8`, which on a `size-3.5` is four pixels and not eight.
+    "avatar-fallback" => %w[text-[0.5rem]],
+    "avatar-group" => %w[-space-x-1],
+    "avatar-group-count" => %w[lg:size-4 text-[0.5rem]],
+    # The width the day sheet is given at the call site, like every other panel
+    # width in this list: a sheet does not know how wide its contents want to be.
+    "sheet-content" => %w[sm:max-w-md],
+    # The width the grouping menu is given at the call site, like every other
+    # panel width in this list.
+    "dropdown-menu-content" => %w[w-56],
+    "event-calendar-day-count" => %w[border-border/40 data-[heavy]:text-primary-foreground py-0 text-[0.65rem]],
+    "event-calendar-day-assignee" => %w[border-border/40],
+    # A lane a day does not use, held open so the day that does use it finds it
+    # in the same place. It wears a chip's own classes because it is a chip with
+    # nothing in it — given a height instead, it came out 45px against a real 53
+    # and put the band it was aligning eight pixels off.
+    # Nothing of its own any more: the chip's rules moved into
+    # `.shadcn-event-calendar-chip` in `shadcn.css`, and an invisible lane is
+    # that class plus `invisible`. See the note on `event-calendar-day-item`.
+    "event-calendar-day-held" => %w[shadcn-event-calendar-chip],
+    # A job that crosses days is drawn on each day it covers, and says so twice:
+    # a flat edge on the side it runs off, which is the bars' vocabulary, and a
+    # rail of its own colour down the left.
+    #
+    # The rail is not decoration. The flat edge reads where chips sit in a row —
+    # the strip below `lg`, the hours axis — because an edge running off the end
+    # of something is a shape you can see. Stacked at full width in a grid cell
+    # it says nothing, and two days of one job looked like two jobs.
+    #
+    # The chip, and — in the hours reading — where the clock puts it. An all-day
+    # chip is the one whose width means something: it has no hour to be placed
+    # at, so it is the whole axis rather than as wide as its own text — and it
+    # carries exactly one of `w-auto` and `w-(--for)`, never both, because this
+    # class string does not go through `tailwind_merge`.
+    # `shadcn-event-calendar-chip` is the one component class in this port, and
+    # the only one there will be while the rest is 1:1 on classes: this chip is
+    # ours, so no vendored source owns its rules, and 390 bytes repeated on 68
+    # chips was 24 KB of a dense month. `shadcn.css` carries the reasoning.
+    #
+    # The tokens beside it are the hours reading, which renders this same slot
+    # the ordinary way — it draws too few chips for the weight to matter.
+    "event-calendar-day-item" => %w[
+      shadcn-event-calendar-chip
+      bg-[var(--event-color)]/12 border-border/40 text-(--event-ink)
+      left-(--at) top-(--lane) max-w-[13rem] w-(--for) min-w-max
+      data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none
+      data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)]
+      data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)]
+    ],
+    "event-calendar-day-time" => %w[pe-2 text-[0.65rem]],
+    "event-calendar-day-text" => %w[text-[0.65rem]],
+    # The cap is a rule about the fourth chip onwards, scoped by slot so it
+    # cannot also catch the "+N" chip sitting last in the column — and the two
+    # groupings hide each other, because both are rendered and the menu picks.
+    # The event calendar shrinks an avatar a step below upstream's smallest for
+    # the crew stack on a workload chip, where five faces share the width of a
+    # clock. `size-3.5` is in the corpus; the desktop step up is not.
+    "avatar" => %w[lg:size-4],
+    "event-calendar-day-rest" => %w[border-border/40 text-[0.65rem]]
   }.freeze
 
   it "renders no class that has disappeared from every vendored source", :aggregate_failures do
