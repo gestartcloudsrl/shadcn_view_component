@@ -79,9 +79,15 @@ export class FloatingLayer {
     // size while it stays still — a sidebar menu button goes from 239px to
     // 32px when the panel collapses under an open tooltip, which left the
     // label 200px out to the right of the icon it names. floating-ui's
-    // `autoUpdate` observes both the reference and the floating element; this
-    // observes the anchor only, which is the side that moves the result.
+    // `autoUpdate` observes both the reference and the floating element, and
+    // so does this: the content's own size moves the result too. Placed above
+    // its trigger, a searchable Select's top edge is computed from its height,
+    // so when the search hides rows the panel shrinks towards its top and its
+    // bottom edge climbed away from the field it belongs to. A transform does
+    // not change an element's box, so writing the position cannot loop back
+    // here.
     if (this.trigger) this.resizes.observe(this.trigger)
+    this.resizes.observe(this.content)
 
     this.layer = pushLayer({
       element: this.content,
