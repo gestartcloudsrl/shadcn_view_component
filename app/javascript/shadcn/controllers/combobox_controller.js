@@ -109,7 +109,12 @@ export default class extends Controller {
     this.highlight(this.chosenItem || this.visibleItems[0])
   }
 
+  // Every way of closing ends here, including the ones that never pass through
+  // `close()` — a click outside or Escape dismiss the layer directly. Left true,
+  // `openValue` made the next `open()` return early and the field stopped
+  // opening the panel.
   closed() {
+    this.openValue = false
     this.contentTarget.dataset.closed = ""
     delete this.contentTarget.dataset.open
     this.searchTarget.setAttribute("aria-expanded", "false")
