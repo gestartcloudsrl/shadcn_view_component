@@ -60,6 +60,20 @@ RSpec.describe "Combobox", :js do
 
       expect(page).to have_no_css(content)
     end
+
+    # A click outside closes the panel through the layer's dismiss, not through
+    # `close()`. The controller still thought it open, so the next click on the
+    # field was swallowed by `open()`'s early return.
+    it "opens again after a click outside closed it", :aggregate_failures do
+      find(field).click
+      find("body").click
+      expect(page).to have_no_css(content)
+
+      find(field).click
+
+      expect(page).to have_css(content)
+      expect(find(field)["aria-expanded"]).to eq("true")
+    end
   end
 
   describe "filtering" do
@@ -272,6 +286,17 @@ RSpec.describe "Combobox", :js do
 
       expect(chips_bottom.call).to be > before
       expect(panel_top.call).to be >= chips_bottom.call
+    end
+
+    it "opens again after a chip is added and a click outside closes it" do
+      find(field).click
+      find("#{item}[data-value=py]").click
+      find("body").click
+      expect(page).to have_no_css(content)
+
+      find(field).click
+
+      expect(page).to have_css(content)
     end
 
     it "adds a chip and keeps the panel open", :aggregate_failures do
