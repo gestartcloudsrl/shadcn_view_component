@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- A `Combobox` opens again after a click outside has closed it. The click
+  dismisses the floating layer directly, which runs the controller's
+  `closed()` but not `close()`, and only `close()` reset `openValue`: the
+  controller still thought the panel open, and the next click on the field
+  returned early from `open()`. `closed()`, where every way of closing ends,
+  now resets it. Single and chips mode alike.
+
+  `spec/system/combobox_spec.rb` closes the panel with a click outside, in
+  both modes, and opens it again from the field.
+
 ## [0.3.5] — 2026-11-02
 
 ### Fixed
