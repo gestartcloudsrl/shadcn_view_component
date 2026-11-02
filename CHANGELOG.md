@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- A `Combobox` in **chips** mode is anchored to its chips box, as upstream's
+  `useComboboxAnchor()` does, and its content carries `data-chips="true"`. It
+  was anchored to the search field, which is only what the last chip leaves of
+  its line: with the chips filling the box the panel shrank to a sliver —
+  47px under a 147px box on a host's form — and started at the caret instead
+  of at the box's left edge. With `data-chips` the content's own
+  `data-[chips=true]:min-w-(--anchor-width)` applies, so the panel is exactly
+  as wide as the box.
+
+  `spec/system/combobox_spec.rb` checks the panel against the chips box, and
+  that it follows the box down when a chip wraps to a new line.
+
 ## [0.3.4] — 2026-10-29
 
 ### Fixed
