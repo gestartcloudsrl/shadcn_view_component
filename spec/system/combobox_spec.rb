@@ -237,6 +237,43 @@ RSpec.describe "Combobox", :js do
       expect(find(field)["placeholder"]).to eq("Add a language…")
     end
 
+    # Upstream's chips example hands `useComboboxAnchor()` to both the chips box
+    # and the content. Anchored to the field instead, the panel took the width
+    # of what the last chip left of its line — a sliver once the chips filled
+    # it — and started where the caret was.
+    it "lines the panel up with the chips box, not with the field", :aggregate_failures do
+      find(field).click
+
+      box = page.evaluate_script(<<~JS)
+        (() => {
+          const rect = (selector) => document.querySelector(selector).getBoundingClientRect()
+          const panel = rect("#{content}")
+          const chips = rect("[data-slot=combobox-chips]")
+          return { panel: [ Math.round(panel.left), Math.round(panel.width) ],
+                   chips: [ Math.round(chips.left), Math.round(chips.width) ],
+                   input: Math.round(rect("#{field}").width),
+                   flag: document.querySelector("#{content}").dataset.chips }
+        })()
+      JS
+
+      expect(box["input"]).to be < box["chips"][1]
+      expect(box["panel"][0]).to be_within(1).of(box["chips"][0])
+      expect(box["panel"][1]).to be_within(1).of(box["chips"][1])
+      expect(box["flag"]).to eq("true")
+    end
+
+    it "follows the chips box down when a chip wraps to a new line" do
+      chips_bottom = -> { page.evaluate_script("document.querySelector('[data-slot=combobox-chips]').getBoundingClientRect().bottom") }
+      panel_top = -> { page.evaluate_script("document.querySelector('#{content}').getBoundingClientRect().top") }
+
+      find(field).click
+      before = chips_bottom.call
+      %w[py js rs ex].each { |value| find("#{item}[data-value=#{value}]").click }
+
+      expect(chips_bottom.call).to be > before
+      expect(panel_top.call).to be >= chips_bottom.call
+    end
+
     it "adds a chip and keeps the panel open", :aggregate_failures do
       find(field).click
       find("#{item}[data-value=py]").click
