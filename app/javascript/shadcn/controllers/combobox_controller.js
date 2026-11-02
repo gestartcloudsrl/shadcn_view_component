@@ -32,8 +32,15 @@ export default class extends Controller {
     this.contentTarget.id ||= uniqueId("shadcn-combobox-content")
     this.searchTarget.setAttribute("aria-controls", this.contentTarget.id)
 
+    // Upstream's chips example passes `useComboboxAnchor()` to the chips box and
+    // to the content alike, and the content writes `data-chips` from it. The
+    // field is only what is left of the chips' last line: measured against it,
+    // the panel narrowed to a sliver as the chips filled the box.
+    if (this.hasChipsTarget) this.contentTarget.dataset.chips = "true"
+
     this.layer = new FloatingLayer({
       trigger: this.searchTarget,
+      anchor: this.hasChipsTarget ? this.chipsTarget : this.searchTarget,
       content: this.contentTarget,
       prefix: "combobox",
       side: this.sideValue,
