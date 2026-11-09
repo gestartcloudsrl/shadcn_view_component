@@ -225,6 +225,26 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    # Every host colour is `data-color="host"`, so the colour alone cannot tell
+    # two of them apart: the property is half of what a band is.
+    context "with two host colours on one day" do
+      let(:options) do
+        { events: [
+          { title: "A", starts_at: Time.zone.local(2026, 8, 20, 9), color: "--chart-4" },
+          { title: "B", starts_at: Time.zone.local(2026, 8, 20, 10), color: "--chart-2" },
+          { title: "C", starts_at: Time.zone.local(2026, 8, 20, 11), color: "--chart-4" }
+        ] }
+      end
+
+      it "bands them apart and closes the gap only inside each", :aggregate_failures do
+        ticks = day("2026-08-20").css(%(*[data-slot="event-calendar-day-tick"]))
+
+        expect(ticks.map { |tick| tick["style"][/var\((--[^)]+)\)/, 1] }).to eq(%w[--chart-2 --chart-4 --chart-4])
+        expect(ticks.map { |tick| tick["data-run-after"] }).to eq([ nil, "true", nil ])
+        expect(ticks.map { |tick| tick["data-run-before"] }).to eq([ nil, nil, "true" ])
+      end
+    end
+
     context "when every day fits in its lanes" do
       it "keeps naming them from sm up" do
         expect(root["data-labelled"]).to eq("true")
@@ -912,6 +932,22 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    # `setAttribute` throws on a name the browser rejects, and one throw is the
+    # whole redraw. The server's row escapes such a name rather than dropping
+    # it, so the payload carries it escaped the same way and the two agree.
+    context "with an attribute name no element can carry" do
+      let(:options) do
+        { selected: Date.new(2026, 8, 20),
+          events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 20, 9), url: "/e/1",
+                      attributes: { "on click" => "x", "data-ok" => "1" } } ] }
+      end
+
+      it "carries the name as the server's row writes it", :aggregate_failures do
+        expect(crossed["attributes"]).to eq("on_click" => "x", "data-ok" => "1")
+        expect(parts("event-calendar-agenda-row").first["on_click"]).to eq("x")
+      end
+    end
+
     # With `day_url:` the agenda is the server's and no row is ever built in
     # the browser, so nothing only a row reads is worth shipping. The colour
     # still crosses: the bars and the marks are still redrawn.
@@ -1178,6 +1214,31 @@ RSpec.describe Shadcn::EventCalendar::Component do
         link = parts("event-calendar-agenda-row").first
         expect([ link["href"], link["data-slot"], link["class"].include?("ring-2") ])
           .to eq([ "/e/1", "event-calendar-agenda-row", true ])
+      end
+    end
+
+    # The class goes through the pipeline every caller class does, so a Hash
+    # means what it means on `Badge::Component.new(class: { … })` rather than
+    # being written out as its own `inspect`.
+    context "when the host's class is a Hash" do
+      let(:attributes) { { class: { "ring-2" => true, "ring-ring" => false } } }
+
+      it "keeps the true keys and drops the false ones", :aggregate_failures do
+        classes = parts("event-calendar-agenda-row").first["class"].split
+        expect(classes).to include("ring-2")
+        expect(classes).not_to include("ring-ring")
+        expect(classes.grep(/[{}"=>]/)).to be_empty
+      end
+    end
+
+    # `as:` and `size:` are Item's arguments rather than attributes, so a host
+    # hash that carries them would otherwise reach the constructor.
+    context "when the host names Item's own arguments" do
+      let(:attributes) { { as: :button, size: :default } }
+
+      it "keeps the row a small link" do
+        link = parts("event-calendar-agenda-row").first
+        expect([ link.name, link["data-size"] ]).to eq([ "a", "sm" ])
       end
     end
 

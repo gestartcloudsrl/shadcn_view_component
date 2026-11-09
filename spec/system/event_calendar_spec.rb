@@ -1213,6 +1213,45 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # `Component#in_bands`' browser half. The gallery has no day with two host
+  # colours, so the example hands the controller one — the payload it already
+  # has, plus two copies of the host-coloured event, one under another
+  # property — and then steps away and back so the marks are the clone's.
+  describe "two host colours on one day, in the browser's marks" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events"
+      wait_for_stimulus
+
+      page.execute_script(<<~JS, calendar)
+        const root = document.querySelector(arguments[0])
+        const name = "data-shadcn--event-calendar-events-value"
+        const events = JSON.parse(root.getAttribute(name))
+        const host = events.find((event) => event.colorProperty === "--chart-2")
+        events.push({ ...host, title: "Other", colorProperty: "--chart-4", dayOrder: 2 },
+                    { ...host, title: "Again", dayOrder: 3 })
+        root.setAttribute(name, JSON.stringify(events))
+      JS
+
+      nav_button("Go to the Next Month").click
+      expect(page).to have_css(title, text: "September 2026")
+      nav_button("Go to the Previous Month").click
+      expect(page).to have_css(title, text: "August 2026")
+    end
+
+    let(:ticks) do
+      page.evaluate_script(<<~JS)
+        [ ...document.querySelectorAll(#{"#{calendar} [data-day='2026-08-05'] [data-slot=event-calendar-day-tick]".to_json}) ]
+          .map((tick) => [ tick.style.getPropertyValue("--event-color") || tick.dataset.color,
+                           tick.dataset.runBefore || null, tick.dataset.runAfter || null ])
+      JS
+    end
+
+    it "bands them apart, and closes the gap only inside each" do
+      expect(ticks).to eq([ [ "green", nil, nil ], [ "var(--chart-2)", nil, "true" ],
+                            [ "var(--chart-2)", "true", nil ], [ "var(--chart-4)", nil, nil ] ])
+    end
+  end
+
   # A movable row used to be two tab stops — the `<li>` and the `<a>` in it —
   # and Enter on the first did nothing. With a url the link is the one stop:
   # Enter is the link's and Space still picks the row up.

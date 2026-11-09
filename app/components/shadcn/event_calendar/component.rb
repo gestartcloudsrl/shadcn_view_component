@@ -975,7 +975,14 @@ module Shadcn
         # lets through, deliberately, for an already-built Event — and a nil in
         # a sort key is a 500 rather than a bad order. Unknown sorts last, which
         # is where the JavaScript half already put it.
-        on_day.sort_by.with_index { |event, index| [ COLOR_RANK.fetch(event.color, COLORS_END), index ] }
+        #
+        # Every host colour is `:host`, so its property is the second key: two
+        # of them band apart, as two fixed colours do, in an order both halves
+        # can compute — a plain string comparison, which is what the
+        # controller's `<` does on an ASCII name.
+        on_day.sort_by.with_index do |event, index|
+          [ COLOR_RANK.fetch(event.color, COLORS_END), event.color_property.to_s, index ]
+        end
       end
 
       # A host's own colour, as the two properties the `data-color` rules set
@@ -995,9 +1002,16 @@ module Shadcn
           "data-slot": "event-calendar-day-tick",
           "data-color": event.color,
           style: color_style(event).presence,
-          "data-run-before": ("true" if on_day[index - 1]&.color == event.color && index.positive?),
-          "data-run-after": ("true" if on_day[index + 1]&.color == event.color)
+          "data-run-before": ("true" if index.positive? && same_band?(on_day[index - 1], event)),
+          "data-run-after": ("true" if same_band?(on_day[index + 1], event))
         )
+      end
+
+      # A colour is the name *and*, for a host's, the property it names: every
+      # host colour is `:host`, and two of them are no more one band than blue
+      # and rose are.
+      def same_band?(other, event)
+        other && other.color == event.color && other.color_property == event.color_property
       end
 
       def more(count)
@@ -1162,13 +1176,18 @@ module Shadcn
       # url has no link, and the `<li>` is the list's own. Merged with the
       # gem's precedence: the caller's hash after the component's defaults, and
       # `href` and `data-slot` after that, so a host cannot move the row off the
-      # event's address or out of its slot. `class` and `data-action` join.
+      # event's address or out of its slot. `class`, `data-action` and
+      # `data-controller` join.
+      #
+      # The class is handed on as the list `merge_attributes` built, so Item's
+      # own `css_classes` resolves a host's Hash or Array the way it resolves
+      # any caller's. `as:` and `size:` are Item's arguments, not attributes,
+      # and are dropped from the host's hash so they stay the row's.
       def agenda_link(event)
         merged = merge_attributes({ "class" => "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}" },
-                                  event.attributes,
+                                  event.attributes.to_h.except(:as, :size, "as", "size"),
                                   { "href" => event.url, "data-slot" => "event-calendar-agenda-row" })
-        merged["class"] = Array(merged["class"]).join(" ")
-        Item::Component.new(size: :sm, as: :a, **merged.symbolize_keys)
+        Item::Component.new(**merged.symbolize_keys, size: :sm, as: :a)
       end
 
       # The title and the subtitle share one truncated line, the flags beside
@@ -1346,15 +1365,21 @@ module Shadcn
       # Rails' nesting. Normalised by `merge_attributes` first, which is what
       # the server's row goes through, so `data: { action: }` arrives as the
       # `data-action` the clone concatenates. `href` and `data-slot` are the
-      # row's own and never cross.
+      # row's own and never cross, and neither do `as`/`size`, which
+      # `#agenda_link` keeps from the server's row.
+      #
+      # A name is escaped the way `tag` escapes it, so it arrives as the server
+      # row's spelling of it: `setAttribute` throws on a name no element can
+      # carry (`"on click"`), and one throw is the whole redraw.
       def portable_attributes(event)
-        pairs = merge_attributes(event.attributes).flat_map do |name, value|
+        pairs = merge_attributes(event.attributes.to_h.except(:as, :size, "as", "size")).flat_map do |name, value|
           next [ [ name, value ] ] unless %w[data aria].include?(name) && value.is_a?(Hash)
 
           value.map { |key, inner| [ "#{name}-#{key.to_s.dasherize}", inner ] }
         end
 
-        pairs.to_h { |name, value| [ name, flat_value(name, value) ] }.compact.except("href", "data-slot")
+        pairs.to_h { |name, value| [ ERB::Util.xml_name_escape(name), flat_value(name, value) ] }
+             .compact.except("href", "data-slot")
       end
 
       # `nil` is an attribute `tag` leaves out, and so is a false boolean one.

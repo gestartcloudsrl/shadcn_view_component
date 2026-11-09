@@ -674,14 +674,24 @@ export default class extends Controller {
       const index = this.colorsValue.indexOf(color)
       return index === -1 ? this.colorsValue.length : index
     }
-    const marks = [ ...events ].sort((left, right) => rank(left.color) - rank(right.color))
+    // Every host colour is `"host"`, so the property it names is the second
+    // key and half of what a band is — `Component#in_bands` and `#same_band?`.
+    // `<` rather than `localeCompare`, to order the names the way Ruby's
+    // string comparison does.
+    const property = (event) => event.colorProperty || ""
+    const byProperty = (left, right) => {
+      if (property(left) === property(right)) return 0
+      return property(left) < property(right) ? -1 : 1
+    }
+    const marks = [ ...events ].sort((left, right) => rank(left.color) - rank(right.color) || byProperty(left, right))
+    const band = (other, event) => other.color === event.color && property(other) === property(event)
 
     ticks.replaceChildren(...marks.map((event, index) => {
       const tick = this.tickPrototype.cloneNode(true)
 
       this.paint(tick, event)
-      this.mark(tick, "runBefore", index > 0 && marks[index - 1].color === event.color)
-      this.mark(tick, "runAfter", index + 1 < marks.length && marks[index + 1].color === event.color)
+      this.mark(tick, "runBefore", index > 0 && band(marks[index - 1], event))
+      this.mark(tick, "runAfter", index + 1 < marks.length && band(marks[index + 1], event))
 
       return tick
     }))
@@ -773,7 +783,8 @@ export default class extends Controller {
   }
 
   // `Component#agenda_link`'s precedence: the host's attributes, then `href`
-  // and `data-slot`, which are the row's. `class` and `data-action` join
+  // and `data-slot`, which are the row's. `class`, `data-action` and
+  // `data-controller` join
   // rather than replace — and the classes are the host's own, written in the
   // host's source where its Tailwind saw them, so this adds none of its own.
   link(anchor, event) {
