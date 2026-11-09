@@ -871,6 +871,59 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  describe "the weekly reading" do
+    let(:options) do
+      { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19),
+        events: [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 5, 9) } ] }
+    end
+
+    before { render_inline(calendar) }
+
+    it "hands over to its own class" do
+      expect(described_class.new(month: Date.new(2026, 8, 1), **options))
+        .to be_a(Shadcn::EventCalendar::Weekly::Component)
+    end
+
+    it "draws the seven days of the week holding the selection", :aggregate_failures do
+      expect(parts("event-calendar-day").size).to eq(7)
+      expect(parts("event-calendar-day").map { |cell| cell["data-day"] }.first).to eq("2026-08-03")
+      expect(parts("event-calendar-day").map { |cell| cell["role"] }).to all(eq("listitem"))
+    end
+
+    it "titles itself with the span, not the month" do
+      expect(parts("event-calendar-title").first.text).to eq("3 – 9 August 2026")
+    end
+
+    context "with a week that crosses a month" do
+      let(:options) { { reading: :weekly, selected: Date.new(2026, 8, 31), window: (7..19) } }
+
+      it "says both months" do
+        expect(parts("event-calendar-title").first.text).to eq("31 August – 6 September 2026")
+      end
+    end
+
+    # The one span where saying the year once is wrong: written only at the
+    # end, it puts 28 December in the year that follows it.
+    context "with a week that crosses a year" do
+      subject(:calendar) { described_class.new(month: Date.new(2026, 12, 1), **options) }
+
+      let(:options) { { reading: :weekly, selected: Date.new(2026, 12, 31), window: (7..19) } }
+
+      it "says both years" do
+        expect(parts("event-calendar-title").first.text).to eq("28 December 2026 – 3 January 2027")
+      end
+    end
+
+    context "with a selection the month does not contain" do
+      let(:options) { { reading: :weekly, selected: Date.new(2026, 9, 20), window: (7..19) } }
+
+      it "falls back to the first week of the grid rather than raising" do
+        expect(parts("event-calendar-day").map { |cell| cell["data-day"] }.first)
+          .to eq("2026-07-27")
+      end
+    end
+  end
+
   # The panel used to decide the checked period with `(name == :daily) ==
   # daily?`, which says "there are two of these" in a comparison rather than in
   # a list. Asserted per reading, because the reading is what answers it.

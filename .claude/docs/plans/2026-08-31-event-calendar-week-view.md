@@ -315,13 +315,17 @@ module Shadcn
                   role: "status", "aria-live": "polite")
         end
 
-        # "3 – 9 August 2026", and the month said twice when the week crosses
-        # one — the case a fixture month inside a single month makes easy to
-        # forget.
+        # "3 – 9 August 2026", the month said twice when the week crosses one,
+        # and the year too when it crosses that — the cases a fixture month
+        # sitting inside a single month makes easy to forget.
         def span_label
           from = week.days.first
           to = week.days.last
-          opening = from.month == to.month ? from.strftime("%-d") : I18n.l(from, format: "%-d %B")
+          opening =
+            if from.year != to.year then I18n.l(from, format: "%-d %B %Y")
+            elsif from.month != to.month then I18n.l(from, format: "%-d %B")
+            else from.strftime("%-d")
+            end
 
           "#{opening} – #{I18n.l(to, format: '%-d %B %Y')}"
         end
@@ -373,7 +377,18 @@ end
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "the weekly reading"`
 Expected: PASS.
 
-- [ ] **Step 6: Add the preview**
+- [ ] **Step 6: Add the preview — a template, and only a template**
+
+`snapshot_spec` globs `*/previews/*.html.erb`, so **a method preview gets no
+golden**. That is decisive here: the week needs the fixture more than it needs
+parameters, because a silent change to its markup would otherwise be caught by
+nothing.
+
+Which means the preview cannot drive its own nav. A server-drawn reading's `‹`
+and `›` are links, links need a `month_url:`, and a `month_url:` needs somewhere
+to point — a parameter a template has not got. Step 8 uses `density` for that
+instead, which is the preview built for exactly this and which already walks the
+month and the day the same way.
 
 `app/components/shadcn/event_calendar/previews/weekly.html.erb`:
 
@@ -435,12 +450,17 @@ third period being added badly, and they should be read before being edited.
   end
 ```
 
-`nav_button` is the helper already at the top of that file. If the click does
-nothing, read the spec's *What it inherits without asking*: this reading is
-server-drawn, so without a `month_url:` the arrows dispatch rather than navigate
-and there is nothing listening in a bare preview. Give the preview a
-`month_url:` the way `panel` does, rather than making the example pass by
-asserting less.
+**Not `nav_button`.** That helper finds a `button`, and `nav_button` in the
+component renders an `<a>` when it has an `href` — which it does here, because
+this reading is drawn by the server and its nav is links. The example finds the
+`[aria-label=…]` without naming a tag.
+
+`density` also has to learn the period: `weekly = period.to_s == "weekly"`, the
+`view_url` case gains `"weekly"` beside `"daily"` and `"monthly"`, and an `args`
+branch merges `reading: :weekly` with the window and the shape. Its existing
+`month_url:` needs no change — the week hands it `selected ± 7`, and the month
+of that date is the grid the week is found in, including the step that crosses
+into September.
 
 - [ ] **Step 9: Regenerate, declare, and run everything**
 
@@ -449,10 +469,12 @@ SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb
 bundle exec rspec spec/reverse_parity_spec.rb
 ```
 
-Only the new `event_calendar-weekly.html` should appear. **If any existing
-golden moves, stop**: the week renders no class the month does not, so a moved
-golden means something is being written unconditionally — the trap Task 1's
-commit message names.
+`event_calendar-weekly.html` appears, **and four existing goldens move** — the
+readings that have an options panel, which all gain the new *Weekly* item. That
+is correct and the diff proves it: every changed line belongs to that one radio
+item and its indicator. Read the diff rather than accepting the count; a change
+anywhere but in the panel means something is being written unconditionally,
+which is the trap Task 1's commit message names.
 
 Reverse parity will name any class the week renders that no vendored TSX has.
 There should be none — every class here comes from `Hours` — but read what it

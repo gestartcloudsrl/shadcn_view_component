@@ -65,6 +65,7 @@ en:
       period:
         label: Show
         monthly: Monthly
+        weekly: Weekly
         daily: Daily
       # What a day shows: the axis says when it is busy and cannot write a name,
       # the agenda says what each job is and cannot show a gap. Named after the
@@ -77,6 +78,8 @@ en:
         both: Timeline and list
       previous_day: Go to the Previous Day
       next_day: Go to the Next Day
+      previous_week: Go to the Previous Week
+      next_week: Go to the Next Week
       # The label is **Timeline** and the key, the reading and the value that
       # reaches `view_url:` are all still `hours`, deliberately: "Hours"
       # described the axis it is drawn on, which is a fact about how it works

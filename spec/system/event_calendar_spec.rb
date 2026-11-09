@@ -503,6 +503,28 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # Seven days of one axis. Server-drawn, so `‹` and `›` are links and the week
+  # arrives from the server rather than being redrawn here.
+  describe "the weekly reading" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density?period=weekly&month=2026-08-05&most=6"
+      wait_for_stimulus
+    end
+
+    it "steps a week rather than a month", :aggregate_failures do
+      expect(find("#{calendar} [data-slot=event-calendar-title]").text).to eq("3 – 9 August 2026")
+
+      # Not `nav_button`: that helper looks for a `button`, and with a
+      # `month_url:` the nav renders anchors — which is the whole point of a
+      # reading the server draws.
+      find("#{calendar} [data-slot=event-calendar-nav] [aria-label='Go to the Next Week']").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
+                               text: "10 – 16 August 2026")
+      expect(all("#{calendar} [data-slot=event-calendar-day]").size).to eq(7)
+    end
+  end
+
   # Both cuts of a cell used to be rendered with one hidden, which made the menu
   # free and everything else twice as expensive. A cell renders the grouping it
   # is showing now, and the panel is links to the other state.
@@ -535,7 +557,7 @@ RSpec.describe "Event calendar", :js do
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
         .to eq([ "Show", "Show the month as", "Group by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Monthly", "Daily", "Grid", "Rows", "Timeline", "By assignee", "By event" ])
+        .to eq([ "Monthly", "Weekly", "Daily", "Grid", "Rows", "Timeline", "By assignee", "By event" ])
     end
 
     # A day has one arrangement, so the monthly question goes; the grouping
@@ -561,7 +583,7 @@ RSpec.describe "Event calendar", :js do
       expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
         .to eq([ "Show", "Show the day as", "Show each job as", "Group by" ])
       expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
-        .to eq([ "Monthly", "Daily", "Timeline only", "List only", "Timeline and list",
+        .to eq([ "Monthly", "Weekly", "Daily", "Timeline only", "List only", "Timeline and list",
                  "Chips", "Bars", "By assignee", "By event" ])
     end
 

@@ -78,7 +78,7 @@ module Shadcn
       # that happens to be square, so this is where `max_events` clamps.
       MAX_EVENTS = (1..6).freeze
 
-      READINGS = %i[auto events workload hours daily].freeze
+      READINGS = %i[auto events workload hours daily weekly].freeze
 
       # How the workload month is laid out. `:auto` is the breakpoint doing the
       # deciding — rows below `lg`, the seven-column grid above it — and
@@ -106,7 +106,7 @@ module Shadcn
       # The period the toolbar switches between, above the views. A month has
       # three ways of being read and a day has one; `PERIODS` is what the panel
       # asks first, and `VIEWS` is only the monthly follow-up.
-      PERIODS = %i[monthly daily].freeze
+      PERIODS = %i[monthly weekly daily].freeze
 
       # Keywords a *reading* owns. A reading that declares one consumes it and
       # it never arrives here; one that does not would forward it to the element
@@ -367,7 +367,8 @@ module Shadcn
       RENDERERS = {
         workload: "Shadcn::EventCalendar::Workload::Component",
         hours: "Shadcn::EventCalendar::Hours::Component",
-        daily: "Shadcn::EventCalendar::Daily::Component"
+        daily: "Shadcn::EventCalendar::Daily::Component",
+        weekly: "Shadcn::EventCalendar::Weekly::Component"
       }.freeze
 
       def self.new(reading: :auto, **rest)
@@ -882,7 +883,19 @@ module Shadcn
           # writes. `aria-pressed` made every one of the other forty-one days
           # announce as "toggle button, not pressed", a state a date grid has no
           # meaning for, and it was the only non-toggle in the gem claiming it.
-          "aria-selected": ("true" if day == selected),
+          #
+          # And only on a `gridcell`. ARIA does not allow it on a `listitem`,
+          # which is what the readings that stack their days use — axe calls it
+          # critical. `Daily` has been shipping that violation since it was
+          # written, unseen because it has no template preview and the audit
+          # walks template previews. The week is the first stacked reading to
+          # have one, which is what surfaced it.
+          #
+          # What goes with it is the announcement of *which* of seven days is
+          # the chosen one. `data-selected` still styles it and the day is still
+          # a button carrying its whole date; what a stacked reading has no
+          # standard way to say is "and this is the one you are on".
+          "aria-selected": ("true" if day == selected && cell_role == "gridcell"),
           "aria-current": ("date" if day == Date.current),
           # One tab stop for the whole month; the arrows move within it.
           tabindex: (day == selected ? "0" : "-1"),

@@ -1,0 +1,9 @@
+<%# The busy generator, because a week's height is decided by its most crowded
+    day's lanes and a light fixture hides that. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      reading: :weekly,
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 5),
+      window: (7..19),
+      events: Shadcn::EventCalendar::Preview.workload_events
+    )) %>

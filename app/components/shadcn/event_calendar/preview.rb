@@ -19,6 +19,20 @@ module Shadcn
         render_with_template
       end
 
+      # A week: seven days of the hours axis over one window, so the same hour
+      # is the same x on every row, and a day with nothing on it says so at full
+      # height rather than in a whisper.
+      #
+      # The busy generator rather than the handful the other previews use,
+      # because what decides a week's height is its most crowded day's lanes —
+      # a light fixture makes the shape look like something it is not.
+      #
+      # Walking the weeks is `density`'s: the nav of a server-drawn reading is
+      # links, and a template has no parameter to point them at.
+      def weekly
+        render_with_template
+      end
+
       # One of each colour, then the same calendar with `default_color:` — the
       # level FullCalendar puts on an event source. The palette is fixed rather
       # than free-form; the reason is in `Event::COLORS`.
@@ -170,17 +184,24 @@ module Shadcn
         # picking a view also says the period is monthly — which is what makes
         # `monthly` expressible rather than implied.
         daily = period.to_s == "daily"
+        weekly = period.to_s == "weekly"
         common = { month: shown, events:,
                    view_url: lambda { |name|
                      case name.to_s
-                     when "daily", "monthly" then here.call(period: name)
+                     when "daily", "weekly", "monthly" then here.call(period: name)
                      else here.call(period: "monthly", view: name)
                      end
                    },
                    month_url: ->(date) { here.call(month: date.iso8601) } }
 
         args =
-          if daily
+          if weekly
+            # `month_url:` in `common` is what `‹` and `›` reach for, and it is
+            # already right: the week hands it `selected ± 7` and the month of
+            # that date is the grid the week is found in.
+            common.merge(reading: :weekly, selected: shown, window: (from.to_i..to.to_i),
+                         shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })
+          elsif daily
             common.merge(reading: :daily, selected: shown,
                          window: (from.to_i..to.to_i), shape: shape.to_sym,
                          showing: showing.to_sym, group: group.to_sym,
