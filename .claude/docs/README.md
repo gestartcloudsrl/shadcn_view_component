@@ -38,6 +38,7 @@ written.
 | [specs/2026-08-31-event-calendar-week-view-design.md](specs/2026-08-31-event-calendar-week-view-design.md) | the week: seven aligned day-rows rather than a continuous axis or seven columns, why a third period breaks a panel built for two, and the two pieces deliberately left for later |
 | [specs/2026-11-09-event-calendar-event-content-design.md](specs/2026-11-09-event-calendar-event-content-design.md) | what an event says and where it opens: generic fields drawn by the gem rather than a host slot, the chip kept as decoration inside the day's target and the list row made the link, the host's colour as a mark only |
 | [plans/2026-08-31-event-calendar-week-view.md](plans/2026-08-31-event-calendar-week-view.md) | the week, built from a spike that had already run it — three tasks, the boolean the panel decided the period with, and two steps that deliberately refuse to predict their own failure |
+| [plans/2026-11-09-event-calendar-event-content.md](plans/2026-11-09-event-calendar-event-content.md) | seven tasks: the fields on `Event`, the host colour, the chip, the row and its attributes, a Sheet preview, then the client-drawn month last |
 | [features/toaster.md](features/toaster.md) | the toaster, which is ours rather than a port: why there was nothing to reproduce, what was kept from sonner, and the three ways a Rails app raises one |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything
