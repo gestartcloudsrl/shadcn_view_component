@@ -1008,4 +1008,35 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(checked_period(reading: :daily)).to eq("daily")
     end
   end
+
+  describe "what a chip says" do
+    let(:options) do
+      { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19),
+        events: [ { title: "Service", subtitle: "Rossi", description: "Bleed the radiators, spare filter",
+                    done: true, attachment: true,
+                    starts_at: Time.zone.local(2026, 8, 5, 9),
+                    assignees: [ "Ada Lovelace", { name: "Grace Hopper", status: :done } ] } ] }
+    end
+
+    before { render_inline(calendar) }
+
+    it "draws the flags as icons with names", :aggregate_failures do
+      expect(parts("event-calendar-day-done").first.text).to include("Done")
+      expect(parts("event-calendar-day-attachment").first.text).to include("Has an attachment")
+    end
+
+    it "puts the subtitle on the title's line" do
+      expect(parts("event-calendar-day-subtitle").first.text).to eq("Rossi")
+    end
+
+    it "keeps the description off the chip" do
+      expect(painted.css("[data-slot=event-calendar-day-item]").text).not_to include("spare filter")
+    end
+
+    it "badges only the assignee with a status", :aggregate_failures do
+      badges = painted.css("[data-slot=event-calendar-day-item] [data-slot=avatar-badge]")
+      expect(badges.map { |badge| badge["data-status"] }).to eq([ "done" ])
+      expect(badges.first.text).to include("Done")
+    end
+  end
 end

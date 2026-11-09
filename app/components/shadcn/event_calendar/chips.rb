@@ -166,6 +166,9 @@ module Shadcn
       # others.
       CHIP_HEAD_CLASS = "flex min-h-6 items-center gap-1"
 
+      FLAG_ICON_CLASS = "size-3"
+      SUBTITLE_CLASS = "ms-1 font-normal"
+
       CHIP_TEXT_CLASS = "truncate text-left text-[0.65rem] leading-tight"
       # Faces up to `AVATARS_CAP`, then a count.
       # `-space-x-1` overrides the group's own `-space-x-2`: upstream's overlap
@@ -245,15 +248,62 @@ module Shadcn
           (if item.multi_day?
              tag.span(date_span(item), "data-slot": "event-calendar-day-span", class: SPAN_CLASS)
            end),
+          flag_icons(item, "event-calendar-day"),
           chip_avatars(item)
-        ].compact),
+        ].flatten.compact),
         class: CHIP_HEAD_CLASS
         )
       end
 
+      # The title and the subtitle share one truncated line, so a long subtitle
+      # gives way before the title does. The description is not on the chip at
+      # all: it is a sentence, and a chip is a few words.
       def chip_text(item)
-        tag.span(item.title, "data-slot": "event-calendar-day-text",
-               class: CHIP_TEXT_CLASS)
+        tag.span(safe_join([ item.title, chip_subtitle(item) ].compact),
+                 "data-slot": "event-calendar-day-text",
+                 class: CHIP_TEXT_CLASS)
+      end
+
+      def chip_subtitle(item)
+        return if item.subtitle.blank?
+
+        tag.span(item.subtitle, "data-slot": "event-calendar-day-subtitle", class: SUBTITLE_CLASS)
+      end
+
+      # The two flags an event can carry, as icons, in the order they are
+      # listed. `prefix` is the slot family they are drawn in — the chip's
+      # `event-calendar-day`, the agenda row's `event-calendar-agenda` — so a
+      # surface can be addressed without the other being.
+      def flag_icons(item, prefix)
+        [ (done_icon(prefix) if item.done?), (attachment_icon(prefix) if item.attachment?) ]
+      end
+
+      def done_icon(prefix)
+        flag_icon("check", "#{prefix}-done", shadcn_t("event_calendar.done"))
+      end
+
+      def attachment_icon(prefix)
+        flag_icon("paperclip", "#{prefix}-attachment", shadcn_t("event_calendar.attachment"))
+      end
+
+      # The picture is decorative and the name is not: the chip's text is read
+      # from inside the day's target, so an icon alone would say nothing there.
+      def flag_icon(icon, slot, name)
+        tag.span(safe_join([ render(Icon::Component.new(icon, class: FLAG_ICON_CLASS, "aria-hidden": "true")),
+                             tag.span(name, class: "sr-only") ]),
+                 "data-slot": slot, class: "inline-flex shrink-0")
+      end
+
+      # What an assignee's progress looks like on the corner of their face:
+      # upstream's own badge, with `bg-muted-foreground` standing for "not yet"
+      # over its `bg-primary`. An assignee with no status gets no badge at all.
+      def assignee_badge(avatar, assignee)
+        return unless assignee.status
+
+        avatar.with_badge(class: ("bg-muted-foreground" if assignee.status == :pending),
+                          "data-status": assignee.status) do
+          tag.span(shadcn_t("event_calendar.assignee_status.#{assignee.status}"), class: "sr-only")
+        end
       end
 
       # `Avatar::Group` is upstream's own overlap and ring; the count past
@@ -272,6 +322,7 @@ module Shadcn
         render(Avatar::Component.new(size: :sm, class: STACK_AVATAR_CLASS)) do |avatar|
         avatar.with_fallback(class: INITIALS_CLASS) { assignee.initials }
         avatar.with_image(src: assignee.image, alt: "") if assignee.image
+        assignee_badge(avatar, assignee)
         end
       end
 
