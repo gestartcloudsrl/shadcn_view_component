@@ -277,7 +277,7 @@ module Shadcn
             class: [ BAR_CLASS, BAR_PAINT_CLASS, CROSSING_CLASS ],
             "data-color": event.color,
             **crossing_attributes(event, day),
-            style: "--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
+            style: "#{color_style(event)}--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
             title: [ chip_time(event), event.title ].compact.join(" — ")
           )
         end
@@ -293,7 +293,7 @@ module Shadcn
                      (to - from >= floor_minutes ? CHIP_SPANNING_CLASS : CHIP_TIMED_CLASS) ],
             "data-color": event.color,
             **crossing_attributes(event, day),
-            style: "--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
+            style: "#{color_style(event)}--at:#{at(from)};--for:#{span(to - from)};--lane:#{lane_offset(lane)}",
             title: [ chip_time(event), event.title ].compact.join(" — ")
           )
         end

@@ -976,11 +976,23 @@ module Shadcn
         on_day.sort_by.with_index { |event, index| [ COLOR_RANK.fetch(event.color, COLORS_END), index ] }
       end
 
+      # A host's own colour, as the two properties the `data-color` rules set
+      # for a fixed one. Inline, so it beats those descendant rules without
+      # touching them; the ink stays `--foreground` because a host's colour has
+      # no readable pair derived from it. Empty for a fixed colour, so those
+      # render byte-identical to before. The name is validated in `Event`.
+      def color_style(event)
+        return "" unless event.color == :host
+
+        "--event-color:var(#{event.color_property});--event-ink:var(--foreground);"
+      end
+
       def tick(event, on_day, index)
         tag.span(
           "",
           "data-slot": "event-calendar-day-tick",
           "data-color": event.color,
+          style: color_style(event).presence,
           "data-run-before": ("true" if on_day[index - 1]&.color == event.color && index.positive?),
           "data-run-after": ("true" if on_day[index + 1]&.color == event.color)
         )
@@ -1044,7 +1056,7 @@ module Shadcn
           # which is the thing its second rule forbids. Grid line numbers are
           # what those classes compile to anyway, so both sides write the same
           # two declarations and cannot drift.
-          style: "grid-column:#{segment.column} / span #{segment.span};grid-row:#{segment.lane}",
+          style: "#{color_style(event)}grid-column:#{segment.column} / span #{segment.span};grid-row:#{segment.lane}",
           "data-color": event.color,
           "data-continues-before": ("true" if segment.continues_before?),
           "data-continues-after": ("true" if segment.continues_after?),
@@ -1103,7 +1115,7 @@ module Shadcn
 
       def agenda_item(event)
         tag.li(agenda_row(event), "data-slot": "event-calendar-agenda-item", "data-color": event.color,
-               "data-event-id": (event.id if movable?),
+               style: color_style(event).presence, "data-event-id": (event.id if movable?),
                class: (AGENDA_PICK_CLASS if movable?), tabindex: ("0" if movable?))
       end
 

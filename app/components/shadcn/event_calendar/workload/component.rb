@@ -438,6 +438,7 @@ module Shadcn
             safe_join([ chip_head(item, day), chip_text(item) ]),
             "data-slot": "event-calendar-day-item", class: ITEM_CLASS,
             "data-color": item.color,
+            style: color_style(item).presence,
             **crossing_attributes(item, day),
             title: "#{item.title} — #{item.assignees.map(&:name).join(', ')}"
           )

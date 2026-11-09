@@ -463,6 +463,57 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # asserted because both are the feature: `--for` is the width, `--lane` is
   # the position, and a bar that spans the day but sits at the bottom would
   # pass an assertion about either one alone.
+  describe "a host colour" do
+    let(:events) do
+      [ { title: "Service", starts_at: Time.zone.local(2026, 8, 5, 9), color: "--chart-2", url: "/e/1" },
+        { title: "Survey", starts_at: Time.zone.local(2026, 8, 5, 11), color: :blue, url: "/e/2" } ]
+    end
+    let(:set) { "--event-color:var(--chart-2);--event-ink:var(--foreground);" }
+
+    def calendar_for(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 5),
+                                        day_url: ->(day) { "/d/#{day}" }, events:, **options))
+    end
+
+    it "sets the mark and leaves the ink neutral, on the chip and the row", :aggregate_failures do
+      calendar_for(reading: :weekly, window: (7..19))
+
+      host = [ parts("event-calendar-day-item").first, parts("event-calendar-agenda-item").first ]
+      expect(host.map { |node| node["data-color"] }).to all(eq("host"))
+      expect(host.map { |node| node["style"] }).to all(include(set))
+    end
+
+    it "writes no style for a fixed colour" do
+      calendar_for(reading: :weekly, window: (7..19))
+
+      expect(parts("event-calendar-agenda-item").last["style"]).to be_nil
+    end
+
+    it "sets it on the hours bar, ahead of the position", :aggregate_failures do
+      calendar_for(reading: :hours, window: (7..19), shape: :bars)
+
+      bars = parts("event-calendar-day-bar")
+      expect(bars.first["style"]).to start_with(set).and include("--at:")
+      expect(bars.last["style"]).to start_with("--at:")
+    end
+
+    it "sets it on the workload chip when grouped by event", :aggregate_failures do
+      calendar_for(reading: :workload, group: :events)
+
+      chips = parts("event-calendar-day-item")
+      expect(chips.map { |chip| chip["data-color"] }).to include("host", "blue")
+      expect(chips.find { |chip| chip["data-color"] == "host" }["style"]).to eq(set)
+      expect(chips.find { |chip| chip["data-color"] == "blue" }["style"]).to be_nil
+    end
+
+    it "sets it on the month's bar and tick", :aggregate_failures do
+      calendar_for(reading: :events)
+
+      expect(parts("event-calendar-event").first["style"]).to start_with(set).and include("grid-column")
+      expect(parts("event-calendar-event").last["style"]).to start_with("grid-column")
+    end
+  end
+
   describe "an all-day event in the hours reading" do
     subject(:bars) do
       render_inline(described_class.new(
