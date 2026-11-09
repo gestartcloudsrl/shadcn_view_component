@@ -147,6 +147,53 @@ RSpec.describe Shadcn::EventCalendar::Event do
     end
   end
 
+  describe "the fields a host adds" do
+    it "keeps the texts and flags it is given", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20),
+                                  subtitle: "Rossi", description: "Bring the spare filter",
+                                  done: true, attachment: true)
+
+      expect(event).to have_attributes(subtitle: "Rossi", description: "Bring the spare filter",
+                                       done?: true, attachment?: true)
+    end
+
+    it "says nothing it was not given", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20), subtitle: " ")
+
+      expect(event).to have_attributes(subtitle: nil, description: nil, done?: false,
+                                       attachment?: false, attributes: {}, color_property: nil)
+    end
+
+    it "takes a host colour as a custom property's name" do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20), color: "--chart-2")
+
+      expect(event).to have_attributes(color: :host, color_property: "--chart-2")
+    end
+
+    # Anything but a bare name would be interpolated into `style`.
+    it "refuses anything but a bare custom-property name", :aggregate_failures do
+      [ "--x; background: red", "var(--x)", "red", "--" ].each do |value|
+        event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20), color: value)
+
+        expect(event).to have_attributes(color: :default, color_property: nil)
+      end
+    end
+
+    it "gives an assignee a status from a hash, and none from a string", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20),
+                                  assignees: [ "Ada Lovelace", { name: "Grace Hopper", status: :done } ])
+
+      expect(event.assignees.map(&:status)).to eq([ nil, :done ])
+    end
+
+    it "drops a status it does not know" do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20),
+                                  assignees: [ { name: "Grace Hopper", status: :signed } ])
+
+      expect(event.assignees.first.status).to be_nil
+    end
+  end
+
   describe "#covers?" do
     subject(:event) do
       described_class.new(title: "Conference", starts_at: Date.new(2026, 8, 19), ends_at: Date.new(2026, 8, 21))

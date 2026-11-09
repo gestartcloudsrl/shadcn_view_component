@@ -383,7 +383,10 @@ module Shadcn
       # @param selected [Date, nil] the day the agenda reads out; defaults to
       #   today when today is in view, and to the first of the month otherwise
       # @param events [Array<Hash, Event>] `{ title:, starts_at:, ends_at:,
-      #   color:, url:, all_day: }` — `ends_at` is *inclusive*
+      #   color:, url:, all_day:, subtitle:, description:, done:, attachment:,
+      #   attributes: }` — `ends_at` is *inclusive*; `color:` is a palette name
+      #   or the name of a custom property (`"--chart-2"`); an assignee may carry
+      #   a `status:` of `:done` or `:pending`
       # @param max_events [Integer] bars per cell before a cell says "+2"
       # @param week_starts_on [Integer, nil] `Date#wday`; the host's
       #   `Date.beginning_of_week` when not given

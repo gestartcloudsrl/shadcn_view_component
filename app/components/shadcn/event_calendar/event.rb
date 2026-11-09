@@ -21,14 +21,26 @@ module Shadcn
       # Each name resolves to two custom properties in `Component::COLOR_TOKENS`.
       COLORS = %i[default blue green amber rose violet].freeze
 
+      # A host's own colour, as the *name* of a custom property it defines
+      # (`--chart-2`). Only a bare name is accepted because it ends up inside a
+      # `style` attribute: anything wider — a `;`, a `var(…)`, a keyword — would
+      # let a value off a record write arbitrary declarations there.
+      HOST_COLOR = /\A--[a-z0-9-]+\z/i
+
       # Who is doing the thing — a name, or a name and a picture. An event can
       # take more than one, which is what the by-event grouping counts. Only the
       # workload reading reads them.
-      Assignee = Struct.new(:name, :image) do
+      #
+      # `status` is the host's word for how far that person got, and only the
+      # two it can be drawn for are kept; nil means the host said nothing.
+      Assignee = Struct.new(:name, :image, :status) do
+        const_set(:STATUSES, %i[done pending].freeze)
+
         def initials = name.to_s.split(/\s+/).first(2).filter_map { |part| part[0] }.join.upcase
       end
 
-      attr_reader :id, :title, :starts_at, :ends_at, :color, :url, :assignees
+      attr_reader :id, :title, :starts_at, :ends_at, :color, :url, :assignees,
+                  :subtitle, :description, :attributes, :color_property
 
       # `default_color:` is the calendar's own colour, standing where
       # FullCalendar puts an *event source's*: between the event and the
@@ -44,7 +56,8 @@ module Shadcn
       #   a `Date` has no time of day to show, a `Time` has. An all-day `Time`
       #   at midnight is the case inference cannot see, so it takes the keyword.
       def initialize(title:, starts_at:, ends_at: nil, color: nil, url: nil, all_day: nil,
-                     id: nil, assignee: nil, assignees: nil, default_color: :default)
+                     id: nil, assignee: nil, assignees: nil, default_color: :default,
+                     subtitle: nil, description: nil, done: false, attachment: false, attributes: {})
         @id = id
         @title = title.to_s
         @starts_at = starts_at
@@ -53,12 +66,29 @@ module Shadcn
         # A name that is not in the palette falls back to the *calendar's*
         # colour rather than to grey: a typo in one row of a `map` should look
         # like the rest of that calendar, not like an uncategorised event.
-        @color = COLORS.include?(color&.to_sym) ? color.to_sym : fallback_color(default_color)
+        #
+        # A host colour is the exception: a String naming a custom property
+        # (`HOST_COLOR`) is kept as `:host`, with the name beside it.
+        if color.is_a?(String) && color.match?(HOST_COLOR)
+          @color = :host
+          @color_property = color
+        else
+          @color = COLORS.include?(color&.to_sym) ? color.to_sym : fallback_color(default_color)
+        end
         @url = url
         @assignees = wrap_assignees(assignees || assignee)
+        @subtitle = subtitle.presence
+        @description = description.presence
+        @done = !!done
+        @attachment = !!attachment
+        @attributes = attributes || {}
       end
 
       def all_day? = @all_day
+
+      def done? = @done
+
+      def attachment? = @attachment
 
       def fallback_color(name) = COLORS.include?(name&.to_sym) ? name.to_sym : :default
       private :fallback_color
@@ -85,12 +115,13 @@ module Shadcn
       def wrap_assignee(value)
         case value
         when nil, Assignee then value
-        when String then Assignee.new(value.to_s, nil)
+        when String then Assignee.new(value.to_s, nil, nil)
         else
-          name, image = value.to_h.symbolize_keys.values_at(:name, :image)
+          name, image, status = value.to_h.symbolize_keys.values_at(:name, :image, :status)
           raise ArgumentError, "an assignee needs a :name, got #{value.inspect}" if name.blank? && Rails.env.local?
 
-          Assignee.new(name.to_s, image)
+          status = status.to_s.to_sym
+          Assignee.new(name.to_s, image, Assignee::STATUSES.include?(status) ? status : nil)
         end
       end
       private :wrap_assignee
