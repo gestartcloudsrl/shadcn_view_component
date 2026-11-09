@@ -1145,6 +1145,7 @@ RSpec.describe "Event calendar", :js do
       find("[data-slot=event-calendar-agenda-row][href='/calendar/events/2']").send_keys(:enter)
 
       expect(page).to have_current_path("/calendar/events/2")
+      expect(page).to have_css("h2", text: "Event 2")
     end
   end
 end

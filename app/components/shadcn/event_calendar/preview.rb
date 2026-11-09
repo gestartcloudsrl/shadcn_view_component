@@ -111,13 +111,11 @@ module Shadcn
       # A row of the day list as a link, and the host deciding where it goes.
       # Both events carry a `url:`; the first also carries the attributes that
       # send the response into the Sheet's frame and open it, the second says
-      # nothing and so is an ordinary link to its page.
+      # nothing and so is an ordinary link to its page. Press Enter on each row
+      # of the selected day to see the two.
       #
-      # `@hidden` for the same reason as `panel`: the link has no server in a
-      # Lookbook preview, so this exists to be driven by the system spec and
-      # to have a golden.
-      #
-      # @hidden
+      # The dummy app that Lookbook runs inside answers both links
+      # (`/calendar/events/:id`), so they work here as they would in a host.
       def event_links
         render_with_template
       end
