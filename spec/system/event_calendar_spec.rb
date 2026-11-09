@@ -1126,4 +1126,25 @@ RSpec.describe "Event calendar", :js do
       expect(agenda_titles).to eq([ "Conference", "Birthday Party" ])
     end
   end
+
+  # The row is a link, so what happens next is the host's: the attributes it
+  # put on the event are the only thing deciding between a Sheet and a page.
+  describe "opening an event from its row" do
+    before do
+      visit_preview("event_calendar", :event_links)
+      wait_for_stimulus
+    end
+
+    it "opens it in the Sheet when the host says so" do
+      find("[data-slot=event-calendar-agenda-row][href='/calendar/events/1']").send_keys(:enter)
+
+      expect(page).to have_css("[role=dialog] turbo-frame#event", text: "Event 1")
+    end
+
+    it "goes to its page when the host says nothing" do
+      find("[data-slot=event-calendar-agenda-row][href='/calendar/events/2']").send_keys(:enter)
+
+      expect(page).to have_current_path("/calendar/events/2")
+    end
+  end
 end

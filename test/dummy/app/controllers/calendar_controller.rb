@@ -8,4 +8,10 @@ class CalendarController < ApplicationController
     @date = Date.parse(params[:date])
     @appointments = Appointment.on(@date)
   end
+
+  # The page an agenda row links to. Only the id is read: what an event is
+  # called is the whole of what this example needs to show.
+  def event
+    @id = params[:id]
+  end
 end

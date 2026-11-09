@@ -108,6 +108,20 @@ module Shadcn
         render_with_template
       end
 
+      # A row of the day list as a link, and the host deciding where it goes.
+      # Both events carry a `url:`; the first also carries the attributes that
+      # send the response into the Sheet's frame and open it, the second says
+      # nothing and so is an ordinary link to its page.
+      #
+      # `@hidden` for the same reason as `panel`: the link has no server in a
+      # Lookbook preview, so this exists to be driven by the system spec and
+      # to have a golden.
+      #
+      # @hidden
+      def event_links
+        render_with_template
+      end
+
       # The playground for the three server-drawn views, and one preview for all
       # of them because the options panel already walks between them: `view_url`
       # points back here, so picking Grid, Rows or Hours is a link to this same

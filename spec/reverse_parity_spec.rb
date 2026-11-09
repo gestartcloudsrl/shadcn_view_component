@@ -536,6 +536,9 @@ RSpec.describe "reverse parity" do
     # the crew stack on a workload chip, where five faces share the width of a
     # clock. `size-3.5` is in the corpus; the desktop step up is not.
     "avatar" => %w[lg:size-4],
+    # A pending assignee's corner badge: upstream's `bg-primary` means "has
+    # finished" here, and a muted fill is what "not yet" looks like beside it.
+    "avatar-badge" => %w[bg-muted-foreground],
     "event-calendar-day-rest" => %w[border-border/40 text-[0.65rem]]
   }.freeze
 

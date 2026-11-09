@@ -16,6 +16,9 @@ Rails.application.routes.draw do
   # render the calendar but cannot answer its links, so the route lives here.
   get "calendar/days/:date" => "calendar#day", as: :calendar_day
 
+  # One event, answering the `<turbo-frame id="event">` an agenda row points at.
+  get "calendar/events/:id" => "calendar#event", as: :calendar_event
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   root to: redirect("/lookbook")
