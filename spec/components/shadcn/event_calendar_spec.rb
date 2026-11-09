@@ -1051,4 +1051,52 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(parts("event-calendar-day-text").first.text).to include("Service Rossi")
     end
   end
+
+  describe "what a row says" do
+    let(:attributes) { { data: { turbo_frame: "event", action: "shadcn--dialog#open" } } }
+    let(:url) { "/e/1" }
+    let(:options) do
+      { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19), day_url: ->(day) { "/days/#{day}" },
+        events: [ { title: "Service", subtitle: "Rossi", description: "Bring the spare filter",
+                    done: true, attachment: true, url:, attributes:,
+                    starts_at: Time.zone.local(2026, 8, 5, 9),
+                    assignees: [ "Ada Lovelace", { name: "Grace Hopper", status: :done } ] } ] }
+    end
+
+    before { render_inline(calendar) }
+
+    it "reads everything out in full", :aggregate_failures do
+      row = parts("event-calendar-agenda-row").first
+      expect(row.at_css("[data-slot=event-calendar-agenda-subtitle]").text).to eq("Rossi")
+      expect(row.at_css("[data-slot=event-calendar-agenda-description]").text).to eq("Bring the spare filter")
+      expect(row.css("[data-slot=avatar]").size).to eq(2)
+      expect(row.css("[data-slot=avatar-badge]").map { |badge| badge["data-status"] }).to eq([ "done" ])
+      expect(row.css("[data-slot=event-calendar-agenda-done], [data-slot=event-calendar-agenda-attachment]").size).to eq(2)
+    end
+
+    it "puts the host's attributes on the link", :aggregate_failures do
+      link = parts("event-calendar-agenda-row").first
+      expect(link.name).to eq("a")
+      expect(link["data-turbo-frame"]).to eq("event")
+      expect(link["data-action"]).to include("shadcn--dialog#open")
+    end
+
+    context "when the host tries to replace what the row owns" do
+      let(:attributes) { { href: "/elsewhere", "data-slot": "x", class: "ring-2" } }
+
+      it "keeps its own href and slot, and joins classes" do
+        link = parts("event-calendar-agenda-row").first
+        expect([ link["href"], link["data-slot"], link["class"].include?("ring-2") ])
+          .to eq([ "/e/1", "event-calendar-agenda-row", true ])
+      end
+    end
+
+    context "when there is no url to link to" do
+      let(:url) { nil }
+
+      it "drops attributes it has no link to put them on" do
+        expect(painted.css("[data-turbo-frame]")).to be_empty
+      end
+    end
+  end
 end

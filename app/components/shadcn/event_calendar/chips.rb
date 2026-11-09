@@ -15,14 +15,10 @@ module Shadcn
     # Included, so the constants resolve through the ancestor chain from either
     # component without qualification.
     module Chips
+      include Faces
+
       # Smaller everywhere a month is not on a desktop. Two initials at 14px
       # still read; the circle is what gives way, not the type.
-      # A face in a crew stack, which is not the same face as the one on an
-      # assignee chip: these two shared a name after a rename and Ruby kept the
-      # second, so the chip's avatar silently lost its `shrink-0` and shrank in
-      # a scrolling row. `ruby -w` was the only thing that saw it — no spec did,
-      # and rubocop has no cop for a reassigned constant.
-      STACK_AVATAR_CLASS = "size-3.5 lg:size-4"
 
       # What a job that crosses days wears. Two things saying one thing, on
       # purpose — the same redundancy the events reading's bars have, where the
@@ -146,12 +142,6 @@ module Shadcn
       # white with a hairline round it. A chip needs a surface of its own, not a
       # borrowed one.
 
-      # `bg-background` rather than the fallback's own `bg-muted`: the chip *is*
-      # `bg-muted` now, so an avatar wearing it would be an invisible circle
-      # with initials floating in it. Inverting them also lifts the initials off
-      # the pair `accessibility_spec` excludes as upstream's — 4.34:1 on muted,
-      # 4.74:1 on background.
-      INITIALS_CLASS = "bg-background text-[0.5rem] font-medium"
       # No `sm:` gate on either of these any more. They were hidden on a phone
       # because a 46px grid cell could not hold a name — and below `lg` there is
       # no grid now, there is a row three hundred pixels wide. A breakpoint rule
@@ -166,22 +156,8 @@ module Shadcn
       # others.
       CHIP_HEAD_CLASS = "flex min-h-6 items-center gap-1"
 
-      FLAG_ICON_CLASS = "size-3"
-      SUBTITLE_CLASS = "font-normal"
 
       CHIP_TEXT_CLASS = "truncate text-left text-[0.65rem] leading-tight"
-      # Faces up to `AVATARS_CAP`, then a count.
-      # `-space-x-1` overrides the group's own `-space-x-2`: upstream's overlap
-      # is a quarter of a `size-8` avatar, and the same eight pixels on a
-      # `size-4` one is half of it — the second initial disappears under the
-      # next face. A quarter of *this* size is four.
-      AVATARS_CLASS = "ml-auto flex shrink-0 -space-x-1"
-      # The fourth face is a number, at the same size as the three it follows.
-      AVATARS_MORE_CLASS = "size-3.5 bg-background text-[0.5rem] lg:size-4"
-      # Three faces, then the fourth is the count. Five was the first guess and
-      # it is too many at this size: the stack out-weighs the clock beside it,
-      # and past three the faces stop being read individually anyway.
-      AVATARS_CAP = 3
       # Text tokens, never the ramp's colour: the tint says how much, the
       # numerals stay ink.
 
@@ -270,69 +246,6 @@ module Shadcn
         return if item.subtitle.blank?
 
         tag.span(item.subtitle, "data-slot": "event-calendar-day-subtitle", class: SUBTITLE_CLASS)
-      end
-
-      # The two flags an event can carry, as icons, in the order they are
-      # listed. `prefix` is the slot family they are drawn in — the chip's
-      # `event-calendar-day`, the agenda row's `event-calendar-agenda` — so a
-      # surface can be addressed without the other being.
-      def flag_icons(item, prefix)
-        [ (done_icon(prefix) if item.done?), (attachment_icon(prefix) if item.attachment?) ]
-      end
-
-      def done_icon(prefix)
-        flag_icon("check", "#{prefix}-done", shadcn_t("event_calendar.done"))
-      end
-
-      def attachment_icon(prefix)
-        flag_icon("paperclip", "#{prefix}-attachment", shadcn_t("event_calendar.attachment"))
-      end
-
-      # The picture is decorative and the name is not: the chip's text is read
-      # from inside the day's target, so an icon alone would say nothing there.
-      def flag_icon(icon, slot, name)
-        tag.span(safe_join([ render(Icon::Component.new(icon, class: FLAG_ICON_CLASS, "aria-hidden": "true")),
-                             tag.span(name, class: "sr-only") ]),
-                 "data-slot": slot, class: "inline-flex shrink-0")
-      end
-
-      # What an assignee's progress looks like on the corner of their face:
-      # upstream's own badge, with `bg-muted-foreground` standing for "not yet"
-      # over its `bg-primary`. An assignee with no status gets no badge at all.
-      def assignee_badge(avatar, assignee)
-        return unless assignee.status
-
-        avatar.with_badge(class: ("bg-muted-foreground" if assignee.status == :pending),
-                          "data-status": assignee.status) do
-          tag.span(shadcn_t("event_calendar.assignee_status.#{assignee.status}"), class: "sr-only")
-        end
-      end
-
-      # `Avatar::Group` is upstream's own overlap and ring; the count past
-      # `AVATARS_CAP` is its `GroupCount`, so the shape is shadcn's
-      # rather than a lookalike.
-      def chip_avatars(item)
-        shown = item.assignees.first(AVATARS_CAP)
-        rest = item.assignees.size - shown.size
-
-        render(Avatar::Group::Component.new(class: AVATARS_CLASS)) do
-        safe_join(shown.map { |assignee| avatar_for(assignee) } + [ avatars_more(rest) ].compact)
-        end
-      end
-
-      def avatar_for(assignee)
-        render(Avatar::Component.new(size: :sm, class: STACK_AVATAR_CLASS)) do |avatar|
-        avatar.with_fallback(class: INITIALS_CLASS) { assignee.initials }
-        avatar.with_image(src: assignee.image, alt: "") if assignee.image
-        assignee_badge(avatar, assignee)
-        end
-      end
-
-      def avatars_more(count)
-        return if count.zero?
-
-        render(Avatar::GroupCount::Component.new(class: AVATARS_MORE_CLASS)
-                                          .with_content("+#{count}"))
       end
     end
   end

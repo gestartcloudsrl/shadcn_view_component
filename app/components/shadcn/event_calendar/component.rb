@@ -35,6 +35,8 @@ module Shadcn
     # [features/event-calendar.md](../../../../.claude/docs/features/event-calendar.md).
     #
     class Component < ApplicationViewComponent
+      include Faces
+
       # Each colour is two custom properties, declared once on the root as
       # descendant rules rather than as utilities on every chip and every dot.
       # Two things follow, and both are the reason for the shape: an element is
@@ -1130,20 +1132,65 @@ module Shadcn
                    "data-action": ("pointerdown->shadcn--event-calendar#grabRow" if movable?)),
           render(Item::Content::Component.new(class: AGENDA_CONTENT_CLASS).with_content(
           safe_join([
-            render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS).with_content(event.title)),
+            render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS)
+                                         .with_content(agenda_title(event))),
             render(Item::Description::Component.new(class: AGENDA_META_CLASS)
-                                              .with_content(agenda_meta(event)))
-          ])
-          ))
-        ])
+                                              .with_content(agenda_meta(event))),
+            agenda_description(event)
+          ].compact)
+          )),
+          agenda_avatars(event)
+        ].compact)
 
         # The `<li>` carries the colour and this carries the classes, because
         # only one of the two can be an `<a>` and a clone cannot change its own
         # tag name — which is why the `<template>` at the bottom holds both.
         return render(agenda_item_component.with_content(body)) if event.url.blank?
 
-        render(agenda_item_component(as: :a, href: event.url,
-                                     class: "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}").with_content(body))
+        render(agenda_link(event).with_content(body))
+      end
+
+      # The host's attributes go on the link and nowhere else — a row with no
+      # url has no link, and the `<li>` is the list's own. Merged with the
+      # gem's precedence: the caller's hash after the component's defaults, and
+      # `href` and `data-slot` after that, so a host cannot move the row off the
+      # event's address or out of its slot. `class` and `data-action` join.
+      def agenda_link(event)
+        merged = merge_attributes({ "class" => "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}" },
+                                  event.attributes,
+                                  { "href" => event.url, "data-slot" => "event-calendar-agenda-row" })
+        merged["class"] = Array(merged["class"]).join(" ")
+        Item::Component.new(size: :sm, as: :a, **merged.symbolize_keys)
+      end
+
+      # The title and the subtitle share one truncated line, the flags beside
+      # them. Plain title text when there is nothing else, so a row that says
+      # no more than it did renders as it did.
+      def agenda_title(event)
+        extras = [ agenda_subtitle(event), *flag_icons(event, "event-calendar-agenda") ].compact
+        return event.title if extras.empty?
+
+        safe_join([ event.title, *extras ], " ")
+      end
+
+      def agenda_subtitle(event)
+        return if event.subtitle.blank?
+
+        tag.span(event.subtitle, "data-slot": "event-calendar-agenda-subtitle", class: SUBTITLE_CLASS)
+      end
+
+      def agenda_description(event)
+        return if event.description.blank?
+
+        render(Item::Description::Component.new(class: AGENDA_META_CLASS,
+                                                "data-slot": "event-calendar-agenda-description")
+                                           .with_content(event.description))
+      end
+
+      def agenda_avatars(event)
+        return if event.assignees.empty?
+
+        tag.span(chip_avatars(event), "data-slot": "event-calendar-agenda-avatars", class: "flex shrink-0 items-center")
       end
 
       def agenda_item_component(**attributes)
