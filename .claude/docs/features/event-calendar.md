@@ -742,7 +742,10 @@ what was built, read back from the code.
 
 ### The generic fields
 
-`Event` takes six more keywords, all optional, and a host that passes none of
+`Event` takes five more keywords, all optional (`subtitle:`, `description:`,
+`done:`, `attachment:`, `attributes:`); `color:` is widened to also take a
+custom property's name, as a String only (a Symbol, `:"--chart-2"` included, is
+read as a palette name and falls back); and an assignee takes `status:`. A host that passes none of
 them renders what it rendered before (the goldens outside the `<template>` did
 not move).
 
@@ -791,7 +794,13 @@ or `:both`.
 
 The row's `<a>` takes the event's `attributes:`. Precedence is the gem's usual:
 the component's defaults, then the caller's, then `href` and `data-slot`, which
-stay the event's and the gem's; `class` and `data-action` concatenate. Without
+stay the event's and the gem's; `class`, `data-action` and `data-controller`
+concatenate. A `class` goes through the same pipeline as any caller's, so a
+Hash or an Array means what it means on any other component. `as:` and `size:`
+are `Item`'s arguments, not attributes, and are dropped from `attributes:`: the
+row stays a small `<a>`. An attribute name no element can carry (`"on click"`)
+is escaped the way Rails' `tag` escapes it (`on_click`), on the server's row and
+in the payload alike, so the browser's `setAttribute` never throws on it. Without
 `url:` there is no link, and `attributes:` are dropped. A drawer is
 `attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } }`.
 There is no JavaScript event and no id emitted: what a click shows is the
@@ -835,12 +844,15 @@ fails. Dark mode is the host's: it defines the property under `.dark`.
 same reason: it needs a readable foreground derived from an unknown colour. A
 mark and a neutral text need none.
 
-**Known limitation:** the dense reading bands marks into runs by colour, and a
-host colour is `:host` to that comparison, so two different host colours that
-sit next to each other are drawn as one run (`#tick`, comparing
-`event.color`). The browser's redraw compares `color` in the payload too
-(`marks[index - 1].color === event.color`); what `color` holds there for a host
-colour was not checked. Not measured in a page.
+The dense reading's marks band by colour, and every host colour is `:host`
+(`"host"` in the payload, which the component spec asserts), so the property is
+half of what a band is: `Component#in_bands` sorts by the palette's rank, then
+by `color_property`, and `#same_band?` compares both, so two host colours band
+apart as two fixed colours do. The controller's `ticksElement` does the same
+with `color` and `colorProperty`. Host colours sit after the six, ordered by
+plain string comparison of the name. Covered on the server by the component
+spec and in the browser by a system example that steps a month away and back;
+not looked at in the gallery, which has no day with two host colours.
 
 ### The host slot that was rejected
 

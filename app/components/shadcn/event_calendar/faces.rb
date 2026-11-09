@@ -7,6 +7,9 @@ module Shadcn
     # agenda row, and neither of those is the other's parent, so they live here
     # rather than in `Chips`.
     module Faces
+      # Smaller everywhere a month is not on a desktop. Two initials at 14px
+      # still read; the circle is what gives way, not the type.
+      #
       # A face in a crew stack, which is not the same face as the one on an
       # assignee chip: these two shared a name after a rename and Ruby kept the
       # second, so the chip's avatar silently lost its `shrink-0` and shrank in

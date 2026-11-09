@@ -15,9 +15,10 @@ module Shadcn
     # divergence is deliberate and is the only one; it is in
     # [features/event-calendar.md](../../../../.claude/docs/features/event-calendar.md).
     class Event
-      # Named rather than free-form, because an arbitrary colour would have to
-      # arrive as a class or a hex and neither survives: Tailwind never sees a
-      # string built at runtime, and a hex cannot answer to the dark palette.
+      # The palette's own names. A colour outside it cannot arrive as a class
+      # or a hex — Tailwind never sees a string built at runtime, and a hex
+      # cannot answer to the dark palette — so a host's own arrives as the name
+      # of a custom property instead: see `HOST_COLOR`, below.
       # Each name resolves to two custom properties in `Component::COLOR_TOKENS`.
       COLORS = %i[default blue green amber rose violet].freeze
 

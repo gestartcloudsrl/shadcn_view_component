@@ -17,9 +17,6 @@ module Shadcn
     module Chips
       include Faces
 
-      # Smaller everywhere a month is not on a desktop. Two initials at 14px
-      # still read; the circle is what gives way, not the type.
-
       # What a job that crosses days wears. Two things saying one thing, on
       # purpose — the same redundancy the events reading's bars have, where the
       # flat edge and the position both say "this continues".
@@ -155,7 +152,6 @@ module Shadcn
       # the band it was holding open sat at 81 pixels in some cells and 89 in
       # others.
       CHIP_HEAD_CLASS = "flex min-h-6 items-center gap-1"
-
 
       CHIP_TEXT_CLASS = "truncate text-left text-[0.65rem] leading-tight"
       # Text tokens, never the ramp's colour: the tint says how much, the
