@@ -101,17 +101,68 @@ a subclass.** `EventCalendar::Component.new(reading: :hours)` hands over from
 `.new`, so the API is one component and one argument, and the root is still one
 element. `:auto` remains a synonym for `:events`, because the gem is published.
 
+The table is three readings of a *month*, and there are five components: the
+two periods that are not the month — `Daily::Component` and
+`Weekly::Component` — are subclasses of `Hours`, the reading they draw with, and
+are reached the same way, `reading: :daily` and `reading: :weekly`.
+
 `Calendar::Month`, `Schedule` and `Event` are not split. `Chips` — what one job
 looks like as a chip, and what a day's total looks like as a badge — is a module
 the workload and hours readings both include, because hours is not a kind of
 workload: it is a third reading that wants the same chip, so what the two differ
 in is the axis, not what an intervention looks like.
 
-### The period, and the day
+### The period, the week and the day
 
-The panel narrows in three steps: **the period**, then how to read it, then the
-only question that reading has. A day has one arrangement, so its middle
-question is not drawn at all.
+The panel narrows in three steps: **the period** — monthly, weekly or daily —
+then how to read it, then the only question that reading has. A week and a day
+have one arrangement each, so their middle question is not drawn at all.
+
+**A week is seven `Hours` rows over one `window`**, so Tuesday at ten sits
+directly above Thursday at ten. `Weekly::Component` is `Daily`'s sibling, not
+its subclass: what the two share is being a period that is not the month, and
+`Daily`'s nav steps a day. It overrides six things — `view`, `period`, `grid`,
+`title`, `step_button` and `cell_role` — and inherits the axis, the placement and the
+panel's one question, chips or bars, untouched.
+
+- **Which week** is the one in the month's grid that holds `selected`, so a week
+  crossing two months is not a special case: the grid already carries the days
+  either side. A `selected` the grid does not contain falls back to its first
+  week rather than raising, as `default_selection` does for a day.
+- **The title is the span** — "3 – 9 August 2026", the month said twice when
+  the week crosses one, the year too when it crosses that — and `‹` `›` step a
+  week.
+- **Seven stacked days are a `role="list"`** of `listitem`s, as `Daily`'s one
+  day is, and not a grid: the seven-column geometry a `role="grid"` would report
+  does not exist here. That is also why neither carries `aria-selected`, which
+  ARIA does not allow on a `listitem`; the chosen day is still `data-selected`
+  and still a button with its whole date, but a stacked reading has no standard
+  way to say "and this is the one you are on".
+- **An empty day keeps a full row.** The rows are ragged — each grows with its
+  lanes, from nothing to 185px on the fixture month — and two adjacent free days
+  take about 160px of an 802px screen. They keep it: *Thursday is free* answers
+  the question a week is asked, and a thin strip would say it in a whisper.
+  Alignment does not decide it either way, because it is horizontal.
+- **It is drawn by the server**, like every `Hours` reading: the nav is links,
+  nothing is re-packed in the browser, and `movable:` does not reach it.
+
+**The shape matters more to a week than to a month.** On the busy generator —
+ten to twenty-four events a day — the same week measures **1565px at `chips` and
+577px at `bars`** against an 802px viewport: two screens against seven tenths of
+one, because a row's height follows its lanes and a chip is as tall as a title
+and a crew where a bar is a line. The default stays `chips`, inherited from
+`Hours`; a host for whom *all seven at once* matters more than what each bar
+says has `shape: :bars`, and the panel offers it. An event outside `window` is
+reached by scrolling the track sideways, as in the month — which reads worse in
+a view you expect to take in at a glance.
+
+**A week has no grouping**, because `Hours` has none and the week adds nothing
+to the reading it draws with. Cut by operator, a week's row would be a person
+rather than a day, on a continuous Monday→Sunday axis rather than seven windows
+stacked — a different geometry, not a variation on this one. That and the
+week's agenda half, `showing:`, are the two pieces left out of
+[its design](../specs/2026-08-31-event-calendar-week-view-design.md#not-in-this-design)
+on purpose.
 
 `Daily::Component` inherits `Hours::Component`, because a day is where that axis
 finally has room — the same twenty-four hours that were a twenty-eighth of a
@@ -1113,13 +1164,15 @@ Named rather than left to be discovered:
   follow a base class; and the premise was false, because `calendar_controller.js`
   is longer and unsplit. What was done instead is the part that was actually
   worth having — the methods are in the order of the two halves, with the four
-  edges that cross the seam named at it. The trigger for revisiting is the week
-  view below: it needs a `render` of its own, which is the second subclass the
-  base does not have today.
-- **the week view.** The switcher and the day view are built — see *The period,
-  and the day*. A week is the one shape left, and it is the one that needs a
-  time axis *across* seven days rather than down one; the hours reading has the
-  axis now, so this is smaller than it was, but it is not free.
+  edges that cross the seam named at it. The trigger for revisiting used to be
+  the week view, on the assumption that it would need a `render` of its own. It
+  did not: the week is drawn by the server and the controller returns before
+  reaching it. The trigger is a second reading drawn *in the browser*, which
+  none has needed yet.
+- **the week's agenda, and a week cut by operator.** The week is built — see
+  *The period, the week and the day* — without either; both are named in
+  [its design](../specs/2026-08-31-event-calendar-week-view-design.md#not-in-this-design)
+  as separate pieces.
 - **drag to resize.** Moving is built — see *Moving an event* above — and this
   is the gesture that did not come with it: a second handle on the end of a bar,
   and a rule for what a resize means to a `to` that is inclusive here and

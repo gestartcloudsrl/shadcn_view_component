@@ -477,14 +477,6 @@ noting that it would not have delivered the component that raised the question:
       the gem stays physical on purpose — upstream is, and diverging on class
       strings is the thing this port does not do.
 
-- [ ] **The event calendar's week view.** The one shape the family does not
-      have. It was blocked on a time axis "that is a different component's
-      worth of geometry"; the hours reading has that axis now, so what is left
-      is running it *across* seven days rather than down one — the lane packing
-      is per-week already (`Schedule#pack`), and `Hours::Component` places by a
-      percentage of a window, which a week can widen. Smaller than it was, not
-      free.
-
 - [ ] **Split `event_calendar_controller.js` — not yet, and here is the
       trigger.** The split was built and thrown away rather than argued about,
       so the numbers below are measured and not estimated. 570 lines came apart
@@ -540,13 +532,22 @@ noting that it would not have delivered the component that raised the question:
       would still run the wrong way, and `stimulus_contract_spec` would still go
       blind. Size was the one reason **against** splitting, and it has gone —
       which moves this from "the case is weak" to "the case is untested", and
-      the test is still the week view above.
+      the test is a second reading drawn in the browser.
 
-      **What changes the answer is the week view above.** It needs a `render` of
-      its own, which gives the base its second subclass and brings the three
-      hooks to life — at which point the split pays for itself instead of being
-      paid for in advance. Until then the seam is worth having in the *order of
-      the methods*, which is where it now is, and not in a second file.
+      **What was going to change the answer was the week view, and it did
+      not.** This entry predicted the week would need a `render` of its own,
+      giving the base its second subclass and the three hooks a life. The week
+      is built and needs none: `Hours::Component#client_drawn?` is `false`, so
+      the server draws it whole and the controller's `render()` returns before
+      reaching it. The prediction was made before looking at which half of the
+      family the week would sit in.
+
+      The trigger is therefore a second **client-drawn** reading — something no
+      reading has needed yet, and not by accident: the events reading is the
+      only one drawn in the browser, and the other four — workload, hours, the
+      day and the week — are server-drawn because their data should not travel. Until one exists
+      the seam is worth having in the *order of the methods*, which is where it
+      now is, and not in a second file.
 
 - [x] **The Sidebar's mobile sheet has no role and no accessible name.** Fixed:
       the controller writes `role="dialog"`, `aria-modal` and both relationships
@@ -706,9 +707,10 @@ noting that it would not have delivered the component that raised the question:
   of truth, the two grips — and what is missing is a second gesture on the end
   of a bar and a rule for what a resize means to a `to` that is inclusive.
 
-  The fourth was the week view, and it is under *Smaller things* now rather than
-  here: it was listed as blocked on a time axis that has since been built. The
-  day view came off this list the same way — it was named as deliberately not
+  The fourth was the week view, which went to *Smaller things* once the time
+  axis it was blocked on had been built, and has since been built itself — see
+  the [feature doc](features/event-calendar.md#the-period-the-week-and-the-day).
+  The day view came off this list the same way — it was named as deliberately not
   done for a while after it was done.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
   false positives.
