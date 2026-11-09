@@ -1148,4 +1148,109 @@ RSpec.describe "Event calendar", :js do
       expect(page).to have_css("h2", text: "Event 2")
     end
   end
+
+  # The same two events, in the month the browser redraws. A step away and back
+  # puts every bar and mark through the clone, and choosing the day puts the
+  # rows through it — so what is asserted here is the controller's copy of the
+  # row, never the server's.
+  describe "a row the browser built" do
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events"
+      wait_for_stimulus
+
+      nav_button("Go to the Next Month").click
+      expect(page).to have_css(title, text: "September 2026")
+      nav_button("Go to the Previous Month").click
+      expect(page).to have_css(title, text: "August 2026")
+      day("2026-08-05").click
+    end
+
+    let(:row) { find("#{agenda} [data-slot=event-calendar-agenda-row][href='/calendar/events/1']") }
+
+    def style_of(selector)
+      page.evaluate_script("document.querySelector(#{"#{calendar} #{selector}".to_json})?.getAttribute('style') || ''")
+    end
+
+    it "says what the event says", :aggregate_failures do
+      expect(row["data-turbo-frame"]).to eq("event")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-subtitle]", text: "Via Roma 12")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-description]", text: "flue check")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-done]")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-attachment]")
+      expect(row.all("[data-slot=avatar-fallback]", visible: :all).map { |face| face.text(:all) }).to eq(%w[MR GB])
+      expect(row.all("[data-slot=avatar-badge]", visible: :all).map { |badge| badge["data-status"] })
+        .to eq(%w[done pending])
+    end
+
+    it "opens it in the Sheet on Enter" do
+      row.send_keys(:enter)
+
+      expect(page).to have_css("[role=dialog] turbo-frame#event", text: "Event 1")
+    end
+
+    it "keeps a host colour and gives a fixed one none", :aggregate_failures do
+      host = [ "[data-slot=event-calendar-agenda-item][data-color=host]",
+               "[data-slot=event-calendar-event][title='Boiler service']",
+               "[data-slot=event-calendar-day-tick][data-color=host]" ]
+      fixed = [ "[data-slot=event-calendar-agenda-item][data-color=green]",
+                "[data-slot=event-calendar-event][title='Flue inspection']",
+                "[data-slot=event-calendar-day-tick][data-color=green]" ]
+
+      expect(host.map { |selector| style_of(selector) }).to all(include("--event-color: var(--chart-2)"))
+      expect(fixed.map { |selector| style_of(selector) }).to all(satisfy { |style| !style.include?("--event-color") })
+    end
+
+    it "leaves out what an event does not say", :aggregate_failures do
+      plain = find("#{agenda} [data-slot=event-calendar-agenda-row][href='/calendar/events/2']")
+
+      expect(plain["data-turbo-frame"]).to be_nil
+      expect(plain).to have_no_css("[data-slot=event-calendar-agenda-subtitle], " \
+                                   "[data-slot=event-calendar-agenda-description], " \
+                                   "[data-slot=event-calendar-agenda-done], [data-slot=avatar-badge]",
+                                   visible: :all)
+      expect(plain.all("[data-slot=avatar-fallback]", visible: :all).map { |face| face.text(:all) }).to eq(%w[LV])
+    end
+  end
+
+  # A movable row used to be two tab stops — the `<li>` and the `<a>` in it —
+  # and Enter on the first did nothing. With a url the link is the one stop:
+  # Enter is the link's and Space still picks the row up.
+  describe "a movable row that is also a link" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events&movable=true"
+      wait_for_stimulus
+    end
+
+    let(:item) { find("#{agenda} [data-slot=event-calendar-agenda-item][data-event-id='2']") }
+    let(:link) { item.find("a[href='/calendar/events/2']") }
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    it "is one tab stop, and the stop is the link", :aggregate_failures do
+      expect(item["tabindex"]).to be_nil
+      expect(item.all("[tabindex='0'], a[href]").size).to eq(1)
+    end
+
+    it "goes to its page on Enter" do
+      link.send_keys(:enter)
+
+      expect(page).to have_current_path("/calendar/events/2")
+    end
+
+    it "is picked up on Space", :aggregate_failures do
+      link.send_keys(:space)
+
+      expect(find("#{calendar} [data-slot=event-calendar-announcer]", visible: :all).text(:all))
+        .to include("Flue inspection")
+      expect(focused).to eq("2026-08-05")
+    end
+
+    it "gives the focus back to the link when the pick is cancelled" do
+      link.send_keys(:space)
+      press(:escape)
+
+      expect(page.evaluate_script("document.activeElement?.getAttribute('href')")).to eq("/calendar/events/2")
+    end
+  end
 end

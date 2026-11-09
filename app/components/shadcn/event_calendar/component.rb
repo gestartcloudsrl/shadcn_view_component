@@ -1115,17 +1115,25 @@ module Shadcn
         shadcn_t("event_calendar.event_count", count:) if count.positive?
       end
 
-      def agenda_item(event)
-        tag.li(agenda_row(event), "data-slot": "event-calendar-agenda-item", "data-color": event.color,
+      # The `<li>` is the tab stop of a movable row only when nothing inside it
+      # is: a row with a url is already a link, and a stop around a stop was
+      # two of them for one row, with Enter doing nothing on the outer one.
+      # Space reaches `agendaKeydown` from the link just the same, because the
+      # list is what listens.
+      #
+      # `prototype:` is the `<template>`'s, and draws every part a row can
+      # have, empty — see `#prototypes`.
+      def agenda_item(event, prototype: false)
+        tag.li(agenda_row(event, prototype:), "data-slot": "event-calendar-agenda-item", "data-color": event.color,
                style: color_style(event).presence, "data-event-id": (event.id if movable?),
-               class: (AGENDA_PICK_CLASS if movable?), tabindex: ("0" if movable?))
+               class: (AGENDA_PICK_CLASS if movable?), tabindex: ("0" if movable? && event.url.blank?))
       end
 
       # The row *is* an `Item` — a content, a title and a description was the
       # shape it had already, spelled out by hand. Rendering the family instead
       # means the vocabulary is upstream's, and the rules `Item` carries for its
       # own parts keep working.
-      def agenda_row(event)
+      def agenda_row(event, prototype: false)
         body = safe_join([
           tag.span("", "data-slot": "event-calendar-agenda-mark",
                    class: [ AGENDA_MARK_CLASS, (AGENDA_MARK_GRIP_CLASS if movable?) ],
@@ -1133,10 +1141,10 @@ module Shadcn
           render(Item::Content::Component.new(class: AGENDA_CONTENT_CLASS).with_content(
           safe_join([
             render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS)
-                                         .with_content(agenda_title(event))),
+                                         .with_content(agenda_title(event, prototype:))),
             render(Item::Description::Component.new(class: AGENDA_META_CLASS)
                                               .with_content(agenda_meta(event))),
-            agenda_description(event)
+            agenda_description(event, prototype:)
           ].compact)
           )),
           agenda_avatars(event)
@@ -1166,25 +1174,27 @@ module Shadcn
       # The title and the subtitle share one truncated line, the flags beside
       # them. Plain title text when there is nothing else, so a row that says
       # no more than it did renders as it did.
-      def agenda_title(event)
-        extras = [ agenda_subtitle(event), *flag_icons(event, "event-calendar-agenda") ].compact
+      def agenda_title(event, prototype: false)
+        extras = [ agenda_subtitle(event, prototype:), *flag_icons(event, "event-calendar-agenda") ].compact
         return event.title if extras.empty?
 
         safe_join([ event.title, *extras ], " ")
       end
 
-      def agenda_subtitle(event)
-        return if event.subtitle.blank?
+      # `prototype:` draws the part with nothing in it: `Event` turns a blank
+      # subtitle into none, so an empty one cannot be asked for any other way.
+      def agenda_subtitle(event, prototype: false)
+        return if event.subtitle.blank? && !prototype
 
-        tag.span(event.subtitle, "data-slot": "event-calendar-agenda-subtitle", class: SUBTITLE_CLASS)
+        tag.span(event.subtitle.to_s, "data-slot": "event-calendar-agenda-subtitle", class: SUBTITLE_CLASS)
       end
 
-      def agenda_description(event)
-        return if event.description.blank?
+      def agenda_description(event, prototype: false)
+        return if event.description.blank? && !prototype
 
         render(Item::Description::Component.new(class: AGENDA_META_CLASS,
                                                 "data-slot": "event-calendar-agenda-description")
-                                           .with_content(event.description))
+                                           .with_content(event.description.to_s))
       end
 
       def agenda_avatars(event)
@@ -1221,8 +1231,8 @@ module Shadcn
             event_bar(Schedule::Segment.new(event: prototype_event, column: 1, span: 1, lane: 1)),
             ticks([ prototype_event ]),
             more_chip(1),
-            agenda_item(prototype_event),
-            agenda_item(prototype_link_event)
+            agenda_item(prototype_row_event, prototype: true),
+            agenda_item(prototype_row_event(url: "#"), prototype: true)
           ]),
           "data-shadcn--event-calendar-target": "prototypes"
         )
@@ -1234,7 +1244,21 @@ module Shadcn
       # not need instead, which is the direction that works.
       def prototype_event = Event.new(title: "", starts_at: month.first.in_time_zone)
 
-      def prototype_link_event = Event.new(title: "", starts_at: month.first.in_time_zone, url: "#")
+      # The row's shape, with every part it can have, for the same reason the
+      # chip's is timed: the clone fills or removes, it never builds. Both
+      # badges, one face with a picture, and one face past `AVATARS_CAP` so the
+      # count is there — the controller reads the cap back off the number of
+      # faces, rather than carrying a copy of the constant.
+      #
+      # All of it sits inside the `<template>`, inert and never painted, which
+      # is why the goldens may move there and nowhere else.
+      def prototype_row_event(url: nil)
+        faces = [ Event::Assignee.new("", "", :done), Event::Assignee.new("", nil, :pending) ]
+        faces += Array.new([ AVATARS_CAP + 1 - faces.size, 1 ].max) { Event::Assignee.new("", nil, nil) }
+
+        Event.new(title: "", starts_at: month.first.in_time_zone, url:, done: true, attachment: true,
+                  assignees: faces)
+      end
 
       # --- text -----------------------------------------------------------------
 
@@ -1255,6 +1279,7 @@ module Shadcn
         # neither `#hash` nor `#eql?`, collapsed a reused instance into one key.
         ranked = schedule.events.each_with_index.sort_by { |event, index| [ *event.day_sort_key, index ] }
         day_order = ranked.each_with_index.to_h { |(_, original), rank| [ original, rank ] }
+        rows = client_rows?
 
         schedule.events.each_with_index.map do |event, index|
           # Bound once each. `chip_time` was called four times and `agenda_meta`
@@ -1277,9 +1302,69 @@ module Shadcn
             allDay: (true if event.all_day?),
             time:,
             meta: (meta unless meta == time),
-            url: event.url.presence
+            url: event.url.presence,
+            # The bars and the marks wear it, so it crosses whenever it is set.
+            colorProperty: event.color_property,
+            # An empty hash rather than `**nil`, which only Ruby 3.4 accepts.
+            **(rows ? portable_row(event) : {})
           }.compact
         end
+      end
+
+      # Whether the controller ever builds an agenda row — the same condition
+      # its `agendaList` target is written under. With `day_url:` the agenda is
+      # the server's, and with `agenda: false` there is none, so what only a
+      # row reads would be paid for and never read: the `panel` preview's
+      # month carried every assignee of every appointment, for a Sheet.
+      def client_rows? = agenda? && day_url.nil?
+
+      # What a row says beyond the title, each only when the event says it —
+      # the same trim as `#portable_events`, for the same two thousand events.
+      def portable_row(event)
+        { subtitle: event.subtitle,
+          description: event.description,
+          done: (true if event.done?),
+          attachment: (true if event.attachment?),
+          assignees: (portable_assignees(event) if event.assignees.any?),
+          # Only with a url: without one the row has no link to put them on,
+          # and the server drops them too.
+          attributes: (portable_attributes(event).presence if event.url.present?) }
+      end
+
+      # The initials cross already worked out, like the times: they are a rule
+      # about names, and the controller would otherwise need its own copy.
+      def portable_assignees(event)
+        event.assignees.map do |assignee|
+          { name: assignee.name, initials: assignee.initials, image: assignee.image&.to_s.presence,
+            status: assignee.status }.compact
+        end
+      end
+
+      # Written out the way `tag` writes them — `data: { turbo_frame: }` as
+      # `data-turbo-frame`, a non-string `data-` value as JSON, an `aria-` list
+      # joined — so the controller only ever sets attributes and never learns
+      # Rails' nesting. Normalised by `merge_attributes` first, which is what
+      # the server's row goes through, so `data: { action: }` arrives as the
+      # `data-action` the clone concatenates. `href` and `data-slot` are the
+      # row's own and never cross.
+      def portable_attributes(event)
+        pairs = merge_attributes(event.attributes).flat_map do |name, value|
+          next [ [ name, value ] ] unless %w[data aria].include?(name) && value.is_a?(Hash)
+
+          value.map { |key, inner| [ "#{name}-#{key.to_s.dasherize}", inner ] }
+        end
+
+        pairs.to_h { |name, value| [ name, flat_value(name, value) ] }.compact.except("href", "data-slot")
+      end
+
+      # `nil` is an attribute `tag` leaves out, and so is a false boolean one.
+      def flat_value(name, value)
+        return if value.nil?
+        return (name if value) if ActionView::Helpers::TagHelper::BOOLEAN_ATTRIBUTES.include?(name)
+        return value.to_json if name.start_with?("data-") && !value.is_a?(String) && !value.is_a?(Symbol)
+        return ActionView::Helpers::TagHelper.build_tag_values(value).join(" ") if value.is_a?(Array) || value.is_a?(Hash)
+
+        value.to_s
       end
 
       def chip_time(event)

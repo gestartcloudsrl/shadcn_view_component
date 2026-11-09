@@ -452,6 +452,19 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
       expect(week.css(%(*[data-slot="event-calendar-event"]))).to be_empty
     end
+
+    # The row is cloned and stripped, like the chip, so every part the server
+    # row can have is in both prototypes — empty, for the clone to fill.
+    it "holds every part a row can say, in both kinds of row", :aggregate_failures do
+      template.css(%(*[data-slot="event-calendar-agenda-row"])).each do |row|
+        %w[event-calendar-agenda-subtitle event-calendar-agenda-done event-calendar-agenda-attachment
+           event-calendar-agenda-description event-calendar-agenda-avatars avatar-image avatar-group-count].each do |name|
+          expect(row.at_css(%(*[data-slot="#{name}"]))).not_to be_nil, "no #{name} in the #{row.name} row"
+        end
+        expect(row.css("[data-slot=avatar-badge]").map { |badge| badge["data-status"] }).to eq(%w[done pending])
+        expect(row.at_css("[data-slot=event-calendar-agenda-subtitle]").text).to eq("")
+      end
+    end
   end
 
   # Four bugs a review found, all of the same shape: the server renders a
@@ -856,6 +869,64 @@ RSpec.describe Shadcn::EventCalendar::Component do
     it "carries the reading order a day is listed in" do
       expect(crossed).to have_key("dayOrder")
     end
+
+    # The fields an event can say are paid for only by the events that say
+    # them: a host passing none of them ships the payload it always did.
+    it "adds nothing for an event that says no more than it did" do
+      expect(crossed.keys).to match_array(%w[dayOrder title color from time])
+    end
+
+    context "with an event that says everything" do
+      let(:options) do
+        { events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 20, 9), color: "--chart-2",
+                      url: "/e/1", subtitle: "Via Roma 12", description: "Flue check", done: true,
+                      attachment: true,
+                      assignees: [ "Ada Lovelace", { name: "Grace Hopper", image: "/g.png", status: :pending } ],
+                      attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" },
+                                    aria: { describedby: "note" }, class: %w[ring-2 ring-ring],
+                                    href: "/elsewhere", "data-slot": "x", hidden: false } } ] }
+      end
+
+      it "carries exactly the keys it said" do
+        expect(crossed.keys).to match_array(%w[dayOrder title color from time url colorProperty subtitle
+                                               description done attachment assignees attributes])
+      end
+
+      it "carries the fields as the row draws them", :aggregate_failures do
+        expect(crossed.values_at("color", "colorProperty", "subtitle", "description", "done", "attachment"))
+          .to eq([ "host", "--chart-2", "Via Roma 12", "Flue check", true, true ])
+        expect(crossed["assignees"]).to eq([
+          { "name" => "Ada Lovelace", "initials" => "AL" },
+          { "name" => "Grace Hopper", "initials" => "GH", "image" => "/g.png", "status" => "pending" }
+        ])
+      end
+
+      # Flat, the way `tag` writes `data:` and `aria:` — the controller sets
+      # attributes, it does not know Rails' nesting. What the row owns stays
+      # the row's, as it does on the server.
+      it "carries the attributes flat, without the ones the row owns" do
+        expect(crossed["attributes"]).to eq(
+          "data-action" => "shadcn--dialog#open", "data-turbo-frame" => "event",
+          "aria-describedby" => "note", "class" => "ring-2 ring-ring"
+        )
+      end
+    end
+
+    # With `day_url:` the agenda is the server's and no row is ever built in
+    # the browser, so nothing only a row reads is worth shipping. The colour
+    # still crosses: the bars and the marks are still redrawn.
+    context "when the server owns the agenda" do
+      let(:options) do
+        { day_url: ->(day) { "/d/#{day}" },
+          events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 20, 9), color: "--chart-2",
+                      url: "/e/1", subtitle: "Via Roma 12", done: true, assignees: [ "Ada Lovelace" ],
+                      attributes: { data: { turbo_frame: "event" } } } ] }
+      end
+
+      it "carries only what the month itself draws" do
+        expect(crossed.keys).to match_array(%w[dayOrder title color from time url colorProperty])
+      end
+    end
   end
 
   # A move dispatches the host's own id, and an event has none unless the host
@@ -890,6 +961,25 @@ RSpec.describe Shadcn::EventCalendar::Component do
       it "crosses the switch to the controller" do
         expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-movable-value"])
           .to eq("true")
+      end
+    end
+
+    # The `<li>` was the tab stop and the `<a>` inside it another: two stops
+    # for one row, and Enter on the outer one did nothing. With a url the link
+    # is the one stop — Enter is the link's, Space still picks the row up.
+    context "with an event that has a url" do
+      let(:options) do
+        { events: [ events.first.merge(url: "/e/a"), events.last ], selected: Date.new(2026, 8, 20),
+          movable: true }
+      end
+
+      before { render_inline(calendar) }
+
+      it "makes the link the row's one tab stop", :aggregate_failures do
+        linked, plain = parts("event-calendar-agenda-item").to_a
+        expect(linked["tabindex"]).to be_nil
+        expect(linked.at_css("a[href='/e/a']")).not_to be_nil
+        expect(plain["tabindex"]).to eq("0")
       end
     end
 

@@ -8,7 +8,16 @@
 
     The colour is `--chart-2`, a token every theme defines in both palettes, so
     this preview needs no stylesheet of its own. The route and the frame's
-    markup are in `test/dummy`. %>
+    markup are in `test/dummy`.
+
+    `reading` and `movable` are the preview method's knobs, so the same two
+    events can be read as the month the browser redraws — rendered as a file,
+    with no locals, it is the week. The month takes no `day_url:`: with one
+    the agenda is the server's, and the point of reading it there is the rows
+    the controller builds itself. %>
+<% reading = local_assigns.fetch(:reading, :weekly) %>
+<% movable = local_assigns.fetch(:movable, false) %>
+<% placed = reading == :weekly ? { window: (7..19), day_url: ->(date) { "/calendar/days/#{date.iso8601}" } } : {} %>
 <%= render(Shadcn::Sheet::Component.new) do |sheet| %>
   <% sheet.with_dialog_content(side: :right, class: "w-full sm:max-w-md",
                                "aria-label": "Event detail") do %>
@@ -18,13 +27,13 @@
   <% end %>
 
   <%= render(Shadcn::EventCalendar::Component.new(
-        reading: :weekly,
+        reading:,
         month: Date.new(2026, 8, 1),
         selected: Date.new(2026, 8, 5),
-        window: (7..19),
-        day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
+        movable:,
+        **placed,
         events: [
-          { title: "Boiler service", starts_at: Time.zone.local(2026, 8, 5, 9),
+          { **(movable ? { id: "1" } : {}), title: "Boiler service", starts_at: Time.zone.local(2026, 8, 5, 9),
             ends_at: Time.zone.local(2026, 8, 5, 11), color: "--chart-2",
             url: "/calendar/events/1",
             subtitle: "Via Roma 12",
@@ -33,7 +42,7 @@
             assignees: [ { name: "Marco Rossi", status: :done },
                          { name: "Giulia Bianchi", status: :pending } ],
             attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } } },
-          { title: "Flue inspection", starts_at: Time.zone.local(2026, 8, 5, 13),
+          { **(movable ? { id: "2" } : {}), title: "Flue inspection", starts_at: Time.zone.local(2026, 8, 5, 13),
             ends_at: Time.zone.local(2026, 8, 5, 14), color: :green,
             url: "/calendar/events/2", assignees: [ "Luca Verdi" ] }
         ]

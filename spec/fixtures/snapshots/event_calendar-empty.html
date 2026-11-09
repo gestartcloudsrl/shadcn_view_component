@@ -504,10 +504,55 @@
 </span>
 <div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
 <div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+<span data-slot="event-calendar-agenda-subtitle" class="font-normal">
+</span>
+<span data-slot="event-calendar-agenda-done" class="inline-flex shrink-0">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide lucide-check size-3">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+<span class="sr-only">Done
+</span>
+</span>
+<span data-slot="event-calendar-agenda-attachment" class="inline-flex shrink-0">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide lucide-paperclip size-3">
+<path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/>
+</svg>
+<span class="sr-only">Has an attachment
+</span>
+</span>
 </div>
 <p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
 </p>
+<p data-slot="event-calendar-agenda-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">
+</p>
 </div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" data-controller="shadcn--avatar" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<img data-slot="avatar-image" data-shadcn--avatar-target="image" src="" alt="" class="aspect-square size-full">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">
+</span>
+<span data-slot="avatar-badge" data-status="done" class="absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&amp;&gt;svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&amp;&gt;svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&amp;&gt;svg]:size-2">
+<span class="sr-only">Done
+</span>
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">
+</span>
+<span data-slot="avatar-badge" data-status="pending" class="absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&amp;&gt;svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&amp;&gt;svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&amp;&gt;svg]:size-2 bg-muted-foreground">
+<span class="sr-only">Pending
+</span>
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
 </div>
 </li>
 <li data-slot="event-calendar-agenda-item" data-color="default">
@@ -516,10 +561,55 @@
 </span>
 <div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
 <div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">
+<span data-slot="event-calendar-agenda-subtitle" class="font-normal">
+</span>
+<span data-slot="event-calendar-agenda-done" class="inline-flex shrink-0">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide lucide-check size-3">
+<path d="M20 6 9 17l-5-5"/>
+</svg>
+<span class="sr-only">Done
+</span>
+</span>
+<span data-slot="event-calendar-agenda-attachment" class="inline-flex shrink-0">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide lucide-paperclip size-3">
+<path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/>
+</svg>
+<span class="sr-only">Has an attachment
+</span>
+</span>
 </div>
 <p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">12:00 AM
 </p>
+<p data-slot="event-calendar-agenda-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">
+</p>
 </div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" data-controller="shadcn--avatar" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<img data-slot="avatar-image" data-shadcn--avatar-target="image" src="" alt="" class="aspect-square size-full">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">
+</span>
+<span data-slot="avatar-badge" data-status="done" class="absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&amp;&gt;svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&amp;&gt;svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&amp;&gt;svg]:size-2">
+<span class="sr-only">Done
+</span>
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">
+</span>
+<span data-slot="avatar-badge" data-status="pending" class="absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full text-primary-foreground ring-2 ring-background select-none group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&amp;&gt;svg]:hidden group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&amp;&gt;svg]:size-2 group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&amp;&gt;svg]:size-2 bg-muted-foreground">
+<span class="sr-only">Pending
+</span>
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
 </a>
 </li>
 </template>

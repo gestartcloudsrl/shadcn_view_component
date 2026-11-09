@@ -143,6 +143,18 @@ export default class extends Controller {
     const rows = shapes.querySelectorAll("[data-slot='event-calendar-agenda-item']")
     this.agendaItemPrototype = rows[0]
     this.agendaLinkPrototype = rows[1]
+
+    // A row's faces, read once rather than per clone. The prototype draws one
+    // face past the cap, so the faces it shows *are* the cap — `AVATARS_CAP`
+    // stays in Ruby. The first face carries a picture and a badge; the badges
+    // are kept apart by status, because the two differ by a class and the
+    // clone may not write one.
+    const faces = rows[0].querySelectorAll("[data-slot='avatar']")
+    this.avatarCap = faces.length
+    this.facePrototype = faces[0]
+    this.badgePrototypes = Object.fromEntries(
+      [ ...rows[0].querySelectorAll("[data-slot='avatar-badge']") ].map((badge) => [ badge.dataset.status, badge ])
+    )
   }
 
   // --- navigation -----------------------------------------------------------
@@ -390,7 +402,9 @@ export default class extends Controller {
       `[data-slot='event-calendar-agenda-item'][data-event-id='${id}']`
     )
 
-    if (row) row.focus()
+    // The link, when the row is one: a row with a url has no stop of its own,
+    // and focusing the `<li>` would quietly put the focus nowhere.
+    if (row) (row.querySelector("a[href]") || row).focus()
     else this.focusDay(parse(picked.from))
   }
 
@@ -654,13 +668,18 @@ export default class extends Controller {
     const ticks = this.ticksPrototype.cloneNode(false)
     // `Component#in_bands`. `sort` is stable, so the clock still decides the
     // order inside a band, exactly as it does on the server.
-    const marks = [ ...events ].sort((left, right) =>
-      this.colorsValue.indexOf(left.color) - this.colorsValue.indexOf(right.color))
+    // A colour outside the palette — a host's own — ranks last, as
+    // `COLOR_RANK.fetch(…, COLORS_END)` has it; `indexOf` alone put it first.
+    const rank = (color) => {
+      const index = this.colorsValue.indexOf(color)
+      return index === -1 ? this.colorsValue.length : index
+    }
+    const marks = [ ...events ].sort((left, right) => rank(left.color) - rank(right.color))
 
     ticks.replaceChildren(...marks.map((event, index) => {
       const tick = this.tickPrototype.cloneNode(true)
 
-      tick.dataset.color = event.color
+      this.paint(tick, event)
       this.mark(tick, "runBefore", index > 0 && marks[index - 1].color === event.color)
       this.mark(tick, "runAfter", index + 1 < marks.length && marks[index + 1].color === event.color)
 
@@ -702,7 +721,7 @@ export default class extends Controller {
     const dot = node.querySelector("[data-slot='event-calendar-event-dot']")
     const time = node.querySelector("[data-slot='event-calendar-event-time']")
 
-    node.dataset.color = event.color
+    this.paint(node, event)
     if (this.movableValue) node.dataset.eventId = event.id
     this.mark(node, "picked", event.id === this.pickedId)
     this.mark(node, "pending", !!event.pending)
@@ -734,17 +753,105 @@ export default class extends Controller {
     this.agendaEmptyTarget.hidden = on.length > 0
   }
 
+  // `Component#agenda_row`, filled from the payload. The prototype holds every
+  // part a row can have, so each one is filled or removed — never built.
   agendaElement(event) {
     const node = (event.url ? this.agendaLinkPrototype : this.agendaItemPrototype).cloneNode(true)
+    const description = node.querySelector("[data-slot='event-calendar-agenda-description']")
 
-    node.dataset.color = event.color
+    this.paint(node, event)
     if (this.movableValue) node.dataset.eventId = event.id
     this.mark(node, "picked", event.id === this.pickedId)
-    if (event.url) node.querySelector("a").setAttribute("href", event.url)
-    node.querySelector("[data-slot='item-title']").textContent = event.title
+    if (event.url) this.link(node.querySelector("a"), event)
+    this.fillTitle(node.querySelector("[data-slot='item-title']"), event)
     node.querySelector("[data-slot='item-description']").textContent = event.meta
+    if (event.description) description.textContent = event.description
+    else description.remove()
+    this.fillFaces(node.querySelector("[data-slot='event-calendar-agenda-avatars']"), event.assignees)
 
     return node
+  }
+
+  // `Component#agenda_link`'s precedence: the host's attributes, then `href`
+  // and `data-slot`, which are the row's. `class` and `data-action` join
+  // rather than replace — and the classes are the host's own, written in the
+  // host's source where its Tailwind saw them, so this adds none of its own.
+  link(anchor, event) {
+    Object.entries(event.attributes || {}).forEach(([ name, value ]) => {
+      if (name === "href" || name === "data-slot") return
+
+      if (name === "class") anchor.classList.add(...value.split(/\s+/).filter(Boolean))
+      else if (name === "data-action" || name === "data-controller") {
+        anchor.setAttribute(name, [ anchor.getAttribute(name), value ].filter(Boolean).join(" "))
+      } else anchor.setAttribute(name, value)
+    })
+    anchor.setAttribute("href", event.url)
+  }
+
+  // `Component#agenda_title`: the title, then whichever of the subtitle and the
+  // two flags the event has, a space apart. Plain text when it has none.
+  fillTitle(title, event) {
+    const subtitle = title.querySelector("[data-slot='event-calendar-agenda-subtitle']")
+    const extras = [
+      event.subtitle && subtitle,
+      event.done && title.querySelector("[data-slot='event-calendar-agenda-done']"),
+      event.attachment && title.querySelector("[data-slot='event-calendar-agenda-attachment']")
+    ].filter(Boolean)
+
+    if (event.subtitle) subtitle.textContent = event.subtitle
+    title.replaceChildren(event.title, ...extras.flatMap((part) => [ " ", part ]))
+  }
+
+  // `Faces#chip_avatars`: up to the cap, then the count.
+  fillFaces(wrapper, assignees) {
+    if (!assignees?.length) return wrapper.remove()
+
+    const group = wrapper.querySelector("[data-slot='avatar-group']")
+    const count = group.querySelector("[data-slot='avatar-group-count']")
+    const shown = assignees.slice(0, this.avatarCap)
+    const rest = assignees.length - shown.length
+
+    // The `+` is the server's literal too — `Faces#avatars_more` writes it
+    // untranslated — so this is the same string rather than text of its own.
+    count.textContent = `+${rest}`
+    group.replaceChildren(...shown.map((assignee) => this.faceElement(assignee)), ...(rest > 0 ? [ count ] : []))
+  }
+
+  // `Faces#avatar_for`. The picture's controller goes with the picture: an
+  // initials-only face carries none on the server either.
+  faceElement(assignee) {
+    const face = this.facePrototype.cloneNode(true)
+    const image = face.querySelector("[data-slot='avatar-image']")
+
+    face.querySelector("[data-slot='avatar-badge']")?.remove()
+    face.querySelector("[data-slot='avatar-fallback']").textContent = assignee.initials
+    if (assignee.image) image.setAttribute("src", assignee.image)
+    else {
+      image.remove()
+      face.removeAttribute("data-controller")
+    }
+
+    const badge = this.badgePrototypes[assignee.status]
+    if (badge) face.append(badge.cloneNode(true))
+
+    return face
+  }
+
+  // `Component#color_style`, on a clone. A host colour is the two properties
+  // the `data-color` rules set for a fixed one, inline so it beats them; the
+  // ink is `--foreground` because no readable pair can be derived from a
+  // colour the gem cannot see. A fixed colour takes neither, so nothing a
+  // clone might have carried survives into it.
+  paint(node, event) {
+    node.dataset.color = event.color
+
+    if (event.colorProperty) {
+      node.style.setProperty("--event-color", `var(${event.colorProperty})`)
+      node.style.setProperty("--event-ink", "var(--foreground)")
+    } else {
+      node.style.removeProperty("--event-color")
+      node.style.removeProperty("--event-ink")
+    }
   }
 
   // --- the grid, and what sits on it ----------------------------------------

@@ -116,8 +116,16 @@ module Shadcn
       #
       # The dummy app that Lookbook runs inside answers both links
       # (`/calendar/events/:id`), so they work here as they would in a host.
-      def event_links
-        render_with_template
+      #
+      # `reading` puts the same two events in the month, whose rows the browser
+      # builds itself once you step a month away and back; `movable` makes
+      # them rows that can be picked up as well as opened.
+      #
+      # @param reading select [weekly, events]
+      # @param movable toggle
+      def event_links(reading: "weekly", movable: false)
+        render_with_template(locals: { reading: reading.to_sym,
+                                       movable: ActiveModel::Type::Boolean.new.cast(movable) || false })
       end
 
       # The playground for the three server-drawn views, and one preview for all
