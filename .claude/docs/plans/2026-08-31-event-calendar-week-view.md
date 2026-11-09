@@ -60,7 +60,7 @@ which is what its test asserts.
   `period_option` comparing `name == period` and on the panel drawing
   `view_options` only when `period == :monthly`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 In `spec/components/shadcn/event_calendar_spec.rb`, at the end of the top-level
 describe:
@@ -96,7 +96,7 @@ describe:
   end
 ```
 
-- [ ] **Step 2: Run it, and expect it to pass**
+- [x] **Step 2: Run it, and expect it to pass**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "#period"`
 
@@ -115,7 +115,7 @@ plain events calendar has **no options panel at all** — the panel is a
 `reading_control` and that reading declares none — so asking it which period is
 checked has no answer rather than a wrong one.
 
-- [ ] **Step 3: Introduce `period` and use it**
+- [x] **Step 3: Introduce `period` and use it**
 
 In `component.rb`, below `daily?`:
 
@@ -153,7 +153,7 @@ In `daily/component.rb`, beside `def view = :daily`:
         def period = :daily
 ```
 
-- [ ] **Step 4: Run the tests, then break it on purpose**
+- [x] **Step 4: Run the tests, then break it on purpose**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb spec/system/event_calendar_spec.rb`
 Expected: PASS, all of them. This task changes no output — `daily?` and
@@ -164,7 +164,7 @@ Then the control the green cannot give you: make `Daily#period` return
 `:monthly`, run the `#period` examples again, and confirm the failure reads
 `expected "daily", got "monthly"`. Put it back.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 bundle exec rspec spec/snapshot_spec.rb   # must pass without regenerating
@@ -199,7 +199,7 @@ whole claim is that the rendered output is identical.
   `Weekly::Component`; `data-slot=event-calendar-weeks` holding seven
   `event-calendar-day` cells with `role="listitem"`.
 
-- [ ] **Step 1: Write the failing component examples**
+- [x] **Step 1: Write the failing component examples**
 
 ```ruby
   describe "the weekly reading" do
@@ -244,13 +244,13 @@ whole claim is that the rendered output is identical.
   end
 ```
 
-- [ ] **Step 2: Run them and watch them fail**
+- [x] **Step 2: Run them and watch them fail**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "the weekly reading"`
 Expected: FAIL — `reading: :weekly` is not in `READINGS`, so it falls back to
 `:auto` and draws a month.
 
-- [ ] **Step 3: Register the reading**
+- [x] **Step 3: Register the reading**
 
 In `component.rb`:
 
@@ -277,7 +277,7 @@ In `config/locales/en.yml`, under `period:`, between `monthly` and `daily`:
         weekly: Weekly
 ```
 
-- [ ] **Step 4: Write the class**
+- [x] **Step 4: Write the class**
 
 `app/components/shadcn/event_calendar/weekly/component.rb`:
 
@@ -372,12 +372,12 @@ end
       next_week: Go to the Next Week
 ```
 
-- [ ] **Step 5: Run the component examples**
+- [x] **Step 5: Run the component examples**
 
 Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "the weekly reading"`
 Expected: PASS.
 
-- [ ] **Step 6: Add the preview — a template, and only a template**
+- [x] **Step 6: Add the preview — a template, and only a template**
 
 `snapshot_spec` globs `*/previews/*.html.erb`, so **a method preview gets no
 golden**. That is decisive here: the week needs the fixture more than it needs
@@ -414,7 +414,7 @@ In `preview.rb`, beside the other examples:
       end
 ```
 
-- [ ] **Step 7: Fix the two panel assertions a third period breaks**
+- [x] **Step 7: Fix the two panel assertions a third period breaks**
 
 `spec/system/event_calendar_spec.rb` asserts the panel's radio items exactly, in
 two places. Both gain `"Weekly"` after `"Monthly"`:
@@ -431,7 +431,7 @@ two places. Both gain `"Weekly"` after `"Monthly"`:
 These are not incidental churn: they are the examples that would have caught a
 third period being added badly, and they should be read before being edited.
 
-- [ ] **Step 8: A system example for the nav**
+- [x] **Step 8: A system example for the nav**
 
 ```ruby
   describe "the weekly reading" do
@@ -462,7 +462,7 @@ branch merges `reading: :weekly` with the window and the shape. Its existing
 of that date is the grid the week is found in, including the step that crosses
 into September.
 
-- [ ] **Step 9: Regenerate, declare, and run everything**
+- [x] **Step 9: Regenerate, declare, and run everything**
 
 ```bash
 SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb
@@ -494,7 +494,7 @@ git commit -m "Draw a week as seven rows of one axis"
 - Modify: `.claude/docs/features/event-calendar.md`
 - Modify: `.claude/docs/todo.md`
 
-- [ ] **Step 1: Give the feature doc the week**
+- [x] **Step 1: Give the feature doc the week**
 
 In *Three readings, three components* — which the week makes four — and in *The
 period, and the day*, which becomes the period, the week and the day. Carry over
@@ -503,12 +503,12 @@ the two shapes measured at 1565px and 577px against an 802px viewport, with the
 default staying `chips`; and that the week has no grouping because `Hours` has
 none, which is the third piece.
 
-- [ ] **Step 2: Close the week's TODO entry**
+- [x] **Step 2: Close the week's TODO entry**
 
 `todo.md` carries **The event calendar's week view** under *Smaller things*. It
 comes off.
 
-- [ ] **Step 3: Correct the split entry, whose trigger did not fire**
+- [x] **Step 3: Correct the split entry, whose trigger did not fire**
 
 This is the step to read carefully. The entry **Split
 `event_calendar_controller.js`** ends:
@@ -528,7 +528,7 @@ What replaces it: the trigger is a *client-drawn* second reading, which is a
 thing no reading has needed yet — the three server-drawn ones exist precisely
 because their data should not travel.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .claude/docs
