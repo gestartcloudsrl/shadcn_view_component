@@ -425,6 +425,14 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **The event calendar's desktop month takes two clicks to open an event**
+      (the day, then the row), where it took one. Events open from the row in
+      the day's list and the chip stays decoration, see
+      [the feature doc](features/event-calendar.md#what-an-event-says-and-where-it-opens).
+      A product owner is deciding. **Trigger: if two clicks are refused, revisit
+      the month alone**; the week and the day ship either way. Nothing built
+      toward the alternative, and none is designed.
+
 - [x] **Profile the client-side redraw before optimising it.** Done, and the
       answer is *don't*. A 2,000-event month redraws in **19.4 ms** — one frame,
       for a density no host should be shipping in the first place, and against

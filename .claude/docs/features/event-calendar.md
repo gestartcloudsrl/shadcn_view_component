@@ -733,6 +733,124 @@ navigation.
   happened to be. It is the one branch here no spec can reach: Selenium cannot
   cancel a pointer.
 
+## What an event says, and where it opens
+
+Written for a host that needs an event to say more than a title and a time, to
+wear its own colour, and to open somewhere the host decides. The design is
+[its spec](../specs/2026-11-09-event-calendar-event-content-design.md); this is
+what was built, read back from the code.
+
+### The generic fields
+
+`Event` takes six more keywords, all optional, and a host that passes none of
+them renders what it rendered before (the goldens outside the `<template>` did
+not move).
+
+| keyword | drawn as |
+|---|---|
+| `subtitle:` | the chip: on the title's line, after it. The row: the same. |
+| `description:` | the row only. A sentence does not fit a chip |
+| `done:` | a check icon, in the chip's head and beside the row's title |
+| `attachment:` | a paperclip, in the same two places |
+| `attributes:` | merged onto the row's link, nowhere else |
+| `color:` | see below |
+| an assignee's `status:` | `:done` or `:pending`, a badge on that face. Anything else is nil and draws none |
+
+The gem gives `title`, `subtitle` and `description` an order and no meaning.
+`attachment:` is one boolean because whether the attachment belongs to the
+record or to something under it is the host's to collapse. The icons' accessible
+names are the `event_calendar.done` and `event_calendar.attachment` keys, and
+the badge's are `event_calendar.assignee_status.*`.
+
+The chip is `Chips#chip_head` and `#chip_text`, so the hours, week and day
+readings and the workload grouped *by event* all carry the new fields; the
+`bars` shape of `Hours` and the month events reading's bars (dot, time, title)
+were left as they were. The helpers the chip and the row share, avatars, badge
+and the two icons, live in `EventCalendar::Faces` (`faces.rb`), because neither
+includes the other.
+
+The row gained the assignees' avatars, their badges and the `+N`, which it did
+not draw before. That is a builder's call: the row is where an event is read in
+full, and without it a status would be visible nowhere in the month.
+
+### The chip is decoration, the row is the link
+
+A chip is drawn inside the day's target, which is an `<a>` (with `day_url:`) or
+a `<button>`. A link inside either is invalid HTML, and one target per day is
+the property the mobile reading is built on. So the chip is not made a link, and
+an event opens from its **row in the day's list**.
+
+That puts a condition on every reading: the list has to exist. In the code,
+`agenda?` is true when the reading is drawn by the browser or `day_url:` is
+given (`component.rb`, `#agenda?`). **For the server-drawn readings (the month's
+hours and workload readings, the week) the list needs `day_url:`**, because the
+server is what draws the chosen day. This is the contract, documented rather
+than answered with a second list that works without it: a host that wants events
+to open passes `day_url:`. The day reading has its rows under `showing: :agenda`
+or `:both`.
+
+The row's `<a>` takes the event's `attributes:`. Precedence is the gem's usual:
+the component's defaults, then the caller's, then `href` and `data-slot`, which
+stay the event's and the gem's; `class` and `data-action` concatenate. Without
+`url:` there is no link, and `attributes:` are dropped. A drawer is
+`attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } }`.
+There is no JavaScript event and no id emitted: what a click shows is the
+server's, and with no `attributes:` the row is a plain link that still works
+with JavaScript off. The `event_links` preview (Lookbook) shows one event
+opening in a Sheet and one going to its page; the dummy app answers
+`/calendar/events/:id`.
+
+A movable row with a `url:` is one tab stop, the link: Enter opens, Space picks
+up. The `<li>` keeps `tabindex="0"` only when the row has no link.
+
+**The browser-built month** draws these rows from the payload and the
+`<template>`. Two costs worth knowing:
+
+- The payload carries the row's fields (`subtitle`, `description`, `done`,
+  `attachment`, `assignees`, `attributes`) only when the browser builds agenda
+  rows, which is `agenda?` without `day_url:` (`Component#client_rows?`).
+  A host already passing `assignees:` to that reading pays more bytes per event
+  than before. Absent fields cost nothing, as with every other key.
+- A host `class` in `attributes:` is **appended** by the browser
+  (`classList.add`) where the server tailwind-merges it. A known difference;
+  a host class that is meant to *replace* a gem class will do so on the server
+  and not in the browser-built month.
+
+### The host's colour is a mark, with neutral ink
+
+`color:` still takes the six names. It also takes the **bare name of a custom
+property**, `color: "--chart-2"`, matched by `Event::HOST_COLOR`
+(`/\A--[a-z0-9-]+\z/i`); anything else falls back as an unknown name always did.
+Only a bare name is accepted because it ends up inside a `style` attribute.
+
+The gem writes it inline as `--event-color: var(<name>)` with
+`--event-ink: var(--foreground)`, so it drives what the fixed colours drive (the
+dot, tick, agenda mark, crossing rails, the tint behind a chip and the `bars`
+fill) and beats the `data-color` rules without editing them. `COLOR_TOKENS` is
+untouched. The ink stays neutral because the gem cannot know the contrast of a
+colour it was not given; a yellow token as text on a card is the case that
+fails. Dark mode is the host's: it defines the property under `.dark`.
+
+**A filled block, the chip painted in the host's colour, was not done**, for the
+same reason: it needs a readable foreground derived from an unknown colour. A
+mark and a neutral text need none.
+
+**Known limitation:** the dense reading bands marks into runs by colour, and a
+host colour is `:host` to that comparison, so two different host colours that
+sit next to each other are drawn as one run (`#tick`, comparing
+`event.color`). The browser's redraw compares `color` in the payload too
+(`marks[index - 1].color === event.color`); what `color` holds there for a host
+colour was not checked. Not measured in a page.
+
+### The host slot that was rejected
+
+An empty slot per event, filled with the host's markup and told whether it is
+drawing a chip or a row, was the first idea. It was dropped as the more complex
+road: the events reading is drawn in the browser by cloning templates, so host
+markup would have to travel to the client for every event, and the `bars` shape
+and the workload's per-operator chips have no room, or no single event, to put it
+in. Generic fields drawn by the gem cost none of that.
+
 ## Where it diverges from FullCalendar
 
 **`ends_at` is inclusive.** FullCalendar's `end` is exclusive, which is right for
@@ -1173,6 +1291,11 @@ Named rather than left to be discovered:
   *The period, the week and the day* — without either; both are named in
   [its design](../specs/2026-08-31-event-calendar-week-view-design.md#not-in-this-design)
   as separate pieces.
+- **the desktop month's second click.** With events opening from the day's
+  list, the month goes from one click to two: the day, then the row. A product
+  owner is deciding whether that is acceptable; the week and the day are not in
+  question. If it is refused the month alone is revisited
+  ([todo](../todo.md#smaller-things)).
 - **drag to resize.** Moving is built — see *Moving an event* above — and this
   is the gesture that did not come with it: a second handle on the end of a bar,
   and a rule for what a resize means to a `to` that is inclusive here and
