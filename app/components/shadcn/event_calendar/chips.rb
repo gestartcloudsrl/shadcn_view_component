@@ -167,7 +167,7 @@ module Shadcn
       CHIP_HEAD_CLASS = "flex min-h-6 items-center gap-1"
 
       FLAG_ICON_CLASS = "size-3"
-      SUBTITLE_CLASS = "ms-1 font-normal"
+      SUBTITLE_CLASS = "font-normal"
 
       CHIP_TEXT_CLASS = "truncate text-left text-[0.65rem] leading-tight"
       # Faces up to `AVATARS_CAP`, then a count.
@@ -258,8 +258,10 @@ module Shadcn
       # The title and the subtitle share one truncated line, so a long subtitle
       # gives way before the title does. The description is not on the chip at
       # all: it is a sentence, and a chip is a few words.
+      # Joined with a real space: the chip is read from inside the day's target,
+      # and "ServiceRossi" is what a screen reader makes of two adjacent nodes.
       def chip_text(item)
-        tag.span(safe_join([ item.title, chip_subtitle(item) ].compact),
+        tag.span(safe_join([ item.title, chip_subtitle(item) ].compact, " "),
                  "data-slot": "event-calendar-day-text",
                  class: CHIP_TEXT_CLASS)
       end

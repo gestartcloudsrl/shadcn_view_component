@@ -1015,7 +1015,8 @@ RSpec.describe Shadcn::EventCalendar::Component do
         events: [ { title: "Service", subtitle: "Rossi", description: "Bleed the radiators, spare filter",
                     done: true, attachment: true,
                     starts_at: Time.zone.local(2026, 8, 5, 9),
-                    assignees: [ "Ada Lovelace", { name: "Grace Hopper", status: :done } ] } ] }
+                    assignees: [ "Ada Lovelace", { name: "Grace Hopper", status: :done },
+                                     { name: "Alan Turing", status: :pending } ] } ] }
     end
 
     before { render_inline(calendar) }
@@ -1033,10 +1034,21 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(painted.css("[data-slot=event-calendar-day-item]").text).not_to include("spare filter")
     end
 
-    it "badges only the assignee with a status", :aggregate_failures do
+    it "badges only the assignees with a status", :aggregate_failures do
       badges = painted.css("[data-slot=event-calendar-day-item] [data-slot=avatar-badge]")
-      expect(badges.map { |badge| badge["data-status"] }).to eq([ "done" ])
-      expect(badges.first.text).to include("Done")
+      expect(badges.map { |badge| badge["data-status"] }).to eq(%w[done pending])
+    end
+
+    it "names each badge and tells pending from done by colour", :aggregate_failures do
+      done, pending = painted.css("[data-slot=event-calendar-day-item] [data-slot=avatar-badge]").to_a
+      expect(done.text).to include("Done")
+      expect(done["class"]).not_to include("bg-muted-foreground")
+      expect(pending.text).to include("Pending")
+      expect(pending["class"].split).to include("bg-muted-foreground")
+    end
+
+    it "separates the title from the subtitle" do
+      expect(parts("event-calendar-day-text").first.text).to include("Service Rossi")
     end
   end
 end
