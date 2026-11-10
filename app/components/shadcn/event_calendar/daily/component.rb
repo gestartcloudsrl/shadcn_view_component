@@ -63,6 +63,9 @@ module Shadcn
 
         def cell_role = "listitem"
 
+        # The panel's hooks, private as they are on the base class.
+        private :period, :view_choices, :cell_role
+
         # The scale has to start where the axes do, and here that is not the
         # date column's `w-14`: cut by operator the left column is the name at
         # `w-32`, cut by event there is no column at all. Measured against a row

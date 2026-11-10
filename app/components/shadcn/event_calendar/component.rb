@@ -400,7 +400,11 @@ module Shadcn
 
       def self.new(reading: :auto, **rest)
         renderer = RENDERERS[reading&.to_sym]
-        renderer = WEEKLY_ROWS if renderer == RENDERERS[:weekly] && rest[:arrangement]&.to_sym == :rows
+        # Built directly, `WeeklyRows` is already the week it would hand over
+        # to — without this `reading: :weekly` would send it to the timeline.
+        if renderer == RENDERERS[:weekly] && (name == WEEKLY_ROWS || rest[:arrangement]&.to_sym == :rows)
+          renderer = WEEKLY_ROWS
+        end
 
         return super(reading:, **rest) if renderer.nil? || name == renderer
 

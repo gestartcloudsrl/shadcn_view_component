@@ -9,6 +9,8 @@ module Shadcn
     # they cannot share a parent — one is an `Hours` reading and the other a
     # `Workload` one — so it is a module both include.
     module Week
+      private
+
       def period = :weekly
 
       def cell_role = "listitem"
@@ -18,8 +20,6 @@ module Shadcn
       def view_choices = EventCalendar::Component::WEEK_VIEWS
 
       def view_heading = shadcn_t("event_calendar.view.week_label")
-
-      private
 
       # The week of the rendered grid that holds `selected`, falling back to
       # the first rather than raising: a host can pass a `selected` this month

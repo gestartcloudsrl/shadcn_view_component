@@ -1146,6 +1146,17 @@ RSpec.describe Shadcn::EventCalendar::Component do
         .to be_a(Shadcn::EventCalendar::Weekly::Component)
     end
 
+    # A host never names the subclass, but nothing stops one: built directly,
+    # it must still be the rows rather than handing itself back to the
+    # timeline because `reading: :weekly` alone means the timeline.
+    it "stays itself when built directly", :aggregate_failures do
+      expect(Shadcn::EventCalendar::WeeklyRows::Component.new(month: Date.new(2026, 8, 1), reading: :weekly))
+        .to be_a(Shadcn::EventCalendar::WeeklyRows::Component)
+      expect(Shadcn::EventCalendar::WeeklyRows::Component.new(month: Date.new(2026, 8, 1), reading: :weekly,
+                                                              arrangement: :auto))
+        .to be_a(Shadcn::EventCalendar::WeeklyRows::Component)
+    end
+
     # A host flipping the view off `params` hands over a string.
     it "takes the arrangement as a string" do
       expect(described_class.new(month: Date.new(2026, 8, 1), **options, arrangement: "rows"))
@@ -1196,10 +1207,28 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
     # The timeline's keywords on a rows week: a host flipping one param keeps
     # the others, and they must neither raise nor leak onto the element.
+    #
+    # They take the path every unread reading keyword takes: namespaced into a
+    # `data-event-calendar-*` attribute, and a callable dropped rather than
+    # stringified into a `#<Proc>`.
     it "ignores the timeline's keywords", :aggregate_failures do
       expect { render_with(window: (7..19), shape: :bars, shape_url: ->(form) { form }) }.not_to raise_error
 
-      expect(root.attributes.keys).not_to include("window", "shape", "shape_url")
+      expect(root["data-event-calendar-window"]).to eq("7..19")
+      expect(root["data-event-calendar-shape"]).to eq("bars")
+      expect(root.attributes.keys).not_to include("window", "shape", "shape_url", "data-event-calendar-shape-url")
+    end
+
+    # The panel's hooks are the readings' own business, private on the base
+    # class, and a week that made them public put them in a host's API.
+    it "keeps the panel's hooks private, as the week's timeline and the day do", :aggregate_failures do
+      hooks = %i[period cell_role view_choices view_heading]
+      calendars = [ { reading: :weekly, arrangement: :rows }, { reading: :weekly }, { reading: :daily } ]
+
+      calendars.each do |reading|
+        calendar = described_class.new(month: Date.new(2026, 8, 1), **reading)
+        expect(hooks.select { |hook| calendar.respond_to?(hook) }).to be_empty, reading.inspect
+      end
     end
 
     it "draws a week that crosses a month with the next month's days outside", :aggregate_failures do

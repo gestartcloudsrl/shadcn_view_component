@@ -19,8 +19,10 @@ module Shadcn
       class Component < Workload::Component
         include Week
 
-        # Rows at every width: there is no grid to fall back to above `lg`,
-        # so whatever arrangement was passed, this is the one drawn.
+        # Rows at every width: there is no grid to fall back to above `lg`, so
+        # whatever arrangement reaches this class, this is the one drawn —
+        # `.new` routes here for `arrangement: :rows`, or when the class is
+        # built directly.
         def initialize(**attributes)
           super(**attributes, arrangement: :rows)
         end
