@@ -462,6 +462,14 @@ RSpec.describe "reverse parity" do
     "event-calendar-agenda" => %w[mt-3],
     "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
+    # The row's faces back on upstream's `bg-muted`, and inverted to
+    # `bg-background` where the row is `bg-accent` — see `AGENDA_AVATARS_CLASS`.
+    "event-calendar-agenda-avatars" => %w[
+      [&_[data-slot=avatar-fallback]]:bg-muted [&_[data-slot=avatar-group-count]]:bg-muted
+      [a:hover_&_[data-slot=avatar-fallback]]:bg-background [a:hover_&_[data-slot=avatar-group-count]]:bg-background
+      [[data-picked]_&_[data-slot=avatar-fallback]]:bg-background
+      [[data-picked]_&_[data-slot=avatar-group-count]]:bg-background
+    ],
     # `w-1.5` because the mark is a bar the height of the row rather than a dot
     # beside its first line — a row here is a title and a time.
     "event-calendar-agenda-mark" => %w[bg-(--event-color) w-1.5 cursor-grab],

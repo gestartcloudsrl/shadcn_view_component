@@ -311,6 +311,22 @@ module Shadcn
       AGENDA_ITEM_CLASS = "items-stretch px-2 py-2"
       AGENDA_LINK_CLASS = "transition-colors hover:bg-accent focus-visible:outline-none " \
                           "focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      # The faces in a row are the chip's faces inverted back. `Faces` gives an
+      # avatar `bg-background` because a chip is `bg-muted`, and a row sits on
+      # the page's own `bg-background` — so there the circle vanished and only
+      # the initials floated. A row takes upstream's `bg-muted` again, and
+      # `bg-background` once it is itself `bg-accent`, hovered as a link or
+      # picked to move: every theme here gives `--accent` and `--muted` the same
+      # value, so `bg-muted` alone would vanish a second time. Written on the
+      # wrapper rather than on the face because the browser clones one face for
+      # chip and row alike.
+      AGENDA_AVATARS_CLASS = "flex shrink-0 items-center " \
+                             "[&_[data-slot=avatar-fallback]]:bg-muted " \
+                             "[&_[data-slot=avatar-group-count]]:bg-muted " \
+                             "[a:hover_&_[data-slot=avatar-fallback]]:bg-background " \
+                             "[a:hover_&_[data-slot=avatar-group-count]]:bg-background " \
+                             "[[data-picked]_&_[data-slot=avatar-fallback]]:bg-background " \
+                             "[[data-picked]_&_[data-slot=avatar-group-count]]:bg-background"
       # The colour, and the reason the row is `items-stretch`: a dot marks a line
       # and a bar marks a row, and a row here is two lines. It keeps its slot
       # name because it keeps its job — a host styling the colour of an agenda
@@ -1219,7 +1235,7 @@ module Shadcn
       def agenda_avatars(event)
         return if event.assignees.empty?
 
-        tag.span(chip_avatars(event), "data-slot": "event-calendar-agenda-avatars", class: "flex shrink-0 items-center")
+        tag.span(chip_avatars(event), "data-slot": "event-calendar-agenda-avatars", class: AGENDA_AVATARS_CLASS)
       end
 
       def agenda_item_component(**attributes)
