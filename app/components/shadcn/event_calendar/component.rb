@@ -394,8 +394,13 @@ module Shadcn
         weekly: "Shadcn::EventCalendar::Weekly::Component"
       }.freeze
 
+      # The week has two views and one reading name: `arrangement: :rows` is
+      # what tells them apart, the keyword the month's rows already use.
+      WEEKLY_ROWS = "Shadcn::EventCalendar::WeeklyRows::Component"
+
       def self.new(reading: :auto, **rest)
         renderer = RENDERERS[reading&.to_sym]
+        renderer = WEEKLY_ROWS if renderer == RENDERERS[:weekly] && rest[:arrangement]&.to_sym == :rows
 
         return super(reading:, **rest) if renderer.nil? || name == renderer
 

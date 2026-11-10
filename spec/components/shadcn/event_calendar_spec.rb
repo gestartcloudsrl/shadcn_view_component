@@ -1118,6 +1118,117 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # The week drawn as the month's rows: the workload reading's row for each of
+  # the seven days, asked for with `arrangement: :rows`. The timeline stays what
+  # `reading: :weekly` alone draws.
+  describe "the weekly reading, as rows" do
+    let(:fit_out) do
+      { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 5, 9), assignees: [ "Ada Lovelace" ] }
+    end
+    let(:options) do
+      { reading: :weekly, arrangement: :rows, selected: Date.new(2026, 8, 5), events: [ fit_out ] }
+    end
+
+    def render_with(**changed)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), **options, **changed))
+    end
+
+    def root = painted.at_css("[data-slot=event-calendar]")
+
+    def days = parts("event-calendar-day").map { |cell| cell["data-day"] }
+
+    it "hands over to its own class, and only for rows", :aggregate_failures do
+      expect(described_class.new(month: Date.new(2026, 8, 1), **options))
+        .to be_a(Shadcn::EventCalendar::WeeklyRows::Component)
+      expect(described_class.new(month: Date.new(2026, 8, 1), **options, arrangement: :auto))
+        .to be_a(Shadcn::EventCalendar::Weekly::Component)
+      expect(described_class.new(month: Date.new(2026, 8, 1), **options, arrangement: :bogus))
+        .to be_a(Shadcn::EventCalendar::Weekly::Component)
+    end
+
+    # A host flipping the view off `params` hands over a string.
+    it "takes the arrangement as a string" do
+      expect(described_class.new(month: Date.new(2026, 8, 1), **options, arrangement: "rows"))
+        .to be_a(Shadcn::EventCalendar::WeeklyRows::Component)
+    end
+
+    it "draws the seven days as rows, forced at every width", :aggregate_failures do
+      render_with
+
+      expect(days).to eq(%w[2026-08-03 2026-08-04 2026-08-05 2026-08-06 2026-08-07 2026-08-08 2026-08-09])
+      expect(parts("event-calendar-day").map { |cell| cell["role"] }).to all(eq("listitem"))
+      expect(root["data-arrangement"]).to eq("rows")
+      expect(parts("event-calendar-weekdays")).to be_empty
+      expect(parts("event-calendar-ruler")).to be_empty
+    end
+
+    it "titles itself with the span and checks rows on the panel", :aggregate_failures do
+      render_with
+
+      expect(parts("event-calendar-title").first.text).to eq("3 – 9 August 2026")
+      expect(parts("dropdown-menu-trigger").first.text.squish).to eq("Weekly · Rows · By event")
+    end
+
+    it "groups by event by default" do
+      render_with
+
+      expect(parts("event-calendar-day-item").size).to eq(1)
+    end
+
+    it "groups by assignee when asked" do
+      render_with(group: :assignees)
+
+      expect(parts("event-calendar-day-assignee").first.text).to include("Ada Lovelace")
+    end
+
+    it "steps a week through month_url" do
+      render_with(month_url: ->(date) { "/m/#{date.iso8601}" })
+
+      expect(painted.at_css("[aria-label='Go to the Next Week']")["href"]).to eq("/m/2026-08-12")
+    end
+
+    it "keeps the day list under the week, with the event's link", :aggregate_failures do
+      render_with(day_url: ->(day) { "/d/#{day}" }, events: [ fit_out.merge(url: "/e/1") ])
+
+      expect(parts("event-calendar-agenda")).not_to be_empty
+      expect(parts("event-calendar-agenda-row").first["href"]).to eq("/e/1")
+    end
+
+    # The timeline's keywords on a rows week: a host flipping one param keeps
+    # the others, and they must neither raise nor leak onto the element.
+    it "ignores the timeline's keywords", :aggregate_failures do
+      expect { render_with(window: (7..19), shape: :bars, shape_url: ->(form) { form }) }.not_to raise_error
+
+      expect(root.attributes.keys).not_to include("window", "shape", "shape_url")
+    end
+
+    it "draws a week that crosses a month with the next month's days outside", :aggregate_failures do
+      render_with(selected: Date.new(2026, 8, 31))
+
+      expect(days).to eq(%w[2026-08-31 2026-09-01 2026-09-02 2026-09-03 2026-09-04 2026-09-05 2026-09-06])
+      expect(parts("event-calendar-day").to_a.last(6).map { |cell| cell["data-outside"] }).to all(eq("true"))
+    end
+
+    context "with a day busier than the cap" do
+      let(:busy) do
+        Array.new(5) { |index| { title: "Job #{index}", starts_at: Time.zone.local(2026, 8, 5, 8 + index) } }
+      end
+
+      it "shows three and counts the rest", :aggregate_failures do
+        render_with(events: busy)
+
+        expect(parts("event-calendar-day-item").size).to eq(3)
+        expect(parts("event-calendar-day-rest").first.text).to eq("+2")
+      end
+
+      it "shows them all when asked" do
+        render_with(events: busy, show_all: true)
+
+        expect(parts("event-calendar-day-item").size).to eq(5)
+      end
+    end
+  end
+
   # The panel used to decide the checked period with `(name == :daily) ==
   # daily?`, which says "there are two of these" in a comparison rather than in
   # a list. Asserted per reading, because the reading is what answers it.
