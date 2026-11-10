@@ -157,6 +157,41 @@ RSpec.describe Shadcn::EventCalendar::Event do
                                        done?: true, attachment?: true)
     end
 
+    # What a screen reader hears for a flag or a status, when the host has its
+    # own words for it. The gem does not interpret them; it reads them out
+    # instead of its own generic ones.
+    it "takes a flag as a hash carrying its label", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20),
+                                  done: { label: "Service completed" }, attachment: { "label" => "Has a report" })
+
+      expect(event).to have_attributes(done?: true, done_label: "Service completed",
+                                       attachment?: true, attachment_label: "Has a report")
+    end
+
+    it "keeps a boolean flag unlabelled, and a blank label as none", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20),
+                                  done: true, attachment: { label: " " })
+
+      expect(event).to have_attributes(done?: true, done_label: nil, attachment?: true, attachment_label: nil)
+    end
+
+    it "draws no flag for false or nil, whatever else is passed", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20), done: false, attachment: nil)
+
+      expect(event).to have_attributes(done?: false, done_label: nil, attachment?: false, attachment_label: nil)
+    end
+
+    it "keeps an assignee's label only beside a status it can draw", :aggregate_failures do
+      event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20), assignees: [
+        { name: "Ada Lovelace", status: :done, label: "Ada signed" },
+        { name: "Grace Hopper", label: "Grace signed" },
+        { name: "Alan Turing", status: :lost, label: "Alan signed" }
+      ])
+
+      expect(event.assignees.map { |one| [ one.status, one.label ] })
+        .to eq([ [ :done, "Ada signed" ], [ nil, nil ], [ nil, nil ] ])
+    end
+
     it "says nothing it was not given", :aggregate_failures do
       event = described_class.new(title: "Service", starts_at: Date.new(2026, 8, 20), subtitle: " ")
 

@@ -6,6 +6,10 @@
     so the browser follows the link. The `shadcn--dialog#open` action reaches the
     controller because the calendar is rendered inside the Sheet's root.
 
+    The first event also shows the host's own words for what a screen reader
+    hears: `done: { label: }` on the tick and `label:` beside Marco's status.
+    Its paperclip and Giulia's status pass none and read the gem's words.
+
     The colour is `--chart-2`, a token every theme defines in both palettes, so
     this preview needs no stylesheet of its own. The route and the frame's
     markup are in `test/dummy`.
@@ -38,8 +42,8 @@
             url: "/calendar/events/1",
             subtitle: "Via Roma 12",
             description: "Annual service, flue check and a new gasket.",
-            done: true, attachment: true,
-            assignees: [ { name: "Marco Rossi", status: :done },
+            done: { label: "Service completed" }, attachment: true,
+            assignees: [ { name: "Marco Rossi", status: :done, label: "Marco Rossi signed the report" },
                          { name: "Giulia Bianchi", status: :pending } ],
             attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } } },
           { **(movable ? { id: "2" } : {}), title: "Flue inspection", starts_at: Time.zone.local(2026, 8, 5, 13),

@@ -44,16 +44,20 @@ module Shadcn
       # listed. `prefix` is the slot family they are drawn in — the chip's
       # `event-calendar-day`, the agenda row's `event-calendar-agenda` — so a
       # surface can be addressed without the other being.
+      #
+      # The name is the host's words when it gave some (`done: { label: }`),
+      # and the gem's generic ones otherwise.
       def flag_icons(item, prefix)
-        [ (done_icon(prefix) if item.done?), (attachment_icon(prefix) if item.attachment?) ]
+        [ (done_icon(prefix, item.done_label) if item.done?),
+          (attachment_icon(prefix, item.attachment_label) if item.attachment?) ]
       end
 
-      def done_icon(prefix)
-        flag_icon("check", "#{prefix}-done", shadcn_t("event_calendar.done"))
+      def done_icon(prefix, label = nil)
+        flag_icon("check", "#{prefix}-done", label || shadcn_t("event_calendar.done"))
       end
 
-      def attachment_icon(prefix)
-        flag_icon("paperclip", "#{prefix}-attachment", shadcn_t("event_calendar.attachment"))
+      def attachment_icon(prefix, label = nil)
+        flag_icon("paperclip", "#{prefix}-attachment", label || shadcn_t("event_calendar.attachment"))
       end
 
       # The picture is decorative and the name is not: the chip's text is read
@@ -67,12 +71,13 @@ module Shadcn
       # What an assignee's progress looks like on the corner of their face:
       # upstream's own badge, with `bg-muted-foreground` standing for "not yet"
       # over its `bg-primary`. An assignee with no status gets no badge at all.
+      # What it says is the host's `label:` when given, the gem's word otherwise.
       def assignee_badge(avatar, assignee)
         return unless assignee.status
 
         avatar.with_badge(class: ("bg-muted-foreground" if assignee.status == :pending),
                           "data-status": assignee.status) do
-          tag.span(shadcn_t("event_calendar.assignee_status.#{assignee.status}"), class: "sr-only")
+          tag.span(assignee.label || shadcn_t("event_calendar.assignee_status.#{assignee.status}"), class: "sr-only")
         end
       end
 

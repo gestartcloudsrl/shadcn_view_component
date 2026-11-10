@@ -1200,6 +1200,17 @@ RSpec.describe "Event calendar", :js do
         .to eq(%w[done pending])
     end
 
+    # The host's words where it gave some, the gem's where it did not — read
+    # off the controller's clone, which got them from the payload.
+    it "reads the host's labels and the gem's words where there are none", :aggregate_failures do
+      expect(row.find("[data-slot=event-calendar-agenda-done] .sr-only", visible: :all).text(:all))
+        .to eq("Service completed")
+      expect(row.find("[data-slot=event-calendar-agenda-attachment] .sr-only", visible: :all).text(:all))
+        .to eq("Has an attachment")
+      expect(row.all("[data-slot=avatar-badge]", visible: :all).map { |badge| badge.text(:all).strip })
+        .to eq([ "Marco Rossi signed the report", "Pending" ])
+    end
+
     it "opens it in the Sheet on Enter" do
       row.send_keys(:enter)
 

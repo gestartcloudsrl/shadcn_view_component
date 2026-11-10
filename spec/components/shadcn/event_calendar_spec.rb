@@ -904,6 +904,21 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(crossed.keys).to match_array(%w[dayOrder title color from time])
     end
 
+    context "with an event whose host labels the flags and a status" do
+      let(:options) do
+        { events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 20, 9),
+                      done: { label: "Service completed" }, attachment: { label: "Has a report" },
+                      assignees: [ { name: "Grace Hopper", status: :done, label: "Grace signed" } ] } ] }
+      end
+
+      it "carries the labels beside the flags", :aggregate_failures do
+        expect(crossed.values_at("done", "doneLabel", "attachment", "attachmentLabel"))
+          .to eq([ true, "Service completed", true, "Has a report" ])
+        expect(crossed["assignees"])
+          .to eq([ { "name" => "Grace Hopper", "initials" => "GH", "status" => "done", "label" => "Grace signed" } ])
+      end
+    end
+
     context "with an event that says everything" do
       let(:options) do
         { events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 20, 9), color: "--chart-2",
@@ -1345,6 +1360,42 @@ RSpec.describe Shadcn::EventCalendar::Component do
     it "separates the title from the subtitle" do
       expect(parts("event-calendar-day-text").first.text).to include("Service Rossi")
     end
+
+    context "when the host labels the flags and a status" do
+      let(:options) do
+        { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19),
+          events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 5, 9),
+                      done: { label: "Service <b>completed</b>" }, attachment: { label: "Has a report" },
+                      assignees: [ { name: "Grace Hopper", status: :done, label: "Grace signed" },
+                                   { name: "Alan Turing", status: :pending } ] } ] }
+      end
+
+      # As text: the host's words are escaped like every other value of its.
+      it "reads the host's words instead of the gem's", :aggregate_failures do
+        expect(parts("event-calendar-day-done").first.at_css(".sr-only").text).to eq("Service <b>completed</b>")
+        expect(parts("event-calendar-day-done").first.css("b")).to be_empty
+        expect(parts("event-calendar-day-attachment").first.at_css(".sr-only").text).to eq("Has a report")
+      end
+
+      it "reads the host's word on a labelled badge and the gem's on the other", :aggregate_failures do
+        labelled, plain = painted.css("[data-slot=event-calendar-day-item] [data-slot=avatar-badge]").to_a
+        expect(labelled.text.strip).to eq("Grace signed")
+        expect(plain.text.strip).to eq("Pending")
+      end
+    end
+
+    context "when an assignee has a label and no status" do
+      let(:options) do
+        { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19),
+          events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 5, 9),
+                      assignees: [ { name: "Grace Hopper", label: "Grace signed" } ] } ] }
+      end
+
+      it "draws no badge and says nothing", :aggregate_failures do
+        expect(painted.css("[data-slot=avatar-badge]")).to be_empty
+        expect(painted.text).not_to include("Grace signed")
+      end
+    end
   end
 
   describe "what a row says" do
@@ -1367,6 +1418,29 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(row.css("[data-slot=avatar]").size).to eq(2)
       expect(row.css("[data-slot=avatar-badge]").map { |badge| badge["data-status"] }).to eq([ "done" ])
       expect(row.css("[data-slot=event-calendar-agenda-done], [data-slot=event-calendar-agenda-attachment]").size).to eq(2)
+    end
+
+    context "when the host labels the flags and a status" do
+      let(:options) do
+        { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19), day_url: ->(day) { "/days/#{day}" },
+          events: [ { title: "Service", starts_at: Time.zone.local(2026, 8, 5, 9), url:,
+                      done: { label: "Service completed" }, attachment: { label: "Has a report" },
+                      assignees: [ { name: "Grace Hopper", status: :done, label: "Grace signed" } ] } ] }
+      end
+
+      it "reads the host's words in the row too", :aggregate_failures do
+        row = parts("event-calendar-agenda-row").first
+        expect(row.at_css("[data-slot=event-calendar-agenda-done] .sr-only").text).to eq("Service completed")
+        expect(row.at_css("[data-slot=event-calendar-agenda-attachment] .sr-only").text).to eq("Has a report")
+        expect(row.at_css("[data-slot=avatar-badge]").text.strip).to eq("Grace signed")
+      end
+    end
+
+    it "reads the gem's words when the host gives none", :aggregate_failures do
+      row = parts("event-calendar-agenda-row").first
+      expect(row.at_css("[data-slot=event-calendar-agenda-done] .sr-only").text).to eq("Done")
+      expect(row.at_css("[data-slot=event-calendar-agenda-attachment] .sr-only").text).to eq("Has an attachment")
+      expect(row.at_css("[data-slot=avatar-badge]").text.strip).to eq("Done")
     end
 
     it "puts the host's attributes on the link", :aggregate_failures do

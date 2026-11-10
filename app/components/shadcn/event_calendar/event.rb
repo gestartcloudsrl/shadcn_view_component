@@ -34,14 +34,19 @@ module Shadcn
       #
       # `status` is the host's word for how far that person got, and only the
       # two it can be drawn for are kept; nil means the host said nothing.
-      Assignee = Struct.new(:name, :image, :status) do
+      #
+      # `label` is what a screen reader hears for that status instead of the
+      # gem's generic word — "Mario signed", say. Kept only beside a status,
+      # since without one there is no badge to say it on.
+      Assignee = Struct.new(:name, :image, :status, :label) do
         const_set(:STATUSES, %i[done pending].freeze)
 
         def initials = name.to_s.split(/\s+/).first(2).filter_map { |part| part[0] }.join.upcase
       end
 
       attr_reader :id, :title, :starts_at, :ends_at, :color, :url, :assignees,
-                  :subtitle, :description, :attributes, :color_property
+                  :subtitle, :description, :attributes, :color_property,
+                  :done_label, :attachment_label
 
       # `default_color:` is the calendar's own colour, standing where
       # FullCalendar puts an *event source's*: between the event and the
@@ -80,8 +85,8 @@ module Shadcn
         @assignees = wrap_assignees(assignees || assignee)
         @subtitle = subtitle.presence
         @description = description.presence
-        @done = !!done
-        @attachment = !!attachment
+        @done, @done_label = flag(done)
+        @attachment, @attachment_label = flag(attachment)
         @attributes = attributes || {}
       end
 
@@ -93,6 +98,17 @@ module Shadcn
 
       def fallback_color(name) = COLORS.include?(name&.to_sym) ? name.to_sym : :default
       private :fallback_color
+
+      # `done:` and `attachment:` take a boolean, as they always have, or a
+      # hash carrying the words a screen reader hears for the flag instead of
+      # the gem's: `{ label: "Service completed" }`, which counts as true. The
+      # gem does not interpret them. A blank label is no label.
+      def flag(value)
+        return [ !!value, nil ] unless value.is_a?(Hash)
+
+        [ true, value.to_h.symbolize_keys[:label].to_s.strip.presence ]
+      end
+      private :flag
 
       # `Array()` is not usable here: a single `{ name:, image: }` is a Hash, and
       # `Array(hash)` is its pairs rather than one element.
@@ -118,11 +134,12 @@ module Shadcn
         when nil, Assignee then value
         when String then Assignee.new(value.to_s, nil, nil)
         else
-          name, image, status = value.to_h.symbolize_keys.values_at(:name, :image, :status)
+          name, image, status, label = value.to_h.symbolize_keys.values_at(:name, :image, :status, :label)
           raise ArgumentError, "an assignee needs a :name, got #{value.inspect}" if name.blank? && Rails.env.local?
 
           status = status.to_s.to_sym
-          Assignee.new(name.to_s, image, Assignee::STATUSES.include?(status) ? status : nil)
+          status = nil unless Assignee::STATUSES.include?(status)
+          Assignee.new(name.to_s, image, status, (label.to_s.strip.presence if status))
         end
       end
       private :wrap_assignee

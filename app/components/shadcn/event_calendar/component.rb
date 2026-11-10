@@ -417,8 +417,10 @@ module Shadcn
       # @param events [Array<Hash, Event>] `{ title:, starts_at:, ends_at:,
       #   color:, url:, all_day:, subtitle:, description:, done:, attachment:,
       #   attributes: }` — `ends_at` is *inclusive*; `color:` is a palette name
-      #   or the name of a custom property (`"--chart-2"`); an assignee may carry
-      #   a `status:` of `:done` or `:pending`
+      #   or the name of a custom property (`"--chart-2"`); `done:` and
+      #   `attachment:` take `true` or `{ label: }`, the words a screen reader
+      #   hears instead of the gem's; an assignee may carry a `status:` of
+      #   `:done` or `:pending`, and a `label:` read out instead of the status's
       # @param max_events [Integer] bars per cell before a cell says "+2"
       # @param week_starts_on [Integer, nil] `Date#wday`; the host's
       #   `Date.beginning_of_week` when not given
@@ -1380,7 +1382,11 @@ module Shadcn
         { subtitle: event.subtitle,
           description: event.description,
           done: (true if event.done?),
+          # The host's words for a flag, beside it rather than in its place, so
+          # `done: true` still reads as it always has to whoever reads it.
+          doneLabel: event.done_label,
           attachment: (true if event.attachment?),
+          attachmentLabel: event.attachment_label,
           assignees: (portable_assignees(event) if event.assignees.any?),
           # Only with a url: without one the row has no link to put them on,
           # and the server drops them too.
@@ -1392,7 +1398,7 @@ module Shadcn
       def portable_assignees(event)
         event.assignees.map do |assignee|
           { name: assignee.name, initials: assignee.initials, image: assignee.image&.to_s.presence,
-            status: assignee.status }.compact
+            status: assignee.status, label: assignee.label }.compact
         end
       end
 

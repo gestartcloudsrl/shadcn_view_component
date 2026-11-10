@@ -803,14 +803,21 @@ export default class extends Controller {
   // two flags the event has, a space apart. Plain text when it has none.
   fillTitle(title, event) {
     const subtitle = title.querySelector("[data-slot='event-calendar-agenda-subtitle']")
-    const extras = [
-      event.subtitle && subtitle,
-      event.done && title.querySelector("[data-slot='event-calendar-agenda-done']"),
-      event.attachment && title.querySelector("[data-slot='event-calendar-agenda-attachment']")
-    ].filter(Boolean)
+    const done = title.querySelector("[data-slot='event-calendar-agenda-done']")
+    const attachment = title.querySelector("[data-slot='event-calendar-agenda-attachment']")
+    const extras = [ event.subtitle && subtitle, event.done && done, event.attachment && attachment ].filter(Boolean)
 
     if (event.subtitle) subtitle.textContent = event.subtitle
+    this.say(done, event.doneLabel)
+    this.say(attachment, event.attachmentLabel)
     title.replaceChildren(event.title, ...extras.flatMap((part) => [ " ", part ]))
+  }
+
+  // `Faces#flag_icon` and `#assignee_badge`: what a screen reader hears is the
+  // host's `label:` when it gave one, and the gem's word the prototype already
+  // carries otherwise. Text, so the host's words are never markup.
+  say(part, label) {
+    if (label) part.querySelector(".sr-only").textContent = label
   }
 
   // `Faces#chip_avatars`: up to the cap, then the count.
@@ -842,8 +849,11 @@ export default class extends Controller {
       face.removeAttribute("data-controller")
     }
 
-    const badge = this.badgePrototypes[assignee.status]
-    if (badge) face.append(badge.cloneNode(true))
+    const badge = this.badgePrototypes[assignee.status]?.cloneNode(true)
+    if (badge) {
+      this.say(badge, assignee.label)
+      face.append(badge)
+    }
 
     return face
   }

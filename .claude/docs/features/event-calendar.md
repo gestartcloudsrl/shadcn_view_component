@@ -793,17 +793,40 @@ not move).
 |---|---|
 | `subtitle:` | the chip: on the title's line, after it. The row: the same. |
 | `description:` | the row only. A sentence does not fit a chip |
-| `done:` | a check icon, in the chip's head and beside the row's title |
-| `attachment:` | a paperclip, in the same two places |
+| `done:` | a check icon, in the chip's head and beside the row's title. `true`, or `{ label: "…" }` |
+| `attachment:` | a paperclip, in the same two places. `true`, or `{ label: "…" }` |
 | `attributes:` | merged onto the row's link, nowhere else |
 | `color:` | see below |
 | an assignee's `status:` | `:done` or `:pending`, a badge on that face. Anything else is nil and draws none |
+| an assignee's `label:` | what the badge says to a screen reader. Kept only beside a valid `status:` |
 
 The gem gives `title`, `subtitle` and `description` an order and no meaning.
 `attachment:` is one boolean because whether the attachment belongs to the
 record or to something under it is the host's to collapse. The icons' accessible
 names are the `event_calendar.done` and `event_calendar.attachment` keys, and
 the badge's are `event_calendar.assignee_status.*`.
+
+**Unless the host gives its own words.** Those keys are generic on purpose —
+"Done", "Has an attachment", "Pending" — and a host usually means something
+narrower by them. So each of the three takes a `label:`, read out instead:
+
+```ruby
+done: { label: "Service completed" }                     # instead of true
+attachment: { label: "Has a signed report" }             # instead of true
+assignees: [ { name: "Mario Rossi", status: :done, label: "Mario signed" } ]
+```
+
+A flag given as a hash counts as `true`; `false` and `nil` still draw nothing,
+and a blank label is no label. A boolean keeps working as it did, so nobody
+passing one changes. Two keys, `done_label:` beside `done:`, were the other
+shape and were not taken: they allow a label with no flag, which means nothing,
+and the hash cannot say that. An assignee's `label:` without a valid `status:`
+is dropped, as an unknown `status:` already is — there is no badge to put it on.
+
+The gem does not interpret the words; it puts them where its own would have
+gone, as text (escaped, never markup), in the chip, in the row, and in the month
+the browser draws, whose payload carries them as `doneLabel`,
+`attachmentLabel` and an assignee's `label` beside the values it already had.
 
 The chip is `Chips#chip_head` and `#chip_text`, so the hours, week and day
 readings and the workload grouped *by event* all carry the new fields; the
