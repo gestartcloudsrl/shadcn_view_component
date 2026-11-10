@@ -195,8 +195,26 @@ module Shadcn
       NUMBER_HEIGHT = 2.0
 
       HEADER_CLASS = "flex flex-wrap items-center justify-between gap-2 pb-3"
-      TITLE_CLASS = "text-base leading-none font-semibold sm:text-lg"
-      NAV_CLASS = "flex items-center gap-1"
+      # The header wraps the nav under the title, and that is not enough on a
+      # phone: the nav was one unbreakable row, 406px of it for the day against
+      # 342px of header at 390px wide, so the page scrolled sideways. It wraps
+      # too, and `min-w-0` lets it be narrower than that row, so its controls
+      # go onto a second line instead of past the edge. Nothing is clipped.
+      # From 768px up every reading in the gallery fits its nav on one line
+      # beside the title, so neither class changes anything there.
+      #
+      # `min-w-0` on the title for the same reason, in a title too long for the
+      # line: it wraps instead of truncating, because `leading-none` with
+      # `overflow-hidden` would clip the descenders of "agosto".
+      TITLE_CLASS = "min-w-0 text-base leading-none font-semibold sm:text-lg"
+      NAV_CLASS = "flex min-w-0 flex-wrap items-center gap-1"
+      # The panel's trigger says where you are in a sentence the host
+      # translates ("Giornaliero · Timeline ed elenco · Per assegnatario"),
+      # and a button is `whitespace-nowrap shrink-0`. So it stops at the nav's
+      # width and the label ends in an ellipsis. The whole label is still its
+      # accessible name, and still the checked items in the menu it opens.
+      VIEW_TRIGGER_CLASS = "min-w-0 max-w-full"
+      VIEW_TRIGGER_LABEL_CLASS = "truncate"
       CHEVRON_CLASS = "size-4"
       FRAME_CLASS = "overflow-hidden rounded-md border"
       WEEKDAYS_CLASS = "grid grid-cols-7 border-b bg-muted/50"
@@ -671,9 +689,10 @@ module Shadcn
       # on it.
       def view_panel
         render(DropdownMenu::Component.new(align: :start)) do |dropdown|
-          dropdown.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :sm)) do
+          dropdown.with_trigger(class: [ Button::Component.variant_classes(variant: :outline, size: :sm),
+                                         VIEW_TRIGGER_CLASS ].join(" ")) do
             safe_join([
-              tag.span(view_label),
+              tag.span(view_label, class: VIEW_TRIGGER_LABEL_CLASS),
               render(Icon::Component.new("chevron-down", class: CHEVRON_CLASS))
             ])
           end

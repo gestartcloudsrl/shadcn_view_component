@@ -272,7 +272,15 @@ RSpec.describe "reverse parity" do
     # forty-two chances to disagree. Its pad is the width of the date column,
     # so tick zero starts where the tracks do.
     "event-calendar-ruler" => %w[pb-1 text-[0.6rem]],
-    "event-calendar-ruler-pad" => %w[w-14],
+    "event-calendar-ruler-pad" => %w[w-14 w-32 pt-1],
+    # The daily reading's own, which no fixture rendered until
+    # `previews/phone.html.erb` became the first preview of a day: cut by
+    # operator, each row leads with the person's name at `w-32` instead of the
+    # date column's `w-14`, and the ruler's pad is the same box so the scale
+    # starts where the axes do (`Daily::Component::RESOURCE_CLASS`). The root
+    # adds `w-full` and `rounded-md` to the one day it draws
+    # (`Daily::Component::TOKENS`).
+    "event-calendar-resource" => %w[w-32 pt-1],
     # The axis itself. The gridlines are a repeating gradient rather than
     # twenty-four elements, because they are decoration and a DOM node each
     # would be a thousand of them in a month — spaced by `--gridline`, which is
@@ -308,6 +316,8 @@ RSpec.describe "reverse parity" do
     # explicit width does not grow when given a negative margin. `not-rows:`
     # because in a row a day has no neighbour to meet.
     "event-calendar" => %w[
+      [&_[data-slot=event-calendar-day]]:w-full
+      [&_[data-slot=event-calendar-day]]:rounded-md
       not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:-ms-[calc(var(--spacing)*1.5_+_0.5px)]
       not-rows:[&_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto
       not-rows:[&_[data-slot=event-calendar-day-item][data-continues-after]]:-me-[calc(var(--spacing)*1.5_+_0.5px)]

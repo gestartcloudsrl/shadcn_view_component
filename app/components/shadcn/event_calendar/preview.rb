@@ -40,6 +40,22 @@ module Shadcn
         render_with_template
       end
 
+      # The toolbar at a phone's width, in the worst case there is: the day,
+      # whose nav holds the most, titled with the longest date in Italian
+      # (mercoledì 30 settembre) and a panel trigger that says three things
+      # ("Giornaliero · Timeline ed elenco · Per assegnatario"). Under 390px
+      # the nav wraps under the title and the trigger's label ends in an
+      # ellipsis; nothing scrolls sideways.
+      #
+      # The frame is 390px so the wrap shows on a desktop too, but the page's
+      # breakpoints still read the window, so `sm:text-lg` on the title stays
+      # large here. Narrow the window, or use the inspector's width, to see the
+      # title at a phone's size. The Italian is the dummy app's
+      # (`test/dummy/config/locales/it.yml`), since the gem ships English.
+      def phone
+        render_with_template
+      end
+
       # One of each colour, then the same calendar with `default_color:` — the
       # level FullCalendar puts on an event source. The palette is fixed rather
       # than free-form; the reason is in `Event::COLORS`.

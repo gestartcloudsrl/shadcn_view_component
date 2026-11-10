@@ -1319,6 +1319,50 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # A phone is narrower than the controls a reading puts in the toolbar: the
+  # day's measured 406px of nav against 342px of header at 390px wide, and the
+  # page scrolled sideways. What keeps it inside is these classes, so they are
+  # what is pinned; the widths themselves are measured in the browser, in
+  # `spec/system/event_calendar_spec.rb`.
+  describe "the toolbar on a narrow screen" do
+    readings = {
+      "the month" => {},
+      "the month as rows" => { reading: :workload, arrangement: :rows },
+      "the month's timeline" => { reading: :hours },
+      "the week's timeline" => { reading: :weekly },
+      "the week as rows" => { reading: :weekly, arrangement: :rows },
+      "the day" => { reading: :daily }
+    }
+
+    readings.each do |name, reading|
+      context "with #{name}" do
+        let(:options) { reading.merge(selected: Date.new(2026, 8, 5)) }
+
+        before { render_inline(calendar) }
+
+        it "wraps the nav rather than letting it push past the header", :aggregate_failures do
+          expect(parts("event-calendar-header").first["class"].split).to include("flex-wrap")
+          expect(parts("event-calendar-nav").first["class"].split).to include("flex-wrap", "min-w-0")
+          expect(parts("event-calendar-title").first["class"].split).to include("min-w-0")
+        end
+      end
+    end
+
+    context "with a view panel whose label is longer than the screen" do
+      let(:options) { { reading: :daily, selected: Date.new(2026, 8, 5) } }
+
+      before { render_inline(calendar) }
+
+      # The one control whose width is a sentence the host translates.
+      it "keeps the trigger inside the nav and ends its label in an ellipsis", :aggregate_failures do
+        trigger = painted.at_css("[data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]")
+
+        expect(trigger["class"].split).to include("min-w-0", "max-w-full")
+        expect(trigger.at_css("span")["class"].split).to include("truncate")
+      end
+    end
+  end
+
   describe "what a chip says" do
     let(:options) do
       { reading: :weekly, selected: Date.new(2026, 8, 5), window: (7..19),

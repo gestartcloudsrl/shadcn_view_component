@@ -291,6 +291,43 @@ which is what `density` did until the week had views — sends the week's *Rows*
 and *Timeline* to the month. `density` now keeps the week when the week is what
 is shown.
 
+### The toolbar on a phone
+
+The header was already `flex-wrap`, so the nav went under the title. The nav
+itself was one row that could not wrap or shrink. The day's nav is 406px wide
+(panel trigger, Today, ‹ and ›), and at 390px the header is 342px, so the page
+scrolled sideways on every phone. That is what a host saw in the day view on a
+Pixel 7 (412px).
+
+Three classes keep it inside, and none of them clips a control:
+
+- the nav is `flex-wrap min-w-0`, so it can be narrower than its row, and
+  its controls go onto a second line;
+- the title is `min-w-0`. A title too long for the line wraps rather than
+  truncating, because `leading-none` with `overflow-hidden` would clip the
+  descenders of "agosto";
+- the panel's trigger is `min-w-0 max-w-full`, and its label is `truncate`.
+  The label is a sentence the host translates ("Giornaliero · Timeline ed
+  elenco · Per assegnatario" is 374px), and a button is `whitespace-nowrap
+  shrink-0`. It stops at the nav's width and ends in an ellipsis. The whole
+  sentence is still its accessible name, and the menu it opens shows the
+  checked items.
+
+From 768px up every reading in the gallery fits on one line, so nothing
+changes there: the header measures 44px tall, as before. Below that the header
+takes two or three lines.
+
+The buttons keep shadcn's sizes, `sm` and `icon-sm`, 32px tall. The toolbar
+never had 44px targets, and this change neither grows nor shrinks them. Growing
+them on a phone would put classes on `Button` that upstream does not emit.
+
+`previews/phone.html.erb` is the worst case: the day, in Italian, with the
+longest date and that trigger, in a 390px frame. The frame shows the wrap on a
+desktop, but the page's breakpoints still read the window. The system spec
+measures every reading at 360, 390 and 412 through device emulation, not
+`resize_to`, because headless Chrome will not make a window narrower than
+500px. At 500 the day's nav fitted, so the overflow got past the suite.
+
 ### What the server-drawn readings do not ship
 
 The workload and hours readings are drawn whole by the server: their cells hold

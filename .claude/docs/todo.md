@@ -425,6 +425,17 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **On a phone, the day's timeline scrolls but cannot take focus.** Below
+      `lg` the axis is wider than the screen: 1429px of track in a 340px grid
+      at 390px wide. The grid scrolls sideways and nothing in it is focusable,
+      so axe raises `scrollable-region-focusable` (WCAG 2.1.1, serious). With
+      `showing: :both` the list below says the same in text. With
+      `showing: :axis` the hours past the edge need a pointer. Found by
+      `previews/phone.html.erb` and set aside on that one node in
+      `accessibility_spec.rb`. The fix is a tab stop that exists only while the
+      grid scrolls; a fixed `tabindex` would be an empty stop on a desktop.
+      The week's and month's timelines hold day buttons, so they pass.
+
 - [ ] **The event calendar's desktop month takes two clicks to open an event**
       (the day, then the row), where it took one. Events open from the row in
       the day's list and the chip stays decoration, see

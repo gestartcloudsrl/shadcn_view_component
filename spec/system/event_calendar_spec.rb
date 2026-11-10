@@ -1144,6 +1144,71 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The toolbar, at the widths of the phones a host's users hold. Through the
+  # device emulation rather than `resize_to`: headless Chrome will not make a
+  # window narrower than 500px, so `resize_to(390, …)` measures at 500, where
+  # the day's nav already fitted. That is how the overflow got past this file.
+  describe "the toolbar on a phone" do
+    def at_width(width)
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width:, height: 844, deviceScaleFactor: 1, mobile: true)
+      yield
+    ensure
+      page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+    end
+
+    # scrollWidth over clientWidth, for the page and for each part of the
+    # toolbar: equal means nothing is wider than the box it sits in.
+    def widths
+      page.evaluate_script(<<~JS)
+        (() => {
+          const measure = (element) => [ element.scrollWidth, element.clientWidth ];
+          const header = document.querySelector("[data-slot=event-calendar-header]");
+          return { page: measure(document.documentElement), header: measure(header),
+                   nav: measure(header.querySelector("[data-slot=event-calendar-nav]")) };
+        })()
+      JS
+    end
+
+    {
+      "the month" => "default",
+      "the month as rows" => "density?period=monthly&view=rows",
+      "the month's timeline" => "density?period=monthly&view=hours",
+      "the week's timeline" => "density?period=weekly&view=hours",
+      "the week as rows" => "density?period=weekly&view=rows",
+      "the day" => "density?period=daily",
+      "the day, in Italian" => "phone"
+    }.each do |name, path|
+      [ 360, 390, 412 ].each do |width|
+        it "keeps #{name}'s toolbar inside #{width}px", :aggregate_failures do
+          at_width(width) do
+            visit "/lookbook/preview/shadcn/event_calendar/#{path}"
+            wait_for_stimulus
+
+            measured = widths
+            expect(measured["page"].first).to eq(width)
+            measured.each { |part, (scroll, client)| expect(scroll).to eq(client), "#{part}: #{scroll}/#{client}" }
+          end
+        end
+      end
+    end
+
+    it "keeps every control whole, wrapping onto lines of its own" do
+      at_width(390) do
+        visit "/lookbook/preview/shadcn/event_calendar/phone"
+        wait_for_stimulus
+
+        sizes = page.evaluate_script(<<~JS)
+          Array.from(document.querySelectorAll("[data-slot=event-calendar-nav] :is(a, button)"))
+            .filter((control) => control.getClientRects().length)
+            .map((control) => Math.round(control.getBoundingClientRect().height))
+        JS
+        expect(sizes.size).to eq(4)
+        expect(sizes).to all(eq(32))
+      end
+    end
+  end
+
   # The row is a link, so what happens next is the host's: the attributes it
   # put on the event are the only thing deciding between a Sheet and a page.
   describe "opening an event from its row" do

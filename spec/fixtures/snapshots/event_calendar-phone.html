@@ -1,0 +1,747 @@
+<div class="mx-auto w-full max-w-[390px]">
+<div data-slot="event-calendar" data-controller="shadcn--event-calendar" style="--event-calendar-cell:7.125rem;--event-calendar-cell-more:8.75rem;--event-calendar-tick:0.4375rem;--event-calendar-track:calc(3.5rem + (12 * var(--event-calendar-hour)))" data-rows="true" data-arrangement="rows" data-shadcn--event-calendar-month-value="2026-09-01" data-shadcn--event-calendar-today-value="2026-08-12" data-shadcn--event-calendar-selected-value="2026-09-30" data-shadcn--event-calendar-week-starts-on-value="1" data-shadcn--event-calendar-max-events-value="3" data-shadcn--event-calendar-tick-sizes-value="[[8,&quot;0.4375rem&quot;],[24,&quot;0.375rem&quot;],[60,&quot;0.3125rem&quot;],[null,&quot;0.25rem&quot;]]" data-shadcn--event-calendar-dense-above-value="12" data-shadcn--event-calendar-reading-value="daily" data-shadcn--event-calendar-client-drawn-value="false" data-shadcn--event-calendar-colors-value="[&quot;default&quot;,&quot;blue&quot;,&quot;green&quot;,&quot;amber&quot;,&quot;rose&quot;,&quot;violet&quot;]" data-shadcn--event-calendar-locale-value="it" data-shadcn--event-calendar-day-names-value="[&quot;domenica&quot;,&quot;lunedì&quot;,&quot;martedì&quot;,&quot;mercoledì&quot;,&quot;giovedì&quot;,&quot;venerdì&quot;,&quot;sabato&quot;]" data-shadcn--event-calendar-short-day-names-value="[&quot;dom&quot;,&quot;lun&quot;,&quot;mar&quot;,&quot;mer&quot;,&quot;gio&quot;,&quot;ven&quot;,&quot;sab&quot;]" data-shadcn--event-calendar-month-names-value="[&quot;gennaio&quot;,&quot;febbraio&quot;,&quot;marzo&quot;,&quot;aprile&quot;,&quot;maggio&quot;,&quot;giugno&quot;,&quot;luglio&quot;,&quot;agosto&quot;,&quot;settembre&quot;,&quot;ottobre&quot;,&quot;novembre&quot;,&quot;dicembre&quot;]" data-shadcn--event-calendar-short-month-names-value="[&quot;gen&quot;,&quot;feb&quot;,&quot;mar&quot;,&quot;apr&quot;,&quot;mag&quot;,&quot;giu&quot;,&quot;lug&quot;,&quot;ago&quot;,&quot;set&quot;,&quot;ott&quot;,&quot;nov&quot;,&quot;dic&quot;]" data-shadcn--event-calendar-month-format-value="%B %Y" data-shadcn--event-calendar-day-format-value="%A, %-d %B %Y" data-shadcn--event-calendar-agenda-format-value="%A %-d %B" data-shadcn--event-calendar-day-label-value="%{date}, %{events}" data-shadcn--event-calendar-more-label-value="+%{count}" data-shadcn--event-calendar-event-count-value="{&quot;one&quot;:&quot;1 evento&quot;,&quot;other&quot;:&quot;%{count} eventi&quot;}" class="group/event-calendar w-full text-foreground [&amp;_[data-color=default]]:[--event-color:var(--muted-foreground)] [&amp;_[data-color=default]]:[--event-ink:var(--foreground)] [&amp;_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&amp;_[data-color=blue]]:[--event-ink:var(--color-blue-800)] dark:[&amp;_[data-color=blue]]:[--event-ink:var(--color-blue-300)] [&amp;_[data-color=green]]:[--event-color:var(--color-emerald-500)] [&amp;_[data-color=green]]:[--event-ink:var(--color-emerald-800)] dark:[&amp;_[data-color=green]]:[--event-ink:var(--color-emerald-300)] [&amp;_[data-color=amber]]:[--event-color:var(--color-amber-500)] [&amp;_[data-color=amber]]:[--event-ink:var(--color-amber-800)] dark:[&amp;_[data-color=amber]]:[--event-ink:var(--color-amber-300)] [&amp;_[data-color=rose]]:[--event-color:var(--color-rose-500)] [&amp;_[data-color=rose]]:[--event-ink:var(--color-rose-800)] dark:[&amp;_[data-color=rose]]:[--event-ink:var(--color-rose-300)] [&amp;_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&amp;_[data-color=violet]]:[--event-ink:var(--color-violet-800)] dark:[&amp;_[data-color=violet]]:[--event-ink:var(--color-violet-300)] rows:[&amp;_[data-slot=event-calendar-week]]:contents rows:[&amp;_[data-slot=event-calendar-days]]:contents rows:[&amp;_[data-slot=event-calendar-weekdays]]:hidden rows:[&amp;_[data-slot=event-calendar-day]]:flex-row rows:[&amp;_[data-slot=event-calendar-day]]:gap-2 rows:[&amp;_[data-slot=event-calendar-day]]:px-2 rows:[&amp;_[data-slot=event-calendar-day]]:py-2 rows:[&amp;_[data-slot=event-calendar-day][data-outside]]:hidden rows:[&amp;_[data-slot=event-calendar-day-head]]:flex rows:[&amp;_[data-slot=event-calendar-day-head]]:w-14 rows:[&amp;_[data-slot=event-calendar-day-head]]:shrink-0 rows:[&amp;_[data-slot=event-calendar-day-head]]:flex-col rows:[&amp;_[data-slot=event-calendar-day-head]]:items-center rows:[&amp;_[data-slot=event-calendar-day-head]]:gap-1 rows:[&amp;_[data-slot=event-calendar-day-label]]:flex rows:[&amp;_[data-slot=event-calendar-day-label]]:w-full rows:[&amp;_[data-slot=event-calendar-day-label]]:flex-col rows:[&amp;_[data-slot=event-calendar-day-label]]:items-center rows:[&amp;_[data-slot=event-calendar-day-label]]:gap-0 rows:[&amp;_[data-slot=event-calendar-day-weekday]]:block rows:[&amp;_[data-slot=event-calendar-day-number]]:text-sm rows:[&amp;_[data-slot=event-calendar-segments]]:hidden [--event-calendar-hour:0px] max-lg:[--event-calendar-hour:22vw] [&amp;_[data-slot=event-calendar-grid]]:overflow-x-auto [&amp;_[data-slot=event-calendar-weeks]]:min-w-(--event-calendar-track) [&amp;_[data-slot=event-calendar-ruler]]:min-w-(--event-calendar-track) [&amp;_[data-slot=event-calendar-day]]:min-h-14 [&amp;_[data-slot=event-calendar-day]]:items-start [&amp;_[data-slot=event-calendar-day-head]]:sticky [&amp;_[data-slot=event-calendar-day-head]]:left-0 [&amp;_[data-slot=event-calendar-day-head]]:z-10 [&amp;_[data-slot=event-calendar-day-head]]:self-stretch [&amp;_[data-slot=event-calendar-day-head]]:justify-start [&amp;_[data-slot=event-calendar-day-head]]:pt-1.5 [&amp;_[data-slot=event-calendar-day-head]]:bg-background [&amp;_[data-slot=event-calendar-ruler-pad]]:sticky [&amp;_[data-slot=event-calendar-ruler-pad]]:left-0 [&amp;_[data-slot=event-calendar-ruler-pad]]:z-10 [&amp;_[data-slot=event-calendar-ruler-pad]]:self-stretch [&amp;_[data-slot=event-calendar-ruler-pad]]:bg-background [&amp;_[data-slot=event-calendar-day]]:w-full [&amp;_[data-slot=event-calendar-day]]:rounded-md">
+<div data-slot="event-calendar-header" class="flex flex-wrap items-center justify-between gap-2 pb-3">
+<div data-slot="event-calendar-title" class="min-w-0 text-base leading-none font-semibold sm:text-lg" role="status" aria-live="polite">mercoledì 30 settembre
+</div>
+<div data-slot="event-calendar-nav" class="flex min-w-0 flex-wrap items-center gap-1">
+<div data-slot="dropdown-menu" style="display:contents" data-controller="shadcn--dropdown-menu" data-shadcn--dropdown-menu-open-value="false" data-shadcn--dropdown-menu-side-value="bottom" data-shadcn--dropdown-menu-align-value="start" data-shadcn--dropdown-menu-side-offset-value="4" data-shadcn--dropdown-menu-align-offset-value="0" data-shadcn--dropdown-menu-loop-value="false">
+<button data-slot="dropdown-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" data-state="closed" data-shadcn--dropdown-menu-target="trigger" data-action="click-&gt;shadcn--dropdown-menu#toggle keydown-&gt;shadcn--dropdown-menu#triggerKeydown" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5 min-w-0 max-w-full">
+<span class="truncate">Giornaliero · Timeline ed elenco · Per assegnatario
+</span>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</button>
+<div data-slot="dropdown-menu-portal" style="display:contents">
+<div data-slot="dropdown-menu-content" role="menu" tabindex="-1" aria-orientation="vertical" data-state="closed" hidden="hidden" data-shadcn--dropdown-menu-target="content" data-action="keydown-&gt;shadcn--dropdown-menu#contentKeydown" class="z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 w-56">
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Mostra
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="monthly" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Mensile
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="weekly" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Settimanale
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="daily" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Giornaliero
+</div>
+</div>
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Mostra il giorno come
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="axis" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#reshow" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Solo timeline
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="agenda" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#reshow" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Solo elenco
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="both" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#reshow" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Timeline ed elenco
+</div>
+</div>
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Mostra ogni lavoro come
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="chips" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#reshape" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Etichette
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="bars" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#reshape" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Barre
+</div>
+</div>
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Raggruppa
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="assignees" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#regroup" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Per assegnatario
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="events" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#regroup" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Per evento
+</div>
+</div>
+</div>
+</div>
+</div>
+<button data-slot="button" data-variant="outline" data-size="sm" data-action="click-&gt;shadcn--event-calendar#today" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">Oggi
+</button>
+<button data-slot="button" data-variant="outline" data-size="icon-sm" data-action="click-&gt;shadcn--event-calendar#previous" aria-label="Vai al giorno precedente" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4">
+<path d="m15 18-6-6 6-6"/>
+</svg>
+</button>
+<button data-slot="button" data-variant="outline" data-size="icon-sm" data-action="click-&gt;shadcn--event-calendar#next" aria-label="Vai al giorno successivo" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4">
+<path d="m9 18 6-6-6-6"/>
+</svg>
+</button>
+</div>
+</div>
+<div data-slot="event-calendar-grid" class="overflow-hidden rounded-md border">
+<div data-slot="event-calendar-ruler" class="flex items-end gap-2 px-2 pb-1 text-[0.6rem] text-muted-foreground" aria-hidden="true">
+<span data-slot="event-calendar-ruler-pad" class="flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1">
+</span>
+<span class="relative h-4 grow">
+<span class="absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5" style="--at:0.0%">07
+</span>
+<span class="absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5" style="--at:16.667%">09
+</span>
+<span class="absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5" style="--at:33.333%">11
+</span>
+<span class="absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5" style="--at:50.0%">13
+</span>
+<span class="absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5" style="--at:66.667%">15
+</span>
+<span class="absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5" style="--at:83.333%">17
+</span>
+</span>
+</div>
+<div data-slot="event-calendar-weeks" class="flex flex-col gap-px bg-border" role="list" aria-label="mercoledì 30 settembre">
+<div data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-30" role="listitem">
+<span data-slot="event-calendar-resource" class="flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1">
+<span class="min-w-0 flex-1 truncate text-[0.7rem] font-medium">Linus Pauling
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
+</span>
+</span>
+<span data-slot="event-calendar-day-track" class="relative min-w-0 grow self-stretch bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))] h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]" style="--lanes:2;--lane-h:3.4rem;--gridline:16.6667%">
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:7.222%;--for:33.333%;--lane:calc(0 * var(--lane-h))" title="07:52 — Delta Clinic">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">07:52
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:36.806%;--for:25.0%;--lane:calc(1 * var(--lane-h))" title="11:25 — Northwind">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:25
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:72.083%;--for:27.917%;--lane:calc(0 * var(--lane-h))" title="15:39 — Delta Clinic">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">15:39
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
+</span>
+</span>
+</span>
+</div>
+<div data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-30" role="listitem">
+<span data-slot="event-calendar-resource" class="flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1">
+<span class="min-w-0 flex-1 truncate text-[0.7rem] font-medium">Alan Turing
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
+</span>
+</span>
+<span data-slot="event-calendar-day-track" class="relative min-w-0 grow self-stretch bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))] h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]" style="--lanes:1;--lane-h:3.4rem;--gridline:16.6667%">
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:7.222%;--for:33.333%;--lane:calc(0 * var(--lane-h))" title="07:52 — Delta Clinic">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">07:52
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:68.75%;--for:20.833%;--lane:calc(0 * var(--lane-h))" title="15:15 — Vega Logistics">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">15:15
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
+</span>
+</span>
+</span>
+</div>
+<div data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-30" role="listitem">
+<span data-slot="event-calendar-resource" class="flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1">
+<span class="min-w-0 flex-1 truncate text-[0.7rem] font-medium">Grace Hopper
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
+</span>
+</span>
+<span data-slot="event-calendar-day-track" class="relative min-w-0 grow self-stretch bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))] h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]" style="--lanes:2;--lane-h:3.4rem;--gridline:16.6667%">
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:7.222%;--for:33.333%;--lane:calc(0 * var(--lane-h))" title="07:52 — Delta Clinic">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">07:52
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:36.806%;--for:25.0%;--lane:calc(1 * var(--lane-h))" title="11:25 — Northwind">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:25
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
+</span>
+</span>
+</span>
+</div>
+<div data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-30" role="listitem">
+<span data-slot="event-calendar-resource" class="flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1">
+<span class="min-w-0 flex-1 truncate text-[0.7rem] font-medium">Marie Curie
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 6.8%, transparent),color-mix(in oklab, var(--primary) 6.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">2
+</span>
+</span>
+<span data-slot="event-calendar-day-track" class="relative min-w-0 grow self-stretch bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))] h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]" style="--lanes:1;--lane-h:3.4rem;--gridline:16.6667%">
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:36.806%;--for:25.0%;--lane:calc(0 * var(--lane-h))" title="11:25 — Northwind">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:25
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:68.75%;--for:20.833%;--lane:calc(0 * var(--lane-h))" title="15:15 — Vega Logistics">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">15:15
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
+</span>
+</span>
+</span>
+</div>
+<div data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-09-30" role="listitem">
+<span data-slot="event-calendar-resource" class="flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1">
+<span class="min-w-0 flex-1 truncate text-[0.7rem] font-medium">Katherine Johnson
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 3.4%, transparent),color-mix(in oklab, var(--primary) 3.4%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">1
+</span>
+</span>
+<span data-slot="event-calendar-day-track" class="relative min-w-0 grow self-stretch bg-[repeating-linear-gradient(to_right,var(--border)_0_1px,transparent_1px_var(--gridline))] h-[calc((var(--lanes)*var(--lane-h))+0.35rem)]" style="--lanes:1;--lane-h:3.4rem;--gridline:16.6667%">
+<span data-slot="event-calendar-day-item" class="absolute top-(--lane) left-(--at) flex flex-col gap-1 overflow-hidden rounded-md border border-border/40 bg-[var(--event-color)]/12 px-1.5 py-1 text-(--event-ink) data-[continues-before]:rounded-s-none data-[continues-after]:rounded-e-none data-[continues-before]:border-s-2 data-[continues-before]:border-s-[var(--event-color)] data-[continues-after]:border-e-2 data-[continues-after]:border-e-[var(--event-color)] w-(--for) min-w-max items-start" data-color="default" style="--at:36.806%;--for:25.0%;--lane:calc(0 * var(--lane-h))" title="11:25 — Northwind">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:25
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
+</span>
+</span>
+</span>
+</div>
+</div>
+</div>
+<div data-slot="event-calendar-agenda" class="mt-3">
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium">
+<span>Linus Pauling
+</span>
+<span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground">3 eventi
+</span>
+</div>
+<ul data-slot="event-calendar-agenda-list" class="flex flex-col">
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Delta Clinic
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">07:52 – 11:52
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Northwind
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">11:25 – 14:25
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Delta Clinic
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">15:39 – 19:09
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+</div>
+</li>
+</ul>
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium">
+<span>Alan Turing
+</span>
+<span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground">2 eventi
+</span>
+</div>
+<ul data-slot="event-calendar-agenda-list" class="flex flex-col">
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Delta Clinic
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">07:52 – 11:52
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Vega Logistics
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">15:15 – 17:45
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+</span>
+</span>
+</div>
+</li>
+</ul>
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium">
+<span>Grace Hopper
+</span>
+<span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground">2 eventi
+</span>
+</div>
+<ul data-slot="event-calendar-agenda-list" class="flex flex-col">
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Delta Clinic
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">07:52 – 11:52
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Northwind
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">11:25 – 14:25
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+</div>
+</li>
+</ul>
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium">
+<span>Marie Curie
+</span>
+<span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground">2 eventi
+</span>
+</div>
+<ul data-slot="event-calendar-agenda-list" class="flex flex-col">
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Northwind
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">11:25 – 14:25
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+</div>
+</li>
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Vega Logistics
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">15:15 – 17:45
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+</span>
+</span>
+</div>
+</li>
+</ul>
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium">
+<span>Katherine Johnson
+</span>
+<span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground">1 evento
+</span>
+</div>
+<ul data-slot="event-calendar-agenda-list" class="flex flex-col">
+<li data-slot="event-calendar-agenda-item" data-color="default">
+<div data-slot="event-calendar-agenda-row" data-variant="default" data-size="sm" class="group/item flex flex-wrap rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-accent/50 bg-transparent gap-2.5 items-stretch px-2 py-2">
+<span data-slot="event-calendar-agenda-mark" class="w-1.5 shrink-0 self-stretch rounded-full bg-(--event-color)">
+</span>
+<div data-slot="item-content" class="flex flex-1 flex-col [&amp;+[data-slot=item-content]]:flex-none min-w-0 gap-0.5">
+<div data-slot="item-title" class="flex w-fit items-center gap-2 text-sm leading-snug truncate font-medium">Northwind
+</div>
+<p data-slot="item-description" class="line-clamp-2 font-normal text-balance text-muted-foreground [&amp;&gt;a]:underline [&amp;&gt;a]:underline-offset-4 [&amp;&gt;a:hover]:text-primary truncate text-xs">11:25 – 14:25
+</p>
+</div>
+<span data-slot="event-calendar-agenda-avatars" class="flex shrink-0 items-center [&amp;_[data-slot=avatar-fallback]]:bg-muted [&amp;_[data-slot=avatar-group-count]]:bg-muted [a:hover_&amp;_[data-slot=avatar-fallback]]:bg-background [a:hover_&amp;_[data-slot=avatar-group-count]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-fallback]]:bg-background [[data-picked]_&amp;_[data-slot=avatar-group-count]]:bg-background">
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
