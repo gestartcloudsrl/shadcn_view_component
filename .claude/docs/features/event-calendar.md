@@ -328,6 +328,28 @@ measures every reading at 360, 390 and 412 through device emulation, not
 `resize_to`, because headless Chrome will not make a window narrower than
 500px. At 500 the day's nav fitted, so the overflow got past the suite.
 
+### The day's timeline on a phone
+
+Below `lg` the day's axis is wider than a phone: 1429px of track in a 340px
+grid at 390px wide. `Hours` makes the grid scroll sideways, and nothing in it
+takes focus, because the axis is a picture and the jobs open from the list.
+axe raised `scrollable-region-focusable` (WCAG 2.1.1, serious), and with
+`showing: :axis` there is no list to read the hours past the edge from.
+
+The day's grid is a named region with a tab stop of its own: `tabindex="0"`,
+`role="region"` and `aria-label` from `event_calendar.daily.axis_label`
+("Hours of the day"). Focused, the arrows scroll it. The ring is the one
+shadcn's inputs draw (`focus-visible:border-ring`, `ring-[3px]`,
+`ring-ring/50`), outside the frame. An inset ring sat under the rows, which
+paint their own background, and showed as a sliver.
+
+It is on at every width, including from `lg` up where the grid does not scroll
+and the arrows move nothing. One stop that is sometimes idle was preferred to
+a controller adding and removing it as the width changes, which would also
+leave a phone without JavaScript with no way in. Only the day: the week's and
+the month's timelines hold the day buttons, and Tab on those already brings
+the timeline along.
+
 ### What the server-drawn readings do not ship
 
 The workload and hours readings are drawn whole by the server: their cells hold

@@ -16,7 +16,7 @@ RSpec.describe "Accessibility", :js do
     check = Axe::Matchers::BeAxeClean.new.according_to(:wcag2a, :wcag2aa, :wcag21a, :wcag21aa)
     check = check.within(within) if within
     check = check.excluding(excluding) if excluding
-    check = check.skipping(*skipping) if skipping
+    check = check.skipping(skipping) if skipping
 
     expect(page).to check
   end
@@ -47,28 +47,9 @@ RSpec.describe "Accessibility", :js do
     "event_calendar" => "[data-slot=event-calendar-day]"
   }.freeze
 
-  def audit_only(rule, excluding:)
-    expect(page).to Axe::Matchers::BeAxeClean.new.checking_only(rule).excluding(excluding)
+  def audit_label_in_name(excluding:)
+    expect(page).to Axe::Matchers::BeAxeClean.new.checking_only(label_in_name).excluding(excluding)
   end
-
-  # WCAG 2.1.1 through axe's `scrollable-region-focusable`: a region that
-  # scrolls has to be reachable from the keyboard, by being focusable or by
-  # holding something that is.
-  def scroller_reach = :"scrollable-region-focusable"
-
-  # Set aside on one preview's one node, and open — this is a finding, not a
-  # ruling. Below `lg` the day's timeline is wider than a phone and its grid
-  # scrolls sideways (1429px of track in 340px at 390 wide), and nothing in it
-  # takes focus: the axis is a picture of the day, and the jobs are read and
-  # opened from the list underneath. With `showing: :axis` there is no list,
-  # and the hours past the edge cannot be reached without a pointer. The grid
-  # needs a tab stop that exists only while it scrolls; see todo.md.
-  #
-  # Only `phone` because it is the only preview of the day drawn at a phone's
-  # width. Every other preview is audited at 1400px, where it does not scroll.
-  scroller_exemptions = {
-    "event_calendar/phone" => "[data-slot=event-calendar-grid]"
-  }.freeze
 
   # Nodes this port renders that axe fails and that the port is not free to
   # change, because the colours are upstream's own — the rule the whole project
@@ -156,14 +137,12 @@ RSpec.describe "Accessibility", :js do
       wait_for_stimulus
 
       exempt = label_in_name_exemptions[family]
-      scroller = scroller_exemptions["#{family}/#{example}"]
-      skipping = [ (label_in_name if exempt), (scroller_reach if scroller) ].compact.presence
+      skipping = (label_in_name if exempt)
 
       audit(excluding: excluding(upstream_contrast[family], upstream_light_contrast[family], light_contrast),
             skipping:)
       in_dark_mode { audit(excluding: excluding(upstream_contrast[family]), skipping:) }
-      audit_only(label_in_name, excluding: exempt) if exempt
-      audit_only(scroller_reach, excluding: scroller) if scroller
+      audit_label_in_name(excluding: exempt) if exempt
     end
   end
 

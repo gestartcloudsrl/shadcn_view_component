@@ -81,6 +81,9 @@ en:
         axis: Timeline only
         agenda: List only
         both: Timeline and list
+        # The timeline's own name: below `lg` it scrolls sideways, so it is a
+        # region with a tab stop, and a region has to be called something.
+        axis_label: Hours of the day
       previous_day: Go to the Previous Day
       next_day: Go to the Next Day
       previous_week: Go to the Previous Week

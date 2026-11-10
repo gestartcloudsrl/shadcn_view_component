@@ -723,6 +723,24 @@ RSpec.describe Shadcn::EventCalendar::Component do
       day(showing).all("[data-slot=dropdown-menu-radio-item]", visible: :all).map { |item| item["data-value"] }
     end
 
+    # Below `lg` the axis is wider than a phone and the grid scrolls sideways,
+    # and nothing in it takes focus: without a tab stop of its own, the hours
+    # past the edge need a pointer.
+    it "makes the scrolling timeline a named region the keyboard can reach", :aggregate_failures do
+      grid = day(:both).find("[data-slot=event-calendar-grid]")
+
+      expect(grid["tabindex"]).to eq("0")
+      expect(grid["role"]).to eq("region")
+      expect(grid["aria-label"]).to eq("Hours of the day")
+      expect(grid["class"].split).to include("focus-visible:ring-[3px]", "focus-visible:ring-ring/50")
+    end
+
+    # The Italian is the dummy app's, `test/dummy/config/locales/it.yml`.
+    it "names the region in the host's language" do
+      expect(I18n.with_locale(:it) { day(:axis) }.find("[data-slot=event-calendar-grid]")["aria-label"])
+        .to eq("Ore del giorno")
+    end
+
     # The shape is `Hours`'s and this inherits it, so a `shape:` a host passed
     # was being *drawn* and could not be changed — the panel showed the period,
     # the halves and the grouping, and never it. It belongs exactly where the

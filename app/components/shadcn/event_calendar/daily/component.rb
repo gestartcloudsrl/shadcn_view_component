@@ -39,6 +39,8 @@ module Shadcn
         # Johnson" — it clipped her to "atherine Johnson" and dropped the count
         # to the foot of a stretched row. Borrowing the slot would have meant
         # undoing three of the frame's rules; a name of its own has none to undo.
+        GRID_FOCUS_CLASS = "outline-none focus-visible:border-ring focus-visible:ring-[3px] " \
+                           "focus-visible:ring-ring/50"
         RESOURCE_CLASS = "flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1"
         RESOURCE_NAME_CLASS = "min-w-0 flex-1 truncate text-[0.7rem] font-medium"
 
@@ -161,11 +163,27 @@ module Shadcn
 
         # One day's row, with the scale above it — no weekday strip, no weeks,
         # and no `role="grid"`, because there is no grid to describe.
+        #
+        # A tab stop of its own. Below `lg` the axis is wider than a phone
+        # (1429px of track in 340px at 390 wide) and `Hours` makes the grid
+        # scroll sideways, and nothing inside takes focus: the axis is a picture
+        # and the jobs open from the list. So a keyboard could not reach the
+        # hours past the edge, and with `showing: :axis` there is no list to
+        # read them from. Focused, the arrows scroll it. A region, so the stop
+        # is announced as something rather than as an unnamed div.
+        #
+        # Always on, including from `lg` up where it does not scroll and the
+        # arrows move nothing: one stop that is sometimes idle, against a
+        # controller watching the width to add and remove it, which would also
+        # leave a phone without JavaScript with no way in. The ring is the one
+        # shadcn's inputs draw, outside the frame: an inset ring sits under the
+        # rows, which paint their own background, and showed as a sliver.
         def grid
           return unless axis?
 
           tag.div(safe_join([ scale, day_row ].compact),
-                  "data-slot": "event-calendar-grid", class: FRAME_CLASS)
+                  "data-slot": "event-calendar-grid", class: "#{FRAME_CLASS} #{GRID_FOCUS_CLASS}",
+                  tabindex: 0, role: "region", "aria-label": shadcn_t("event_calendar.daily.axis_label"))
         end
 
         def day_row

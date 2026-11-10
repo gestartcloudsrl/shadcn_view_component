@@ -1209,6 +1209,47 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # Below `lg` the day's axis is wider than the phone and scrolls sideways,
+  # with nothing inside that takes focus. The grid is its own tab stop, so
+  # the hours past the edge are reached from the keyboard.
+  #
+  # This passes without the fix too, and that is worth knowing rather than a
+  # reason to drop it: the Chrome this suite drives already makes such a
+  # scroller focusable by itself, and other browsers are not known to. What
+  # pins the fix is the component spec (the three attributes) and axe's
+  # `scrollable-region-focusable` on `event_calendar/phone`. This pins what a
+  # keyboard actually gets.
+  describe "the day's timeline on a phone" do
+    before do
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width: 390, height: 844, deviceScaleFactor: 1, mobile: true)
+      visit_preview("event_calendar", :phone)
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride") }
+
+    def grid_state = page.evaluate_script(<<~JS)
+      (() => {
+        const grid = document.querySelector("[data-slot=event-calendar-grid]");
+        return { focused: document.activeElement === grid, left: grid.scrollLeft };
+      })()
+    JS
+
+    it "is reached with Tab and scrolled with the arrows", :aggregate_failures do
+      20.times do
+        break if grid_state["focused"]
+
+        page.driver.browser.action.send_keys(:tab).perform
+      end
+      expect(grid_state["focused"]).to be(true)
+
+      page.driver.browser.action.send_keys(:arrow_right, :arrow_right).perform
+      Timeout.timeout(Capybara.default_max_wait_time) { sleep 0.05 until grid_state["left"].positive? }
+      expect(grid_state["left"]).to be_positive
+    end
+  end
+
   # The row is a link, so what happens next is the host's: the attributes it
   # put on the event are the only thing deciding between a Sheet and a page.
   describe "opening an event from its row" do
