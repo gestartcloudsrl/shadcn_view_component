@@ -386,6 +386,7 @@ RSpec.describe "reverse parity" do
       rows:[&_[data-slot=event-calendar-day]]:flex-row
       rows:[&_[data-slot=event-calendar-day]]:gap-2
       rows:[&_[data-slot=event-calendar-day]]:h-20
+      rows:[&_[data-selected]_[data-slot=event-calendar-day-weekday]]:text-foreground
       rows:[&_[data-slot=event-calendar-day]]:items-center
       rows:[&_[data-slot=event-calendar-day-held]]:hidden
       rows:[&_[data-slot=event-calendar-day]]:min-h-0

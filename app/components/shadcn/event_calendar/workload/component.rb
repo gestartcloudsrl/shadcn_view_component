@@ -54,11 +54,19 @@ module Shadcn
         # sizes its own column and `Chips` is for what both draw.
         NAME_CLASS = "min-w-0 flex-1 truncate text-[0.65rem]"
 
+        # The last rule is contrast, not layout. In a row the weekday is shown,
+        # and on the selected day it sits on the cell's `bg-accent`: muted on
+        # accent is 4.34:1, under AA. The hours reading never met it because
+        # its date column carries `bg-background`; this one has no column
+        # background, and the month's rows never showed it to axe, which audits
+        # them at a width where the month is a grid and the weekday is hidden.
+        # The week drawn as rows is where it surfaced.
         CELL_TOKENS =
           "rows:[&_[data-slot=event-calendar-day]]:items-center " \
           "rows:[&_[data-slot=event-calendar-day]]:h-20 " \
           "rows:[&_[data-slot=event-calendar-day]]:min-h-0 " \
-          "rows:[&_[data-slot=event-calendar-day-head]]:justify-center"
+          "rows:[&_[data-slot=event-calendar-day-head]]:justify-center " \
+          "rows:[&_[data-selected]_[data-slot=event-calendar-day-weekday]]:text-foreground"
 
         HELD_TOKENS = "rows:[&_[data-slot=event-calendar-day-held]]:hidden"
         # The band closes up. On the side where a chip was cut, cancel the

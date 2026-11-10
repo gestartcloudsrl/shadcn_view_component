@@ -77,7 +77,7 @@ Lookbook.
   (`shadcn_t("event_calendar.view.label")`); `Daily` overrides
   `view_choices` to `[]`.
 
-- [ ] **Step 1: Write the failing tests** inside `describe "the weekly reading"`:
+- [x] **Step 1: Write the failing tests** inside `describe "the weekly reading"`:
 
 ```ruby
 it "asks how to show the week, offering rows and the timeline", :aggregate_failures do
@@ -99,12 +99,12 @@ end
 
   And in `describe "#period"`: `expect(checked_period(reading: :weekly)).to eq("weekly")`.
 
-- [ ] **Step 2: Run them, expect FAIL** — no "Show the week as", trigger reads
+- [x] **Step 2: Run them, expect FAIL** — no "Show the week as", trigger reads
   "Weekly · Chips".
 
   Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "the weekly reading" -e "#period"`
 
-- [ ] **Step 3: Implement.**
+- [x] **Step 3: Implement.**
   - `week.rb`: the module above. `Weekly::Component` keeps `grid` (scale +
     `week_rows`), includes `Week`, and its `view` becomes `:hours` (inherited
     from `Hours`, so delete the override).
@@ -115,13 +115,13 @@ end
     reads it.
   - `daily?` stays `view == :daily`.
 
-- [ ] **Step 4: Run the file, then the snapshots.** The two tests pass and the
+- [x] **Step 4: Run the file, then the snapshots.** The two tests pass and the
   whole file stays green. `bundle exec rspec spec/snapshot_spec.rb` fails on
   `weekly` and `event_links` only; regenerate with
   `SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb` and check the
   diff is the trigger text and the added view group, nothing else.
 
-- [ ] **Step 5: Commit** — `Give the week a view question in the panel`.
+- [x] **Step 5: Commit** — `Give the week a view question in the panel`.
 
 ---
 
@@ -148,7 +148,7 @@ end
   recurse (the `name == renderer` guard already handles a class handing to
   itself — extend it to this renderer).
 
-- [ ] **Step 1: Write the failing tests.** `options` is
+- [x] **Step 1: Write the failing tests.** `options` is
   `{ reading: :weekly, arrangement: :rows, selected: Date.new(2026, 8, 5), events: [ … ] }`
   with "Fit-out" on 5 August at 9:00 assigned to "Ada Lovelace".
 
@@ -205,20 +205,20 @@ end
   Use the file's existing helpers (`parts`, `painted`, the root lookup the
   other blocks use); add none if one already does the job.
 
-- [ ] **Step 2: Run, expect FAIL** — `reading: :weekly, arrangement: :rows`
+- [x] **Step 2: Run, expect FAIL** — `reading: :weekly, arrangement: :rows`
   returns a `Weekly::Component`.
 
   Run: `bundle exec rspec spec/components/shadcn/event_calendar_spec.rb -e "as rows"`
 
-- [ ] **Step 3: Implement** the class and the hand-over in `self.new`. Keep the
+- [x] **Step 3: Implement** the class and the hand-over in `self.new`. Keep the
   workload row's heat ramp, `CAP` and *Show all* as inherited (the spec's
   default). If one of them turns out wrong for seven rows, stop and say which
   and why in the report rather than changing it.
 
-- [ ] **Step 4: Run the whole spec file and `spec/stimulus_contract_spec.rb`**,
+- [x] **Step 4: Run the whole spec file and `spec/stimulus_contract_spec.rb`**,
   expect green. No golden should move (`bundle exec rspec spec/snapshot_spec.rb`).
 
-- [ ] **Step 5: Commit** — `Draw the week as the month's rows when asked`.
+- [x] **Step 5: Commit** — `Draw the week as the month's rows when asked`.
 
 ---
 
@@ -237,7 +237,7 @@ end
 **Interfaces:**
 - Consumes: Tasks 1–2.
 
-- [ ] **Step 1: Write the failing system test** in `describe "the weekly reading"`:
+- [x] **Step 1: Write the failing system test** in `describe "the weekly reading"`:
 
 ```ruby
 it "switches the week to rows and back to the timeline", :aggregate_failures do
@@ -255,12 +255,12 @@ it "switches the week to rows and back to the timeline", :aggregate_failures do
 end
 ```
 
-- [ ] **Step 2: Run, expect FAIL** — the rows item sends you to the monthly
+- [x] **Step 2: Run, expect FAIL** — the rows item sends you to the monthly
   rows, because `density`'s `view_url` maps every view to `period: "monthly"`.
 
   Run: `bundle exec rspec spec/system/event_calendar_spec.rb -e "the weekly reading"`
 
-- [ ] **Step 3: Implement.**
+- [x] **Step 3: Implement.**
   - `density`: a view name keeps `period: "weekly"` when the week is shown, and
     `"monthly"` otherwise; the weekly branch passes `arrangement: :rows` plus
     `group:`, `group_url:`, `show_all:`, `show_all_url:` when `view == "rows"`.
@@ -272,9 +272,9 @@ end
     (`arrangement: :rows`), and that the timeline stays the default. Remove or
     update anything in `todo.md` this closes.
 
-- [ ] **Step 4: Run** the system example, then
+- [x] **Step 4: Run** the system example, then
   `SNAPSHOTS=overwrite bundle exec rspec spec/snapshot_spec.rb` (only the new
   golden appears), then `bundle exec rspec spec/system/accessibility_spec.rb -e weekly_rows`,
   then `bundle exec rake`, `bin/rubocop`, `bin/eslint`. All green.
 
-- [ ] **Step 5: Commit** — `Show the week as rows in the gallery and say what it is`.
+- [x] **Step 5: Commit** — `Show the week as rows in the gallery and say what it is`.

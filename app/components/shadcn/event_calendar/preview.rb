@@ -33,6 +33,13 @@ module Shadcn
         render_with_template
       end
 
+      # The same week as rows: a day per row, its jobs in a strip ordered by
+      # time, by event above and by assignee below. The other of the week's
+      # two views, asked for with `arrangement: :rows`.
+      def weekly_rows
+        render_with_template
+      end
+
       # One of each colour, then the same calendar with `default_color:` — the
       # level FullCalendar puts on an event source. The palette is fixed rather
       # than free-form; the reason is in `Event::COLORS`.
@@ -154,7 +161,7 @@ module Shadcn
       # `view` and `most`, a long way from the daily knobs it belongs to.
       #
       # @param month text
-      # @param period select [monthly, daily]
+      # @param period select [monthly, weekly, daily]
       # @param view select [grid, rows, hours]
       # @param most number
       # @param all_day number
@@ -199,23 +206,32 @@ module Shadcn
                                     durations: view.to_s == "hours", all_day: all_day.to_i,
                                     spanning: spanning.to_i)
           end
-        # One callback in, two parameters out. `view_url` is handed `:daily` for
-        # the period and one of `:grid`/`:rows`/`:hours` for the view, so
-        # picking a view also says the period is monthly — which is what makes
-        # `monthly` expressible rather than implied.
+        # One callback in, two parameters out. `view_url` is handed a period
+        # (`:monthly`, `:weekly`, `:daily`) or a view (`:grid`, `:rows`,
+        # `:hours`). A view keeps the week when the week is what is shown —
+        # its own question offers rows and the timeline — and says the month
+        # otherwise, which is what makes `monthly` expressible rather than
+        # implied. The callback is handed the same `:rows` either way; telling
+        # the week's from the month's is this host's state, not a new word.
         daily = period.to_s == "daily"
         weekly = period.to_s == "weekly"
         common = { month: shown, events:,
                    view_url: lambda { |name|
                      case name.to_s
                      when "daily", "weekly", "monthly" then here.call(period: name)
-                     else here.call(period: "monthly", view: name)
+                     else here.call(period: weekly ? "weekly" : "monthly", view: name)
                      end
                    },
                    month_url: ->(date) { here.call(month: date.iso8601) } }
 
         args =
-          if weekly
+          if weekly && view.to_s == "rows"
+            # The week as the month's rows. `month_url:` steps it as it steps
+            # the timeline below.
+            common.merge(reading: :weekly, arrangement: :rows, selected: shown, group: group.to_sym,
+                         show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
+                         group_url: ->(cut) { here.call(group: cut) })
+          elsif weekly
             # `month_url:` in `common` is what `‹` and `›` reach for, and it is
             # already right: the week hands it `selected ± 7` and the month of
             # that date is the grid the week is found in.

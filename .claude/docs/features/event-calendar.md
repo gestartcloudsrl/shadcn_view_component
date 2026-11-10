@@ -156,8 +156,32 @@ says has `shape: :bars`, and the panel offers it. An event outside `window` is
 reached by scrolling the track sideways, as in the month — which reads worse in
 a view you expect to take in at a glance.
 
-**A week has no grouping**, because `Hours` has none and the week adds nothing
-to the reading it draws with. Cut by operator, a week's row would be a person
+**A week can also be drawn as rows** — the month's rows-arrangement row for
+each of its seven days: the date column, then the day's chips in a strip
+ordered by time, grouped by event or by assignee, with the heat ramp, the cap
+of three and *Show all* exactly as the month's rows have them. The timeline
+answers *when*; the rows answer *what is on, and whose*. A host asks for them
+with `reading: :weekly, arrangement: :rows` — a string from `params` works —
+and `reading: :weekly` alone, or any other `arrangement:`, is still the
+timeline, because the gem is published and an existing call must keep drawing
+what it drew. They are `WeeklyRows::Component < Workload::Component`; what
+makes either class a week (which week, the span title, the nav that steps
+seven days, seven stacked `listitem`s) is the `Week` module both include,
+since one is an `Hours` reading and the other a `Workload` one and they cannot
+share a parent. The selected day's list stays under the week in both views and
+needs `day_url:`, as every server-drawn agenda does. There is no grid for the
+week: seven narrow columns are what the rows were built to avoid. See
+[its design](../specs/2026-11-10-event-calendar-week-rows-design.md).
+
+Drawing the week as rows found a contrast defect the month's rows had always
+had: on the selected day the weekday label is muted text on the cell's
+`bg-accent`, 4.34:1. The timeline never met it because its date column carries
+`bg-background`, and axe audits the month at a width where it is a grid and the
+weekday is hidden. The workload reading now turns that label to `foreground` on
+the selected day.
+
+**The week's timeline has no grouping**, because `Hours` has none and the week
+adds nothing to the reading it draws with. Cut by operator, a week's row would be a person
 rather than a day, on a continuous Monday→Sunday axis rather than seven windows
 stacked — a different geometry, not a variation on this one. That and the
 week's agenda half, `showing:`, are the two pieces left out of
@@ -210,6 +234,13 @@ panel: **which view**, then the only question that view has.
 | Grid | group by assignee or by event |
 | Rows | the same |
 | Timeline | draw each job as chips or as bars |
+
+That is the month. A week asks the same question with fewer answers — **Rows**
+and **Timeline**, under "Show the week as" — and a day asks none, having one
+view. Each period answers `view_choices` and the panel draws the question when
+the list is not empty. `view_url:` is handed the same `:rows` and `:hours` from
+the week as from the month: telling the week's rows from the month's is the
+host's state, since it already holds the period.
 
 `Grid` and `Rows` are the workload reading at its two arrangements and the
 timeline is a different reading; that distinction matters to this port and to

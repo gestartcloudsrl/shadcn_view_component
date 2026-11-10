@@ -523,6 +523,23 @@ RSpec.describe "Event calendar", :js do
                                text: "10 – 16 August 2026")
       expect(all("#{calendar} [data-slot=event-calendar-day]").size).to eq(7)
     end
+
+    # The week's own view question: rows or the timeline, and a step keeps the
+    # one you picked — `view_url:` is handed `:rows`, and the host is what
+    # remembers it was the week's rows rather than the month's.
+    it "switches the week to rows and keeps them across a step", :aggregate_failures do
+      open_panel
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the week as", "Show each job as" ])
+
+      find("[data-slot=dropdown-menu-radio-item][data-value=rows]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Weekly · Rows")
+      expect(all("#{calendar} [data-slot=event-calendar-day]").size).to eq(7)
+
+      find("#{calendar} [data-slot=event-calendar-nav] [aria-label='Go to the Next Week']").click
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "10 – 16 August 2026")
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Weekly · Rows")
+    end
   end
 
   # Both cuts of a cell used to be rendered with one hidden, which made the menu

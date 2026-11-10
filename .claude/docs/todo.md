@@ -716,8 +716,9 @@ noting that it would not have delivered the component that raised the question:
   of a bar and a rule for what a resize means to a `to` that is inclusive.
 
   The fourth was the week view, which went to *Smaller things* once the time
-  axis it was blocked on had been built, and has since been built itself — see
-  the [feature doc](features/event-calendar.md#the-period-the-week-and-the-day).
+  axis it was blocked on had been built, and has since been built itself, as a
+  timeline and as the month's rows (`arrangement: :rows`) — see the
+  [feature doc](features/event-calendar.md#the-period-the-week-and-the-day).
   The day view came off this list the same way — it was named as deliberately not
   done for a while after it was done.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
