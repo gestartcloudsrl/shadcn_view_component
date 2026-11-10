@@ -115,8 +115,9 @@ in is the axis, not what an intervention looks like.
 ### The period, the week and the day
 
 The panel narrows in three steps: **the period** — monthly, weekly or daily —
-then how to read it, then the only question that reading has. A week and a day
-have one arrangement each, so their middle question is not drawn at all.
+then how to read it, then the only question that reading has. A month offers
+three views and a week two — rows and the timeline; a day has one, so its middle
+question is not drawn at all.
 
 **A week is seven `Hours` rows over one `window`**, so Tuesday at ten sits
 directly above Thursday at ten. `Weekly::Component` is `Daily`'s sibling, not
@@ -269,8 +270,8 @@ the label rather than the key for the same reason — *Timeline only* and
 thing in the month and in the day.
 
 One callback, but its vocabulary is **`PERIODS + VIEWS`**: it is handed
-`:monthly`, `:daily`, `:grid`, `:rows` or `:hours`, and nothing stands in for
-anything else. That last part was learned rather than designed. The *Monthly*
+`:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, and nothing
+stands in for anything else. That last part was learned rather than designed. The *Monthly*
 item used to be given `:grid`, which reads as "monthly means grid" — harmless
 while the only host merged the two questions into one parameter, and wrong the
 moment one kept them apart, because "show me the month again" and "draw the
@@ -281,6 +282,14 @@ A host is therefore free to model the two as two, and the gallery's `density`
 does: `period` and `view`, in the order the panel asks them. The comment above
 `VIEWS` that justified the merge said the distinction mattered "to nobody using
 it"; the first host to keep them apart was the somebody.
+
+**A view is no longer a month's alone.** The week asks the view question too, and
+hands `view_url:` the same `:rows` and `:hours`, so a host must read a view
+against the period it is showing: `:rows` from the week is the week's rows, and
+from the month the month's. A callback that answers every view with the month —
+which is what `density` did until the week had views — sends the week's *Rows*
+and *Timeline* to the month. `density` now keeps the week when the week is what
+is shown.
 
 ### What the server-drawn readings do not ship
 
