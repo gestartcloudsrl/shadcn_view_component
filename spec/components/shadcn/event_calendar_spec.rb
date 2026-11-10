@@ -49,6 +49,14 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(day("2026-08-21")["aria-label"]).to eq("Friday, August 21, 2026")
     end
 
+    # The name has to contain what the button shows, or a voice-control user
+    # saying "click 3" has nothing to match: "August 03" does not contain the
+    # "3" on the face. axe 4.14 checks it (`label-content-name-mismatch`).
+    # Upstream's day picker says "August 3rd", which does.
+    it "writes a single-digit day the way the button shows it" do
+      expect(day("2026-08-03")["aria-label"]).to eq("Monday, August 3, 2026")
+    end
+
     it "adds the count to the name when something is" do
       expect(day("2026-08-20")["aria-label"]).to eq("Thursday, August 20, 2026, 2 events")
     end

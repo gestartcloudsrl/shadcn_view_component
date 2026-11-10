@@ -1,8 +1,12 @@
-<%# The trigger is a plain button here rather than a combobox, so it could take
-    its name from its own text — but naming it explicitly is what the FormBuilder
-    does for every select, and a preview is documentation. %>
+<%# The trigger is a plain button here rather than a combobox, so its name has
+    to contain the text it shows (WCAG 2.5.3): an `aria-label` of "Favourite
+    fruit" over a face reading "Select a fruit" replaces the words a voice
+    user would say, and axe 4.14 fails it as `label-content-name-mismatch`.
+    So it is named the way the FormBuilder names every select — a visible label
+    — and points at that label *and* itself, so the name is both. %>
+<%= render(Shadcn::Label::Component.new(id: "fruit-label")) { "Favourite fruit" } %>
 <%= render(Shadcn::Select::Component.new(name: "fruit", placeholder: "Select a fruit", searchable: true)) do |s| %>
-  <% s.with_trigger(class: "w-[220px]", "aria-label": "Favourite fruit") do |tr| %>
+  <% s.with_trigger(class: "w-[220px]", id: "fruit-trigger", "aria-labelledby": "fruit-label fruit-trigger") do |tr| %>
     <% tr.with_value(placeholder: "Select a fruit") %>
   <% end %>
   <%# Items go in the block rather than through the `item` slot, so anything

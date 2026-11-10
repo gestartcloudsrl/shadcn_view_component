@@ -12,12 +12,43 @@ require "axe-rspec"
 # parents and children, focusability. It does not replace a screen reader.
 RSpec.describe "Accessibility", :js do
   # WCAG 2.1 AA is what shadcn's own components target.
-  def audit(within: nil, excluding: nil)
+  def audit(within: nil, excluding: nil, skipping: nil)
     check = Axe::Matchers::BeAxeClean.new.according_to(:wcag2a, :wcag2aa, :wcag21a, :wcag21aa)
     check = check.within(within) if within
     check = check.excluding(excluding) if excluding
+    check = check.skipping(skipping) if skipping
 
     expect(page).to check
+  end
+
+  # WCAG 2.5.3, *Label in Name*: a control's accessible name has to contain the
+  # text it shows. axe 4.13 carried the rule as experimental and did not run
+  # it; 4.14 runs it by default, and it is what found the zero-padded day names
+  # ("August 01" on a button showing "1") and the searchable select's trigger.
+  def label_in_name = :"label-content-name-mismatch"
+
+  # The one place the rule is set aside, and only the rule, only on these nodes.
+  #
+  # An event-calendar day is a single target whose *label* is its date — the
+  # number on its face, which its name ("Saturday, August 1, 2026, 3 events")
+  # contains. What else it shows, the chips and the "+N", is a picture of the
+  # day drawn inside the target on purpose (see the event-content design,
+  # 2026-11-09): the events open from the list underneath, not from here. axe
+  # cannot tell a label from a picture and counts every glyph, so every day
+  # with anything on it failed. Naming the day by its content instead would
+  # read a screen-reader user "Sat 1 3 10:44 AM AT GH LP +1 Fabbri Srl…";
+  # moving the chips out of the button is a markup change the design rejected.
+  #
+  # Skipping the rule page-wide would also stop it checking everything else on
+  # the page, so the page is audited without it and then again with it alone,
+  # minus these nodes. Contrast and every other rule still reach the day and
+  # its chips.
+  label_in_name_exemptions = {
+    "event_calendar" => "[data-slot=event-calendar-day]"
+  }.freeze
+
+  def audit_label_in_name(excluding:)
+    expect(page).to Axe::Matchers::BeAxeClean.new.checking_only(label_in_name).excluding(excluding)
   end
 
   # Nodes this port renders that axe fails and that the port is not free to
@@ -54,6 +85,19 @@ RSpec.describe "Accessibility", :js do
   #
   # It is not keyed by family because an avatar turns up inside six of them.
   light_contrast = "[data-slot=avatar-fallback], [data-slot=avatar-group-count]"
+
+  # The same kind of entry, keyed by family because it is one family's, and
+  # light only for the same reason as the avatar's: the dark palette passes.
+  #
+  # The destructive alert's description is `text-destructive/90` on the card
+  # (alert.tsx:13): axe 4.14 measures 4.49:1 at 14px where AA wants 4.5:1.
+  # axe 4.13 passed the same markup and the same compiled CSS — checked by
+  # pinning one and then the other — so what changed is the measurement, not
+  # the port. Why 4.14 reads it differently was not investigated. Scoped to
+  # the destructive root, so the default alert's description is still audited.
+  upstream_light_contrast = {
+    "alert" => "[data-slot=alert].text-destructive [data-slot=alert-description]"
+  }.freeze
 
   # The palette is a class on the root, so both themes can be audited in one
   # visit — the page load is what costs, not the second axe run.
@@ -92,8 +136,13 @@ RSpec.describe "Accessibility", :js do
       visit_preview(family, example)
       wait_for_stimulus
 
-      audit(excluding: excluding(upstream_contrast[family], light_contrast))
-      in_dark_mode { audit(excluding: excluding(upstream_contrast[family])) }
+      exempt = label_in_name_exemptions[family]
+      skipping = (label_in_name if exempt)
+
+      audit(excluding: excluding(upstream_contrast[family], upstream_light_contrast[family], light_contrast),
+            skipping:)
+      in_dark_mode { audit(excluding: excluding(upstream_contrast[family]), skipping:) }
+      audit_label_in_name(excluding: exempt) if exempt
     end
   end
 
