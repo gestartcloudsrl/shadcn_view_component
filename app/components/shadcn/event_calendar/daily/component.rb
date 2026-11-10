@@ -58,6 +58,9 @@ module Shadcn
 
         def period = :daily
 
+        # One view, so no view question on the panel.
+        def view_choices = []
+
         def cell_role = "listitem"
 
         # The scale has to start where the axes do, and here that is not the

@@ -1071,6 +1071,23 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(parts("event-calendar-title").first.text).to eq("3 – 9 August 2026")
     end
 
+    it "asks how to show the week, offering rows and the timeline", :aggregate_failures do
+      labels = painted.css("[data-slot=dropdown-menu-label]").map(&:text)
+      views = painted.css("[data-slot=dropdown-menu-radio-item]").map { |item| item["data-value"] }
+
+      expect(labels).to include("Show the week as")
+      expect(views).to include("rows", "hours")
+      expect(views).not_to include("grid")
+    end
+
+    it "checks the timeline and says so on the trigger", :aggregate_failures do
+      checked = painted.css("[data-slot=dropdown-menu-radio-item][data-state=checked]")
+                       .map { |item| item["data-value"] }
+
+      expect(checked).to include("weekly", "hours")
+      expect(parts("dropdown-menu-trigger").first.text.squish).to eq("Weekly · Timeline · Chips")
+    end
+
     context "with a week that crosses a month" do
       let(:options) { { reading: :weekly, selected: Date.new(2026, 8, 31), window: (7..19) } }
 
@@ -1132,6 +1149,10 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
     it "is the day's for the daily reading" do
       expect(checked_period(reading: :daily)).to eq("daily")
+    end
+
+    it "is the week's for the weekly reading" do
+      expect(checked_period(reading: :weekly)).to eq("weekly")
     end
   end
 

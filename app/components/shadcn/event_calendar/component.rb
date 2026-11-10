@@ -105,6 +105,11 @@ module Shadcn
       # in for anything else.
       VIEWS = %i[grid rows hours].freeze
 
+      # The views a week offers: the same words, without the grid. Seven narrow
+      # columns are what the rows were built to avoid, so a week has nothing to
+      # put there.
+      WEEK_VIEWS = %i[rows hours].freeze
+
       # The period the toolbar switches between, above the views. A month has
       # three ways of being read and a day has one; `PERIODS` is what the panel
       # asks first, and `VIEWS` is only the monthly follow-up.
@@ -662,7 +667,7 @@ module Shadcn
             ])
           end
           dropdown.with_menu_content(class: "w-56") do
-            safe_join([ period_options, (view_options if period == :monthly), *reading_options ].compact)
+            safe_join([ period_options, (view_options if view_choices.any?), *reading_options ].compact)
           end
         end
       end
@@ -695,10 +700,10 @@ module Shadcn
 
       def view_options
         safe_join([
-          render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.view.label") },
+          render(DropdownMenu::Label::Component.new) { view_heading },
           render(DropdownMenu::Separator::Component.new),
           render(DropdownMenu::RadioGroup::Component.new) do
-            safe_join(VIEWS.map { |name| view_option(name) })
+            safe_join(view_choices.map { |name| view_option(name) })
           end
         ])
       end
@@ -718,11 +723,18 @@ module Shadcn
       # what the stylesheet reads.
       def view = :grid
 
+      # The views this period offers, and what the panel calls the question.
+      # A month has all three; a week overrides both in `Week`; a day has one
+      # view and so no question at all.
+      def view_choices = VIEWS
+
+      def view_heading = shadcn_t("event_calendar.view.label")
+
       # The trigger says where you are and what you are seeing — the two things
       # the panel decides, so it can be read without opening it.
       def view_label
         where = shadcn_t("event_calendar.period.#{period}")
-        here = shadcn_t("event_calendar.view.#{view}") if period == :monthly
+        here = shadcn_t("event_calendar.view.#{view}") if view_choices.any?
 
         safe_join([ where, here, reading_label ].compact, " · ")
       end

@@ -93,6 +93,7 @@ en:
       # purpose and it lives here, in the one place a person reads.
       view:
         label: Show the month as
+        week_label: Show the week as
         grid: Grid
         rows: Rows
         hours: Timeline
