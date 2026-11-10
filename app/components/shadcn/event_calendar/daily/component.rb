@@ -34,14 +34,26 @@ module Shadcn
           base { "#{Hours::Component::BASE} #{TOKENS}" }
         end
 
+        # The scrolling grid's focus ring — see `#grid`.
+        GRID_FOCUS_CLASS = "outline-none focus-visible:border-ring focus-visible:ring-[3px] " \
+                           "focus-visible:ring-ring/50"
+
         # Its own slot, not the date column's. That column is `w-14` and centres
         # what it holds, which is right for "Tue 4" and wrong for "Katherine
         # Johnson" — it clipped her to "atherine Johnson" and dropped the count
         # to the foot of a stretched row. Borrowing the slot would have meant
         # undoing three of the frame's rules; a name of its own has none to undo.
-        GRID_FOCUS_CLASS = "outline-none focus-visible:border-ring focus-visible:ring-[3px] " \
-                           "focus-visible:ring-ring/50"
-        RESOURCE_CLASS = "flex w-32 shrink-0 items-center gap-1.5 self-stretch pt-1"
+        #
+        # Sticky, as the date column is in `Hours`: below `lg` the track
+        # scrolls sideways under it, and a name that scrolled away with it left
+        # every row past the first hours saying nothing about whose it was. The
+        # background is what the chips pass under; `z-10` keeps them there.
+        # `-ms-2 ps-2` takes the row's 8px of padding into the column: at rest
+        # the name is where it was, and stuck it keeps that much from the
+        # border instead of sitting flush against it. The ruler's pad is the
+        # same class, so the scale moves with the tracks.
+        RESOURCE_CLASS = "sticky left-0 z-10 -ms-2 flex w-32 shrink-0 items-center gap-1.5 self-stretch " \
+                         "bg-background ps-2 pt-1"
         RESOURCE_NAME_CLASS = "min-w-0 flex-1 truncate text-[0.7rem] font-medium"
 
         attr_reader :showing, :showing_url

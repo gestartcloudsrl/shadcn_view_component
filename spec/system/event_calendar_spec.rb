@@ -1236,6 +1236,24 @@ RSpec.describe "Event calendar", :js do
       })()
     JS
 
+    # Cut by operator, each row leads with the person's name. The track
+    # scrolls under it; the name has to stay, or past the first hours no row
+    # says whose it is.
+    it "keeps each row's name in view while the hours scroll", :aggregate_failures do
+      offsets = page.evaluate_script(<<~JS)
+        (() => {
+          const grid = document.querySelector("[data-slot=event-calendar-grid]");
+          grid.scrollLeft = 400;
+          const left = grid.getBoundingClientRect().left;
+          return Array.from(grid.querySelectorAll("[data-slot=event-calendar-resource]"))
+            .map((name) => Math.round(name.getBoundingClientRect().left - left));
+        })()
+      JS
+
+      expect(offsets).not_to be_empty
+      expect(offsets).to all(be_between(0, 2))
+    end
+
     it "is reached with Tab and scrolled with the arrows", :aggregate_failures do
       20.times do
         break if grid_state["focused"]

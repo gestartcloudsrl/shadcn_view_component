@@ -350,6 +350,13 @@ leave a phone without JavaScript with no way in. Only the day: the week's and
 the month's timelines hold the day buttons, and Tab on those already brings
 the timeline along.
 
+Cut by operator, each row leads with the person's name, and that column is
+`sticky` as the date column is in the month's and week's timelines. Before,
+it scrolled away with the track, and past the first hours no row said whose
+it was. `-ms-2 ps-2` takes the row's 8px of padding into the column. At rest
+the name is where it was, and when stuck it keeps 8px from the border. The
+ruler's pad shares the class, so the scale stays over the tracks.
+
 ### What the server-drawn readings do not ship
 
 The workload and hours readings are drawn whole by the server: their cells hold

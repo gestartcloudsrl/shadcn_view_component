@@ -272,7 +272,7 @@ RSpec.describe "reverse parity" do
     # forty-two chances to disagree. Its pad is the width of the date column,
     # so tick zero starts where the tracks do.
     "event-calendar-ruler" => %w[pb-1 text-[0.6rem]],
-    "event-calendar-ruler-pad" => %w[w-14 w-32 pt-1],
+    "event-calendar-ruler-pad" => %w[w-14 w-32 pt-1 sticky -ms-2 ps-2],
     # The daily reading's own, which no fixture rendered until
     # `previews/phone.html.erb` became the first preview of a day: cut by
     # operator, each row leads with the person's name at `w-32` instead of the
@@ -280,7 +280,12 @@ RSpec.describe "reverse parity" do
     # starts where the axes do (`Daily::Component::RESOURCE_CLASS`). The root
     # adds `w-full` and `rounded-md` to the one day it draws
     # (`Daily::Component::TOKENS`).
-    "event-calendar-resource" => %w[w-32 pt-1],
+    #
+    # The name column is `sticky` so the track scrolls under it on a phone,
+    # and `-ms-2 ps-2` takes the row's padding into the column so a stuck name
+    # keeps 8px from the border. The pad shares the class, so the scale moves
+    # with the tracks.
+    "event-calendar-resource" => %w[w-32 pt-1 sticky -ms-2 ps-2],
     # The axis itself. The gridlines are a repeating gradient rather than
     # twenty-four elements, because they are decoration and a DOM node each
     # would be a thousand of them in a month — spaced by `--gridline`, which is
