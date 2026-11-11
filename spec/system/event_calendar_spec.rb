@@ -1148,6 +1148,54 @@ RSpec.describe "Event calendar", :js do
   # device emulation rather than `resize_to`: headless Chrome will not make a
   # window narrower than 500px, so `resize_to(390, …)` measures at 500, where
   # the day's nav already fitted. That is how the overflow got past this file.
+  # A month taller than the window: past its first week the column names
+  # scrolled away, and a cell said its day number but not which weekday.
+  describe "the weekday row in a tall month" do
+    before do
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width: 1400, height: 400, deviceScaleFactor: 1, mobile: false)
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride") }
+
+    # Where the row and the grid are once the page has scrolled `by` past the
+    # grid's own top.
+    def scrolled(by:, offset: nil)
+      page.evaluate_script(<<~JS)
+        (() => {
+          if (#{offset.to_json}) document.documentElement.style.setProperty("--event-calendar-sticky-top", #{offset.to_json});
+          const grid = document.querySelector("[data-slot=event-calendar-grid]");
+          window.scrollTo(0, 0);
+          window.scrollTo(0, grid.getBoundingClientRect().top + #{by});
+          const row = grid.querySelector("[data-slot=event-calendar-weekdays]");
+          return { row: Math.round(row.getBoundingClientRect().top),
+                   grid: Math.round(grid.getBoundingClientRect().top) };
+        })()
+      JS
+    end
+
+    it "stays at the top of the window while the weeks scroll under it", :aggregate_failures do
+      at = scrolled(by: 200)
+
+      expect(at["grid"]).to eq(-200)
+      expect(at["row"]).to eq(0)
+    end
+
+    it "stops below a host's fixed bar when the host names its height", :aggregate_failures do
+      at = scrolled(by: 200, offset: "48px")
+
+      expect(at["row"]).to eq(48)
+    end
+
+    it "stays in its place before the grid reaches the top" do
+      at = scrolled(by: -50)
+
+      expect(at["row"]).to eq(at["grid"] + 1)
+    end
+  end
+
   describe "the toolbar on a phone" do
     def at_width(width)
       page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",

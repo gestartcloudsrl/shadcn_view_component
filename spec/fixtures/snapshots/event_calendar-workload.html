@@ -122,21 +122,21 @@
 </button>
 </div>
 </div>
-<div data-slot="event-calendar-grid" class="overflow-hidden rounded-md border">
-<div data-slot="event-calendar-weekdays" class="grid grid-cols-7 border-b bg-muted/50" aria-hidden="true">
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Mon
+<div data-slot="event-calendar-grid" class="overflow-clip rounded-md border">
+<div data-slot="event-calendar-weekdays" class="sticky top-[var(--event-calendar-sticky-top,0px)] z-10 grid grid-cols-7 border-b bg-background" aria-hidden="true">
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Mon
 </div>
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Tue
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Tue
 </div>
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Wed
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Wed
 </div>
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Thu
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Thu
 </div>
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Fri
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Fri
 </div>
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Sat
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Sat
 </div>
-<div data-slot="event-calendar-weekday" class="py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Sun
+<div data-slot="event-calendar-weekday" class="bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs">Sun
 </div>
 </div>
 <div data-slot="event-calendar-weeks" class="flex flex-col gap-px bg-border" role="grid" aria-label="August 2026" data-shadcn--event-calendar-target="weeks" data-action="keydown-&gt;shadcn--event-calendar#keydown">

@@ -216,9 +216,24 @@ module Shadcn
       VIEW_TRIGGER_CLASS = "min-w-0 max-w-full"
       VIEW_TRIGGER_LABEL_CLASS = "truncate"
       CHEVRON_CLASS = "size-4"
-      FRAME_CLASS = "overflow-hidden rounded-md border"
-      WEEKDAYS_CLASS = "grid grid-cols-7 border-b bg-muted/50"
-      WEEKDAY_CLASS = "py-2 text-center text-[0.7rem] font-medium text-muted-foreground select-none sm:text-xs"
+      # `overflow-clip`, not `overflow-hidden`: both cut the corners, but
+      # `hidden` makes the frame a scroll container, and a `sticky` row inside
+      # one sticks to the frame, which never scrolls, so it stayed put. `clip`
+      # leaves the page as the scroller the weekday row sticks to.
+      FRAME_CLASS = "overflow-clip rounded-md border"
+      # The weekday row stays at the top while a tall month scrolls the page
+      # under it. It stops at `--event-calendar-sticky-top`, 0 unless the host
+      # sets it, so a host with a fixed navbar puts the row below that bar
+      # rather than under it.
+      #
+      # The row is `bg-background` and the tint is on each name, where the row
+      # used to be `bg-muted/50` alone: half-transparent, the cells scrolling
+      # under it showed through. The names fill the row with no gap, so it
+      # looks as it did.
+      WEEKDAYS_CLASS = "sticky top-[var(--event-calendar-sticky-top,0px)] z-10 grid grid-cols-7 border-b " \
+                       "bg-background"
+      WEEKDAY_CLASS = "bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground " \
+                      "select-none sm:text-xs"
       # `gap-px` over a `bg-border` parent, rather than a border on each cell:
       # borders double up where two cells meet and the grid ends up with lines
       # of two widths, which is the thing a month grid cannot have.

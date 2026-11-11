@@ -417,7 +417,13 @@ RSpec.describe "reverse parity" do
     "event-calendar-day-label" => %w[contents],
     "event-calendar-day-weekday" => %w[text-[0.7rem]],
     "event-calendar-title" => %w[sm:text-lg],
-    "event-calendar-weekdays" => %w[grid-cols-7],
+    # The weekday row sticks while a tall month scrolls the page, stopping at
+    # the host's `--event-calendar-sticky-top`. The frame cuts its corners
+    # with `overflow-clip` where upstream writes `overflow-hidden`, because
+    # `hidden` makes it a scroll container and the row would stick to a frame
+    # that never scrolls (`Component::FRAME_CLASS`).
+    "event-calendar-weekdays" => %w[grid-cols-7 sticky top-[var(--event-calendar-sticky-top,0px)]],
+    "event-calendar-grid" => %w[overflow-clip],
     "event-calendar-weekday" => %w[sm:text-xs text-[0.7rem]],
     # The 1px rules between cells, drawn as gaps over a `bg-border` parent
     # rather than as borders on each cell — borders double up where two cells

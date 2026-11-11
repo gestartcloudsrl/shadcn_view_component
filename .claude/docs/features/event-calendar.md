@@ -357,6 +357,35 @@ it was. `-ms-2 ps-2` takes the row's 8px of padding into the column. At rest
 the name is where it was, and when stuck it keeps 8px from the border. The
 ruler's pad shares the class, so the scale stays over the tracks.
 
+### The weekday row in a tall month
+
+A month taller than the window scrolled its column names away, and past the
+first week a cell showed its day number but not its weekday. The row is now
+`sticky`, `z-10`, and stops at `top-[var(--event-calendar-sticky-top,0px)]`.
+That custom property is the host's: unset it is 0, and a host with a fixed
+navbar sets it to the bar's height, on `:root` or any ancestor of the
+calendar, so the row stops below the bar rather than under it.
+
+Two things had to change for it to stick at all:
+
+- **The frame is `overflow-clip`, not `overflow-hidden`.** Both cut the
+  rounded corners. `hidden` also makes the frame a scroll container, and a
+  sticky child sticks to its nearest scroll container. The frame never
+  scrolls, so the row went up with it (−199px after a 200px scroll, in the
+  system spec). `clip` makes no scroll container, so the row sticks to the
+  page.
+- **The row's background is opaque.** It was `bg-muted/50`, and stuck, the
+  cells under it showed through. The row is `bg-background` and each name
+  carries the `bg-muted/50`. The names fill the row with no gap, so it looks
+  the same.
+
+What it does not do: it sticks to the nearest scroller *the host* has. If the
+calendar sits inside an `overflow-auto` panel, it sticks to that panel, which
+is right. If an ancestor is `overflow-hidden`, it sticks to that ancestor
+and does nothing visible, and that is the host's to change. The timelines,
+whose grid scrolls sideways, are scroll containers of their own, so there the
+row does not stick vertically. Only the grid reading has the problem.
+
 ### What the server-drawn readings do not ship
 
 The workload and hours readings are drawn whole by the server: their cells hold

@@ -1342,6 +1342,20 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # page scrolled sideways. What keeps it inside is these classes, so they are
   # what is pinned; the widths themselves are measured in the browser, in
   # `spec/system/event_calendar_spec.rb`.
+  # Where it sticks is the system spec's; this pins the three things it needs.
+  describe "the weekday row" do
+    before { render_inline(calendar) }
+
+    it "sticks below the host's offset, over an opaque row, in a frame that is not a scroller",
+       :aggregate_failures do
+      expect(parts("event-calendar-weekdays").first["class"].split)
+        .to include("sticky", "top-[var(--event-calendar-sticky-top,0px)]", "bg-background")
+      frame = parts("event-calendar-grid").first["class"].split
+      expect(frame).to include("overflow-clip")
+      expect(frame).not_to include("overflow-hidden")
+    end
+  end
+
   describe "the toolbar on a narrow screen" do
     readings = {
       "the month" => {},
