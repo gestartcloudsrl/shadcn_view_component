@@ -134,7 +134,7 @@ module Shadcn
         # there is an axis for it to decide, which is the same rule that keeps
         # the arrangement question off a day: a question is on the panel when
         # the view it belongs to is the view you are in.
-        def reading_options = [ showing_items, (shape_items if axis?), grouping_items ].compact
+        def reading_options = [ showing_items, (shape_items if axis? && shape_choice?), grouping_items ].compact
 
         def showing_items
           safe_join([

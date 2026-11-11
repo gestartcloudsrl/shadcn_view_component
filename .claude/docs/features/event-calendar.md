@@ -90,7 +90,15 @@ Passed to a reading that does not take one, it lands on the root as
 | `arrangement:` | workload, week | `:auto`, `:rows` |
 | `window:` | month and week timelines, day | `0..24`, any range of hours, e.g. `7..19` |
 | `shape:` | month and week timelines, day | `:chips`, `:bars` |
+| `shapes:` | month and week timelines, day | `[:chips, :bars]`; the shapes offered. One alone is drawn whatever `shape:` says, and the panel and its trigger stop mentioning shape at all |
 | `showing:` | day | `:both`, `:axis`, `:agenda` |
+
+`shapes:` is there because a host can know its people never want one shape.
+Gestart has no use for bars and does not want them offered, so
+`shapes: [:chips]` takes "Bars" off the menu and "Chips" off the trigger. A
+question with one answer would still mention the other. The rule is the
+panel's own, the one that keeps the shape off a day showing only its list: a
+question is asked only where it has something to decide.
 
 Each of `group:`, `show_all:`, `shape:` and `showing:` has a `*_url:`
 partner (`group_url:`, `show_all_url:`, `shape_url:`, `showing_url:`), given

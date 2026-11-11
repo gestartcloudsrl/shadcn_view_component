@@ -1342,6 +1342,56 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # page scrolled sideways. What keeps it inside is these classes, so they are
   # what is pinned; the widths themselves are measured in the browser, in
   # `spec/system/event_calendar_spec.rb`.
+  # A host whose people never want bars: one shape offered is that shape every
+  # time, and nothing on the toolbar names either.
+  describe "a host offering one shape" do
+    let(:shown) do
+      painted.css("[data-slot=dropdown-menu-radio-item]").map { |item| item["data-value"] } +
+        painted.css("[data-slot=dropdown-menu-label], [data-slot=dropdown-menu-trigger]").map(&:text)
+    end
+
+    {
+      "the month's timeline" => { reading: :hours },
+      "the week's timeline" => { reading: :weekly },
+      "the day" => { reading: :daily }
+    }.each do |name, reading|
+      context "with #{name}" do
+        let(:options) { reading.merge(selected: Date.new(2026, 8, 5), shapes: [ :chips ], shape: :bars) }
+
+        before { render_inline(calendar) }
+
+        it "draws that shape, whatever shape: asked for" do
+          expect(calendar.shape).to eq(:chips)
+        end
+
+        it "neither asks nor names the shape on the toolbar", :aggregate_failures do
+          expect(shown).not_to include("chips", "bars")
+          expect(shown.join(" ")).not_to match(/Chips|Bars|Show each job as/)
+        end
+      end
+    end
+
+    it "still asks when every shape is offered" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :hours))
+
+      expect(painted.css("[data-slot=dropdown-menu-radio-item]").map { |item| item["data-value"] })
+        .to include("chips", "bars")
+    end
+
+    it "offers every shape when none it names is one", :aggregate_failures do
+      calendar = described_class.new(month: Date.new(2026, 8, 1), reading: :hours, shapes: [ :ribbons ], shape: :bars)
+
+      expect(calendar.shapes).to eq(%i[chips bars])
+      expect(calendar.shape).to eq(:bars)
+    end
+
+    it "is namespaced on a reading that has no shape" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, shapes: [ :chips ]))
+
+      expect(page.first("[data-slot=event-calendar]")["shapes"]).to be_nil
+    end
+  end
+
   # Where it sticks is the system spec's; this pins the three things it needs.
   describe "the weekday row" do
     before { render_inline(calendar) }

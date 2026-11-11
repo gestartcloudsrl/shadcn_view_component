@@ -125,6 +125,9 @@ module Shadcn
         # so a 2.9rem lane overlapped the next by five pixels and clipped the
         # bottom row of every busy day.
         LANE_HEIGHTS = { chips: 3.4, bars: 0.9 }.freeze
+        # Every shape, in the order the panel offers them; the first is the
+        # default.
+        SHAPES = LANE_HEIGHTS.keys.freeze
 
         # The scale, drawn once above the month rather than once per row: it is
         # the same hours on every row, and forty-two copies would be forty-two
@@ -140,7 +143,7 @@ module Shadcn
         RULER_BODY_CLASS = "relative h-4 grow"
         HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
 
-        attr_reader :window, :shape, :shape_url
+        attr_reader :window, :shape, :shapes, :shape_url
 
         # @param window [Range] the hours the axis shows. A calendar of field
         #   work spent thirty per cent of its width on midnight-to-seven —
@@ -157,14 +160,21 @@ module Shadcn
         #   state. Present, the menu is links; absent, it dispatches. A shape is
         #   different markup, not a class toggle — drawing both and hiding one
         #   is the trade this reading spent a whole round removing.
+        # @param shapes [Array<Symbol>] the shapes a host offers. One alone is
+        #   that shape at every request, and the panel drops the question and
+        #   the trigger stops naming it: a host whose people never want bars
+        #   should not have them mentioned. Unknown names are ignored, and
+        #   none left means every shape.
         # The window is clamped like every other argument here rather than
         # trusted: `(7..7)` reached `.step(0)` and raised, and a reversed range
         # drew a negative axis, where every sibling argument falls back.
-        def initialize(window: (0..24), shape: :chips, shape_url: nil, **attributes)
+        def initialize(window: (0..24), shape: :chips, shapes: SHAPES, shape_url: nil, **attributes)
           first = window.first.to_i.clamp(0, 23)
           @window = first..window.last.to_i.clamp(first + 1, 24)
           @shape_url = shape_url
-          @shape = LANE_HEIGHTS.key?(shape&.to_sym) ? shape.to_sym : :chips
+          @shapes = SHAPES & Array(shapes).map { |name| name.to_s.to_sym }
+          @shapes = SHAPES if @shapes.empty?
+          @shape = @shapes.include?(shape&.to_sym) ? shape.to_sym : @shapes.first
           super(**attributes)
         end
 
@@ -209,16 +219,21 @@ module Shadcn
 
         def reading_controls = [ view_panel ]
 
-        def reading_label = shadcn_t("event_calendar.hours.#{shape}")
+        # Whether there is a shape to choose. Without one the trigger does not
+        # name the shape and the panel does not ask: a question with one
+        # answer is still a mention of the answers it does not have.
+        def shape_choice? = shapes.size > 1
 
-        def reading_options = [ shape_items ]
+        def reading_label = (shadcn_t("event_calendar.hours.#{shape}") if shape_choice?)
+
+        def reading_options = [ (shape_items if shape_choice?) ].compact
 
         def shape_items
           safe_join([
             render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.hours.label") },
             render(DropdownMenu::Separator::Component.new),
             render(DropdownMenu::RadioGroup::Component.new) do
-              safe_join(LANE_HEIGHTS.keys.map { |name| shape_item(name) })
+              safe_join(shapes.map { |name| shape_item(name) })
             end
           ])
         end
