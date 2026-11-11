@@ -375,9 +375,15 @@ Two things had to change for it to stick at all:
   system spec). `clip` makes no scroll container, so the row sticks to the
   page.
 - **The row's background is opaque.** It was `bg-muted/50`, and stuck, the
-  cells under it showed through. The row is `bg-background` and each name
-  carries the `bg-muted/50`. The names fill the row with no gap, so it looks
-  the same.
+  cells under it showed through. Each name now carries the `bg-muted/50`, and
+  the row under them is opaque with the surface that used to show through the
+  tint, so it looks the same. That surface is the page's `--background`, or
+  `--card` inside a Card (a `[[data-slot=card]_&]` rule, the way
+  `calendar.tsx` turns transparent inside `card-content`). On any other
+  surface the host names it in `--event-calendar-sticky-bg`. The first cut
+  used `--background` everywhere, and Gestart's dark-palette Card showed it:
+  the row was a darker band (tint over 0.145 instead of 0.205). In the light
+  palette the two tokens are equal, which is why it did not show there.
 
 What it does not do: it sticks to the nearest scroller *the host* has. If the
 calendar sits inside an `overflow-auto` panel, it sticks to that panel, which

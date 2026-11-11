@@ -421,8 +421,15 @@ RSpec.describe "reverse parity" do
     # the host's `--event-calendar-sticky-top`. The frame cuts its corners
     # with `overflow-clip` where upstream writes `overflow-hidden`, because
     # `hidden` makes it a scroll container and the row would stick to a frame
-    # that never scrolls (`Component::FRAME_CLASS`).
-    "event-calendar-weekdays" => %w[grid-cols-7 sticky top-[var(--event-calendar-sticky-top,0px)]],
+    # that never scrolls (`Component::FRAME_CLASS`). Stuck, the row is opaque
+    # with the surface under it: the page, a Card (keyed off `data-slot=card`
+    # as `calendar.tsx` keys off `card-content`), or the host's
+    # `--event-calendar-sticky-bg`.
+    "event-calendar-weekdays" => %w[
+      grid-cols-7 sticky top-[var(--event-calendar-sticky-top,0px)]
+      bg-[color:var(--event-calendar-sticky-bg,var(--background))]
+      [[data-slot=card]_&]:bg-[color:var(--event-calendar-sticky-bg,var(--card))]
+    ],
     "event-calendar-grid" => %w[overflow-clip],
     "event-calendar-weekday" => %w[sm:text-xs text-[0.7rem]],
     # The 1px rules between cells, drawn as gaps over a `bg-border` parent

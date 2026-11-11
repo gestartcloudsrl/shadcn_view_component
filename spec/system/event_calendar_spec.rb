@@ -1189,6 +1189,36 @@ RSpec.describe "Event calendar", :js do
       expect(at["row"]).to eq(48)
     end
 
+    # Opaque with the surface the calendar sits on, which is what showed
+    # through the tint before the row was opaque. In the dark palette the page
+    # and a card differ (0.145 against 0.205), so that is where it shows.
+    it "is opaque with the surface it sits on", :aggregate_failures do
+      colors = page.evaluate_script(<<~JS)
+        (() => {
+          document.documentElement.classList.add("dark");
+          const calendar = document.querySelector("[data-slot=event-calendar]");
+          const row = calendar.querySelector("[data-slot=event-calendar-weekdays]");
+          const probe = document.createElement("div");
+          document.body.append(probe);
+          const token = (name) => { probe.style.backgroundColor = `var(${name})`;
+                                    return getComputedStyle(probe).backgroundColor; };
+          const read = () => getComputedStyle(row).backgroundColor;
+          const page = read();
+          calendar.parentElement.dataset.slot = "card";
+          const card = read();
+          calendar.style.setProperty("--event-calendar-sticky-bg", "var(--muted)");
+          const host = read();
+          return { page, card, host, background: token("--background"), cardToken: token("--card"),
+                   muted: token("--muted") };
+        })()
+      JS
+
+      expect(colors["page"]).to eq(colors["background"])
+      expect(colors["card"]).to eq(colors["cardToken"])
+      expect(colors["card"]).not_to eq(colors["page"])
+      expect(colors["host"]).to eq(colors["muted"])
+    end
+
     it "stays in its place before the grid reaches the top" do
       at = scrolled(by: -50)
 

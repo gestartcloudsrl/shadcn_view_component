@@ -226,12 +226,20 @@ module Shadcn
       # sets it, so a host with a fixed navbar puts the row below that bar
       # rather than under it.
       #
-      # The row is `bg-background` and the tint is on each name, where the row
-      # used to be `bg-muted/50` alone: half-transparent, the cells scrolling
-      # under it showed through. The names fill the row with no gap, so it
-      # looks as it did.
+      # The row is opaque and the tint is on each name, where the row used to be
+      # `bg-muted/50` alone: half-transparent, the cells scrolling under it
+      # showed through. The names fill the row with no gap.
+      #
+      # What the row is opaque *with* is whatever used to show through the
+      # tint: the surface the calendar sits on. That is the page's
+      # `--background`, or `--card` inside a Card (the `data-slot=card` rule,
+      # as `calendar.tsx` keys its own background off `card-content`). A host
+      # on any other surface names it in `--event-calendar-sticky-bg`. With
+      # `--background` alone, a calendar in a dark-palette Card had a row
+      # darker than before, because the tint went over 0.145 instead of 0.205.
       WEEKDAYS_CLASS = "sticky top-[var(--event-calendar-sticky-top,0px)] z-10 grid grid-cols-7 border-b " \
-                       "bg-background"
+                       "bg-[color:var(--event-calendar-sticky-bg,var(--background))] " \
+                       "[[data-slot=card]_&]:bg-[color:var(--event-calendar-sticky-bg,var(--card))]"
       WEEKDAY_CLASS = "bg-muted/50 py-2 text-center text-[0.7rem] font-medium text-muted-foreground " \
                       "select-none sm:text-xs"
       # `gap-px` over a `bg-border` parent, rather than a border on each cell:

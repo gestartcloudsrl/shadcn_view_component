@@ -1349,7 +1349,8 @@ RSpec.describe Shadcn::EventCalendar::Component do
     it "sticks below the host's offset, over an opaque row, in a frame that is not a scroller",
        :aggregate_failures do
       expect(parts("event-calendar-weekdays").first["class"].split)
-        .to include("sticky", "top-[var(--event-calendar-sticky-top,0px)]", "bg-background")
+        .to include("sticky", "top-[var(--event-calendar-sticky-top,0px)]",
+                    "bg-[color:var(--event-calendar-sticky-bg,var(--background))]")
       frame = parts("event-calendar-grid").first["class"].split
       expect(frame).to include("overflow-clip")
       expect(frame).not_to include("overflow-hidden")
