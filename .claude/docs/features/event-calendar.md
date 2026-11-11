@@ -40,6 +40,103 @@ render Shadcn::EventCalendar::Component.new(
 host's own records, and a library cannot know what those records are called.
 `Event.wrap` normalises each one; an already-built `Event` passes through.
 
+## Options
+
+The reference: every argument, its values and its default. *Why* each one is
+shaped the way it is lives in the sections below. A value outside the list
+falls back to the default rather than raising. The one argument that raises
+is `movable: true` without an `id:` on every event.
+
+### Every reading
+
+| Argument | Default | |
+|---|---|---|
+| `month:` | today's month | the month shown |
+| `selected:` | today if it is in the month, else the 1st | the day the agenda reads out |
+| `events:` | `nil` | hashes or `Event`s, see [one event](#one-event) |
+| `reading:` | `:auto` | which reading draws the month, see below |
+| `max_events:` | `3` | bars per cell before "+2", clamped to 1–6 |
+| `week_starts_on:` | the host's `Date.beginning_of_week` | a `Date#wday`, 0 is Sunday |
+| `default_color:` | `:default` | the colour of events that name none |
+| `month_url:` | `nil` | given a `Date`, that month's URL. Present, the nav is links and the server draws the month |
+| `day_url:` | `nil` | given a `Date`, that day's URL. Present, a cell is a link and the server owns what a click shows |
+| `day_attributes:` | `{}` | merged onto every day cell, e.g. `data: { turbo_frame: … }` |
+| `agenda:` | `true` | `false` drops the built-in day list, for a host that shows the day elsewhere |
+| `agenda_as:` | `:div` | the agenda's element; `:"turbo-frame"` makes it what a day link swaps |
+| `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id` |
+| `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
+| `movable:` | `false` | events can be moved; needs an `id:` on each |
+| `**attributes` | | HTML on the root; `class` and `data-action` add to the gem's |
+
+### `reading:`
+
+| Value | What it draws |
+|---|---|
+| `:auto`, `:events` | the month as a grid, bars or marks by density |
+| `:workload` | the month for field work: rows below `lg`, the grid above |
+| `:hours` | the month as a timeline, a row of hours per day |
+| `:weekly` | the week as a timeline; with `arrangement: :rows`, as rows |
+| `:daily` | one day |
+
+### Arguments only some readings take
+
+Passed to a reading that does not take one, it lands on the root as
+`data-event-calendar-*` and does nothing (`READING_KEYWORDS`).
+
+| Argument | Readings | Values, default first |
+|---|---|---|
+| `group:` | workload, week as rows, day | `:events`, `:assignees` |
+| `show_all:` | workload, week as rows | `false`, `true` (every chip instead of a cap and "+N") |
+| `arrangement:` | workload, week | `:auto`, `:rows` |
+| `window:` | month and week timelines, day | `0..24`, any range of hours, e.g. `7..19` |
+| `shape:` | month and week timelines, day | `:chips`, `:bars` |
+| `showing:` | day | `:both`, `:axis`, `:agenda` |
+
+Each of `group:`, `show_all:`, `shape:` and `showing:` has a `*_url:`
+partner (`group_url:`, `show_all_url:`, `shape_url:`, `showing_url:`), given
+the wanted value and returning its URL. Present, that menu is links. Absent,
+it dispatches the event below and the host decides.
+
+### One event
+
+| Key | |
+|---|---|
+| `title:`, `starts_at:` | required. A `Date` is all-day, a `Time` has a time of day |
+| `ends_at:` | *inclusive* |
+| `all_day:` | for an all-day `Time` at midnight, which inference cannot see |
+| `id:` | needed by `movable: true` |
+| `color:` | `:default`, `:blue`, `:green`, `:amber`, `:rose`, `:violet`, or a host custom property (`"--chart-2"`) |
+| `url:` | the agenda row becomes a link |
+| `assignee:` / `assignees:` | a name, or `{ name:, image:, status: :done/:pending, label: }` |
+| `subtitle:`, `description:` | see [the generic fields](#the-generic-fields) |
+| `done:`, `attachment:` | `true`, or `{ label: "…" }` for the words a screen reader hears |
+| `attributes:` | merged onto the row's link |
+
+### Events it dispatches
+
+All prefixed `shadcn--event-calendar:`. A menu sends its event only when its
+`*_url:` is absent.
+
+| Event | `detail` |
+|---|---|
+| `select` | `{ date, events }` |
+| `month-change` | `{ month, selected }` |
+| `view` | `{ view }` |
+| `reshow` | `{ showing }` |
+| `reshape` | `{ shape }` |
+| `regroup` | `{ group }` |
+| `show-all` | `{ showAll }` |
+| `event-move` | `{ id, from, to, revert }`, see [moving an event](#moving-an-event) |
+
+### Custom properties a host sets
+
+| Property | Default | |
+|---|---|---|
+| `--event-calendar-sticky-top` | `0px` | where the grid's weekday row stops, below a fixed navbar |
+| `--event-calendar-sticky-bg` | `--card` in a Card, else `--background` | that row's surface |
+
+See [the weekday row in a tall month](#the-weekday-row-in-a-tall-month).
+
 ## What it borrows rather than rebuilds
 
 **The grid is `Calendar::Month`.** It already builds the weeks, already reads
