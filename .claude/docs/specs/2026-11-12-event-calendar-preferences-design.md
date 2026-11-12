@@ -1,6 +1,12 @@
 # Event calendar: a person's preferred view
 
-**Status:** agreed, 2026-11-12. Feeds an implementation plan; not itself a plan.
+**Status:** agreed, 2026-11-12.
+
+**Amended, 2026-11-12 (after Gestart's integration):** the `show_all` question
+is replaced by a chip limit, `max_chips` (`3`, `5`, `all`), and the workload
+reading takes `max_chips:`. Where this document says `show_all` for the dialog
+or the posted fields, read `max_chips`; the toolbar's *Show all* toggle is
+unchanged. The feature doc is the current reference. Feeds an implementation plan; not itself a plan.
 
 **The question:** a person reaches the calendar from the same link every time
 and wants it the way they left it: always *Weekly · Rows*, say. Today every

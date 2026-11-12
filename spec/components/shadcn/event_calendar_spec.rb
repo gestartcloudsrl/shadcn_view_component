@@ -1296,6 +1296,21 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
         expect(parts("event-calendar-day-item").size).to eq(5)
       end
+
+      # The person's own limit, from their preferences: a number of chips
+      # before the "+N", with "Show all" still the toggle past it.
+      it "shows as many as the host's limit says, and counts the rest", :aggregate_failures do
+        render_with(events: busy, max_chips: 4)
+
+        expect(parts("event-calendar-day-item").size).to eq(4)
+        expect(parts("event-calendar-day-rest").first.text).to eq("+1")
+      end
+
+      it "keeps the limit at one at least" do
+        render_with(events: busy, max_chips: 0)
+
+        expect(parts("event-calendar-day-item").size).to eq(1)
+      end
     end
   end
 
@@ -1636,22 +1651,32 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # controller's, and `spec/system/event_calendar_spec.rb`'s to prove.
   describe "preferences" do
     let(:prefix) { "data-shadcn--event-calendar-preferences" }
-
-    # `false` is an answer, not an absence: filtering the options as falsy
-    # dropped it and left "Show all" a question with one choice.
     let(:form) { painted.at_css("form") }
     let(:root) { painted.at_css("[data-controller~='shadcn--event-calendar']") }
 
-    it "offers both answers to show all, by name", :aggregate_failures do
-      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload,
-                                        preferences: :host, preferences_save_url: "/prefs"))
-      group = painted.at_css(%([data-slot=radio-group]:has([name="preferences[show_all]"])))
-      options = group.css("[data-slot=radio-group-item]").map { |item| item["value"] }
-      labels = group.css("[data-slot=label]").map { |label| label.text.squish }
+    def chip_limit_group = painted.at_css(%([data-slot=radio-group]:has([name="preferences[max_chips]"])))
 
-      expect(options).to eq(%w[false true])
-      expect(labels).to eq([ "The first few", "Every job" ])
-      expect(group["data-shadcn--radio-group-value-value"]).to eq("false")
+    # The chip limit replaced the show-all question: three answers, by name,
+    # starting from what the reading draws. The first cut of the show-all
+    # question listed its options with `filter_map` and lost `false`; the
+    # labels are asserted so an answer cannot go missing again.
+    it "asks how many chips a day shows, by name, starting from the limit drawn", :aggregate_failures do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, max_chips: 5,
+                                        preferences: :host, preferences_save_url: "/prefs"))
+      options = chip_limit_group.css("[data-slot=radio-group-item]").map { |item| item["value"] }
+      labels = chip_limit_group.css("[data-slot=label]").map { |label| label.text.squish }
+
+      expect(options).to eq(%w[3 5 all])
+      expect(labels).to eq([ "3", "5", "All" ])
+      expect(chip_limit_group["data-shadcn--radio-group-value-value"]).to eq("5")
+      expect(painted.at_css(%([name="preferences[show_all]"]))).to be_nil
+    end
+
+    it "says All when the reading shows every chip" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, show_all: true,
+                                        preferences: :host, preferences_save_url: "/prefs"))
+
+      expect(chip_limit_group["data-shadcn--radio-group-value-value"]).to eq("all")
     end
 
 
@@ -1705,11 +1730,11 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
 
       it "starts from what is shown", :aggregate_failures do
-        checked = %w[period view group show_all].to_h do |name|
+        checked = %w[period view group max_chips].to_h do |name|
           [ name, form.at_css(%(input[name="preferences[#{name}]"]))["value"] ]
         end
 
-        expect(checked).to eq("period" => "weekly", "view" => "rows", "group" => "assignees", "show_all" => "false")
+        expect(checked).to eq("period" => "weekly", "view" => "rows", "group" => "assignees", "max_chips" => "3")
       end
 
       it "hides and disables what does not apply", :aggregate_failures do
@@ -1753,7 +1778,7 @@ RSpec.describe Shadcn::EventCalendar::Component do
       it "ships every set's URL", :aggregate_failures do
         urls = JSON.parse(root["#{prefix}-urls-value"])
 
-        expect(urls.size).to eq(26)
+        expect(urls.size).to eq(32)
         expect(urls["preferences[period]=monthly&preferences[view]=hours&preferences[shape]=chips"])
           .to eq("/c?period=monthly&shape=chips&view=hours")
       end

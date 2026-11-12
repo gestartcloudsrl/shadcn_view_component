@@ -21,16 +21,13 @@ module Shadcn
       # each of its options. `view` has a second heading, for the week.
       HEADINGS = {
         period: "period.label", view: "view.label", showing: "daily.label",
-        group: "group.label", shape: "hours.label", show_all: "group.show_all"
+        group: "group.label", shape: "hours.label", max_chips: "preferences.max_chips"
       }.freeze
 
       OPTION_KEYS = {
         period: "period.%s", view: "view.%s", showing: "daily.%s",
-        group: "group.%s", shape: "hours.%s", show_all: "preferences.show_all_%s"
+        group: "group.%s", shape: "hours.%s", max_chips: "preferences.max_chips_%s"
       }.freeze
-      # `show_all`'s answers are booleans, and its copy says what each one
-      # shows rather than "true" and "false".
-      SHOW_ALL_WORDS = { false => "off", true => "on" }.freeze
       PREFERENCES_CONTENT_CLASS = "max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)]"
       PREFERENCES_FORM_CLASS = "flex min-h-0 flex-col gap-4"
       # `-m-1 p-1`: a scroller clips what overflows it, and the radios'
@@ -202,8 +199,16 @@ module Shadcn
       # controller moves it when the period changes.
       def preference_view_heading = preference_current[:period] == :weekly ? "week" : "month"
 
+      # A chip limit is its own number; every other answer, and "All", is copy.
+      def preference_label(question, value)
+        return value.to_s if question == :max_chips && value.is_a?(Integer)
+
+        shadcn_t("event_calendar.#{OPTION_KEYS.fetch(question) % value}")
+      end
+
       def preference_options(question)
-        # Not `filter_map`: it drops `false`, which is `show_all`'s first answer.
+        # Not `filter_map`, which drops a falsy answer: the show-all question it
+        # replaced lost `false` that way and asked with one choice.
         preference_table.sets.select { |set| set.key?(question) }.map { |set| set[question] }.uniq
       end
 
@@ -226,7 +231,7 @@ module Shadcn
         tag.div(
           safe_join([
             render(RadioGroup::Item::Component.new(value:, checked: value == selected, id:)),
-            render(Label::Component.new(for: id)) { shadcn_t("event_calendar.#{OPTION_KEYS.fetch(question) % SHOW_ALL_WORDS.fetch(value, value)}") }
+            render(Label::Component.new(for: id)) { preference_label(question, value) }
           ]),
           "data-slot": "event-calendar-preference-option", class: "flex items-center gap-2",
           "data-preferences-when": tokens&.join(" "), hidden: (true unless shown)

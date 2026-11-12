@@ -72,8 +72,8 @@ en:
         description: Open the calendar this way every time.
         save: Save
         cancel: Cancel
-        show_all_on: Every job
-        show_all_off: The first few
+        max_chips: Jobs shown per day
+        max_chips_all: All
       # The workload reading's arrangement toggle. It names what pressing it
       # does, not the state it is in, so the controller never has to write it.
       # The options panel: which view, and then the one question that view has.

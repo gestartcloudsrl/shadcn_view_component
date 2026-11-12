@@ -137,7 +137,7 @@ module Shadcn
       #
       # Callables are dropped rather than stringified: a `#{group_url}` in the
       # markup is a `#<Proc>` and nothing else.
-      READING_KEYWORDS = %i[group group_url show_all show_all_url arrangement
+      READING_KEYWORDS = %i[group group_url show_all show_all_url max_chips arrangement
                             window shape shape_url showing showing_url].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size

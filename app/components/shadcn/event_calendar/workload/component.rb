@@ -16,15 +16,22 @@ module Shadcn
         include Chips
         include Groupings
 
-        attr_reader :show_all, :show_all_url, :arrangement
+        attr_reader :show_all, :show_all_url, :arrangement, :max_chips
 
         # @param show_all [Boolean] render every chip rather than the first
-        #   `CAP` and a "+N". Server state, not a class toggle: rendering them
+        #   `max_chips` and a "+N". Server state, not a class toggle: rendering them
         #   all and hiding the rest cost 1157 KB and 131 ms on 447 events.
         # @param arrangement [Symbol] `:auto` lets the breakpoint decide — rows
         #   below `lg`, the grid above; `:rows` keeps the rows at every width.
         # @param show_all_url [#call, nil] given the wanted `show_all`, its URL
-        def initialize(show_all: false, show_all_url: nil, arrangement: :auto, **attributes)
+        # @param max_chips [Integer] chips a cell shows before its "+N", at
+        #   least one; "Show all" is the toggle past it. A person's preference
+        #   (`Preferences::MAX_CHIPS`), so it is the host's to pass back in.
+        #   No `max_chips_url:`: no control on the toolbar changes it, and the
+        #   host's own `*_url:` lambdas carry it like the rest of its state.
+        def initialize(show_all: false, show_all_url: nil, arrangement: :auto, max_chips: MAX_CHIPS,
+                       **attributes)
+          @max_chips = [ max_chips.to_i, 1 ].max
           @show_all = show_all
           @show_all_url = show_all_url
           @arrangement = EventCalendar::Component::ARRANGEMENTS.include?(arrangement&.to_sym) ? arrangement.to_sym : :auto
@@ -147,7 +154,7 @@ module Shadcn
 
         def panel? = true
 
-        def preference_values = { period:, view:, group:, show_all: }
+        def preference_values = { period:, view:, group:, max_chips: (show_all ? :all : max_chips) }
 
         private :panel?, :preference_values
 
@@ -169,7 +176,9 @@ module Shadcn
         # comes in, and the toggle is a link when the caller can name the URL of
         # the other state. That is the same bargain the nav makes, and this
         # reading is server-drawn anyway.
-        CAP = 3
+        #
+        # The default limit; a host passes the person's own as `max_chips:`.
+        MAX_CHIPS = 3
 
         # ---- rows-are-days --------------------------------------------------
         #
@@ -355,7 +364,7 @@ module Shadcn
         def assignee_chips(tallies)
           return if tallies.empty?
 
-          shown = show_all ? tallies : tallies.first(CAP)
+          shown = show_all ? tallies : tallies.first(max_chips)
 
           tag.span(
             safe_join(shown.map { |assignee, count| assignee_chip(assignee, count) } +
@@ -395,7 +404,7 @@ module Shadcn
           return if items.empty?
 
           rows = cell_rows(items, day)
-          shown = show_all ? rows : rows.first(CAP)
+          shown = show_all ? rows : rows.first(max_chips)
 
           tag.span(
             safe_join(shown.map { |item| item ? item_chip(item, day) : held_lane } +
@@ -459,7 +468,7 @@ module Shadcn
         end
 
         # What the cap actually hid, counted rather than derived. It used to be
-        # `total - CAP`, which was the same number only while every row held a
+        # `total - max_chips`, which was the same number only while every row held a
         # chip: once a row could be a held lane or a hole in the crossing band,
         # a cell of three jobs drew two and said nothing about the third.
         def rest_chip(hidden)

@@ -70,7 +70,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
 | `preferences:` | `nil` | `:local` or `:host`: the panel gets a *Preferences* item and the dialog it opens. Drawn by the readings with a panel only. `nil` and `false` are off, so `preferences: feature_on? && :host` works; any other value raises |
-| `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, show_all: }`, the keys that apply), the URL that draws it |
+| `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, max_chips: }`, the keys that apply), the URL that draws it |
 | `preferences_save_url:` | `nil` | `:host` only, and required there: where the dialog's form is sent, as `PATCH` |
 | `restore:` | `false` | `:local` only: this request is the bare arrival, so go to the stored set if there is one |
 | `**attributes` | | HTML on the root; `class` and `data-action` add to the gem's |
@@ -94,6 +94,7 @@ Passed to a reading that does not take one, it lands on the root as
 |---|---|---|
 | `group:` | workload, week as rows, day | `:events`, `:assignees` |
 | `show_all:` | workload, week as rows | `false`, `true` (every chip instead of a cap and "+N") |
+| `max_chips:` | workload, week as rows | `3`, any number from 1: the chips a cell shows before its "+N". A person's preference, passed back in by the host. *Show all* is still the toggle past it. No `max_chips_url:`, because no control on the toolbar changes it: the host's own `*_url:` lambdas carry it like the rest of its state |
 | `arrangement:` | workload, week | `:auto`, `:rows` |
 | `window:` | month and week timelines, day | `0..24`, any range of hours, e.g. `7..19` |
 | `shape:` | month and week timelines, day | `:chips`, `:bars` |
@@ -1576,21 +1577,29 @@ question follows which.
 | `showing` | Timeline only · List only · Timeline and list | the period is Daily. *List only* only when the day has an agenda |
 | `group` | By event · By assignee | the view groups: grid, rows, the day |
 | `shape` | the host's `shapes:` | the view has an axis and `shapes:` offers more than one |
-| `show_all` | The first few · Every job | the view caps its chips: grid, rows |
+| `max_chips` | 3 · 5 · All | the view caps its chips: grid, rows |
 
-Twenty-six complete sets in all, with both shapes and an agenda.
+Thirty-two complete sets in all, with both shapes and an agenda.
 
 A question that stops applying is hidden and its fields disabled, so it is never
 sent. Where the answer it held is no longer offered — *Grid* when the period
 becomes Weekly — the first offered one is checked instead, so the dialog cannot
 save a set no reading draws.
 
-`show_all`'s answers are the booleans `false` and `true`, labelled from
-`event_calendar.preferences.show_all_off` and `show_all_on`. The first cut
-listed the options with `filter_map`, which dropped `false`, and built the
-label key from the boolean, `show_all_true`, which no locale has: one option,
-reading "Translation missing". The snapshot had recorded that text as correct,
-so `snapshot_spec` now fails any golden that renders a missing translation.
+The chip limit is the person's: how many jobs a capped cell shows before its
+"+N". Its answers are `3`, `5` and `:all` (`Preferences::MAX_CHIPS`), the first
+the reading's own default; *All* is the toolbar's *Show all* kept for next
+time, so the dialog asks one question where it used to ask "show all, yes or
+no". A reading drawing `show_all: true` is answered *All*; otherwise its
+`max_chips`, and a limit the dialog does not offer (a host's `max_chips: 4`)
+starts from the first answer. The numbers are their own labels; *All* and the
+question are `event_calendar.preferences.max_chips_all` and `max_chips`.
+
+It replaced a `show_all` question whose first cut listed the options with
+`filter_map`, which dropped `false`, and built the label key from the boolean,
+`show_all_true`, which no locale has: one option, reading "Translation
+missing". The snapshot had recorded that text as correct, so `snapshot_spec`
+now fails any golden that renders a missing translation.
 
 Six questions are taller than a short window, and a dialog with no limit put
 *Save* off-screen. The panel stops at the window
@@ -1618,7 +1627,7 @@ Save writes the set and navigates to its URL.
 `preferences_save_url:` with `_method=patch`, built with the gem's form
 builder so the authenticity token is in it, fields named `preferences[period]`,
 `preferences[view]`, `preferences[showing]`, `preferences[group]`,
-`preferences[shape]`, `preferences[show_all]` — only the ones the chosen view
+`preferences[shape]`, `preferences[max_chips]` — only the ones the chosen view
 asks; the rest are disabled and not sent. The host saves and redirects back to
 its calendar, rendered from what it saved. Under Turbo that is a fetch and a
 followed redirect, without it an ordinary submit, and a failure is answered as
@@ -1626,14 +1635,14 @@ the host answers any form. The gem names neither. Gestart's side:
 
 ```ruby
 def update
-  current_user.update!(calendar_preferences: params.expect(preferences: %i[period view group shape showing show_all]))
+  current_user.update!(calendar_preferences: params.expect(preferences: %i[period view group shape showing max_chips]))
   redirect_to calendar_path, status: :see_other
 end
 ```
 
 Validate the values against the table above before saving: they come from
 the browser. Only the fields of the chosen view arrive, as strings
-(`show_all` is `"true"` or `"false"`).
+(`max_chips` is `"3"`, `"5"` or `"all"`; `show_all` is no longer sent).
 
 Reading them back is also the host's. Its order is the request's parameters,
 then the person's saved set, then its own defaults, and the saved set applies
@@ -1643,10 +1652,10 @@ reading:
 
 | saved | arguments |
 |---|---|
-| monthly · grid | `reading: :workload`, `group:`, `show_all:` |
+| monthly · grid | `reading: :workload`, `group:`, and from `max_chips`: `"all"` → `show_all: true`, a number → `max_chips:` it and `show_all: false` |
 | monthly · rows | the same, with `arrangement: :rows` |
 | monthly · hours | `reading: :hours`, `shape:` |
-| weekly · rows | `reading: :weekly, arrangement: :rows`, `group:`, `show_all:` |
+| weekly · rows | `reading: :weekly, arrangement: :rows`, `group:`, and the chip limit as for the month |
 | weekly · hours | `reading: :weekly`, `shape:` |
 | daily | `reading: :daily`, `showing:`, `group:`, `shape:` |
 

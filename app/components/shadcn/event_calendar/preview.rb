@@ -192,6 +192,7 @@ module Shadcn
       # @param spanning number
       # @param colored toggle
       # @param show_all toggle
+      # @param max_chips number
       # @param group select [events, assignees]
       # @param shape select [chips, bars]
       # @param showing select [both, axis, agenda]
@@ -206,7 +207,7 @@ module Shadcn
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars",
-                  preferences: "off", restore: false, id: nil, broken_url: false)
+                  preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -215,7 +216,7 @@ module Shadcn
         here = lambda do |**changed|
           state = { month:, period:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
-                    turbo:, shapes:, preferences:, id: }.merge(changed).compact
+                    turbo:, shapes:, preferences:, id:, max_chips: }.merge(changed).compact
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -263,6 +264,7 @@ module Shadcn
             # the timeline below.
             common.merge(reading: :weekly, arrangement: :rows, selected: shown, group: group.to_sym,
                          show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
+                         max_chips: max_chips.to_i,
                          group_url: ->(cut) { here.call(group: cut) })
           elsif weekly
             # `month_url:` in `common` is what `‹` and `›` reach for, and it is
@@ -284,6 +286,7 @@ module Shadcn
             common.merge(reading: :workload, group: group.to_sym,
                          arrangement: view.to_s == "rows" ? :rows : :auto,
                          show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
+                         max_chips: max_chips.to_i,
                          group_url: ->(cut) { here.call(group: cut) })
           end
 
@@ -312,6 +315,12 @@ module Shadcn
                         # `broken_url` is a host getting it wrong, for the spec
                         # that pins what that costs: the URL drops `group` and
                         # asks to restore again, so it never draws the set.
+                        # A host's own translation of the chip limit: "all"
+                        # is the show-all toggle, a number is the limit.
+                        chips = set[:max_chips]
+                        set = set.except(:max_chips)
+                        set = set.merge(show_all: true) if chips == :all
+                        set = set.merge(show_all: false, max_chips: chips) if chips.is_a?(Integer)
                         next here.call(**set) unless cast.cast(broken_url)
 
                         here.call(**set.except(:group), restore: true, broken_url: true)

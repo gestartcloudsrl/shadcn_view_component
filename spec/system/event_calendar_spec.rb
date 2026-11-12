@@ -1532,11 +1532,11 @@ RSpec.describe "Event calendar", :js do
     let(:scripts) { [] }
 
     def weekly_rows
-      Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :events, show_all: false)
+      Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :events, max_chips: 3)
     end
 
     def monthly_grid
-      Shadcn::EventCalendar::Preferences.key(period: :monthly, view: :grid, group: :events, show_all: false)
+      Shadcn::EventCalendar::Preferences.key(period: :monthly, view: :grid, group: :events, max_chips: 3)
     end
 
     def density(query) = "/lookbook/preview/shadcn/event_calendar/density?#{query}"
@@ -1715,6 +1715,35 @@ RSpec.describe "Event calendar", :js do
           .to eq("preferences[period]=daily&preferences[showing]=agenda&preferences[group]=events")
       end
 
+      # The chip limit: a number keeps the toggle off and the cells at that
+      # many, "All" is the toggle on. The weekly rows the dialog opens on are a
+      # capped view, so the question is there without changing the period.
+      it "saves a chip limit and draws that many", :aggregate_failures do
+        open_preferences
+        choose("5")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/max_chips=5/)
+        expect(page).to have_current_path(/show_all=false/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=weekly&preferences[view]=rows&preferences[group]=events&preferences[max_chips]=5")
+        counts = all("#{calendar} [data-slot=event-calendar-day-items]").map do |items|
+          items.all("[data-slot=event-calendar-day-item]", visible: :all).size
+        end
+        expect(counts.max).to eq(5)
+      end
+
+      it "saves All as the show-all toggle", :aggregate_failures do
+        open_preferences
+        choose("all")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/show_all=true/)
+        expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-rest]")
+        expect(find("#{calendar} [data-slot=event-calendar-nav] [aria-pressed]", text: "Show all")["aria-pressed"])
+          .to eq("true")
+      end
+
       it "changes nothing on Cancel", :aggregate_failures do
         open_preferences
         choose("daily")
@@ -1767,7 +1796,7 @@ RSpec.describe "Event calendar", :js do
       it "asks a host's URL once, even when it draws another set", :aggregate_failures do
         store("shadcn--event-calendar:preferences:default",
               Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :assignees,
-                                                     show_all: false))
+                                                     max_chips: 3))
         count_loads
         visit density("preferences=local&restore=true&broken_url=true")
         expect(page).to have_current_path(/period=weekly/)
@@ -1873,7 +1902,20 @@ RSpec.describe "Event calendar", :js do
         saved = JSON.parse(find("#calendar-preferences").text)
         expect(saved).to include("period" => "daily", "showing" => "both")
         expect(saved).not_to have_key("view")
+        expect(saved).not_to have_key("max_chips")
         expect(find("#calendar-preferences")["data-token"]).to eq("true")
+      end
+
+      it "posts the chip limit to the host as a number or all", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=host")
+        wait_for_stimulus
+        open_preferences
+        choose("all")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path("/calendar/preferences")
+        saved = JSON.parse(find("#calendar-preferences").text)
+        expect(saved).to eq("period" => "weekly", "view" => "rows", "group" => "events", "max_chips" => "all")
       end
     end
   end

@@ -15,7 +15,7 @@ module Shadcn
     # fixed.
     class Preferences
       # The form order, and the key order of every set.
-      QUESTIONS = %i[period view showing group shape show_all].freeze
+      QUESTIONS = %i[period view showing group shape max_chips].freeze
 
       PERIODS = %i[monthly weekly daily].freeze
 
@@ -23,7 +23,10 @@ module Shadcn
       VIEWS = { monthly: %i[grid rows hours], weekly: %i[rows hours] }.freeze
       SHOWING = %i[both axis].freeze
       GROUPS = %i[events assignees].freeze
-      SHOW_ALL = [ false, true ].freeze
+      # How many chips a capped cell shows before its "+N", or every one. The
+      # first is the reading's own default (`Workload::Component::MAX_CHIPS`).
+      # `:all` is the toolbar's "Show all" kept for next time.
+      MAX_CHIPS = [ 3, 5, :all ].freeze
 
       # The context tokens a question applies in. A context is `[period,
       # "period:second"]`, where `second` is the view, or what a day is showing.
@@ -34,7 +37,7 @@ module Shadcn
         showing: %w[daily],
         group: %w[monthly:grid monthly:rows weekly:rows daily],
         shape: %w[monthly:hours weekly:hours daily:both daily:axis],
-        show_all: %w[monthly:grid monthly:rows weekly:rows]
+        max_chips: %w[monthly:grid monthly:rows weekly:rows]
       }.freeze
 
       # The `view` options carry tokens of their own: a grid only exists in a
@@ -135,7 +138,7 @@ module Shadcn
         case question
         when :group then GROUPS
         when :shape then shapes
-        when :show_all then SHOW_ALL
+        when :max_chips then MAX_CHIPS
         end
       end
 
@@ -143,8 +146,13 @@ module Shadcn
         return second if question == :view || question == :showing
         return period if question == :period
 
-        value = question == :show_all ? value.to_s == "true" : value&.to_sym
+        value = question == :max_chips ? chip_limit(value) : value&.to_sym
         options(question).include?(value) ? value : options(question).first
+      end
+
+      # "all" or a number, as a form or a host's stored set spells it.
+      def chip_limit(value)
+        value.to_s == "all" ? :all : Integer(value.to_s, exception: false)
       end
     end
   end

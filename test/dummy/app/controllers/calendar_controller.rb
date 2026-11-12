@@ -28,7 +28,7 @@ class CalendarController < ApplicationController
   skip_forgery_protection only: :save_preferences
 
   def save_preferences
-    session[:calendar_preferences] = params.expect(preferences: %i[period view showing group shape show_all]).to_h
+    session[:calendar_preferences] = params.expect(preferences: %i[period view showing group shape max_chips]).to_h
     session[:calendar_preferences_token] = request.request_parameters.key?("authenticity_token")
     redirect_to "/calendar/preferences", status: :see_other
   end
