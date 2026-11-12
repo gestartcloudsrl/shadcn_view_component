@@ -1636,8 +1636,24 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # controller's, and `spec/system/event_calendar_spec.rb`'s to prove.
   describe "preferences" do
     let(:prefix) { "data-shadcn--event-calendar-preferences" }
-    let(:root) { painted.at_css("[data-controller~='shadcn--event-calendar']") }
+
+    # `false` is an answer, not an absence: filtering the options as falsy
+    # dropped it and left "Show all" a question with one choice.
     let(:form) { painted.at_css("form") }
+    let(:root) { painted.at_css("[data-controller~='shadcn--event-calendar']") }
+
+    it "offers both answers to show all, by name", :aggregate_failures do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload,
+                                        preferences: :host, preferences_save_url: "/prefs"))
+      group = painted.at_css(%([data-slot=radio-group]:has([name="preferences[show_all]"])))
+      options = group.css("[data-slot=radio-group-item]").map { |item| item["value"] }
+      labels = group.css("[data-slot=label]").map { |label| label.text.squish }
+
+      expect(options).to eq(%w[false true])
+      expect(labels).to eq([ "The first few", "Every job" ])
+      expect(group["data-shadcn--radio-group-value-value"]).to eq("false")
+    end
+
 
     def field(name) = painted.at_css(%([data-preferences-when]:has([name="preferences[#{name}]"])))
 

@@ -28,6 +28,14 @@ module Shadcn
         period: "period.%s", view: "view.%s", showing: "daily.%s",
         group: "group.%s", shape: "hours.%s", show_all: "preferences.show_all_%s"
       }.freeze
+      # `show_all`'s answers are booleans, and its copy says what each one
+      # shows rather than "true" and "false".
+      SHOW_ALL_WORDS = { false => "off", true => "on" }.freeze
+      PREFERENCES_CONTENT_CLASS = "max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)]"
+      PREFERENCES_FORM_CLASS = "flex min-h-0 flex-col gap-4"
+      # `-m-1 p-1`: a scroller clips what overflows it, and the radios'
+      # focus ring is 3px outside them.
+      PREFERENCES_BODY_CLASS = "-m-1 flex min-h-0 flex-col gap-4 overflow-y-auto p-1"
 
       attr_reader :preferences_mode
 
@@ -111,7 +119,13 @@ module Shadcn
 
       def preferences_dialog
         render(Dialog::Component.new("data-shadcn--event-calendar-target": "preferencesDialog")) do |dialog|
-          dialog.with_dialog_content do |content|
+          # Six questions are taller than a short window, and a dialog that
+          # grows past it puts Save off-screen. The panel stops at the window
+          # and the questions scroll between a fixed header and footer — the
+          # dialog's own "scrollable content" preview, with the form as the
+          # row that gives (`minmax(0,1fr)`, since a grid row will not shrink
+          # below its content otherwise).
+          dialog.with_dialog_content(class: PREFERENCES_CONTENT_CLASS) do |content|
             content.with_header do |header|
               header.with_title { shadcn_t("event_calendar.preferences.title") }
               header.with_description { shadcn_t("event_calendar.preferences.description") }
@@ -130,10 +144,11 @@ module Shadcn
         form_with(scope: :preferences, url: (local ? "#" : @preferences_save_url),
                   authenticity_token: (false if local),
                   method: (local ? :post : :patch), builder: ShadcnViewComponent::FormBuilder,
-                  class: "flex flex-col gap-4",
+                  class: PREFERENCES_FORM_CLASS,
                   data: { "shadcn--event-calendar-target": "preferencesForm", action: }) do |form|
           safe_join([
-            *Preferences::QUESTIONS.filter_map { |question| preference_question(form, question) },
+            tag.div(safe_join(Preferences::QUESTIONS.filter_map { |question| preference_question(form, question) }),
+                    "data-slot": "event-calendar-preferences-body", class: PREFERENCES_BODY_CLASS),
             render(Dialog::Footer::Component.new) do
               safe_join([
                 render(Dialog::Close::Component.new(class: Button::Component.variant_classes(variant: :outline))) do
@@ -188,7 +203,8 @@ module Shadcn
       def preference_view_heading = preference_current[:period] == :weekly ? "week" : "month"
 
       def preference_options(question)
-        preference_table.sets.filter_map { |set| set[question] }.uniq
+        # Not `filter_map`: it drops `false`, which is `show_all`'s first answer.
+        preference_table.sets.select { |set| set.key?(question) }.map { |set| set[question] }.uniq
       end
 
       def preference_radios(form, question, applies, labelled)
@@ -210,7 +226,7 @@ module Shadcn
         tag.div(
           safe_join([
             render(RadioGroup::Item::Component.new(value:, checked: value == selected, id:)),
-            render(Label::Component.new(for: id)) { shadcn_t("event_calendar.#{OPTION_KEYS.fetch(question) % value}") }
+            render(Label::Component.new(for: id)) { shadcn_t("event_calendar.#{OPTION_KEYS.fetch(question) % SHOW_ALL_WORDS.fetch(value, value)}") }
           ]),
           "data-slot": "event-calendar-preference-option", class: "flex items-center gap-2",
           "data-preferences-when": tokens&.join(" "), hidden: (true unless shown)

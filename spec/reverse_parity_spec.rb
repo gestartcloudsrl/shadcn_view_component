@@ -106,7 +106,16 @@ RSpec.describe "reverse parity" do
     # preview exists to show that they are needed. See the preview's own
     # comment for the `min-h-0` that goes with them, which lands on a plain div
     # and so never reaches this spec.
-    "dialog-content" => %w[gap-0 grid-rows-[auto_1fr_auto] max-h-[80vh]],
+    #
+    # The event calendar's preferences dialog does the same as a caller, with
+    # two rows (header, then the form holding a scrolling body and the footer)
+    # and the panel stopped at the window rather than at 80% of it, so a short
+    # window keeps Save in view (`Component::PREFERENCES_CONTENT_CLASS`).
+    "dialog-content" => %w[gap-0 grid-rows-[auto_1fr_auto] max-h-[80vh]
+                           grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)]],
+    # The preferences dialog's scrolling body: `-m-1 p-1` keeps the radios'
+    # 3px focus ring inside a box that clips.
+    "event-calendar-preferences-body" => %w[-m-1],
     # Both from the calendar previews, and both are what upstream's own examples
     # do at the call site rather than in the component. "Custom Cell Size" is a
     # calendar sized from one custom property, and "Booked dates" strikes the

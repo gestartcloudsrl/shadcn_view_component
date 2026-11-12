@@ -123,14 +123,15 @@
 <div data-slot="dialog-portal" style="display:contents">
 <div data-slot="dialog-overlay" data-state="closed" hidden="hidden" data-shadcn--dialog-target="overlay" class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
 </div>
-<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg">
+<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)]">
 <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">
 <h2 data-slot="dialog-title" class="text-lg leading-none font-semibold">Preferences
 </h2>
 <p data-slot="dialog-description" class="text-sm text-muted-foreground">Open the calendar this way every time.
 </p>
 </div>
-<form class="flex flex-col gap-4" data-shadcn--event-calendar-target="preferencesForm" data-action="submit-&gt;shadcn--event-calendar#savePreferences change-&gt;shadcn--event-calendar#refinePreferences" action="#" accept-charset="UTF-8" method="post">
+<form class="flex min-h-0 flex-col gap-4" data-shadcn--event-calendar-target="preferencesForm" data-action="submit-&gt;shadcn--event-calendar#savePreferences change-&gt;shadcn--event-calendar#refinePreferences" action="#" accept-charset="UTF-8" method="post">
+<div data-slot="event-calendar-preferences-body" class="-m-1 flex min-h-0 flex-col gap-4 overflow-y-auto p-1">
 <div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="always">
 <label data-slot="label" id="shadcn-event-calendar-preferences-x-period-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show
 </label>
@@ -316,6 +317,17 @@
 </label>
 <div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="false" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-show_all-label" class="grid gap-3">
 <div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="false" tabindex="0" aria-checked="true" data-state="checked" data-value="false" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-show_all-false" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-show_all-false" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">The first few
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
 <button data-slot="radio-group-item" type="button" role="radio" value="true" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="true" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-show_all-true" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
 <span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
@@ -323,10 +335,11 @@
 </svg>
 </span>
 </button>
-<label data-slot="label" for="shadcn-event-calendar-preferences-x-show_all-true" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Translation missing: en.shadcn_view_component.event_calendar.preferences.show_all_true
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-show_all-true" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Every job
 </label>
 </div>
 <input type="hidden" name="preferences[show_all]" value="false" data-shadcn--radio-group-target="input">
+</div>
 </div>
 </div>
 <div data-slot="dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

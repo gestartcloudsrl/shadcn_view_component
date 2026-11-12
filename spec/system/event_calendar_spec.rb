@@ -1549,6 +1549,47 @@ RSpec.describe "Event calendar", :js do
 
     def choose(value) = find("#{dialog} [role=radio][value='#{value}']").click
 
+    # Six questions are taller than a laptop held low or a phone on its side.
+    # The panel stops at the window and its questions scroll, so Save is
+    # always reachable.
+    after do
+      scripts.each do |identifier|
+        page.driver.browser.execute_cdp("Page.removeScriptToEvaluateOnNewDocument", identifier:)
+      end
+    end
+
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/up"
+      page.execute_script("localStorage.clear(); sessionStorage.clear()")
+    end
+
+    it "stays inside a short window, its questions scrolling and Save in view", :aggregate_failures do
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width: 1280, height: 420, deviceScaleFactor: 1, mobile: false)
+      visit density("period=monthly&view=rows&preferences=local")
+      wait_for_stimulus
+      open_preferences
+
+      measured = page.evaluate_script(<<~JS)
+        (() => {
+          const content = document.querySelector("[data-slot=dialog-content][data-state=open]");
+          const body = content.querySelector("[data-slot=event-calendar-preferences-body]");
+          const save = content.querySelector("[type=submit]").getBoundingClientRect();
+          const box = content.getBoundingClientRect();
+          return { top: box.top, bottom: box.bottom, window: innerHeight, saveBottom: save.bottom,
+                   scrolls: body.scrollHeight > body.clientHeight };
+        })()
+      JS
+
+      expect(measured["top"]).to be >= 0
+      expect(measured["bottom"]).to be <= measured["window"]
+      expect(measured["saveBottom"]).to be <= measured["bottom"]
+      expect(measured["scrolls"]).to be(true)
+    ensure
+      page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+    end
+
     def question(name) = "#{dialog} [data-slot=event-calendar-preference]:has(input[name='preferences[#{name}]'])"
 
     def checked(name) = find("#{question(name)} [role=radio][aria-checked=true]")["value"]
@@ -1581,17 +1622,7 @@ RSpec.describe "Event calendar", :js do
       JS
     end
 
-    before do
-      page.driver.browser.manage.window.resize_to(1400, 1000)
-      visit "/up"
-      page.execute_script("localStorage.clear(); sessionStorage.clear()")
-    end
 
-    after do
-      scripts.each do |identifier|
-        page.driver.browser.execute_cdp("Page.removeScriptToEvaluateOnNewDocument", identifier:)
-      end
-    end
 
     describe "the dialog" do
       before do
