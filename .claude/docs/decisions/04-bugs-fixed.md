@@ -555,3 +555,29 @@ test, not what is drawn above what.
 
 Found by a person clicking a cell, like the two preview-ordering defects
 `CLAUDE.md` names.
+
+## Every modal was an unnamed dialog
+
+Dialog, AlertDialog, Sheet and Drawer rendered `role="dialog"` (or
+`alertdialog`) with no `aria-labelledby` and no `aria-describedby`, and their
+Title parts had no id. A screen reader announced "dialog" and nothing else, and
+a host's `getByRole("dialog", { name: "Preferenze" })` found nothing — which is
+how Gestart reported it, on the event calendar's preferences dialog.
+
+Radix's DialogContent wires both to its Title and Description. Its dialog
+source is not vendored (`vendor/radix/ui` has no dialog), so that comes from
+Radix's documentation, not from a file in this repo.
+
+Fixed once, in the controller all four share (`shadcn--dialog`): on render the
+content points `aria-labelledby` at its own `*-title` part and
+`aria-describedby` at its own `*-description`, giving each an id from
+`uniqueId` when it has none. In the browser rather than on the server, because
+the title is a part the caller places anywhere in the content, slot or block.
+The parts are listed by name rather than matched by suffix, so a Card or an
+Attachment title inside the dialog never names it, and a nested dialog names
+itself. A name or description the caller already set is left alone.
+
+**Nothing in the suite could have seen it**: the snapshot has no ids to miss,
+and axe's `aria-dialog-name` is a best-practice rule the audit does not run.
+`spec/system/dialog_spec.rb` now resolves each family's name and description
+from the ids, and the event calendar's preferences example asserts its name.

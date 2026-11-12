@@ -16,6 +16,14 @@ import { ExitQueue } from "shadcn/animation"
 // the close buttons keep working. (The one case this gives up is a host page
 // that puts a `transform`/`filter`/`contain` ancestor above the dialog, which
 // would become the containing block.)
+// The parts a modal is named and described by, one per family this controller
+// drives. Listed rather than matched by suffix: a Card or an Attachment inside
+// the content also has a `*-title`, and it must not name the dialog.
+const TITLES = "[data-slot=dialog-title], [data-slot=alert-dialog-title], [data-slot=sheet-title], " +
+  "[data-slot=drawer-title]"
+const DESCRIPTIONS = "[data-slot=dialog-description], [data-slot=alert-dialog-description], " +
+  "[data-slot=sheet-description], [data-slot=drawer-description]"
+
 export default class extends Controller {
   static targets = [ "trigger", "overlay", "content" ]
   static values = {
@@ -95,10 +103,38 @@ export default class extends Controller {
     if (this.modalValue) unlockScroll()
   }
 
+  // Without a name a `role="dialog"` is announced as "dialog" and nothing
+  // else, and `getByRole("dialog", { name })` cannot find it. Radix's
+  // DialogContent points `aria-labelledby` at its Title and `aria-describedby`
+  // at its Description; Radix's dialog source is not vendored here
+  // (`vendor/radix/ui` has no dialog), so that is from its documentation, not
+  // checked in this repo. Done here rather than on the server because the
+  // title is a part the caller places anywhere in the content, slot or block.
+  // A name or description the caller already gave is left alone.
+  name(content) {
+    this.point(content, "aria-labelledby", TITLES, "aria-label")
+    this.point(content, "aria-describedby", DESCRIPTIONS)
+  }
+
+  point(content, attribute, selector, alternative = null) {
+    if (content.hasAttribute(attribute) || (alternative && content.hasAttribute(alternative))) return
+
+    // Its own part: a dialog nested in this one names itself.
+    const part = [ ...content.querySelectorAll(selector) ]
+      .find((element) => element.closest("[data-shadcn--dialog-target~=content]") === content)
+    if (!part) return
+
+    part.id ||= uniqueId(part.dataset.slot)
+    content.setAttribute(attribute, part.id)
+  }
+
   render() {
     const state = this.openValue ? "open" : "closed"
 
-    if (this.hasContentTarget) this.contentTarget.id ||= uniqueId("shadcn-dialog")
+    if (this.hasContentTarget) {
+      this.contentTarget.id ||= uniqueId("shadcn-dialog")
+      this.name(this.contentTarget)
+    }
 
     for (const element of this.layers) {
       element.dataset.state = state

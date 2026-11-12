@@ -1642,6 +1642,18 @@ RSpec.describe "Event calendar", :js do
         )).to be(true)
       end
 
+      # What a host's test reaches it by: `getByRole("dialog", { name: "Preferences" })`.
+      it "is a dialog named by its title and described by its description", :aggregate_failures do
+        content = open_preferences
+        name = page.evaluate_script(<<~JS, content)
+          ((content) => ["aria-labelledby", "aria-describedby"]
+            .map((attribute) => document.getElementById(content.getAttribute(attribute))?.textContent.trim()))(arguments[0])
+        JS
+
+        expect(content["role"]).to eq("dialog")
+        expect(name).to eq([ "Preferences", "Open the calendar this way every time." ])
+      end
+
       it "starts again from what is drawn after a Cancel" do
         open_preferences
         choose("daily")
