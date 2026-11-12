@@ -404,19 +404,24 @@ itself was one row that could not wrap or shrink. The day's nav is 406px wide
 scrolled sideways on every phone. That is what a host saw in the day view on a
 Pixel 7 (412px).
 
-Three classes keep it inside, and none of them clips a control:
+Two classes keep it inside, and neither clips a control:
 
 - the nav is `flex-wrap min-w-0`, so it can be narrower than its row, and
   its controls go onto a second line;
 - the title is `min-w-0`. A title too long for the line wraps rather than
   truncating, because `leading-none` with `overflow-hidden` would clip the
-  descenders of "agosto";
-- the panel's trigger is `min-w-0 max-w-full`, and its label is `truncate`.
-  The label is a sentence the host translates ("Giornaliero · Timeline ed
-  elenco · Per assegnatario" is 374px), and a button is `whitespace-nowrap
-  shrink-0`. It stops at the nav's width and ends in an ellipsis. The whole
-  sentence is still its accessible name, and the menu it opens shows the
-  checked items.
+  descenders of "agosto".
+
+The panel's trigger was the widest control: a sentence the host translates
+("Giornaliero · Timeline ed elenco · Per assegnatario" is 374px), which was
+`min-w-0 max-w-full` with a `truncate` label and so ended in an ellipsis on a
+phone. It is now an `icon-sm` button with lucide's `settings-2`, the icon
+shadcn's tasks example puts on its data table's "View" menu (that example is
+not vendored, so this repo does not check it). The sentence is its name, in an
+`sr-only` span as the sidebar trigger's is, and the menu it opens shows the
+checked items. What a sighted person loses is reading the current view off the
+toolbar without opening it. That was a deliberate trade: the title already
+says the period and the span.
 
 From 768px up every reading in the gallery fits on one line, so nothing
 changes there: the header measures 44px tall, as before. Below that the header
@@ -427,7 +432,7 @@ never had 44px targets, and this change neither grows nor shrinks them. Growing
 them on a phone would put classes on `Button` that upstream does not emit.
 
 `previews/phone.html.erb` is the worst case: the day, in Italian, with the
-longest date and that trigger, in a 390px frame. The frame shows the wrap on a
+longest date and the longest panel label, in a 390px frame. The frame shows the wrap on a
 desktop, but the page's breakpoints still read the window. The system spec
 measures every reading at 360, 390 and 412 through device emulation, not
 `resize_to`, because headless Chrome will not make a window narrower than

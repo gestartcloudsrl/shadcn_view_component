@@ -25,6 +25,7 @@ module ShadcnViewComponent
       "panel-left" => %(<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>),
       "paperclip" => %(<path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/>),
       "search" => %(<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>),
+      "settings-2" => %(<path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>),
       "sun" => %(<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>),
       "triangle-alert" => %(<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>),
       "x" => %(<path d="M18 6 6 18"/><path d="m6 6 12 12"/>)

@@ -208,13 +208,6 @@ module Shadcn
       # `overflow-hidden` would clip the descenders of "agosto".
       TITLE_CLASS = "min-w-0 text-base leading-none font-semibold sm:text-lg"
       NAV_CLASS = "flex min-w-0 flex-wrap items-center gap-1"
-      # The panel's trigger says where you are in a sentence the host
-      # translates ("Giornaliero · Timeline ed elenco · Per assegnatario"),
-      # and a button is `whitespace-nowrap shrink-0`. So it stops at the nav's
-      # width and the label ends in an ellipsis. The whole label is still its
-      # accessible name, and still the checked items in the menu it opens.
-      VIEW_TRIGGER_CLASS = "min-w-0 max-w-full"
-      VIEW_TRIGGER_LABEL_CLASS = "truncate"
       CHEVRON_CLASS = "size-4"
       # `overflow-clip`, not `overflow-hidden`: both cut the corners, but
       # `hidden` makes the frame a scroll container, and a `sticky` row inside
@@ -710,13 +703,19 @@ module Shadcn
       # question that view has: the readings answer it themselves through
       # `#reading_options`, so no control exists for a reading that cannot act
       # on it.
+      # The panel's trigger is an icon, `settings-2`, which shadcn's tasks
+      # example puts on its data table's "View" menu. That example is not
+      # vendored here, so nothing in this repo checks it. It used to say where you are in a
+      # sentence ("Giornaliero · Timeline ed elenco · Per assegnatario"), which
+      # on a phone ended in an ellipsis and took the nav a line of its own.
+      # The sentence is still its name, `sr-only` as the sidebar trigger's is,
+      # and what it said is still the checked items in the menu it opens.
       def view_panel
         render(DropdownMenu::Component.new(align: :start)) do |dropdown|
-          dropdown.with_trigger(class: [ Button::Component.variant_classes(variant: :outline, size: :sm),
-                                         VIEW_TRIGGER_CLASS ].join(" ")) do
+          dropdown.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :"icon-sm")) do
             safe_join([
-              tag.span(view_label, class: VIEW_TRIGGER_LABEL_CLASS),
-              render(Icon::Component.new("chevron-down", class: CHEVRON_CLASS))
+              render(Icon::Component.new("settings-2")),
+              tag.span(view_label, class: "sr-only")
             ])
           end
           dropdown.with_menu_content(class: "w-56") do

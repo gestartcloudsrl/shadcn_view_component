@@ -249,7 +249,7 @@ render Shadcn::Select::Trigger::Component.new
 #            aria-expanded="false" aria-autocomplete="none" …>
 ```
 
-22 lucide icons are bundled — exactly the ones the ported components render,
+23 lucide icons are bundled — exactly the ones the ported components render,
 out of lucide's ~1,500, and a spec fails if that stops being exactly true in
 either direction. Their drawings are not typed into Ruby: they are the files lucide publishes,
 vendored in the repository under `vendor/lucide/icons`, and `rake icons:build`

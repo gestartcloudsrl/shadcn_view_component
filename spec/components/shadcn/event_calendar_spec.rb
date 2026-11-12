@@ -1431,17 +1431,20 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
-    context "with a view panel whose label is longer than the screen" do
+    context "with the view panel's trigger" do
       let(:options) { { reading: :daily, selected: Date.new(2026, 8, 5) } }
 
       before { render_inline(calendar) }
 
-      # The one control whose width is a sentence the host translates.
-      it "keeps the trigger inside the nav and ends its label in an ellipsis", :aggregate_failures do
+      # An icon the size of the nav's other buttons, named by the sentence it
+      # used to show, which no longer has a width to fit.
+      it "is an icon button named by the view it is in", :aggregate_failures do
         trigger = painted.at_css("[data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]")
 
-        expect(trigger["class"].split).to include("min-w-0", "max-w-full")
-        expect(trigger.at_css("span")["class"].split).to include("truncate")
+        expect(trigger["class"].split).to include("size-8")
+        expect(trigger.at_css("svg")["class"].split).to include("lucide-settings-2")
+        expect(trigger.at_css("span.sr-only").text).to eq("Daily · Timeline and list · By event")
+        expect(trigger.text.squish).to eq("Daily · Timeline and list · By event")
       end
     end
   end
