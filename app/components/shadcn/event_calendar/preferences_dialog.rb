@@ -61,6 +61,14 @@ module Shadcn
 
       def preference_values = {}
 
+      # One per instance, so two calendars on a page do not share an id and a
+      # `<label for>` or `aria-labelledby` never reaches into the other's
+      # dialog. The `shadcn-<part>-<eight hex>` shape is the gem's convention.
+      def preference_id(question, part)
+        @preference_hex ||= SecureRandom.hex(4)
+        "shadcn-event-calendar-preferences-#{@preference_hex}-#{question}-#{part}"
+      end
+
       def preference_table = @preference_table ||= Preferences.new(shapes:, agenda: @agenda)
 
       # What the reading is drawing right now, as one of `Preferences#sets`.
@@ -144,7 +152,7 @@ module Shadcn
         return if tokens.empty?
 
         applies = preference_current.key?(question)
-        labelled = question == :view ? "#{form.field_id(:view)}_#{preference_view_heading}" : "#{form.field_id(question)}_label"
+        labelled = question == :view ? preference_id(:view, preference_view_heading) : preference_id(question, "label")
 
         tag.div(
           safe_join([ *preference_headings(form, question), preference_radios(form, question, applies, labelled) ]),
@@ -166,7 +174,7 @@ module Shadcn
 
       def preference_heading(form, question, key, period)
         shown = period ? preference_current[:period].to_s == period : true
-        id = "#{form.field_id(question)}_#{period ? (period == 'weekly' ? 'week' : 'month') : 'label'}"
+        id = preference_id(question, period ? (period == "weekly" ? "week" : "month") : "label")
 
         render(Label::Component.new(id:, "data-preferences-when": period, hidden: (true unless shown))) do
           shadcn_t("event_calendar.#{key}")
@@ -193,7 +201,7 @@ module Shadcn
       end
 
       def preference_option(form, question, value, selected)
-        id = "#{form.field_id(question)}_#{value}"
+        id = preference_id(question, value)
         tokens = (preference_table.when(question, value) if question == :view)
         shown = tokens.nil? || tokens.include?(preference_current[:period].to_s)
 

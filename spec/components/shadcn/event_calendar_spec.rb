@@ -1748,6 +1748,24 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    it "keeps two calendars' dialog ids apart", :aggregate_failures do
+      options = { reading: :workload, preferences: :host, preferences_save_url: "/prefs" }
+      dialogs = Array.new(2) do
+        render_inline(described_class.new(month: Date.new(2026, 8, 1), **options))
+        Nokogiri::HTML5.fragment(rendered_content.to_s).at_css("[data-slot=dialog]")
+      end
+
+      ids = dialogs.map { |dialog| dialog.css("[id]").map { |node| node["id"] } }
+      expect(ids.first).not_to be_empty
+      expect(ids.first & ids.last).to be_empty
+      dialogs.each_with_index do |dialog, index|
+        refs = dialog.css("[for]").map { |node| node["for"] } +
+               dialog.css("[aria-labelledby]").flat_map { |node| node["aria-labelledby"].split }
+        expect(refs).not_to be_empty
+        expect(refs - ids[index]).to be_empty
+      end
+    end
+
     it "leaves the auto reading alone" do
       render_calendar(reading: :auto, preferences: :local, preferences_url: ->(_) { "/" })
 
