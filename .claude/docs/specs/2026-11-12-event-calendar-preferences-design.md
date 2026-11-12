@@ -118,7 +118,7 @@ Proposed by Claude and accepted:
 - **Restoring in `:local` mode is signalled by the host** with `restore:`
   (agreed after review). Only the host knows that a request is the bare
   arrival, the usual link with no view named; for Gestart that is
-  `restore: params[:view].blank?`. With `restore: true` and a stored set that
+  `restore: params[:period].blank?`. With `restore: true` and a stored set that
   differs from what was drawn, the controller goes there on connect with
   `location.replace(url)`. Without it, the controller never moves the page.
   The gem guessing instead (marking its own clicks in `sessionStorage`) was

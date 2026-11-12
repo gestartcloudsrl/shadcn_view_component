@@ -202,10 +202,11 @@ module Shadcn
       # @param preferences select [off, local, host]
       # @param restore toggle
       # @param id text
+      # @param broken_url toggle
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars",
-                  preferences: "off", restore: false, id: nil)
+                  preferences: "off", restore: false, id: nil, broken_url: false)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -307,7 +308,14 @@ module Shadcn
         case preferences.to_s
         when "local"
           args.merge!(preferences: :local, restore: cast.cast(restore) || false,
-                      preferences_url: ->(set) { here.call(**set) })
+                      preferences_url: lambda { |set|
+                        # `broken_url` is a host getting it wrong, for the spec
+                        # that pins what that costs: the URL drops `group` and
+                        # asks to restore again, so it never draws the set.
+                        next here.call(**set) unless cast.cast(broken_url)
+
+                        here.call(**set.except(:group), restore: true, broken_url: true)
+                      })
         when "host"
           args.merge!(preferences: :host, preferences_save_url: "/calendar/preferences")
         end

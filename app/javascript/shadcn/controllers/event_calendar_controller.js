@@ -246,8 +246,31 @@ export default class extends Controller {
   // (that would reload forever) or one the host no longer offers (there is no
   // URL for it, and a guessed one could be anything). A browser that refuses
   // storage is a browser with nothing stored.
+  //
+  // "Already drawn" is only a loop guard if the host's URL draws exactly the
+  // set it was handed. One that drops a key, or an action that ignores one,
+  // lands on a page with another current set — and, where the host's
+  // `restore:` is true there too, asks again on every load. So each attempt
+  // is marked in `sessionStorage` first: arriving with the mark still set
+  // means the host was asked once and drew something else, and the mark is
+  // spent instead of a second redirect. Where the mark cannot be written,
+  // nothing is risked.
   restorePreferences() {
-    if (this.preferencesValue !== "local" || !this.preferencesRestoreValue) return
+    if (this.preferencesValue !== "local") return
+
+    const mark = `${this.preferencesStorageValue}:restoring`
+    let attempted
+    try {
+      attempted = sessionStorage.getItem(mark)
+      // Landed where it was sent: the next bare arrival may restore again.
+      if (attempted && attempted === this.preferencesCurrentValue) {
+        sessionStorage.removeItem(mark)
+        attempted = null
+      }
+    } catch {
+      return
+    }
+    if (!this.preferencesRestoreValue) return
 
     let key
     try {
@@ -258,7 +281,19 @@ export default class extends Controller {
     if (!key || key === this.preferencesCurrentValue) return
 
     const url = this.preferencesUrlsValue[key]
-    if (url) location.replace(url)
+    if (!url || url === location.pathname + location.search) return
+
+    try {
+      if (attempted === key) {
+        sessionStorage.removeItem(mark)
+        return
+      }
+      sessionStorage.setItem(mark, key)
+    } catch {
+      return
+    }
+
+    location.replace(url)
   }
 
   // Every answer starts at what is drawn now, not at what was left in the form

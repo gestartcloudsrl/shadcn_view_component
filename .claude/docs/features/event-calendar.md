@@ -1596,7 +1596,8 @@ keeping the set in the session; the `:host` system example posts to it.
 ### `restore:`, and why the gem does not guess
 
 In `:local` mode the host says when a request is the bare arrival — the usual
-link, no view named. For Gestart that is `restore: params[:view].blank?`. With
+link, no view named. For Gestart that is `restore: params[:period].blank?`:
+every set carries a `period`, and a bare arrival carries none. With
 `restore: true` and a stored set that differs from what was drawn, the
 controller goes there on connect with `location.replace`. Without it, the
 controller never moves the page.
@@ -1607,6 +1608,15 @@ calendar after `month-change`, and after a host navigates in answer to a panel
 event, and each of those would have been pulled away from what the person had
 just chosen. The cost, said plainly: one line for the host, and on a bare
 arrival the default view shows for a moment before the saved one loads.
+
+`preferences_url:` must draw exactly the set it is given. A URL that drops a
+key, or an action that ignores one, lands on a page drawing another set, and
+with `restore:` true there too it would ask again on every load. The
+controller marks each attempt in `sessionStorage` before it navigates — its
+own redirect, not a person's click, so this is not the guess rejected above —
+and arriving with the mark still set spends it instead of redirecting again:
+a wrong URL costs one wasted redirect, not a loop. Where `sessionStorage`
+refuses, restore does not navigate at all.
 
 Restore does nothing when the stored set is the one already drawn (it would
 reload forever), when the map has no URL for it (the host narrowed `shapes:`

@@ -1717,6 +1717,35 @@ RSpec.describe "Event calendar", :js do
         expect(page).to have_current_path(density("preferences=local&restore=true&shapes=chips"))
       end
 
+      # A host whose URL does not draw the set it was handed: `broken_url`
+      # drops `group` and keeps `restore`, so the page it lands on draws
+      # another set and asks to restore again. One wasted redirect, then it
+      # stays.
+      it "asks a host's URL once, even when it draws another set", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default",
+              Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :assignees,
+                                                     show_all: false))
+        count_loads
+        visit density("preferences=local&restore=true&broken_url=true")
+        expect(page).to have_current_path(/period=weekly/)
+        wait_for_stimulus
+        sleep Capybara.default_max_wait_time
+
+        expect(loads).to eq(2)
+        expect(page).to have_current_path(/period=weekly/)
+      end
+
+      it "restores again on the next bare arrival after a restore that landed" do
+        store("shadcn--event-calendar:preferences:default", weekly_rows)
+        visit density("preferences=local&restore=true")
+        expect(page).to have_current_path(/period=weekly/)
+        wait_for_stimulus
+
+        visit density("preferences=local&restore=true")
+
+        expect(page).to have_current_path(/period=weekly/)
+      end
+
       it "does not loop on the set already drawn", :aggregate_failures do
         store("shadcn--event-calendar:preferences:default", monthly_grid)
         count_loads
