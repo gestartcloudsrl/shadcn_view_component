@@ -28,6 +28,18 @@ module Shadcn
         period: "period.%s", view: "view.%s", showing: "daily.%s",
         group: "group.%s", shape: "hours.%s", max_chips: "preferences.max_chips_%s"
       }.freeze
+
+      # The chip limit's two answers, as its radio group submits them: a number
+      # the person types, or every chip. Only one reaches the form —
+      # `preferences[max_chips]` is the typed number or "all", never both.
+      LIMIT_CHOICES = %w[number all].freeze
+      PREFERENCES_LIMIT_INPUT_CLASS = "w-20"
+
+      # In a `:local` URL map, the key of a set whose chip limit is a typed
+      # number, and the two numbers the host's `preferences_url:` is called
+      # with to find where that number lands in its URL.
+      LIMIT_PLACEHOLDER = "#"
+      LIMIT_PROBES = [ 23, 45 ].freeze
       PREFERENCES_CONTENT_CLASS = "max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)]"
       PREFERENCES_FORM_CLASS = "flex min-h-0 flex-col gap-4"
       # `-m-1 p-1`: a scroller clips what overflows it, and the radios'
@@ -98,8 +110,43 @@ module Shadcn
         }.compact
       end
 
+      # Every set's URL, keyed as the controller spells what the form holds.
+      # A set that asks the chip limit has one URL for "all" and, for a typed
+      # number, a template: the URL cut in two where the number goes.
       def preference_urls
-        preference_table.sets.to_h { |set| [ Preferences.key(set), @preferences_url.call(set) ] }
+        preference_table.sets.each_with_object({}) do |set, urls|
+          unless preference_table.asks?(:max_chips, set)
+            urls[Preferences.key(set)] = @preferences_url.call(set)
+            next
+          end
+
+          all = preference_table.answer(set, :max_chips, :all)
+          urls[Preferences.key(all)] = @preferences_url.call(all)
+          urls[Preferences.key(preference_table.answer(set, :max_chips, LIMIT_PLACEHOLDER))] = preference_url_template(set)
+        end
+      end
+
+      # The host's lambda is called with two numbers and the URLs compared:
+      # what they share before and after is the template. The same URL twice
+      # means the limit never reaches it, which is the host's to decide. A
+      # lambda that writes the number some other way — twice, or changed — has
+      # no place to put a typed one, and is told so rather than sent somewhere
+      # else.
+      def preference_url_template(set)
+        first, second = LIMIT_PROBES.map { |number| @preferences_url.call(preference_table.answer(set, :max_chips, number)).to_s }
+        return first if first == second
+
+        head = first.each_char.zip(second.each_char).take_while { |a, b| a == b }.size
+        room = [ first.size, second.size ].min - head
+        tail = first.reverse.each_char.zip(second.reverse.each_char).take(room).take_while { |a, b| a == b }.size
+        cut = ->(url) { url[head...(url.size - tail)] }
+
+        unless cut.call(first) == LIMIT_PROBES.first.to_s && cut.call(second) == LIMIT_PROBES.last.to_s
+          raise ArgumentError, "EventCalendar(preferences: :local): preferences_url: must write max_chips " \
+                               "into the URL once, as given, so a typed limit has a place to go"
+        end
+
+        [ first[0, head], first[(first.size - tail)..] ]
       end
 
       # The menu's way in: it sits under the panel's questions.
@@ -169,7 +216,7 @@ module Shadcn
         labelled = question == :view ? preference_id(:view, preference_view_heading) : preference_id(question, "label")
 
         tag.div(
-          safe_join([ *preference_headings(form, question), preference_radios(form, question, applies, labelled) ]),
+          safe_join([ *preference_headings(form, question), preference_answers(form, question, applies, labelled) ]),
           "data-slot": "event-calendar-preference", class: "grid gap-3",
           "data-preferences-when": tokens.join(" "), hidden: (true unless applies)
         )
@@ -199,11 +246,57 @@ module Shadcn
       # controller moves it when the period changes.
       def preference_view_heading = preference_current[:period] == :weekly ? "week" : "month"
 
-      # A chip limit is its own number; every other answer, and "All", is copy.
       def preference_label(question, value)
-        return value.to_s if question == :max_chips && value.is_a?(Integer)
-
         shadcn_t("event_calendar.#{OPTION_KEYS.fetch(question) % value}")
+      end
+
+      def preference_answers(form, question, applies, labelled)
+        return preference_limit(form, applies, labelled) if question == :max_chips
+
+        preference_radios(form, question, applies, labelled)
+      end
+
+      # The number a capped cell starts from when the person types one: the
+      # reading's own limit. A reading without a cap has the default.
+      def preference_chip_count = Workload::Component::MAX_CHIPS
+
+      # Two radios, "at most [n]" and "All". The group's hidden input carries
+      # which one is chosen and submits only "all"; the number field carries
+      # the typed limit. Each is enabled only while its answer is the chosen
+      # one, so the form sends one `preferences[max_chips]`. The controller
+      # keeps that true as the answers change (`limitPreferences`).
+      def preference_limit(form, applies, labelled)
+        current = preference_current[:max_chips]
+        choice = current == :all ? "all" : "number"
+        count = current.is_a?(Integer) ? current : preference_chip_count
+
+        render(RadioGroup::Component.new(
+          name: form.field_name(:max_chips), value: choice, "aria-labelledby": labelled,
+          "data-preferences-limit": "", input_attributes: { disabled: (true unless applies && choice == "all") }.compact
+        )) do
+          safe_join([ preference_limit_number(form, choice, count, applies), preference_option(form, :max_chips, "all", choice) ])
+        end
+      end
+
+      def preference_limit_number(form, choice, count, applies)
+        radio = preference_id(:max_chips, "number")
+        label = preference_id(:max_chips, "number-label")
+
+        tag.div(
+          safe_join([
+            render(RadioGroup::Item::Component.new(value: "number", checked: choice == "number", id: radio,
+                                                   "aria-labelledby": label)),
+            render(Label::Component.new(for: radio, id: label)) { shadcn_t("event_calendar.preferences.max_chips_number") },
+            render(Input::Component.new(
+              type: "number", name: form.field_name(:max_chips), value: count, id: preference_id(:max_chips, "count"),
+              min: Preferences::MAX_CHIPS_RANGE.min, max: Preferences::MAX_CHIPS_RANGE.max, step: 1, required: true,
+              inputmode: "numeric", "aria-labelledby": label, class: PREFERENCES_LIMIT_INPUT_CLASS,
+              disabled: (true unless applies && choice == "number"),
+              "data-shadcn--event-calendar-target": "preferencesLimit"
+            ))
+          ]),
+          "data-slot": "event-calendar-preference-option", class: "flex items-center gap-2"
+        )
       end
 
       def preference_options(question)

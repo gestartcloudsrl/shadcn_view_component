@@ -35,6 +35,7 @@ it:
         cancel: Annulla
         max_chips: Lavori mostrati per giorno
         max_chips_all: Tutti
+        max_chips_number: Al massimo
       period:
         label: Mostra
         monthly: Mensile

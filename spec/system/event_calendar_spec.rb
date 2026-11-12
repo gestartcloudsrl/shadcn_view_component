@@ -1549,6 +1549,12 @@ RSpec.describe "Event calendar", :js do
 
     def choose(value) = find("#{dialog} [role=radio][value='#{value}']").click
 
+    def chip_limit = find("#{dialog} input[type=number]", visible: :all)
+
+    def chip_limits_sent
+      page.evaluate_script(%(Array.from(new FormData(document.querySelector("#{dialog} form")).getAll("preferences[max_chips]"))))
+    end
+
     # Six questions are taller than a laptop held low or a phone on its side.
     # The panel stops at the window and its questions scroll, so Save is
     # always reachable.
@@ -1715,22 +1721,83 @@ RSpec.describe "Event calendar", :js do
           .to eq("preferences[period]=daily&preferences[showing]=agenda&preferences[group]=events")
       end
 
-      # The chip limit: a number keeps the toggle off and the cells at that
-      # many, "All" is the toggle on. The weekly rows the dialog opens on are a
-      # capped view, so the question is there without changing the period.
-      it "saves a chip limit and draws that many", :aggregate_failures do
+      # The chip limit: a typed number keeps the toggle off and the cells at
+      # that many, "All" is the toggle on. The weekly rows the dialog opens on
+      # are a capped view, so the question is there without changing the
+      # period. 4 is neither the default nor a number the dialog once listed.
+      it "saves a typed chip limit and draws that many", :aggregate_failures do
         open_preferences
-        choose("5")
+        chip_limit.set("4")
         find("#{dialog} [type=submit]").click
 
-        expect(page).to have_current_path(/max_chips=5/)
+        expect(page).to have_current_path(/max_chips=4/)
         expect(page).to have_current_path(/show_all=false/)
         expect(stored("shadcn--event-calendar:preferences:default"))
-          .to eq("preferences[period]=weekly&preferences[view]=rows&preferences[group]=events&preferences[max_chips]=5")
+          .to eq("preferences[period]=weekly&preferences[view]=rows&preferences[group]=events&preferences[max_chips]=4")
         counts = all("#{calendar} [data-slot=event-calendar-day-items]").map do |items|
           items.all("[data-slot=event-calendar-day-item]", visible: :all).size
         end
-        expect(counts.max).to eq(5)
+        expect(counts.max).to eq(4)
+      end
+
+      # What a host's test reaches it by: `getByRole("spinbutton", { name: … })`.
+      it "names the field and its radio from one label", :aggregate_failures do
+        open_preferences
+
+        expect([ chip_limit.native.aria_role, chip_limit.native.accessible_name ]).to eq([ "spinbutton", "At most" ])
+        radio = find("#{dialog} [role=radio][value=number]")
+        expect(radio.native.accessible_name).to eq("At most")
+      end
+
+      it "sends the number or All, never both", :aggregate_failures do
+        open_preferences
+
+        expect(chip_limits_sent).to eq([ "3" ])
+
+        choose("all")
+
+        expect(chip_limit).to be_disabled
+        expect(chip_limits_sent).to eq([ "all" ])
+
+        find("#{dialog} label", text: "At most").click
+
+        expect(chip_limit).not_to be_disabled
+        expect(chip_limits_sent).to eq([ "3" ])
+      end
+
+      it "asks the limit only where a view caps its chips", :aggregate_failures do
+        open_preferences
+        choose("monthly")
+        choose("hours")
+
+        expect(chip_limit).not_to be_visible
+        expect(chip_limit).to be_disabled
+        expect(chip_limits_sent).to be_empty
+
+        choose("grid")
+
+        expect(chip_limit).to be_visible
+        expect(chip_limits_sent).to eq([ "3" ])
+      end
+
+      it "keeps a number out of range from being saved", :aggregate_failures do
+        open_preferences
+        chip_limit.set("100")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_css("#{dialog}[data-state=open]")
+        expect(page.evaluate_script("document.activeElement.type")).to eq("number")
+        expect(stored("shadcn--event-calendar:preferences:default")).to be_nil
+      end
+
+      it "starts again from the limit drawn after a Cancel" do
+        open_preferences
+        chip_limit.set("9")
+        choose("all")
+        find("#{dialog} [data-slot=dialog-close]", text: "Cancel").click
+        open_preferences
+
+        expect([ chip_limit.value, chip_limits_sent ]).to eq([ "3", [ "3" ] ])
       end
 
       it "saves All as the show-all toggle", :aggregate_failures do
@@ -1838,7 +1905,12 @@ RSpec.describe "Event calendar", :js do
         page.driver.browser.logs.get(:browser)
       end
 
-      def errors = page.driver.browser.logs.get(:browser).reject { |log| log.level == "WARNING" }
+      # The dummy app has no favicon, and whether Chrome asks for one before
+      # the log is read is timing: that 404 is the page's, not the storage's.
+      def errors
+        page.driver.browser.logs.get(:browser)
+            .reject { |log| log.level == "WARNING" || log.message.include?("/favicon.ico") }
+      end
 
       it "still goes where Save says", :aggregate_failures do
         visit density("period=weekly&view=rows&preferences=local")
@@ -1906,7 +1978,7 @@ RSpec.describe "Event calendar", :js do
         expect(find("#calendar-preferences")["data-token"]).to eq("true")
       end
 
-      it "posts the chip limit to the host as a number or all", :aggregate_failures do
+      it "posts the chip limit to the host as all", :aggregate_failures do
         visit density("period=weekly&view=rows&preferences=host")
         wait_for_stimulus
         open_preferences
@@ -1916,6 +1988,18 @@ RSpec.describe "Event calendar", :js do
         expect(page).to have_current_path("/calendar/preferences")
         saved = JSON.parse(find("#calendar-preferences").text)
         expect(saved).to eq("period" => "weekly", "view" => "rows", "group" => "events", "max_chips" => "all")
+      end
+
+      it "posts a typed chip limit to the host as its number", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=host")
+        wait_for_stimulus
+        open_preferences
+        chip_limit.set("7")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path("/calendar/preferences")
+        saved = JSON.parse(find("#calendar-preferences").text)
+        expect(saved).to eq("period" => "weekly", "view" => "rows", "group" => "events", "max_chips" => "7")
       end
     end
   end

@@ -23,10 +23,16 @@ module Shadcn
       VIEWS = { monthly: %i[grid rows hours], weekly: %i[rows hours] }.freeze
       SHOWING = %i[both axis].freeze
       GROUPS = %i[events assignees].freeze
-      # How many chips a capped cell shows before its "+N", or every one. The
-      # first is the reading's own default (`Workload::Component::MAX_CHIPS`).
-      # `:all` is the toolbar's "Show all" kept for next time.
-      MAX_CHIPS = [ 3, 5, :all ].freeze
+      # How many chips a capped cell shows before its "+N": any whole number in
+      # this range, or `:all`, the toolbar's "Show all" kept for next time.
+      # Public so a host checking the limit in its own URLs reads the same
+      # numbers as the form.
+      MAX_CHIPS_RANGE = (1..99).freeze
+
+      # Questions answered with a number the person types rather than one of a
+      # list. `#sets` cannot enumerate them; `#normalize` checks them on their
+      # own, and the `:local` URL map carries them as a template.
+      FREE = %i[max_chips].freeze
 
       # The context tokens a question applies in. A context is `[period,
       # "period:second"]`, where `second` is the view, or what a day is showing.
@@ -56,21 +62,43 @@ module Shadcn
         @agenda = !!agenda
       end
 
-      # One set per valid answer, keys in `QUESTIONS` order and only those that
-      # apply to it.
+      # One set per valid answer to the listed questions, keys in `QUESTIONS`
+      # order and only those that apply to it. The `FREE` questions are left
+      # out: `#asks?` says which sets take one.
       def sets
         @sets ||= PERIODS.flat_map do |period|
           seconds(period).flat_map do |second|
             context = context(period, second)
-            asked = QUESTIONS.select { |question| applies?(question, context) }
+            asked = QUESTIONS.select { |question| applies?(question, context) } - FREE
             combine(asked, period, second)
           end
         end
       end
 
-      # What a reading is drawing, as one of `#sets`: keys that do not apply are
-      # dropped, ones that do and are missing or unknown take their default.
-      # `nil` when the period or view is not a real one.
+      # Whether a set — one of `#sets`, or a whole one — is asked `question`.
+      def asks?(question, set)
+        second = set[:period] == :daily ? set[:showing] : set[:view]
+        applies?(question, context(set[:period], second))
+      end
+
+      # `set` with `question` answered `value`, keys back in `QUESTIONS` order,
+      # which is the order `.key` spells and the form submits.
+      def answer(set, question, value)
+        QUESTIONS.each_with_object({}) do |name, answered|
+          if name == question
+            answered[name] = value
+          elsif set.key?(name)
+            answered[name] = set[name]
+          end
+        end
+      end
+
+      # What a reading is drawing, as a complete set: keys that do not apply are
+      # dropped, listed ones that do and are missing or unknown take their
+      # default. `nil` when the period or view is not a real one, or when a
+      # chip limit is given and is neither "all" nor a whole number in
+      # `MAX_CHIPS_RANGE` — a typed number is checked, not quietly replaced.
+      # A limit that is not given at all is the reading's default.
       def normalize(given)
         given = given.to_h.transform_keys(&:to_sym)
         period = given[:period]&.to_sym
@@ -80,10 +108,20 @@ module Shadcn
         return unless seconds(period).include?(second)
 
         context = context(period, second)
-        QUESTIONS.select { |question| applies?(question, context) }.to_h do |question|
+        set = QUESTIONS.select { |question| applies?(question, context) }.to_h do |question|
           value = question == :period ? period : given[question]
           [ question, value_for(question, period, value, second) ]
         end
+        set unless set.key?(:max_chips) && set[:max_chips].nil?
+      end
+
+      # "all", or a whole number in `MAX_CHIPS_RANGE`, from a form's string or a
+      # host's stored value; `nil` for anything else, an empty string included.
+      def self.chip_limit(value)
+        return :all if value.to_s == "all"
+
+        number = value.is_a?(Integer) ? value : Integer(value.to_s, 10, exception: false)
+        number if MAX_CHIPS_RANGE.cover?(number)
       end
 
       # The context tokens a field — or, given a value, one of its options — is
@@ -138,21 +176,18 @@ module Shadcn
         case question
         when :group then GROUPS
         when :shape then shapes
-        when :max_chips then MAX_CHIPS
         end
       end
 
       def value_for(question, period, value, second)
         return second if question == :view || question == :showing
         return period if question == :period
+        if question == :max_chips
+          return value.nil? ? Workload::Component::MAX_CHIPS : self.class.chip_limit(value)
+        end
 
-        value = question == :max_chips ? chip_limit(value) : value&.to_sym
+        value = value&.to_sym
         options(question).include?(value) ? value : options(question).first
-      end
-
-      # "all" or a number, as a form or a host's stored set spells it.
-      def chip_limit(value)
-        value.to_s == "all" ? :all : Integer(value.to_s, exception: false)
       end
     end
   end

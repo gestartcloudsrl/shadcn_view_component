@@ -1654,29 +1654,62 @@ RSpec.describe Shadcn::EventCalendar::Component do
     let(:form) { painted.at_css("form") }
     let(:root) { painted.at_css("[data-controller~='shadcn--event-calendar']") }
 
-    def chip_limit_group = painted.at_css(%([data-slot=radio-group]:has([name="preferences[max_chips]"])))
+    def chip_limit_group = painted.at_css("[data-slot=radio-group][data-preferences-limit]")
+    def chip_limit_field = chip_limit_group.at_css("input[type=number]")
+    def chip_limit_choice = chip_limit_group.at_css("[data-shadcn--radio-group-target=input]")
 
-    # The chip limit replaced the show-all question: three answers, by name,
-    # starting from what the reading draws. The first cut of the show-all
-    # question listed its options with `filter_map` and lost `false`; the
-    # labels are asserted so an answer cannot go missing again.
-    it "asks how many chips a day shows, by name, starting from the limit drawn", :aggregate_failures do
-      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, max_chips: 5,
-                                        preferences: :host, preferences_save_url: "/prefs"))
-      options = chip_limit_group.css("[data-slot=radio-group-item]").map { |item| item["value"] }
+    def render_limit(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload,
+                                        preferences: :host, preferences_save_url: "/prefs", **options))
+    end
+
+    # The chip limit is typed: "at most [n]" or "All", one name between them,
+    # and only the chosen one enabled so the form sends one value. The first
+    # cut of the show-all question lost an answer to `filter_map`; the labels
+    # are asserted so one cannot go missing again.
+    it "asks how many chips a day shows as a number, starting from the limit drawn", :aggregate_failures do
+      render_limit(max_chips: 7)
       labels = chip_limit_group.css("[data-slot=label]").map { |label| label.text.squish }
 
-      expect(options).to eq(%w[3 5 all])
-      expect(labels).to eq([ "3", "5", "All" ])
-      expect(chip_limit_group["data-shadcn--radio-group-value-value"]).to eq("5")
+      expect(chip_limit_group.css("[data-slot=radio-group-item]").map { |item| item["value"] }).to eq(%w[number all])
+      expect(labels).to eq([ "At most", "All" ])
+      expect(chip_limit_group["data-shadcn--radio-group-value-value"]).to eq("number")
+      expect(chip_limit_field.to_h).to include("name" => "preferences[max_chips]", "value" => "7", "min" => "1",
+                                               "max" => "99", "step" => "1", "required" => "required")
+      expect(chip_limit_field["disabled"]).to be_nil
+      expect(chip_limit_choice.to_h).to include("name" => "preferences[max_chips]", "disabled" => "disabled")
       expect(painted.at_css(%([name="preferences[show_all]"]))).to be_nil
     end
 
-    it "says All when the reading shows every chip" do
-      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, show_all: true,
-                                        preferences: :host, preferences_save_url: "/prefs"))
+    it "names the radio and the field from one label", :aggregate_failures do
+      render_limit
+      label = chip_limit_group.at_css("[data-slot=label][for$='-max_chips-number']")
+
+      expect(chip_limit_group.at_css("[data-value=number]")["aria-labelledby"]).to eq(label["id"])
+      expect(chip_limit_field["aria-labelledby"]).to eq(label["id"])
+      expect(label["for"]).to eq(chip_limit_group.at_css("[data-value=number]")["id"])
+    end
+
+    it "says All when the reading shows every chip, keeping its limit in the field", :aggregate_failures do
+      render_limit(show_all: true, max_chips: 5)
 
       expect(chip_limit_group["data-shadcn--radio-group-value-value"]).to eq("all")
+      expect(chip_limit_choice["disabled"]).to be_nil
+      expect(chip_limit_field.to_h).to include("value" => "5", "disabled" => "disabled")
+    end
+
+    it "starts the field at its top for a limit past it, and draws the limit given", :aggregate_failures do
+      render_limit(max_chips: 150)
+
+      expect(chip_limit_field["value"]).to eq("99")
+    end
+
+    it "disables both answers where the view does not ask the limit", :aggregate_failures do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :hours,
+                                        preferences: :host, preferences_save_url: "/prefs"))
+
+      expect(chip_limit_group.ancestors("[data-preferences-when]").first["hidden"]).to eq("hidden")
+      expect([ chip_limit_field["disabled"], chip_limit_choice["disabled"] ]).to eq(%w[disabled disabled])
     end
 
 
@@ -1775,12 +1808,23 @@ RSpec.describe Shadcn::EventCalendar::Component do
                         preferences_url: ->(set) { "/c?#{set.to_query}" })
       end
 
+      # 26 = the 20 listed sets, plus one more for each of the six that ask
+      # the chip limit: "all", and the typed number as a template.
       it "ships every set's URL", :aggregate_failures do
         urls = JSON.parse(root["#{prefix}-urls-value"])
 
-        expect(urls.size).to eq(32)
+        expect(urls.size).to eq(26)
         expect(urls["preferences[period]=monthly&preferences[view]=hours&preferences[shape]=chips"])
           .to eq("/c?period=monthly&shape=chips&view=hours")
+        expect(urls["preferences[period]=weekly&preferences[view]=rows&preferences[group]=events&preferences[max_chips]=all"])
+          .to eq("/c?group=events&max_chips=all&period=weekly&view=rows")
+      end
+
+      it "ships a typed limit's URL as the halves the number goes between" do
+        urls = JSON.parse(root["#{prefix}-urls-value"])
+
+        expect(urls["preferences[period]=weekly&preferences[view]=rows&preferences[group]=events&preferences[max_chips]=#"])
+          .to eq([ "/c?group=events&max_chips=", "&period=weekly&view=rows" ])
       end
 
       it "names the current set, the storage key and restore", :aggregate_failures do
@@ -1806,6 +1850,30 @@ RSpec.describe Shadcn::EventCalendar::Component do
         expect(form["action"]).to eq("#")
         expect(form["data-action"]).to include("submit->shadcn--event-calendar#savePreferences")
         expect(form["data-action"]).to include("change->shadcn--event-calendar#refinePreferences")
+      end
+    end
+
+    describe "a typed limit in the browser's URL map" do
+      def urls_for(url)
+        render_calendar(reading: :workload, preferences: :local, preferences_url: url)
+        JSON.parse(root["#{prefix}-urls-value"])
+      end
+
+      def typed = "preferences[period]=monthly&preferences[view]=grid&preferences[group]=events&preferences[max_chips]=#"
+
+      it "is one URL where the host's never carries the number" do
+        expect(urls_for(->(set) { "/c/#{set[:period]}" })[typed]).to eq("/c/monthly")
+      end
+
+      it "takes the number at the end of the URL" do
+        expect(urls_for(->(set) { "/c/#{set[:max_chips]}" })[typed]).to eq([ "/c/", "" ])
+      end
+
+      it "refuses a URL that changes the number or writes it twice", :aggregate_failures do
+        expect { urls_for(->(set) { "/c?n=#{set[:max_chips].is_a?(Integer) ? set[:max_chips] * 2 : 0}" }) }
+          .to raise_error(ArgumentError, /max_chips/)
+        expect { urls_for(->(set) { "/c/#{set[:max_chips]}?n=#{set[:max_chips]}" }) }
+          .to raise_error(ArgumentError, /max_chips/)
       end
     end
 

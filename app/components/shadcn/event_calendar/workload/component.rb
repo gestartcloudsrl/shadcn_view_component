@@ -154,9 +154,13 @@ module Shadcn
 
         def panel? = true
 
-        def preference_values = { period:, view:, group:, max_chips: (show_all ? :all : max_chips) }
+        def preference_values = { period:, view:, group:, max_chips: (show_all ? :all : preference_chip_count) }
 
-        private :panel?, :preference_values
+        # A limit past what the dialog's field takes starts the field at its
+        # top; the reading still draws the limit it was given.
+        def preference_chip_count = max_chips.clamp(Preferences::MAX_CHIPS_RANGE)
+
+        private :panel?, :preference_values, :preference_chip_count
 
         style do
           base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \

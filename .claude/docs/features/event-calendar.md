@@ -94,7 +94,7 @@ Passed to a reading that does not take one, it lands on the root as
 |---|---|---|
 | `group:` | workload, week as rows, day | `:events`, `:assignees` |
 | `show_all:` | workload, week as rows | `false`, `true` (every chip instead of a cap and "+N") |
-| `max_chips:` | workload, week as rows | `3`, any number from 1: the chips a cell shows before its "+N". A person's preference, passed back in by the host. *Show all* is still the toggle past it. No `max_chips_url:`, because no control on the toolbar changes it: the host's own `*_url:` lambdas carry it like the rest of its state |
+| `max_chips:` | workload, week as rows | `3`, any number from 1: the chips a cell shows before its "+N". A person's preference, passed back in by the host; the dialog's field takes 1 to 99 (`Preferences::MAX_CHIPS_RANGE`). *Show all* is still the toggle past it. No `max_chips_url:`, because no control on the toolbar changes it: the host's own `*_url:` lambdas carry it like the rest of its state |
 | `arrangement:` | workload, week | `:auto`, `:rows` |
 | `window:` | month and week timelines, day | `0..24`, any range of hours, e.g. `7..19` |
 | `shape:` | month and week timelines, day | `:chips`, `:bars` |
@@ -1577,9 +1577,12 @@ question follows which.
 | `showing` | Timeline only · List only · Timeline and list | the period is Daily. *List only* only when the day has an agenda |
 | `group` | By event · By assignee | the view groups: grid, rows, the day |
 | `shape` | the host's `shapes:` | the view has an axis and `shapes:` offers more than one |
-| `max_chips` | 3 · 5 · All | the view caps its chips: grid, rows |
+| `max_chips` | *At most* [a number from 1 to 99] · All | the view caps its chips: grid, rows |
 
-Thirty-two complete sets in all, with both shapes and an agenda.
+Twenty complete sets in all, with both shapes and an agenda, not counting the
+chip limit: a typed number multiplies nothing, so `Preferences#sets` leaves
+`max_chips` out (`Preferences::FREE`) and `#asks?(:max_chips, set)` says which
+sets take one.
 
 A question that stops applying is hidden and its fields disabled, so it is never
 sent. Where the answer it held is no longer offered — *Grid* when the period
@@ -1587,13 +1590,31 @@ becomes Weekly — the first offered one is checked instead, so the dialog canno
 save a set no reading draws.
 
 The chip limit is the person's: how many jobs a capped cell shows before its
-"+N". Its answers are `3`, `5` and `:all` (`Preferences::MAX_CHIPS`), the first
-the reading's own default; *All* is the toolbar's *Show all* kept for next
-time, so the dialog asks one question where it used to ask "show all, yes or
-no". A reading drawing `show_all: true` is answered *All*; otherwise its
-`max_chips`, and a limit the dialog does not offer (a host's `max_chips: 4`)
-starts from the first answer. The numbers are their own labels; *All* and the
-question are `event_calendar.preferences.max_chips_all` and `max_chips`.
+"+N". It is two radios. *At most* has a number field beside it
+(`type="number"`, `min=1 max=99 step=1`, `required`), and *All* is the
+toolbar's *Show all* kept for next time, so the dialog asks one question where
+it used to ask "show all, yes or no". The field starts at the reading's own
+`max_chips` (3 by default), and *All* is checked when the reading draws
+`show_all: true`. A `max_chips:` above 99 starts the field at 99; the reading
+still draws the limit it was given.
+
+Both answers share the name `preferences[max_chips]`, and only the chosen one is
+enabled: the radio group's hidden input submits `"all"`, the field submits the
+number. The form sends one value, never both, and the controller keeps it so as
+the answers change (`limitPreferences`). A number outside the range, or none,
+stops the submit in the browser, through the field's own constraints.
+
+The radio and the field are both named by one label, `aria-labelledby` its
+id, so `getByRole("spinbutton", { name: "At most" })` finds the field. The
+copy is `event_calendar.preferences.max_chips` for the question,
+`max_chips_number` ("At most") and `max_chips_all` ("All").
+
+`Preferences::MAX_CHIPS_RANGE` (`1..99`) is the range, public so a host
+checking the limit in its own URLs uses the same numbers. `#normalize` accepts
+`"all"` or a whole number in it, as a string or an Integer, and returns `nil`,
+as it does for an unknown period, for anything else: `"0"`, `"100"`, `"4.5"`,
+`"abc"`, `""`. A limit that is not given at all is the default, 3. It used to
+put an unknown limit back to 3 without saying so.
 
 It replaced a `show_all` question whose first cut listed the options with
 `filter_map`, which dropped `false`, and built the label key from the boolean,
@@ -1618,10 +1639,20 @@ Where the answers live is a property of the host, not a setting in the dialog.
 
 **`:local`** — the gem keeps them in `localStorage`. The host gives
 `preferences_url:`, a callable that turns one complete set into the URL that
-draws it, and the gem calls it for every set it offers (about thirty) and ships
-the map in the markup. The browser cannot run the host's Ruby, and a URL
-template with placeholders would break a host's lambda that looks a value up.
+draws it, and the gem calls it for every set it offers and ships the map in the
+markup, 26 entries. The browser cannot run the host's Ruby, and a URL template
+with placeholders would break a host's lambda that looks a value up.
 Save writes the set and navigates to its URL.
+
+The typed chip limit is the exception, because a number cannot be listed. Each
+of the six sets that ask it gets two entries: one for `"all"`, and one keyed
+with `#` in the number's place whose value is the URL cut in two where the
+number goes. The gem finds the cut by calling the lambda with 23 and with 45 and
+comparing the URLs. If the two are the same, the number never reaches the URL
+and the entry is that one URL. A lambda that writes the number twice or changes
+it has nowhere to put a typed one, and the gem raises `ArgumentError` at render
+time instead of sending the person somewhere else. A value from a list is still
+never passed as a placeholder, only the number.
 
 **`:host`** — the dialog is a plain `<form method="post">` to
 `preferences_save_url:` with `_method=patch`, built with the gem's form
@@ -1642,7 +1673,9 @@ end
 
 Validate the values against the table above before saving: they come from
 the browser. Only the fields of the chosen view arrive, as strings
-(`max_chips` is `"3"`, `"5"` or `"all"`; `show_all` is no longer sent).
+(`max_chips` is the typed number, `"7"`, or `"all"`, one of the two and never
+both; `show_all` is not sent). `Preferences.new(shapes:, agenda:).normalize(params[:preferences])`
+is that check: `nil` means the set is not one the dialog can produce.
 
 Reading them back is also the host's. Its order is the request's parameters,
 then the person's saved set, then its own defaults, and the saved set applies

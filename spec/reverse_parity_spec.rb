@@ -116,6 +116,10 @@ RSpec.describe "reverse parity" do
     # The preferences dialog's scrolling body: `-m-1 p-1` keeps the radios'
     # 3px focus ring inside a box that clips.
     "event-calendar-preferences-body" => %w[-m-1],
+    # The chip limit's number field, beside its radio: a `w-full` input would
+    # take the row, and two digits need about five rem
+    # (`PreferencesDialog::PREFERENCES_LIMIT_INPUT_CLASS`).
+    "input" => %w[w-20],
     # Both from the calendar previews, and both are what upstream's own examples
     # do at the call site rather than in the component. "Custom Cell Size" is a
     # calendar sized from one custom property, and "Booked dates" strikes the

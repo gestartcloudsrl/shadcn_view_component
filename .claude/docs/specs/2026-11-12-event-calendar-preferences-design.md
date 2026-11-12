@@ -6,7 +6,10 @@
 is replaced by a chip limit, `max_chips` (`3`, `5`, `all`), and the workload
 reading takes `max_chips:`. Where this document says `show_all` for the dialog
 or the posted fields, read `max_chips`; the toolbar's *Show all* toggle is
-unchanged. The feature doc is the current reference. Feeds an implementation plan; not itself a plan.
+unchanged. Amended again the same day: the limit is typed, a number field
+(1 to 99, `Preferences::MAX_CHIPS_RANGE`) beside an *All* radio, so it is left
+out of the enumerated sets and the `:local` URL map carries it as a template.
+The feature doc is the current reference. Feeds an implementation plan; not itself a plan.
 
 **The question:** a person reaches the calendar from the same link every time
 and wants it the way they left it: always *Weekly · Rows*, say. Today every

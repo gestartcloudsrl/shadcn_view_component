@@ -10,20 +10,35 @@ RSpec.describe Shadcn::EventCalendar::Preferences do
 
   it "asks each view only its own questions" do
     expect(preferences.sets).to include(
-      { period: :monthly, view: :grid, group: :events, max_chips: 3 },
+      { period: :monthly, view: :grid, group: :events },
       { period: :monthly, view: :hours, shape: :bars },
-      { period: :weekly, view: :rows, group: :assignees, max_chips: :all },
+      { period: :weekly, view: :rows, group: :assignees },
       { period: :daily, showing: :agenda, group: :events },
       { period: :daily, showing: :axis, group: :events, shape: :chips }
     )
     expect(preferences.sets).not_to include(a_hash_including(period: :weekly, view: :grid))
   end
 
-  # 32 = monthly grid 6 + rows 6 + hours 2, weekly rows 6 + hours 2, daily
-  # both 4 + axis 4 + agenda 2: the chip limit has three answers (3, 5, all).
-  it "counts every valid set once" do
-    expect(preferences.sets.size).to eq(32)
-    expect(preferences.sets.uniq.size).to eq(32)
+  # 20 = monthly grid 2 + rows 2 + hours 2, weekly rows 2 + hours 2, daily
+  # both 4 + axis 4 + agenda 2. The chip limit is typed, so it multiplies
+  # nothing: no set carries it.
+  it "counts every valid set once, leaving the typed limit out", :aggregate_failures do
+    expect(preferences.sets.size).to eq(20)
+    expect(preferences.sets.uniq.size).to eq(20)
+    expect(preferences.sets).to all(satisfy { |set| !set.key?(:max_chips) })
+  end
+
+  it "says which sets are asked the chip limit", :aggregate_failures do
+    expect(preferences.sets.select { |set| preferences.asks?(:max_chips, set) })
+      .to match_array(%i[events assignees].flat_map { |group|
+        [ { period: :monthly, view: :grid, group: }, { period: :monthly, view: :rows, group: },
+          { period: :weekly, view: :rows, group: } ]
+      })
+  end
+
+  it "answers a question in a set, in question order" do
+    expect(preferences.answer({ period: :weekly, view: :rows, group: :events }, :max_chips, 7).to_a)
+      .to eq([ [ :period, :weekly ], [ :view, :rows ], [ :group, :events ], [ :max_chips, 7 ] ])
   end
 
   it "stops asking the shape when one is offered, and the list without an agenda", :aggregate_failures do
@@ -50,14 +65,29 @@ RSpec.describe Shadcn::EventCalendar::Preferences do
   end
 
   # The limit arrives as a string from a form or a host's stored set: "all" is
-  # every chip, a number one of the offered limits, anything else the default.
+  # every chip, a whole number in the range is that many. Anything else is a
+  # set that is not one, as an unknown period is — not quietly the default.
   it "reads the chip limit from what a form sends", :aggregate_failures do
-    read = ->(value) { preferences.normalize(period: "monthly", view: "rows", max_chips: value)[:max_chips] }
+    read = ->(value) { preferences.normalize(period: "monthly", view: "rows", max_chips: value)&.fetch(:max_chips) }
 
-    expect(read.call("5")).to eq(5)
+    expect(read.call("7")).to eq(7)
+    expect(read.call(42)).to eq(42)
+    expect(read.call("1")).to eq(1)
+    expect(read.call("99")).to eq(99)
     expect(read.call("all")).to eq(:all)
-    expect(read.call("4")).to eq(3)
-    expect(read.call(nil)).to eq(3)
+    %w[0 100 -3 4.5 abc 7a].push("", 4.0).each { |bad| expect(read.call(bad)).to be_nil, bad.inspect }
+  end
+
+  it "takes the reading's default for a limit not given at all" do
+    expect(preferences.normalize(period: "weekly", view: "rows")).to eq(period: :weekly, view: :rows, group: :events, max_chips: 3)
+  end
+
+  it "ignores a bad limit where the view does not ask it" do
+    expect(preferences.normalize(period: "monthly", view: "hours", max_chips: "abc")).to eq(period: :monthly, view: :hours, shape: :chips)
+  end
+
+  it "publishes the range a typed limit is checked against" do
+    expect(described_class::MAX_CHIPS_RANGE).to eq(1..99)
   end
 
   it "asks the chip limit only where a view caps its chips" do

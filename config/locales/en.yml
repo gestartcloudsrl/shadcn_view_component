@@ -74,6 +74,7 @@ en:
         cancel: Cancel
         max_chips: Jobs shown per day
         max_chips_all: All
+        max_chips_number: At most
       # The workload reading's arrangement toggle. It names what pressing it
       # does, not the state it is in, so the controller never has to write it.
       # The options panel: which view, and then the one question that view has.

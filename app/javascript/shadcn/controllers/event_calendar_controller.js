@@ -25,7 +25,8 @@ import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 // "lowest free lane" rather than "next free lane".
 export default class extends Controller {
   static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
-                     "prototypes", "groupLabel", "announcer", "preferencesDialog", "preferencesForm" ]
+                     "prototypes", "groupLabel", "announcer", "preferencesDialog", "preferencesForm",
+                     "preferencesLimit" ]
 
   static values = {
     // The saved-view preferences, drawn by the server when a host asks for
@@ -280,7 +281,7 @@ export default class extends Controller {
     }
     if (!key || key === this.preferencesCurrentValue) return
 
-    const url = this.preferencesUrlsValue[key]
+    const url = this.preferenceUrl(key)
     if (!url || url === location.pathname + location.search) return
 
     try {
@@ -314,9 +315,28 @@ export default class extends Controller {
     const current = new URLSearchParams(this.preferencesCurrentValue)
 
     for (const [ name, value ] of current) {
+      if (this.hasPreferencesLimitTarget && name === this.preferencesLimitTarget.name) {
+        this.resetPreferenceLimit(value)
+        continue
+      }
+
       const input = this.preferencesFormTarget.querySelector(`input[name="${CSS.escape(name)}"]`)
       if (input) this.choosePreference(input, value)
     }
+  }
+
+  // The chip limit is two fields under one name: "all" chooses the radio, a
+  // number chooses "at most" and goes in the field. With "all" drawn, the field
+  // goes back to the number the server put in it, the reading's own limit.
+  resetPreferenceLimit(value) {
+    const field = this.preferencesLimitTarget
+    const group = field.closest("[role=radiogroup]")
+    const input = group?.querySelector("[data-shadcn--radio-group-target=input]")
+    if (!input) return
+
+    const all = value === "all"
+    field.value = all ? field.defaultValue : value
+    this.choosePreference(input, all ? "all" : "number")
   }
 
   // Up to three passes, because each answer can move the next: Monthly brings
@@ -346,6 +366,24 @@ export default class extends Controller {
       this.namePreferenceGroups(form)
       if (!this.settlePreferences(form)) break
     }
+
+    this.limitPreferences(form)
+  }
+
+  // The chip limit submits one value: the group's hidden input says "all", the
+  // number field says how many, and only the chosen one is enabled. Both stay
+  // off while the question itself is not asked — the pass above has already
+  // disabled them, and this only ever turns one of them back off.
+  limitPreferences(form) {
+    for (const group of form.querySelectorAll("[role=radiogroup][data-preferences-limit]")) {
+      const input = group.querySelector("[data-shadcn--radio-group-target=input]")
+      const field = group.querySelector("input[type=number]")
+      if (!input || !field || group.closest("[data-preferences-when][hidden]")) continue
+
+      const typed = input.value === "number"
+      input.disabled = typed
+      field.disabled = !typed
+    }
   }
 
   // What the period and its second answer say, as the tokens `Preferences`
@@ -365,8 +403,10 @@ export default class extends Controller {
     let moved = false
 
     for (const group of form.querySelectorAll("[role=radiogroup]")) {
-      const input = group.querySelector("input[name^='preferences[']")
-      if (!input || input.disabled) continue
+      // The group's own input, not the first field inside it: the chip limit's
+      // number field sits in the group too.
+      const input = group.querySelector("[data-shadcn--radio-group-target=input]")
+      if (!input?.name.startsWith("preferences[") || input.disabled) continue
 
       const items = [ ...group.querySelectorAll("[role=radio]") ]
       const chosen = items.find((item) => item.dataset.value === input.value)
@@ -429,11 +469,31 @@ export default class extends Controller {
       // Nothing to do: the view is still the one asked for.
     }
 
-    const url = this.preferencesUrlsValue[key]
+    const url = this.preferenceUrl(key)
     if (url) {
       location.assign(url)
     } else {
       this.preferencesDialog?.close()
+    }
+  }
+
+  // A set's URL from the server's map. A typed number has no entry of its own:
+  // its set is listed with "#" in the number's place, and the URL as the two
+  // halves the number goes between — or as one URL, where the host's never
+  // carries the number. Which answer is the number is not known here; any
+  // all-digit answer is tried.
+  preferenceUrl(key) {
+    const urls = this.preferencesUrlsValue
+    if (typeof urls[key] === "string") return urls[key]
+
+    const pairs = key.split("&")
+    for (const [ index, pair ] of pairs.entries()) {
+      const [ name, value ] = pair.split("=")
+      if (!/^\d+$/.test(value ?? "")) continue
+
+      const template = urls[pairs.map((other, at) => (at === index ? `${name}=#` : other)).join("&")]
+      if (Array.isArray(template)) return template.join(value)
+      if (typeof template === "string") return template
     }
   }
 
