@@ -1652,6 +1652,15 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(root.attributes.keys.grep(/preferences/)).to be_empty
     end
 
+    it "is off for false and nil, like no keyword", :aggregate_failures do
+      [ false, nil ].each do |off|
+        render_calendar(reading: :workload, preferences: off)
+
+        expect(painted.css("[data-slot=dialog]")).to be_empty
+        expect(root.attributes.keys.grep(/preferences/)).to be_empty
+      end
+    end
+
     it "raises without the URL its mode needs", :aggregate_failures do
       expect { render_calendar(reading: :workload, preferences: :local) }
         .to raise_error(ArgumentError, /preferences_url/)
@@ -1739,6 +1748,17 @@ RSpec.describe Shadcn::EventCalendar::Component do
           .to eq("preferences[period]=monthly&preferences[view]=hours&preferences[shape]=chips")
         expect(root["#{prefix}-storage-value"]).to eq("shadcn--event-calendar:preferences:default")
         expect(root["#{prefix}-restore-value"]).to eq("true")
+      end
+
+      it "casts restore the way Rails casts a boolean" do
+        render_calendar(reading: :hours, preferences: :local, restore: "false",
+                        preferences_url: ->(set) { "/c?#{set.to_query}" })
+
+        expect(root["#{prefix}-restore-value"]).to eq("false")
+      end
+
+      it "does not carry a token it never submits" do
+        expect(form.at_css("input[name=authenticity_token]")).to be_nil
       end
 
       it "saves in the browser", :aggregate_failures do

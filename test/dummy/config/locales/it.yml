@@ -50,6 +50,12 @@ it:
         label: Mostra ogni lavoro come
         bars: Barre
         chips: Etichette
+      view:
+        label: Mostra il mese come
+        week_label: Mostra la settimana come
+        grid: Griglia
+        rows: Righe
+        hours: Timeline
       group:
         label: Raggruppa
         assignees: Per assegnatario

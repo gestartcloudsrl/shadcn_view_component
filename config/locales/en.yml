@@ -63,10 +63,6 @@ en:
       # is limited to the date tokens that shim knows: %A %a %B %b %d %-d %e
       # %m %-m %Y %y.
       agenda_format: "%A, %B %-d"
-      # The workload reading's arrangement toggle. It names what pressing it
-      # does, not the state it is in, so the controller never has to write it.
-      # The options panel: which view, and then the one question that view has.
-      # The toolbar's period switch, which is the question above the views.
       # The preferences dialog: the menu item that opens it and the form in it.
       # The questions it asks are the panel's own, under `period`, `view`,
       # `daily`, `group` and `hours`.
@@ -78,6 +74,10 @@ en:
         cancel: Cancel
         show_all_on: Every job
         show_all_off: The first few
+      # The workload reading's arrangement toggle. It names what pressing it
+      # does, not the state it is in, so the controller never has to write it.
+      # The options panel: which view, and then the one question that view has.
+      # The toolbar's period switch, which is the question above the views.
       period:
         label: Show
         monthly: Monthly

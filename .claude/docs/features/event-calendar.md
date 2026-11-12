@@ -1593,6 +1593,10 @@ end
 The dummy app's `CalendarController#save_preferences` is the same shape,
 keeping the set in the session; the `:host` system example posts to it.
 
+> Host note: the preferences dialog is not portalled, so a calendar with
+> `preferences:` must not be rendered inside a host `<form>`: the HTML parser
+> drops the nested form and Save would submit the host's form.
+
 ### `restore:`, and why the gem does not guess
 
 In `:local` mode the host says when a request is the bare arrival — the usual
@@ -1623,6 +1627,12 @@ reload forever), when the map has no URL for it (the host narrowed `shapes:`
 or turned `agenda:` off after the person saved — a guessed URL could be
 anything), or when the browser refuses storage. Save, in a browser that
 refuses, still goes where it says; the answer is only not remembered.
+
+Every URL the host hands the calendar must carry `period` (or whatever key its
+restore test reads): `month_url:`, `day_url:`, `view_url:`, the `*_url:` menus,
+a redirect after `month-change`. One that omits it looks like a bare arrival, so
+with `restore: params[:period].blank?` pressing › on a month would take the
+person straight back to their saved view.
 
 `restore:` means nothing in `:host` mode, where the host has already rendered
 from its own stored set.

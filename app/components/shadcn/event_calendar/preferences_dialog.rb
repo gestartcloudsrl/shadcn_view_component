@@ -34,10 +34,10 @@ module Shadcn
       private
 
       def initialize_preferences(preferences, preferences_url, preferences_save_url, restore)
-        @preferences_mode = preferences&.to_sym
+        @preferences_mode = (preferences.to_sym if preferences)
         @preferences_url = preferences_url
         @preferences_save_url = preferences_save_url
-        @restore = !!restore
+        @restore = ActiveModel::Type::Boolean.new.cast(restore) || false
         return if @preferences_mode.nil?
 
         unless MODES.include?(@preferences_mode)
@@ -126,7 +126,9 @@ module Shadcn
         action = "change->shadcn--event-calendar#refinePreferences"
         action = "submit->shadcn--event-calendar#savePreferences #{action}" if local
 
+        # `:local` never submits the form, so a token would only sit in the DOM.
         form_with(scope: :preferences, url: (local ? "#" : @preferences_save_url),
+                  authenticity_token: (false if local),
                   method: (local ? :post : :patch), builder: ShadcnViewComponent::FormBuilder,
                   class: "flex flex-col gap-4",
                   data: { "shadcn--event-calendar-target": "preferencesForm", action: }) do |form|

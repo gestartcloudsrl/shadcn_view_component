@@ -149,6 +149,8 @@ module Shadcn
 
         def preference_values = { period:, view:, group:, show_all: }
 
+        private :panel?, :preference_values
+
         style do
           base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
                  "#{CELL_TOKENS} #{STRIP_TOKENS} #{STRIP_CHIP_TOKENS} #{HELD_TOKENS} " \

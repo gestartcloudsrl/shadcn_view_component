@@ -503,7 +503,10 @@ module Shadcn
       # @param preferences_save_url [String, nil] `:host` only: where the form
       #   is `PATCH`ed
       # @param restore [Boolean] `:local` only: whether the browser sends a
-      #   person to their saved view on arrival
+      #   person to their saved view on arrival. Every URL the host hands the
+      #   calendar (`month_url:`, `day_url:`, `view_url:`...) must carry whatever
+      #   the host's restore test reads, or the next request looks like a bare
+      #   arrival and pulls the person back to their saved view.
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,

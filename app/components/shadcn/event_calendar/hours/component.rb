@@ -226,6 +226,8 @@ module Shadcn
 
         def preference_values = { period:, view: :hours, shape: }
 
+        private :panel?, :preference_values
+
         def shape_items
           safe_join([
             render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.hours.label") },
