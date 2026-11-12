@@ -69,7 +69,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
-| `preferences:` | `nil` | `:local` or `:host`: the panel gets a *Preferences* item and the dialog it opens. Drawn by the readings with a panel only; a value other than those two raises |
+| `preferences:` | `nil` | `:local` or `:host`: the panel gets a *Preferences* item and the dialog it opens. Drawn by the readings with a panel only. `nil` and `false` are off, so `preferences: feature_on? && :host` works; any other value raises |
 | `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, show_all: }`, the keys that apply), the URL that draws it |
 | `preferences_save_url:` | `nil` | `:host` only, and required there: where the dialog's form is sent, as `PATCH` |
 | `restore:` | `false` | `:local` only: this request is the bare arrival, so go to the stored set if there is one |
@@ -1562,6 +1562,47 @@ from what is drawn.
 Off unless asked, because it adds a menu item, a dialog and browser storage to
 a page that did not ask for them. Only the readings with a panel draw it.
 
+### The dialog
+
+The questions, their answers, and when each is asked. All of it comes from one
+table in `EventCalendar::Preferences`; the browser only reads the
+`data-preferences-when` tokens the server wrote, so it knows nothing about which
+question follows which.
+
+| question | answers | asked when |
+|---|---|---|
+| `period` | Monthly · Weekly · Daily | always |
+| `view` | Grid · Rows · Timeline for a month; Rows · Timeline for a week | the period is Monthly or Weekly. Its heading follows the period ("Show the month as" / "Show the week as") and so does the group's `aria-labelledby` |
+| `showing` | Timeline only · List only · Timeline and list | the period is Daily. *List only* only when the day has an agenda |
+| `group` | By event · By assignee | the view groups: grid, rows, the day |
+| `shape` | the host's `shapes:` | the view has an axis and `shapes:` offers more than one |
+| `show_all` | The first few · Every job | the view caps its chips: grid, rows |
+
+Twenty-six complete sets in all, with both shapes and an agenda.
+
+A question that stops applying is hidden and its fields disabled, so it is never
+sent. Where the answer it held is no longer offered — *Grid* when the period
+becomes Weekly — the first offered one is checked instead, so the dialog cannot
+save a set no reading draws.
+
+`show_all`'s answers are the booleans `false` and `true`, labelled from
+`event_calendar.preferences.show_all_off` and `show_all_on`. The first cut
+listed the options with `filter_map`, which dropped `false`, and built the
+label key from the boolean, `show_all_true`, which no locale has: one option,
+reading "Translation missing". The snapshot had recorded that text as correct,
+so `snapshot_spec` now fails any golden that renders a missing translation.
+
+Six questions are taller than a short window, and a dialog with no limit put
+*Save* off-screen. The panel stops at the window
+(`max-h-[calc(100dvh-2rem)]`), and the questions scroll between a header and
+footer that stay put, as the dialog's own *Scrollable Content* preview does:
+two grid rows, the form being the one that gives (`minmax(0,1fr)`), and a body
+that is `overflow-y-auto` with `-m-1 p-1` so the radios' focus ring is not
+clipped. Measured at 440px tall: the questions scroll, *Save* stays in view.
+
+Every id in the dialog is `shadcn-event-calendar-preferences-<hex>-…`, one hex
+per calendar, so two calendars on a page do not label each other's radios.
+
 ### Two homes, and the developer picks
 
 Where the answers live is a property of the host, not a setting in the dialog.
@@ -1589,6 +1630,29 @@ def update
   redirect_to calendar_path, status: :see_other
 end
 ```
+
+Validate the values against the table above before saving: they come from
+the browser. Only the fields of the chosen view arrive, as strings
+(`show_all` is `"true"` or `"false"`).
+
+Reading them back is also the host's. Its order is the request's parameters,
+then the person's saved set, then its own defaults, and the saved set applies
+only to the bare arrival, the request with no `period`. The set becomes the
+component's arguments like this, for a host whose month grid is the workload
+reading:
+
+| saved | arguments |
+|---|---|
+| monthly · grid | `reading: :workload`, `group:`, `show_all:` |
+| monthly · rows | the same, with `arrangement: :rows` |
+| monthly · hours | `reading: :hours`, `shape:` |
+| weekly · rows | `reading: :weekly, arrangement: :rows`, `group:`, `show_all:` |
+| weekly · hours | `reading: :weekly`, `shape:` |
+| daily | `reading: :daily`, `showing:`, `group:`, `shape:` |
+
+The rule that every URL the calendar is handed must carry `period` (below,
+under `restore:`) holds here too, for the same reason: a URL without it is read
+as the bare arrival and drawn from the saved set.
 
 The dummy app's `CalendarController#save_preferences` is the same shape,
 keeping the set in the session; the `:host` system example posts to it.
@@ -1652,6 +1716,22 @@ The month shown and the day selected: the calendar opens on today, as it did.
 defaults"; saving other answers replaces the set. `:local` does not follow a
 person across devices — that is what `:host` is for. And the panel is
 unchanged: a choice made there is for now, and does not touch the saved set.
+
+### Known gaps
+
+- **Cancel resets only the questions that apply.** A hidden question keeps the
+  answer chosen before the Cancel, so choosing Daily → *List only*, cancelling,
+  and choosing Daily again shows *List only* checked rather than the drawn
+  default. Nothing wrong is saved.
+- **The `:host` example proves the token is sent, not that it verifies.**
+  Lookbook renders a preview inside a nested controller whose session never
+  reaches the browser, so the dummy skips verification on that one action. The
+  token comes from a standard `form_with`; a host's own system spec is where it
+  is checked end to end.
+- **A stale mark after a wrong `preferences_url:`.** When the wrong URL lands on
+  a page with `restore:` false, the one-shot mark stays, and the next bare
+  arrival in that tab spends it instead of restoring. One skipped restore, only
+  for a host whose URL is already wrong.
 
 ## Not done
 
