@@ -125,9 +125,8 @@ module Shadcn
         # so a 2.9rem lane overlapped the next by five pixels and clipped the
         # bottom row of every busy day.
         LANE_HEIGHTS = { chips: 3.4, bars: 0.9 }.freeze
-        # Every shape, in the order the panel offers them; the first is the
-        # default.
-        SHAPES = LANE_HEIGHTS.keys.freeze
+        # The shapes are the base's (`EventCalendar::Component::SHAPES`); this
+        # table has to name every one of them, and a spec holds the two equal.
 
         # The scale, drawn once above the month rather than once per row: it is
         # the same hours on every row, and forty-two copies would be forty-two
@@ -143,7 +142,7 @@ module Shadcn
         RULER_BODY_CLASS = "relative h-4 grow"
         HOUR_CLASS = "absolute bottom-0 left-(--at) border-l border-border/60 pl-0.5"
 
-        attr_reader :window, :shape, :shapes, :shape_url
+        attr_reader :window, :shape, :shape_url
 
         # @param window [Range] the hours the axis shows. A calendar of field
         #   work spent thirty per cent of its width on midnight-to-seven —
@@ -160,22 +159,17 @@ module Shadcn
         #   state. Present, the menu is links; absent, it dispatches. A shape is
         #   different markup, not a class toggle — drawing both and hiding one
         #   is the trade this reading spent a whole round removing.
-        # @param shapes [Array<Symbol>] the shapes a host offers. One alone is
-        #   that shape at every request, and the panel drops the question and
-        #   the trigger stops naming it: a host whose people never want bars
-        #   should not have them mentioned. Unknown names are ignored, and
-        #   none left means every shape.
+        # @param shapes [Array<Symbol>] see `EventCalendar::Component`; this
+        #   reading falls back to the first of them when `shape:` is not one.
         # The window is clamped like every other argument here rather than
         # trusted: `(7..7)` reached `.step(0)` and raised, and a reversed range
         # drew a negative axis, where every sibling argument falls back.
-        def initialize(window: (0..24), shape: :chips, shapes: SHAPES, shape_url: nil, **attributes)
+        def initialize(window: (0..24), shape: :chips, shape_url: nil, **attributes)
           first = window.first.to_i.clamp(0, 23)
           @window = first..window.last.to_i.clamp(first + 1, 24)
           @shape_url = shape_url
-          @shapes = SHAPES & Array(shapes).map { |name| name.to_s.to_sym }
-          @shapes = SHAPES if @shapes.empty?
-          @shape = @shapes.include?(shape&.to_sym) ? shape.to_sym : @shapes.first
           super(**attributes)
+          @shape = shapes.include?(shape&.to_sym) ? shape.to_sym : shapes.first
         end
 
         def chips? = shape == :chips

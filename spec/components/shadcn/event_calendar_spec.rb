@@ -1385,10 +1385,16 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(calendar.shape).to eq(:bars)
     end
 
-    it "is namespaced on a reading that has no shape" do
+    it "is consumed by a reading that has no shape", :aggregate_failures do
       render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, shapes: [ :chips ]))
 
-      expect(page.first("[data-slot=event-calendar]")["shapes"]).to be_nil
+      root = page.first("[data-slot=event-calendar]")
+      expect(root["shapes"]).to be_nil
+      expect(root["data-event-calendar-shapes"]).to be_nil
+    end
+
+    it "keeps the timeline's table naming every shape" do
+      expect(Shadcn::EventCalendar::Hours::Component::LANE_HEIGHTS.keys).to eq(described_class::SHAPES)
     end
   end
 

@@ -80,6 +80,13 @@ module Shadcn
       # that happens to be square, so this is where `max_events` clamps.
       MAX_EVENTS = (1..6).freeze
 
+      # Every shape a timeline can draw a job in, in the order the panel offers
+      # them; the first is the default. Here rather than in `Hours`, because the
+      # question is asked from a month that is not a timeline: the panel on a
+      # grid has to know whether *Monthly · Timeline* would have anything to
+      # ask.
+      SHAPES = %i[chips bars].freeze
+
       READINGS = %i[auto events workload hours daily weekly].freeze
 
       # How the workload month is laid out. `:auto` is the breakpoint doing the
@@ -130,7 +137,7 @@ module Shadcn
       # Callables are dropped rather than stringified: a `#{group_url}` in the
       # markup is a `#<Proc>` and nothing else.
       READING_KEYWORDS = %i[group group_url show_all show_all_url arrangement
-                            window shape shapes shape_url showing showing_url].freeze
+                            window shape shape_url showing showing_url].freeze
       # Past the last hue, for a colour the palette does not know.
       COLORS_END = Event::COLORS.size
       # The same ranking as `COLORS.index`, resolved once. It sits inside a
@@ -415,7 +422,7 @@ module Shadcn
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :view_url
+                  :view_url, :shapes
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -480,11 +487,16 @@ module Shadcn
       #   kind of thing says it once instead of on every row of a `map`
       # @param reading [Symbol] `:auto` picks bars or marks by density;
       #   `:workload` is the spike above, and always draws a row per day
+      # @param shapes [Array<Symbol>] the shapes a host offers. One alone is
+      #   that shape at every request, and the panel drops the question and
+      #   the trigger stops naming it: a host whose people never want bars
+      #   should not have them mentioned. Unknown names are ignored, and
+      #   none left means every shape.
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     view_url: nil, movable: false, **attributes)
+                     view_url: nil, movable: false, shapes: SHAPES, **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -501,6 +513,8 @@ module Shadcn
         @reading = READINGS.include?(reading&.to_sym) ? reading.to_sym : :auto
         @reading = :auto if @reading == :events
         @view_url = view_url
+        @shapes = SHAPES & Array(shapes).map { |name| name.to_s.to_sym }
+        @shapes = SHAPES if @shapes.empty?
         @movable = !!movable
         require_identities! if @movable
         super(**attributes)
