@@ -1522,4 +1522,287 @@ RSpec.describe "Event calendar", :js do
       expect(page.evaluate_script("document.activeElement?.getAttribute('href')")).to eq("/calendar/events/2")
     end
   end
+
+  # The panel answers "show me this now"; the dialog answers "show me this every
+  # time". Everything here is against `density`, whose `preferences_url:` is
+  # its own `here`, so a saved set is a URL this same preview can be asked for.
+  describe "preferences" do
+    let(:dialog) { "#{calendar} [data-slot=dialog-content]" }
+    # The scripts `on_every_page` registered, removed again after each example.
+    let(:scripts) { [] }
+
+    def weekly_rows
+      Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :events, show_all: false)
+    end
+
+    def monthly_grid
+      Shadcn::EventCalendar::Preferences.key(period: :monthly, view: :grid, group: :events, show_all: false)
+    end
+
+    def density(query) = "/lookbook/preview/shadcn/event_calendar/density?#{query}"
+
+    def open_preferences
+      open_panel
+      find("#{calendar} [data-slot=dropdown-menu-item]", text: "Preferences").click
+      find("#{dialog}[data-state=open]")
+    end
+
+    def choose(value) = find("#{dialog} [role=radio][value='#{value}']").click
+
+    def question(name) = "#{dialog} [data-slot=event-calendar-preference]:has(input[name='preferences[#{name}]'])"
+
+    def checked(name) = find("#{question(name)} [role=radio][aria-checked=true]")["value"]
+
+    def stored(key) = page.evaluate_script("localStorage.getItem(arguments[0])", key)
+
+    def store(key, value) = page.execute_script("localStorage.setItem(arguments[0], arguments[1])", key, value)
+
+    # A script that runs before anything on every page this tab loads, which is
+    # the only way to be ahead of `connect`: restoring is the first thing it
+    # does.
+    def on_every_page(source)
+      scripts << page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source:)["identifier"]
+    end
+
+    # How many documents this tab has loaded since `count_loads`, kept in
+    # `sessionStorage` so a reload cannot reset it.
+    def count_loads
+      on_every_page(<<~JS)
+        try { sessionStorage.setItem("loads", String(Number(sessionStorage.getItem("loads") || 0) + 1)) } catch {}
+      JS
+    end
+
+    def loads = page.evaluate_script("Number(sessionStorage.getItem('loads'))")
+
+    def refuse_storage
+      on_every_page(<<~JS)
+        Storage.prototype.setItem = () => { throw new DOMException("refused", "SecurityError") }
+        Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError") }
+      JS
+    end
+
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/up"
+      page.execute_script("localStorage.clear(); sessionStorage.clear()")
+    end
+
+    after do
+      scripts.each do |identifier|
+        page.driver.browser.execute_cdp("Page.removeScriptToEvaluateOnNewDocument", identifier:)
+      end
+    end
+
+    describe "the dialog" do
+      before do
+        visit density("period=weekly&view=rows&preferences=local")
+        wait_for_stimulus
+      end
+
+      it "opens from the panel on the current answers", :aggregate_failures do
+        open_preferences
+
+        expect(checked(:period)).to eq("weekly")
+        expect(checked(:view)).to eq("rows")
+        # The menu closing hands the focus back to its trigger; the dialog has
+        # to end up holding it anyway.
+        expect(page.evaluate_script(
+          "!!document.activeElement.closest('[data-slot=dialog-content]')"
+        )).to be(true)
+      end
+
+      it "starts again from what is drawn after a Cancel" do
+        open_preferences
+        choose("daily")
+        find("#{dialog} [data-slot=dialog-close]", text: "Cancel").click
+        expect(page).to have_no_css("#{dialog}[data-state=open]")
+
+        open_preferences
+
+        expect(checked(:period)).to eq("weekly")
+      end
+
+      # Weekly has no grid, so the hidden `view` was pre-filled with the month's
+      # first option; going to Monthly and back must land on one the week has.
+      it "re-asks when the period changes", :aggregate_failures do
+        open_preferences
+        choose("monthly")
+
+        expect(page).to have_css("#{dialog} label", text: "Show the month as")
+        expect(page).to have_no_css("#{dialog} label", text: "Show the week as")
+        expect(page).to have_css("#{dialog} [role=radio][value=grid]")
+        expect(checked(:view)).to eq("rows")
+        expect(page).to have_no_css(question(:showing))
+
+        choose("grid")
+        choose("weekly")
+
+        expect(page).to have_no_css("#{dialog} [role=radio][value=grid]")
+        expect(checked(:view)).to eq("rows")
+
+        choose("daily")
+
+        expect(page).to have_no_css(question(:view))
+        expect(find("#{dialog} input[name='preferences[view]']", visible: :all)).to be_disabled
+        expect(page).to have_css(question(:showing))
+      end
+
+      # A name pointing at a heading that is hidden is a name nobody hears.
+      it "names the view by the heading that is showing" do
+        open_preferences
+        group = find("#{question(:view)} [role=radiogroup]")
+        choose("monthly")
+
+        expect(find(id: group["aria-labelledby"]).text).to eq("Show the month as")
+
+        choose("weekly")
+
+        expect(find(id: group["aria-labelledby"]).text).to eq("Show the week as")
+      end
+
+      it "saves to the browser and goes there at once", :aggregate_failures do
+        open_preferences
+        choose("daily")
+        choose("agenda")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/period=daily/)
+        expect(page).to have_current_path(/showing=agenda/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=daily&preferences[showing]=agenda&preferences[group]=events")
+      end
+
+      it "changes nothing on Cancel", :aggregate_failures do
+        open_preferences
+        choose("daily")
+        find("#{dialog} [data-slot=dialog-close]", text: "Cancel").click
+
+        expect(page).to have_no_css("#{dialog}[data-state=open]")
+        expect(page).to have_current_path(/period=weekly/)
+        expect(stored("shadcn--event-calendar:preferences:default")).to be_nil
+      end
+    end
+
+    describe "coming back" do
+      it "opens on the saved view from a bare arrival", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default", weekly_rows)
+        visit density("preferences=local&restore=true")
+
+        expect(page).to have_current_path(/period=weekly/)
+        expect(page).to have_current_path(/view=rows/)
+      end
+
+      it "stays put without restore", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default", weekly_rows)
+        count_loads
+        visit density("preferences=local&restore=false")
+        wait_for_stimulus
+        sleep 1
+
+        expect(loads).to eq(1)
+        expect(page).to have_current_path(density("preferences=local&restore=false"))
+      end
+
+      # Saved while the host offered bars; the host has since stopped. The key
+      # names a set the map no longer has, and there is nowhere to go.
+      it "ignores a stored set the host no longer offers", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default",
+              "preferences[period]=weekly&preferences[view]=hours&preferences[shape]=bars")
+        count_loads
+        visit density("preferences=local&restore=true&shapes=chips")
+        wait_for_stimulus
+        sleep 1
+
+        expect(loads).to eq(1)
+        expect(page).to have_current_path(density("preferences=local&restore=true&shapes=chips"))
+      end
+
+      it "does not loop on the set already drawn", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default", monthly_grid)
+        count_loads
+        visit density("preferences=local&restore=true")
+        wait_for_stimulus
+        sleep Capybara.default_max_wait_time
+
+        expect(loads).to eq(1)
+        expect(page).to have_current_path(density("preferences=local&restore=true"))
+      end
+    end
+
+    # A private window, or a host's storage blocked by policy: the person still
+    # gets the view they chose, it is only not remembered.
+    describe "a browser that refuses storage" do
+      before do
+        refuse_storage
+        page.driver.browser.logs.get(:browser)
+      end
+
+      def errors = page.driver.browser.logs.get(:browser).reject { |log| log.level == "WARNING" }
+
+      it "still goes where Save says", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=local")
+        wait_for_stimulus
+        open_preferences
+        choose("daily")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/period=daily/)
+        expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
+      end
+
+      it "restores nothing", :aggregate_failures do
+        visit density("preferences=local&restore=true")
+        wait_for_stimulus
+        sleep 1
+
+        expect(page).to have_current_path(density("preferences=local&restore=true"))
+        expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
+      end
+    end
+
+    it "keys by the calendar's id" do
+      visit density("period=weekly&view=rows&preferences=local&id=crew")
+      wait_for_stimulus
+      open_preferences
+      choose("daily")
+      find("#{dialog} [type=submit]").click
+
+      expect(page).to have_current_path(/period=daily/)
+      expect(stored("shadcn--event-calendar:preferences:crew")).to start_with("preferences[period]=daily")
+      expect(stored("shadcn--event-calendar:preferences:default")).to be_nil
+    end
+
+    # The test environment turns forgery protection off, and with it off the
+    # form carries no token — which is exactly the half a host relies on. On
+    # here, so the dialog is drawn as a host's would be; the dummy records
+    # whether the token arrived rather than verifying it, because a Lookbook
+    # preview is rendered in a nested request whose session never reaches the
+    # browser (see `CalendarController#save_preferences`).
+    describe "posting to the host" do
+      around do |example|
+        protection = ActionController::Base.allow_forgery_protection
+        ActionController::Base.allow_forgery_protection = true
+        example.run
+      ensure
+        ActionController::Base.allow_forgery_protection = protection
+      end
+
+      it "posts to the host", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=host")
+        wait_for_stimulus
+        open_preferences
+
+        expect(page).to have_css("#{dialog} form input[name=authenticity_token]", visible: :all)
+
+        choose("daily")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path("/calendar/preferences")
+        saved = JSON.parse(find("#calendar-preferences").text)
+        expect(saved).to include("period" => "daily", "showing" => "both")
+        expect(saved).not_to have_key("view")
+        expect(find("#calendar-preferences")["data-token"]).to eq("true")
+      end
+    end
+  end
 end

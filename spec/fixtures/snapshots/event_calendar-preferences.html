@@ -1,0 +1,822 @@
+<div data-slot="event-calendar" data-controller="shadcn--event-calendar" style="--event-calendar-cell:7.125rem;--event-calendar-cell-more:8.75rem;--event-calendar-tick:0.3125rem" data-group="events" data-rows="true" data-arrangement="rows" data-shadcn--event-calendar-preferences-value="local" data-shadcn--event-calendar-preferences-current-value="preferences[period]=weekly&amp;preferences[view]=rows&amp;preferences[group]=events&amp;preferences[show_all]=false" data-shadcn--event-calendar-preferences-storage-value="shadcn--event-calendar:preferences:default" data-shadcn--event-calendar-preferences-restore-value="false" data-shadcn--event-calendar-preferences-urls-value="{&quot;preferences[period]=monthly\u0026preferences[view]=grid\u0026preferences[group]=events\u0026preferences[show_all]=false&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=monthly\u0026preferences=local\u0026show_all=false\u0026view=grid&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=grid\u0026preferences[group]=events\u0026preferences[show_all]=true&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=monthly\u0026preferences=local\u0026show_all=true\u0026view=grid&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=grid\u0026preferences[group]=assignees\u0026preferences[show_all]=false&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=monthly\u0026preferences=local\u0026show_all=false\u0026view=grid&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=grid\u0026preferences[group]=assignees\u0026preferences[show_all]=true&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=monthly\u0026preferences=local\u0026show_all=true\u0026view=grid&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=rows\u0026preferences[group]=events\u0026preferences[show_all]=false&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=monthly\u0026preferences=local\u0026show_all=false\u0026view=rows&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=rows\u0026preferences[group]=events\u0026preferences[show_all]=true&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=monthly\u0026preferences=local\u0026show_all=true\u0026view=rows&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=rows\u0026preferences[group]=assignees\u0026preferences[show_all]=false&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=monthly\u0026preferences=local\u0026show_all=false\u0026view=rows&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=rows\u0026preferences[group]=assignees\u0026preferences[show_all]=true&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=monthly\u0026preferences=local\u0026show_all=true\u0026view=rows&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=hours\u0026preferences[shape]=chips&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?period=monthly\u0026preferences=local\u0026shape=chips\u0026view=hours&quot;,&quot;preferences[period]=monthly\u0026preferences[view]=hours\u0026preferences[shape]=bars&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?period=monthly\u0026preferences=local\u0026shape=bars\u0026view=hours&quot;,&quot;preferences[period]=weekly\u0026preferences[view]=rows\u0026preferences[group]=events\u0026preferences[show_all]=false&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=weekly\u0026preferences=local\u0026show_all=false\u0026view=rows&quot;,&quot;preferences[period]=weekly\u0026preferences[view]=rows\u0026preferences[group]=events\u0026preferences[show_all]=true&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=weekly\u0026preferences=local\u0026show_all=true\u0026view=rows&quot;,&quot;preferences[period]=weekly\u0026preferences[view]=rows\u0026preferences[group]=assignees\u0026preferences[show_all]=false&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=weekly\u0026preferences=local\u0026show_all=false\u0026view=rows&quot;,&quot;preferences[period]=weekly\u0026preferences[view]=rows\u0026preferences[group]=assignees\u0026preferences[show_all]=true&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=weekly\u0026preferences=local\u0026show_all=true\u0026view=rows&quot;,&quot;preferences[period]=weekly\u0026preferences[view]=hours\u0026preferences[shape]=chips&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?period=weekly\u0026preferences=local\u0026shape=chips\u0026view=hours&quot;,&quot;preferences[period]=weekly\u0026preferences[view]=hours\u0026preferences[shape]=bars&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?period=weekly\u0026preferences=local\u0026shape=bars\u0026view=hours&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=both\u0026preferences[group]=events\u0026preferences[shape]=chips&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=daily\u0026preferences=local\u0026shape=chips\u0026showing=both&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=both\u0026preferences[group]=events\u0026preferences[shape]=bars&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=daily\u0026preferences=local\u0026shape=bars\u0026showing=both&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=both\u0026preferences[group]=assignees\u0026preferences[shape]=chips&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=daily\u0026preferences=local\u0026shape=chips\u0026showing=both&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=both\u0026preferences[group]=assignees\u0026preferences[shape]=bars&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=daily\u0026preferences=local\u0026shape=bars\u0026showing=both&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=axis\u0026preferences[group]=events\u0026preferences[shape]=chips&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=daily\u0026preferences=local\u0026shape=chips\u0026showing=axis&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=axis\u0026preferences[group]=events\u0026preferences[shape]=bars&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=daily\u0026preferences=local\u0026shape=bars\u0026showing=axis&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=axis\u0026preferences[group]=assignees\u0026preferences[shape]=chips&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=daily\u0026preferences=local\u0026shape=chips\u0026showing=axis&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=axis\u0026preferences[group]=assignees\u0026preferences[shape]=bars&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=daily\u0026preferences=local\u0026shape=bars\u0026showing=axis&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=agenda\u0026preferences[group]=events&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=events\u0026period=daily\u0026preferences=local\u0026showing=agenda&quot;,&quot;preferences[period]=daily\u0026preferences[showing]=agenda\u0026preferences[group]=assignees&quot;:&quot;/lookbook/preview/shadcn/event_calendar/density?group=assignees\u0026period=daily\u0026preferences=local\u0026showing=agenda&quot;}" data-shadcn--event-calendar-month-value="2026-08-01" data-shadcn--event-calendar-today-value="2026-08-12" data-shadcn--event-calendar-selected-value="2026-08-05" data-shadcn--event-calendar-week-starts-on-value="1" data-shadcn--event-calendar-max-events-value="3" data-shadcn--event-calendar-tick-sizes-value="[[8,&quot;0.4375rem&quot;],[24,&quot;0.375rem&quot;],[60,&quot;0.3125rem&quot;],[null,&quot;0.25rem&quot;]]" data-shadcn--event-calendar-dense-above-value="12" data-shadcn--event-calendar-reading-value="weekly" data-shadcn--event-calendar-client-drawn-value="false" data-shadcn--event-calendar-colors-value="[&quot;default&quot;,&quot;blue&quot;,&quot;green&quot;,&quot;amber&quot;,&quot;rose&quot;,&quot;violet&quot;]" data-shadcn--event-calendar-locale-value="en" data-shadcn--event-calendar-day-names-value="[&quot;Sunday&quot;,&quot;Monday&quot;,&quot;Tuesday&quot;,&quot;Wednesday&quot;,&quot;Thursday&quot;,&quot;Friday&quot;,&quot;Saturday&quot;]" data-shadcn--event-calendar-short-day-names-value="[&quot;Sun&quot;,&quot;Mon&quot;,&quot;Tue&quot;,&quot;Wed&quot;,&quot;Thu&quot;,&quot;Fri&quot;,&quot;Sat&quot;]" data-shadcn--event-calendar-month-names-value="[&quot;January&quot;,&quot;February&quot;,&quot;March&quot;,&quot;April&quot;,&quot;May&quot;,&quot;June&quot;,&quot;July&quot;,&quot;August&quot;,&quot;September&quot;,&quot;October&quot;,&quot;November&quot;,&quot;December&quot;]" data-shadcn--event-calendar-short-month-names-value="[&quot;Jan&quot;,&quot;Feb&quot;,&quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;,&quot;Jun&quot;,&quot;Jul&quot;,&quot;Aug&quot;,&quot;Sep&quot;,&quot;Oct&quot;,&quot;Nov&quot;,&quot;Dec&quot;]" data-shadcn--event-calendar-month-format-value="%B %Y" data-shadcn--event-calendar-day-format-value="%A, %B %-d, %Y" data-shadcn--event-calendar-agenda-format-value="%A, %B %-d" data-shadcn--event-calendar-day-label-value="%{date}, %{events}" data-shadcn--event-calendar-more-label-value="+%{count}" data-shadcn--event-calendar-event-count-value="{&quot;one&quot;:&quot;1 event&quot;,&quot;other&quot;:&quot;%{count} events&quot;}" class="group/event-calendar w-full text-foreground [&amp;_[data-color=default]]:[--event-color:var(--muted-foreground)] [&amp;_[data-color=default]]:[--event-ink:var(--foreground)] [&amp;_[data-color=blue]]:[--event-color:var(--color-blue-500)] [&amp;_[data-color=blue]]:[--event-ink:var(--color-blue-800)] dark:[&amp;_[data-color=blue]]:[--event-ink:var(--color-blue-300)] [&amp;_[data-color=green]]:[--event-color:var(--color-emerald-500)] [&amp;_[data-color=green]]:[--event-ink:var(--color-emerald-800)] dark:[&amp;_[data-color=green]]:[--event-ink:var(--color-emerald-300)] [&amp;_[data-color=amber]]:[--event-color:var(--color-amber-500)] [&amp;_[data-color=amber]]:[--event-ink:var(--color-amber-800)] dark:[&amp;_[data-color=amber]]:[--event-ink:var(--color-amber-300)] [&amp;_[data-color=rose]]:[--event-color:var(--color-rose-500)] [&amp;_[data-color=rose]]:[--event-ink:var(--color-rose-800)] dark:[&amp;_[data-color=rose]]:[--event-ink:var(--color-rose-300)] [&amp;_[data-color=violet]]:[--event-color:var(--color-violet-500)] [&amp;_[data-color=violet]]:[--event-ink:var(--color-violet-800)] dark:[&amp;_[data-color=violet]]:[--event-ink:var(--color-violet-300)] rows:[&amp;_[data-slot=event-calendar-week]]:contents rows:[&amp;_[data-slot=event-calendar-days]]:contents rows:[&amp;_[data-slot=event-calendar-weekdays]]:hidden rows:[&amp;_[data-slot=event-calendar-day]]:flex-row rows:[&amp;_[data-slot=event-calendar-day]]:gap-2 rows:[&amp;_[data-slot=event-calendar-day]]:px-2 rows:[&amp;_[data-slot=event-calendar-day]]:py-2 rows:[&amp;_[data-slot=event-calendar-day][data-outside]]:hidden rows:[&amp;_[data-slot=event-calendar-day-head]]:flex rows:[&amp;_[data-slot=event-calendar-day-head]]:w-14 rows:[&amp;_[data-slot=event-calendar-day-head]]:shrink-0 rows:[&amp;_[data-slot=event-calendar-day-head]]:flex-col rows:[&amp;_[data-slot=event-calendar-day-head]]:items-center rows:[&amp;_[data-slot=event-calendar-day-head]]:gap-1 rows:[&amp;_[data-slot=event-calendar-day-label]]:flex rows:[&amp;_[data-slot=event-calendar-day-label]]:w-full rows:[&amp;_[data-slot=event-calendar-day-label]]:flex-col rows:[&amp;_[data-slot=event-calendar-day-label]]:items-center rows:[&amp;_[data-slot=event-calendar-day-label]]:gap-0 rows:[&amp;_[data-slot=event-calendar-day-weekday]]:block rows:[&amp;_[data-slot=event-calendar-day-number]]:text-sm rows:[&amp;_[data-slot=event-calendar-segments]]:hidden rows:[&amp;_[data-slot=event-calendar-day]]:items-center rows:[&amp;_[data-slot=event-calendar-day]]:h-20 rows:[&amp;_[data-slot=event-calendar-day]]:min-h-0 rows:[&amp;_[data-slot=event-calendar-day-head]]:justify-center rows:[&amp;_[data-selected]_[data-slot=event-calendar-day-weekday]]:text-foreground rows:[&amp;_[data-slot=event-calendar-day-assignees]]:w-auto rows:[&amp;_[data-slot=event-calendar-day-assignees]]:flex-row rows:[&amp;_[data-slot=event-calendar-day-assignees]]:flex-nowrap rows:[&amp;_[data-slot=event-calendar-day-assignees]]:overflow-x-auto rows:[&amp;_[data-slot=event-calendar-day-assignees]]:overscroll-x-contain rows:[&amp;_[data-slot=event-calendar-day-assignees]]:touch-pan-x rows:[&amp;_[data-slot=event-calendar-day-assignees]]:[scrollbar-width:none] rows:[&amp;_[data-slot=event-calendar-day-assignees]]:[&amp;::-webkit-scrollbar]:hidden rows:[&amp;_[data-slot=event-calendar-day-assignees]]:min-w-0 rows:[&amp;_[data-slot=event-calendar-day-items]]:w-auto rows:[&amp;_[data-slot=event-calendar-day-items]]:flex-row rows:[&amp;_[data-slot=event-calendar-day-items]]:flex-nowrap rows:[&amp;_[data-slot=event-calendar-day-items]]:overflow-x-auto rows:[&amp;_[data-slot=event-calendar-day-items]]:overscroll-x-contain rows:[&amp;_[data-slot=event-calendar-day-items]]:touch-pan-x rows:[&amp;_[data-slot=event-calendar-day-items]]:[scrollbar-width:none] rows:[&amp;_[data-slot=event-calendar-day-items]]:[&amp;::-webkit-scrollbar]:hidden rows:[&amp;_[data-slot=event-calendar-day-items]]:min-w-0 rows:[&amp;_[data-slot=event-calendar-day-assignee]]:w-auto rows:[&amp;_[data-slot=event-calendar-day-assignee]]:shrink-0 rows:[&amp;_[data-slot=event-calendar-day-item]]:w-auto rows:[&amp;_[data-slot=event-calendar-day-item]]:shrink-0 rows:[&amp;_[data-slot=event-calendar-day-rest]]:w-auto rows:[&amp;_[data-slot=event-calendar-day-rest]]:shrink-0 rows:[&amp;_[data-slot=event-calendar-day-held]]:hidden not-rows:[&amp;_[data-slot=event-calendar-day-item][data-continues-before]]:-ms-[calc(var(--spacing)*1.5_+_0.5px)] not-rows:[&amp;_[data-slot=event-calendar-day-item][data-continues-before]]:w-auto not-rows:[&amp;_[data-slot=event-calendar-day-item][data-continues-after]]:-me-[calc(var(--spacing)*1.5_+_0.5px)] not-rows:[&amp;_[data-slot=event-calendar-day-item][data-continues-after]]:w-auto">
+<div data-slot="event-calendar-header" class="flex flex-wrap items-center justify-between gap-2 pb-3">
+<div data-slot="event-calendar-title" class="min-w-0 text-base leading-none font-semibold sm:text-lg" role="status" aria-live="polite">3 – 9 August 2026
+</div>
+<div data-slot="event-calendar-nav" class="flex min-w-0 flex-wrap items-center gap-1">
+<div data-slot="dropdown-menu" style="display:contents" data-controller="shadcn--dropdown-menu" data-shadcn--dropdown-menu-open-value="false" data-shadcn--dropdown-menu-side-value="bottom" data-shadcn--dropdown-menu-align-value="start" data-shadcn--dropdown-menu-side-offset-value="4" data-shadcn--dropdown-menu-align-offset-value="0" data-shadcn--dropdown-menu-loop-value="false">
+<button data-slot="dropdown-menu-trigger" type="button" aria-haspopup="menu" aria-expanded="false" data-state="closed" data-shadcn--dropdown-menu-target="trigger" data-action="click-&gt;shadcn--dropdown-menu#toggle keydown-&gt;shadcn--dropdown-menu#triggerKeydown" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-2">
+<path d="M14 17H5"/>
+<path d="M19 7h-9"/>
+<circle cx="17" cy="17" r="3"/>
+<circle cx="7" cy="7" r="3"/>
+</svg>
+<span class="sr-only">Weekly · Rows · By event
+</span>
+</button>
+<div data-slot="dropdown-menu-portal" style="display:contents">
+<div data-slot="dropdown-menu-content" role="menu" tabindex="-1" aria-orientation="vertical" data-state="closed" hidden="hidden" data-shadcn--dropdown-menu-target="content" data-action="keydown-&gt;shadcn--dropdown-menu#contentKeydown" class="z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 w-56">
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Show
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="monthly" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Monthly
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="weekly" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Weekly
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="daily" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Daily
+</div>
+</div>
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Show the week as
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="rows" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Rows
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="hours" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#changeView" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>Timeline
+</div>
+</div>
+<div data-slot="dropdown-menu-label" class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8">Group by
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-radio-group" role="group">
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="false" data-value="assignees" data-state="unchecked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#regroup" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator" hidden="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>By assignee
+</div>
+<div data-slot="dropdown-menu-radio-item" role="menuitemradio" tabindex="-1" aria-checked="true" data-value="events" data-state="checked" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#regroup" class="relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<span class="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+<span data-slot="dropdown-menu-radio-item-indicator">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</span>By event
+</div>
+</div>
+<div data-slot="dropdown-menu-separator" class="-mx-1 my-1 h-px bg-border">
+</div>
+<div data-slot="dropdown-menu-item" role="menuitem" tabindex="-1" data-variant="default" data-shadcn--dropdown-menu-target="item" data-action="click-&gt;shadcn--dropdown-menu#select pointerenter-&gt;shadcn--dropdown-menu#pointerenter click-&gt;shadcn--event-calendar#openPreferences" class="relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 [&amp;_svg:not([class*=&#39;text-&#39;])]:text-muted-foreground data-[variant=destructive]:*:[svg]:text-destructive!">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-cog">
+<path d="M10 15H6a4 4 0 0 0-4 4v2"/>
+<path d="m14.305 16.53.923-.382"/>
+<path d="m15.228 13.852-.923-.383"/>
+<path d="m16.852 12.228-.383-.923"/>
+<path d="m16.852 17.772-.383.924"/>
+<path d="m19.148 12.228.383-.923"/>
+<path d="m19.53 18.696-.382-.924"/>
+<path d="m20.772 13.852.924-.383"/>
+<path d="m20.772 16.148.924.383"/>
+<circle cx="18" cy="15" r="3"/>
+<circle cx="9" cy="7" r="4"/>
+</svg>Preferences
+</div>
+</div>
+</div>
+</div>
+<button data-slot="button" data-variant="outline" data-size="sm" data-action="click-&gt;shadcn--event-calendar#showAll" aria-pressed="false" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">Show all
+</button>
+<div data-slot="dialog" style="display:contents" data-controller="shadcn--dialog" data-shadcn--dialog-open-value="false" data-shadcn--dialog-modal-value="true" data-shadcn--dialog-dismissable-value="true" data-shadcn--event-calendar-target="preferencesDialog">
+<div data-slot="dialog-portal" style="display:contents">
+<div data-slot="dialog-overlay" data-state="closed" hidden="hidden" data-shadcn--dialog-target="overlay" class="fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+</div>
+<div data-slot="dialog-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-shadcn--dialog-target="content" class="fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg">
+<div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">
+<h2 data-slot="dialog-title" class="text-lg leading-none font-semibold">Preferences
+</h2>
+<p data-slot="dialog-description" class="text-sm text-muted-foreground">Open the calendar this way every time.
+</p>
+</div>
+<form class="flex flex-col gap-4" data-shadcn--event-calendar-target="preferencesForm" data-action="submit-&gt;shadcn--event-calendar#savePreferences change-&gt;shadcn--event-calendar#refinePreferences" action="#" accept-charset="UTF-8" method="post">
+<div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="always">
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-period-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show
+</label>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="weekly" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-period-label" class="grid gap-3">
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="monthly" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="monthly" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-period-monthly" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-period-monthly" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Monthly
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="weekly" tabindex="0" aria-checked="true" data-state="checked" data-value="weekly" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-period-weekly" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-period-weekly" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Weekly
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="daily" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="daily" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-period-daily" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-period-daily" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Daily
+</label>
+</div>
+<input type="hidden" name="preferences[period]" value="weekly" data-shadcn--radio-group-target="input">
+</div>
+</div>
+<div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="monthly weekly">
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-view-month" data-preferences-when="monthly" hidden="hidden" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show the month as
+</label>
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-view-week" data-preferences-when="weekly" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show the week as
+</label>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="rows" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-view-week" class="grid gap-3">
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2" data-preferences-when="monthly" hidden="hidden">
+<button data-slot="radio-group-item" type="button" role="radio" value="grid" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="grid" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-view-grid" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-view-grid" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Grid
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2" data-preferences-when="monthly weekly">
+<button data-slot="radio-group-item" type="button" role="radio" value="rows" tabindex="0" aria-checked="true" data-state="checked" data-value="rows" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-view-rows" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-view-rows" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Rows
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2" data-preferences-when="monthly weekly">
+<button data-slot="radio-group-item" type="button" role="radio" value="hours" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="hours" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-view-hours" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-view-hours" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Timeline
+</label>
+</div>
+<input type="hidden" name="preferences[view]" value="rows" data-shadcn--radio-group-target="input">
+</div>
+</div>
+<div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="daily" hidden="hidden">
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-showing-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show the day as
+</label>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="both" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-showing-label" class="grid gap-3">
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="both" tabindex="0" aria-checked="true" data-state="checked" data-value="both" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-showing-both" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-showing-both" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Timeline and list
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="axis" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="axis" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-showing-axis" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-showing-axis" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Timeline only
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="agenda" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="agenda" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-showing-agenda" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-showing-agenda" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">List only
+</label>
+</div>
+<input type="hidden" name="preferences[showing]" value="both" data-shadcn--radio-group-target="input" disabled="disabled">
+</div>
+</div>
+<div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="monthly:grid monthly:rows weekly:rows daily">
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-group-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Group by
+</label>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="events" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-group-label" class="grid gap-3">
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="events" tabindex="0" aria-checked="true" data-state="checked" data-value="events" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-group-events" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-group-events" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">By event
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="assignees" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="assignees" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-group-assignees" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-group-assignees" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">By assignee
+</label>
+</div>
+<input type="hidden" name="preferences[group]" value="events" data-shadcn--radio-group-target="input">
+</div>
+</div>
+<div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="monthly:hours weekly:hours daily:both daily:axis" hidden="hidden">
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-shape-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show each job as
+</label>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="chips" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-shape-label" class="grid gap-3">
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="chips" tabindex="0" aria-checked="true" data-state="checked" data-value="chips" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-shape-chips" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="checked" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-shape-chips" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Chips
+</label>
+</div>
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="bars" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="bars" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-shape-bars" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-shape-bars" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Bars
+</label>
+</div>
+<input type="hidden" name="preferences[shape]" value="chips" data-shadcn--radio-group-target="input" disabled="disabled">
+</div>
+</div>
+<div data-slot="event-calendar-preference" class="grid gap-3" data-preferences-when="monthly:grid monthly:rows weekly:rows">
+<label data-slot="label" id="shadcn-event-calendar-preferences-x-show_all-label" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Show all
+</label>
+<div data-slot="radio-group" role="radiogroup" data-controller="shadcn--radio-group" data-shadcn--radio-group-value-value="false" data-shadcn--radio-group-disabled-value="false" aria-labelledby="shadcn-event-calendar-preferences-x-show_all-label" class="grid gap-3">
+<div data-slot="event-calendar-preference-option" class="flex items-center gap-2">
+<button data-slot="radio-group-item" type="button" role="radio" value="true" tabindex="-1" aria-checked="false" data-state="unchecked" data-value="true" data-shadcn--radio-group-target="item" data-action="click-&gt;shadcn--radio-group#select keydown-&gt;shadcn--radio-group#keydown" id="shadcn-event-calendar-preferences-x-show_all-true" class="aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40">
+<span data-slot="radio-group-indicator" data-state="unchecked" hidden="hidden" class="relative flex items-center justify-center">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary">
+<circle cx="12" cy="12" r="10"/>
+</svg>
+</span>
+</button>
+<label data-slot="label" for="shadcn-event-calendar-preferences-x-show_all-true" class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">Translation missing: en.shadcn_view_component.event_calendar.preferences.show_all_true
+</label>
+</div>
+<input type="hidden" name="preferences[show_all]" value="false" data-shadcn--radio-group-target="input">
+</div>
+</div>
+<div data-slot="dialog-footer" class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+<button data-slot="dialog-close" type="button" data-action="shadcn--dialog#close" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3">Cancel
+</button>
+<button data-slot="button" data-variant="default" data-size="default" type="submit" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3">Save
+</button>
+</div>
+</form>
+<button data-slot="dialog-close" type="button" data-action="shadcn--dialog#close" class="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+<path d="M18 6 6 18"/>
+<path d="m6 6 12 12"/>
+</svg>
+<span class="sr-only">Close
+</span>
+</button>
+</div>
+</div>
+</div>
+<button data-slot="button" data-variant="outline" data-size="sm" data-action="click-&gt;shadcn--event-calendar#today" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">Today
+</button>
+<button data-slot="button" data-variant="outline" data-size="icon-sm" data-action="click-&gt;shadcn--event-calendar#previous" aria-label="Go to the Previous Week" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4">
+<path d="m15 18-6-6 6-6"/>
+</svg>
+</button>
+<button data-slot="button" data-variant="outline" data-size="icon-sm" data-action="click-&gt;shadcn--event-calendar#next" aria-label="Go to the Next Week" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-8">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4">
+<path d="m9 18 6-6-6-6"/>
+</svg>
+</button>
+</div>
+</div>
+<div data-slot="event-calendar-grid" class="overflow-clip rounded-md border">
+<div data-slot="event-calendar-weeks" class="flex flex-col gap-px bg-border" role="list" aria-label="3 – 9 August 2026">
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-03" role="listitem" tabindex="-1" aria-label="Monday, August 3, 2026, 24 events">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Mon
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">3
+</span>
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" data-heavy="true" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 81.6%, transparent),color-mix(in oklab, var(--primary) 81.6%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">24
+</span>
+</span>
+<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5">
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Kite Studio — Katherine Johnson, Marie Curie, Ada Lovelace">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:00 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Bellini SpA — Marie Curie, Katherine Johnson, Ada Lovelace">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:33 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Kite Studio — Katherine Johnson, Ada Lovelace, Marie Curie">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:55 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
+</span>
+</span>
+<span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+21
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-04" role="listitem" tabindex="-1" aria-label="Tuesday, August 4, 2026, 12 events">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Tue
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">4
+</span>
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 40.8%, transparent),color-mix(in oklab, var(--primary) 40.8%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">12
+</span>
+</span>
+<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5">
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Fabbri Srl — Alan Turing, Marie Curie">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">8:46 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Fabbri Srl — Marie Curie">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">9:05 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Delta Clinic — Marie Curie, Alan Turing">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">9:11 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Delta Clinic
+</span>
+</span>
+<span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+9
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-05" data-selected="true" role="listitem" tabindex="0" aria-label="Wednesday, August 5, 2026, 20 events">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Wed
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">5
+</span>
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" data-heavy="true" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 68.0%, transparent),color-mix(in oklab, var(--primary) 68.0%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">20
+</span>
+</span>
+<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5">
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Kite Studio — Katherine Johnson">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:08 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Vega Logistics — Ada Lovelace, Katherine Johnson">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:52 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Bellini SpA — Alan Turing, Katherine Johnson, Ada Lovelace">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:58 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
+</span>
+</span>
+<span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+17
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-06" role="listitem" tabindex="-1" aria-label="Thursday, August 6, 2026, 13 events">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Thu
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">6
+</span>
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 44.2%, transparent),color-mix(in oklab, var(--primary) 44.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">13
+</span>
+</span>
+<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5">
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Bellini SpA — Ada Lovelace">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">9:31 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Bellini SpA — Linus Pauling">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">10:33 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">LP
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Northwind — Marie Curie">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">11:29 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Northwind
+</span>
+</span>
+<span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+10
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-07" role="listitem" tabindex="-1" aria-label="Friday, August 7, 2026">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Fri
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">7
+</span>
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-08" role="listitem" tabindex="-1" aria-label="Saturday, August 8, 2026, 10 events">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sat
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">8
+</span>
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 34.0%, transparent),color-mix(in oklab, var(--primary) 34.0%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">10
+</span>
+</span>
+<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5">
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Vega Logistics — Ada Lovelace, Katherine Johnson, Grace Hopper">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">7:52 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Vega Logistics
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Kite Studio — Grace Hopper, Ada Lovelace, Katherine Johnson">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">10:27 AM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Kite Studio
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Orsini &amp; Co — Katherine Johnson, Ada Lovelace, Grace Hopper">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">12:17 PM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Orsini &amp; Co
+</span>
+</span>
+<span data-slot="event-calendar-day-rest" class="flex w-full items-center gap-1 overflow-hidden rounded-md border border-border/40 bg-muted px-1 py-0.5 text-foreground justify-center text-[0.65rem] font-medium">+7
+</span>
+</span>
+</button>
+<button type="button" data-action="click-&gt;shadcn--event-calendar#select" data-slot="event-calendar-day" class="group/day relative flex min-h-14 w-full flex-col items-center gap-1 bg-background px-0.5 pt-1.5 pb-1 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset data-[selected]:bg-accent data-[selected]:[outline:2px_solid_var(--ring)] data-[selected]:[outline-offset:-2px] sm:items-start sm:px-1.5 group-data-[labelled]/event-calendar:sm:min-h-(--event-calendar-cell) sm:group-data-[overflow]/event-calendar:min-h-(--event-calendar-cell-more)" data-day="2026-08-09" role="listitem" tabindex="-1" aria-label="Sunday, August 9, 2026, 3 events">
+<span data-slot="event-calendar-day-head" class="flex w-full items-center justify-between gap-1">
+<span data-slot="event-calendar-day-label" class="contents shrink-0 items-center gap-1">
+<span data-slot="event-calendar-day-weekday" class="hidden text-[0.7rem] font-normal text-muted-foreground tabular-nums">Sun
+</span>
+<span data-slot="event-calendar-day-number" class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums select-none group-data-[outside]/day:text-muted-foreground group-data-[today]/day:bg-primary group-data-[today]/day:font-semibold group-data-[today]/day:text-primary-foreground sm:text-[0.8rem]">9
+</span>
+</span>
+<span data-slot="event-calendar-day-count" data-variant="outline" style="background-image:linear-gradient(color-mix(in oklab, var(--primary) 10.2%, transparent),color-mix(in oklab, var(--primary) 10.2%, transparent))" class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;&gt;svg]:pointer-events-none [&amp;&gt;svg]:size-3 [a&amp;]:hover:bg-accent [a&amp;]:hover:text-accent-foreground border-border/40 bg-transparent px-1.5 py-0 text-[0.65rem] tabular-nums text-foreground data-[heavy]:text-primary-foreground">3
+</span>
+</span>
+<span data-slot="event-calendar-day-items" class="flex w-full flex-col gap-0.5">
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Bellini SpA — Ada Lovelace, Grace Hopper, Marie Curie, Alan Turing, Katherine Johnson">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">12:44 PM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+2
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Bellini SpA
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Fabbri Srl — Marie Curie, Katherine Johnson, Alan Turing, Grace Hopper, Ada Lovelace">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:30 PM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">MC
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">KJ
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+2
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
+</span>
+</span>
+<span data-slot="event-calendar-day-item" class="shadcn-event-calendar-chip" data-color="default" title="Fabbri Srl — Ada Lovelace, Alan Turing, Grace Hopper, Marie Curie">
+<span class="flex min-h-6 items-center gap-1">
+<span data-slot="event-calendar-day-time" class="min-w-0 truncate pe-2 text-[0.65rem] font-medium tabular-nums">2:41 PM
+</span>
+<span data-slot="avatar-group" class="group/avatar-group *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background ml-auto flex shrink-0 -space-x-1">
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AL
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">AT
+</span>
+</span>
+<span data-slot="avatar" data-size="sm" class="group/avatar relative flex shrink-0 overflow-hidden rounded-full select-none data-[size=lg]:size-10 data-[size=sm]:size-6 size-3.5 lg:size-4">
+<span data-slot="avatar-fallback" data-shadcn--avatar-target="fallback" class="flex size-full items-center justify-center rounded-full text-muted-foreground group-data-[size=sm]/avatar:text-xs bg-background text-[0.5rem] font-medium">GH
+</span>
+</span>
+<span data-slot="avatar-group-count" class="relative flex shrink-0 items-center justify-center rounded-full text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&amp;&gt;svg]:size-4 group-has-data-[size=lg]/avatar-group:[&amp;&gt;svg]:size-5 group-has-data-[size=sm]/avatar-group:[&amp;&gt;svg]:size-3 size-3.5 bg-background text-[0.5rem] lg:size-4">+1
+</span>
+</span>
+</span>
+<span data-slot="event-calendar-day-text" class="truncate text-left text-[0.65rem] leading-tight">Fabbri Srl
+</span>
+</span>
+</span>
+</button>
+</div>
+</div>
+</div>

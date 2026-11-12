@@ -115,6 +115,14 @@ module Shadcn
         render_with_template
       end
 
+      # A person's preferred view, kept in the browser: the panel's last item
+      # opens a dialog asking its questions for next time. A template rather
+      # than a call to `density`, because the snapshot and accessibility specs
+      # read templates; `density?preferences=local` is the one to play with.
+      def preferences
+        render_with_template
+      end
+
       # The day in a Sheet, at its default month — the same template `density`
       # renders when its `turbo` knob asks for a panel, with the locals left
       # out so the defaults stand.
@@ -190,15 +198,23 @@ module Shadcn
       # @param from number
       # @param to number
       # @param turbo select [off, panel, agenda]
+      # @param shapes text
+      # @param preferences select [off, local, host]
+      # @param restore toggle
+      # @param id text
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
-                  showing: "both", from: 7, to: 23, turbo: "off")
+                  showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars",
+                  preferences: "off", restore: false, id: nil)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
+        # `restore` is left out on purpose: it marks *this* request as the bare
+        # arrival, and every link the calendar draws is somewhere a person chose
+        # to go — carrying it along would pull them back to the saved view.
         here = lambda do |**changed|
           state = { month:, period:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
-                    turbo: }.merge(changed)
+                    turbo:, shapes:, preferences:, id: }.merge(changed).compact
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -282,6 +298,20 @@ module Shadcn
         # `agenda_as:`. No markup, but it sits under six weeks of grid: it
         # updated 335px below the fold and a click read as nothing happening,
         # which is what `autoscroll` is for and what a panel never needs.
+        # The saved view, in either of its homes. `:local` hands the gem `here`
+        # itself, because a set's keys are this preview's own parameters;
+        # `:host` posts to the dummy's `CalendarController`, which keeps it in
+        # the session and shows what it kept.
+        args[:shapes] = shapes.to_s.split(",").map(&:strip).map(&:to_sym)
+        args[:id] = id if id.present?
+        case preferences.to_s
+        when "local"
+          args.merge!(preferences: :local, restore: cast.cast(restore) || false,
+                      preferences_url: ->(set) { here.call(**set) })
+        when "host"
+          args.merge!(preferences: :host, preferences_save_url: "/calendar/preferences")
+        end
+
         return render_component(**args) unless owned
 
         if turbo.to_s == "agenda"

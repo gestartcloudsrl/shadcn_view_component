@@ -175,6 +175,21 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
+  # The calendar's own dialog, the one with nine radio groups and two headings
+  # for one of them. Audited within itself, because the days behind it carry
+  # the label-in-name exemption above and this is not about them.
+  context "with the event calendar's preferences open" do
+    it "has no violations" do
+      visit_preview(:event_calendar, :preferences)
+      wait_for_stimulus
+      find("[data-slot=event-calendar] [data-slot=dropdown-menu-trigger]").click
+      find("[data-slot=dropdown-menu-item]", text: "Preferences").click
+      expect(page).to have_css("[data-slot=dialog-content][data-state=open]")
+
+      audit(within: "[data-slot=dialog-content]")
+    end
+  end
+
   context "with the alert dialog open" do
     it "has no violations" do
       visit_preview(:alert_dialog)

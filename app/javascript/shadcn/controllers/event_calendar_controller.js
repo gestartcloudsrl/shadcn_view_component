@@ -113,6 +113,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.restorePreferences()
+
     // Only a reading that redraws ships shapes to redraw from. Workload, hours
     // and daily are drawn whole by the server and carry no `prototypes`
     // template — and this used to read it regardless, so `connect` threw on
@@ -230,12 +232,175 @@ export default class extends Controller {
     this.dispatch("show-all", { detail: { showAll: !pressed } })
   }
 
-  // The three preferences actions: named by the markup, behaviour still to come.
-  openPreferences() {}
+  // The saved view: a dialog asking the panel's questions for next time.
+  //
+  // The server drew every question and every option, each with the context
+  // tokens it applies in (`data-preferences-when`), and in `:local` mode the
+  // URL of every complete set it offers. So nothing here knows which question
+  // follows which: it reads two answers, works out the context, and shows what
+  // the tokens say. Saving is one `FormData` turned into the same key
+  // `Preferences.key` spells, looked up in that map.
 
-  refinePreferences() {}
+  // On a bare arrival — which only the host can recognise, so it says so with
+  // `restore:` — go to the stored set, unless it is the one already drawn
+  // (that would reload forever) or one the host no longer offers (there is no
+  // URL for it, and a guessed one could be anything). A browser that refuses
+  // storage is a browser with nothing stored.
+  restorePreferences() {
+    if (this.preferencesValue !== "local" || !this.preferencesRestoreValue) return
 
-  savePreferences(event) {}
+    let key
+    try {
+      key = localStorage.getItem(this.preferencesStorageValue)
+    } catch {
+      return
+    }
+    if (!key || key === this.preferencesCurrentValue) return
+
+    const url = this.preferencesUrlsValue[key]
+    if (url) location.replace(url)
+  }
+
+  // Every answer starts at what is drawn now, not at what was left in the form
+  // by the last time it was opened and cancelled.
+  openPreferences() {
+    if (!this.hasPreferencesDialogTarget) return
+
+    this.resetPreferences()
+    this.preferencesDialog?.open()
+    this.refinePreferences()
+  }
+
+  get preferencesDialog() {
+    return this.application.getControllerForElementAndIdentifier(this.preferencesDialogTarget, "shadcn--dialog")
+  }
+
+  resetPreferences() {
+    const current = new URLSearchParams(this.preferencesCurrentValue)
+
+    for (const [ name, value ] of current) {
+      const input = this.preferencesFormTarget.querySelector(`input[name="${CSS.escape(name)}"]`)
+      if (input) this.choosePreference(input, value)
+    }
+  }
+
+  // Up to three passes, because each answer can move the next: Monthly brings
+  // back the view, the view decides whether grouping is asked. Three is the
+  // depth of the table — period, then view or showing, then the rest.
+  refinePreferences() {
+    if (!this.hasPreferencesFormTarget) return
+
+    const form = this.preferencesFormTarget
+
+    for (let pass = 0; pass < 3; pass++) {
+      const context = this.preferencesContext(form)
+
+      // Document order, so a question is settled before the options inside it
+      // and an option can never come back on inside a question that is gone.
+      for (const field of form.querySelectorAll("[data-preferences-when]")) {
+        const tokens = field.dataset.preferencesWhen.split(/\s+/)
+        const applies = tokens.some((token) => context.has(token)) &&
+          !field.parentElement.closest("[data-preferences-when][hidden]")
+
+        field.hidden = !applies
+        // The buttons too, not only the input that submits: a hidden radio
+        // left enabled is still one an arrow key walks onto.
+        field.querySelectorAll("input, button").forEach((control) => { control.disabled = !applies })
+      }
+
+      this.namePreferenceGroups(form)
+      if (!this.settlePreferences(form)) break
+    }
+  }
+
+  // What the period and its second answer say, as the tokens `Preferences`
+  // writes: the period, and `period:view` (or `daily:showing`).
+  preferencesContext(form) {
+    const answer = (question) => form.querySelector(`input[name="preferences[${question}]"]`)?.value
+    const period = answer("period")
+    const second = period === "daily" ? answer("showing") : answer("view")
+
+    return new Set([ "always", period, `${period}:${second}` ])
+  }
+
+  // A question still asked whose answer was just switched off — Grid, with the
+  // period now Weekly — takes its first option that is still on. Returns
+  // whether anything moved, which is what earns another pass.
+  settlePreferences(form) {
+    let moved = false
+
+    for (const group of form.querySelectorAll("[role=radiogroup]")) {
+      const input = group.querySelector("input[name^='preferences[']")
+      if (!input || input.disabled) continue
+
+      const items = [ ...group.querySelectorAll("[role=radio]") ]
+      const chosen = items.find((item) => item.dataset.value === input.value)
+      if (chosen && !chosen.disabled) continue
+
+      const first = items.find((item) => !item.disabled)
+      if (!first) continue
+
+      this.choosePreference(input, first.dataset.value)
+      moved = true
+    }
+
+    return moved
+  }
+
+  // Through the group's own controller rather than a click, because a click
+  // moves the focus — onto a question the person was not answering.
+  choosePreference(input, value) {
+    const group = input.closest("[role=radiogroup]")
+    const radios = group && this.application.getControllerForElementAndIdentifier(group, "shadcn--radio-group")
+    if (!radios) return
+
+    radios.valueValue = value
+    radios.render()
+  }
+
+  // A group named by a heading that is now hidden is a group with no name.
+  // The view has one heading per period; the group's `aria-labelledby` moves
+  // to whichever of them is showing, found by the id prefix they share with
+  // it rather than by spelling the ids here.
+  namePreferenceGroups(form) {
+    for (const group of form.querySelectorAll("[role=radiogroup][aria-labelledby]")) {
+      const current = document.getElementById(group.getAttribute("aria-labelledby"))
+      if (!current?.hidden) continue
+
+      const prefix = current.id.slice(0, current.id.lastIndexOf("-") + 1)
+      const heading = [ ...current.parentElement.children ]
+        .find((element) => element !== current && element.id.startsWith(prefix) && !element.hidden)
+      if (heading) group.setAttribute("aria-labelledby", heading.id)
+    }
+  }
+
+  // `:local` only; in `:host` mode this action is not bound and the form goes
+  // to the host as a form. Only the `preferences[…]` fields make the key: a
+  // host's form also carries `_method` and the authenticity token. Storage
+  // that refuses is a preference not remembered, and Save still goes there.
+  savePreferences(event) {
+    if (this.preferencesValue !== "local") return
+
+    event.preventDefault()
+
+    const key = [ ...new FormData(this.preferencesFormTarget) ]
+      .filter(([ name ]) => name.startsWith("preferences["))
+      .map(([ name, value ]) => `${name}=${value}`)
+      .join("&")
+
+    try {
+      localStorage.setItem(this.preferencesStorageValue, key)
+    } catch {
+      // Nothing to do: the view is still the one asked for.
+    }
+
+    const url = this.preferencesUrlsValue[key]
+    if (url) {
+      location.assign(url)
+    } else {
+      this.preferencesDialog?.close()
+    }
+  }
 
   select(event) {
     const day = event.currentTarget.dataset.day

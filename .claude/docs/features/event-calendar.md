@@ -44,8 +44,10 @@ host's own records, and a library cannot know what those records are called.
 
 The reference: every argument, its values and its default. *Why* each one is
 shaped the way it is lives in the sections below. A value outside the list
-falls back to the default rather than raising. The one argument that raises
-is `movable: true` without an `id:` on every event.
+falls back to the default rather than raising. The arguments that raise are
+`movable: true` without an `id:` on every event, and a `preferences:` that is
+not `:local` or `:host` or comes without its mode's URL (see
+[a person's preferred view](#a-persons-preferred-view)).
 
 ### Every reading
 
@@ -66,6 +68,11 @@ is `movable: true` without an `id:` on every event.
 | `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id` |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
+| `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
+| `preferences:` | `nil` | `:local` or `:host`: the panel gets a *Preferences* item and the dialog it opens. Drawn by the readings with a panel only; a value other than those two raises |
+| `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, show_all: }`, the keys that apply), the URL that draws it |
+| `preferences_save_url:` | `nil` | `:host` only, and required there: where the dialog's form is sent, as `PATCH` |
+| `restore:` | `false` | `:local` only: this request is the bare arrival, so go to the stored set if there is one |
 | `**attributes` | | HTML on the root; `class` and `data-action` add to the gem's |
 
 ### `reading:`
@@ -90,7 +97,6 @@ Passed to a reading that does not take one, it lands on the root as
 | `arrangement:` | workload, week | `:auto`, `:rows` |
 | `window:` | month and week timelines, day | `0..24`, any range of hours, e.g. `7..19` |
 | `shape:` | month and week timelines, day | `:chips`, `:bars` |
-| `shapes:` | month and week timelines, day | `[:chips, :bars]`; the shapes offered. One alone is drawn whatever `shape:` says, and the panel and its trigger stop mentioning shape at all |
 | `showing:` | day | `:both`, `:axis`, `:agenda` |
 
 `shapes:` is there because a host can know its people never want one shape.
@@ -1541,6 +1547,91 @@ grid = (@month.days.first - 1.month).beginning_of_day..(@month.days.last + 1.mon
 |---|---|
 | **`month_url:`** | the ordinary case. No JavaScript, no flash, the browser is handed only the month it shows, and without JS the link still works |
 | **`month-change`** | when the page around it must not reload — filters, a map beside it, state living in the DOM — and you will preload a window to avoid the flash |
+
+## A person's preferred view
+
+A person reaches the calendar from the same link every time and wants it the
+way they left it. The panel answers "show me this now"; nothing answered "show
+me this every time". `preferences:` adds the answer: a last item in the panel,
+*Preferences*, that opens a `Dialog` asking the panel's own questions, in the
+panel's order, starting from what is on screen. Changing the period re-asks the
+questions under it, as the panel does. *Save* keeps the answers and goes there
+at once; *Cancel* and Escape change nothing, and the next open starts again
+from what is drawn.
+
+Off unless asked, because it adds a menu item, a dialog and browser storage to
+a page that did not ask for them. Only the readings with a panel draw it.
+
+### Two homes, and the developer picks
+
+Where the answers live is a property of the host, not a setting in the dialog.
+
+**`:local`** — the gem keeps them in `localStorage`. The host gives
+`preferences_url:`, a callable that turns one complete set into the URL that
+draws it, and the gem calls it for every set it offers (about thirty) and ships
+the map in the markup. The browser cannot run the host's Ruby, and a URL
+template with placeholders would break a host's lambda that looks a value up.
+Save writes the set and navigates to its URL.
+
+**`:host`** — the dialog is a plain `<form method="post">` to
+`preferences_save_url:` with `_method=patch`, built with the gem's form
+builder so the authenticity token is in it, fields named `preferences[period]`,
+`preferences[view]`, `preferences[showing]`, `preferences[group]`,
+`preferences[shape]`, `preferences[show_all]` — only the ones the chosen view
+asks; the rest are disabled and not sent. The host saves and redirects back to
+its calendar, rendered from what it saved. Under Turbo that is a fetch and a
+followed redirect, without it an ordinary submit, and a failure is answered as
+the host answers any form. The gem names neither. Gestart's side:
+
+```ruby
+def update
+  current_user.update!(calendar_preferences: params.expect(preferences: %i[period view group shape showing show_all]))
+  redirect_to calendar_path, status: :see_other
+end
+```
+
+The dummy app's `CalendarController#save_preferences` is the same shape,
+keeping the set in the session; the `:host` system example posts to it.
+
+### `restore:`, and why the gem does not guess
+
+In `:local` mode the host says when a request is the bare arrival — the usual
+link, no view named. For Gestart that is `restore: params[:view].blank?`. With
+`restore: true` and a stored set that differs from what was drawn, the
+controller goes there on connect with `location.replace`. Without it, the
+controller never moves the page.
+
+The gem guessing instead — marking its own clicks in `sessionStorage` — was
+rejected: `connect` also fires on back and forward, when a host swaps the
+calendar after `month-change`, and after a host navigates in answer to a panel
+event, and each of those would have been pulled away from what the person had
+just chosen. The cost, said plainly: one line for the host, and on a bare
+arrival the default view shows for a moment before the saved one loads.
+
+Restore does nothing when the stored set is the one already drawn (it would
+reload forever), when the map has no URL for it (the host narrowed `shapes:`
+or turned `agenda:` off after the person saved — a guessed URL could be
+anything), or when the browser refuses storage. Save, in a browser that
+refuses, still goes where it says; the answer is only not remembered.
+
+`restore:` means nothing in `:host` mode, where the host has already rendered
+from its own stored set.
+
+### The storage key
+
+`shadcn--event-calendar:preferences:<id>`, with the root's `id` when the host
+gives one and `default` otherwise — so two calendars in one app are told apart
+by giving them ids. The value is the set as `Preferences.key` spells it,
+`preferences[period]=weekly&preferences[view]=rows&…`, which the controller
+rebuilds from the form's `FormData`, keeping only the `preferences[…]` fields.
+
+### What is not saved
+
+The month shown and the day selected: the calendar opens on today, as it did.
+`window:` and `max_events:`, which are the developer's. There is no "reset to
+defaults"; saving other answers replaces the set. `:local` does not follow a
+person across devices — that is what `:host` is for. And the panel is
+unchanged: a choice made there is for now, and does not touch the saved set.
 
 ## Not done
 

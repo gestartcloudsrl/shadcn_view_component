@@ -19,6 +19,12 @@ Rails.application.routes.draw do
   # One event, answering the `<turbo-frame id="event">` an agenda row points at.
   get "calendar/events/:id" => "calendar#event", as: :calendar_event
 
+  # The host half of the calendar's `preferences: :host`: the dialog's form is
+  # posted here, kept in the session and shown back, which is all a spec needs
+  # to read what arrived.
+  patch "calendar/preferences" => "calendar#save_preferences", as: :calendar_preferences
+  get "calendar/preferences" => "calendar#preferences"
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   root to: redirect("/lookbook")
