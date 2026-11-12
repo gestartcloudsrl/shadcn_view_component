@@ -36,6 +36,7 @@ module Shadcn
     #
     class Component < ApplicationViewComponent
       include Faces
+      include PreferencesDialog
 
       # Each colour is two custom properties, declared once on the root as
       # descendant rules rather than as utilities on every chip and every dot.
@@ -492,11 +493,24 @@ module Shadcn
       #   the trigger stops naming it: a host whose people never want bars
       #   should not have them mentioned. Unknown names are ignored, and
       #   none left means every shape.
+      # @param preferences [Symbol, nil] `:local` keeps a person's preferred view
+      #   in their browser, `:host` sends the form to `preferences_save_url:`;
+      #   absent, there is no preferences item at all. Readings without a panel
+      #   (`:auto`) ignore it.
+      # @param preferences_url [#call, nil] `:local` only: given a set of
+      #   preferences, the URL of that view. Every set is shipped to the
+      #   browser, so the callable runs once per set at render.
+      # @param preferences_save_url [String, nil] `:host` only: where the form
+      #   is `PATCH`ed
+      # @param restore [Boolean] `:local` only: whether the browser sends a
+      #   person to their saved view on arrival
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     view_url: nil, movable: false, shapes: SHAPES, **attributes)
+                     view_url: nil, movable: false, shapes: SHAPES,
+                     preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
+                     **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
         @max_events = max_events.to_i.clamp(MAX_EVENTS.first, MAX_EVENTS.last)
         @selected = (selected || default_selection).to_date
@@ -517,6 +531,7 @@ module Shadcn
         @shapes = SHAPES if @shapes.empty?
         @movable = !!movable
         require_identities! if @movable
+        initialize_preferences(preferences, preferences_url, preferences_save_url, restore)
         super(**attributes)
       end
 
@@ -561,6 +576,7 @@ module Shadcn
           # cell is made of.
           "data-labelled" => ("true" if labelled?),
           **reading_attributes,
+          **preference_attributes,
           "data-shadcn--event-calendar-month-value" => month.first.iso8601,
           # The application's today, not the browser's — the same reason the
           # calendar crosses one: `Time.zone` and a laptop's clock disagree by a
@@ -698,6 +714,7 @@ module Shadcn
         tag.div(
           safe_join([
             *reading_controls,
+            (preferences_dialog if preferences?),
             nav_button(today, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
             end,
@@ -733,7 +750,8 @@ module Shadcn
             ])
           end
           dropdown.with_menu_content(class: "w-56") do
-            safe_join([ period_options, (view_options if view_choices.any?), *reading_options ].compact)
+            safe_join([ period_options, (view_options if view_choices.any?), *reading_options,
+                        (preferences_item if preferences?) ].compact)
           end
         end
       end

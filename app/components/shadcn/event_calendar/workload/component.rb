@@ -145,6 +145,10 @@ module Shadcn
 
         def reading_options = [ grouping_items ]
 
+        def panel? = true
+
+        def preference_values = { period:, view:, group:, show_all: }
+
         style do
           base { "#{EventCalendar::Component::BASE_TOKENS} #{EventCalendar::Component::ROWS_TOKENS} " \
                  "#{CELL_TOKENS} #{STRIP_TOKENS} #{STRIP_CHIP_TOKENS} #{HELD_TOKENS} " \

@@ -67,6 +67,17 @@ en:
       # does, not the state it is in, so the controller never has to write it.
       # The options panel: which view, and then the one question that view has.
       # The toolbar's period switch, which is the question above the views.
+      # The preferences dialog: the menu item that opens it and the form in it.
+      # The questions it asks are the panel's own, under `period`, `view`,
+      # `daily`, `group` and `hours`.
+      preferences:
+        item: Preferences
+        title: Preferences
+        description: Open the calendar this way every time.
+        save: Save
+        cancel: Cancel
+        show_all_on: Every job
+        show_all_off: The first few
       period:
         label: Show
         monthly: Monthly

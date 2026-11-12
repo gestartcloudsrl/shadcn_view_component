@@ -27,6 +27,14 @@ it:
       event_count:
         one: 1 evento
         other: "%{count} eventi"
+      preferences:
+        item: Preferenze
+        title: Preferenze
+        description: Apri il calendario sempre così.
+        save: Salva
+        cancel: Annulla
+        show_all_on: Tutti i lavori
+        show_all_off: I primi
       period:
         label: Mostra
         monthly: Mensile

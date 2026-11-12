@@ -1629,4 +1629,136 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
   end
+
+  # The saved-view form. What the server draws: the item, the dialog and the
+  # questions, with the fields that do not apply to the current set `hidden` and
+  # `disabled`. Showing and hiding them as the answers change is the
+  # controller's, and `spec/system/event_calendar_spec.rb`'s to prove.
+  describe "preferences" do
+    let(:prefix) { "data-shadcn--event-calendar-preferences" }
+    let(:root) { painted.at_css("[data-controller~='shadcn--event-calendar']") }
+    let(:form) { painted.at_css("form") }
+
+    def field(name) = painted.at_css(%([data-preferences-when]:has([name="preferences[#{name}]"])))
+
+    def render_calendar(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), **options))
+    end
+
+    it "is off unless asked" do
+      render_calendar(reading: :workload)
+
+      expect(painted.css("[data-slot=dialog]")).to be_empty
+      expect(root.attributes.keys.grep(/preferences/)).to be_empty
+    end
+
+    it "raises without the URL its mode needs", :aggregate_failures do
+      expect { render_calendar(reading: :workload, preferences: :local) }
+        .to raise_error(ArgumentError, /preferences_url/)
+      expect { render_calendar(reading: :workload, preferences: :host) }
+        .to raise_error(ArgumentError, /preferences_save_url/)
+    end
+
+    context "when the host saves it, from a weekly rows reading" do
+      before do
+        render_calendar(reading: :weekly, arrangement: :rows, group: :assignees,
+                        preferences: :host, preferences_save_url: "/prefs")
+      end
+
+      it "draws the item in the panel" do
+        item = painted.css("[role=menuitem]").find { |node| node.text.strip == "Preferences" }
+
+        expect(item.at_css("svg.lucide-user-cog")).to be_present
+        expect(item["data-action"]).to include("click->shadcn--event-calendar#openPreferences")
+      end
+
+      it "posts to the host's URL", :aggregate_failures do
+        expect(form["action"]).to eq("/prefs")
+        expect(form.at_css("input[name=_method]")["value"]).to eq("patch")
+        expect(form["data-shadcn--event-calendar-target"]).to eq("preferencesForm")
+        expect(form["data-action"]).to eq("change->shadcn--event-calendar#refinePreferences")
+      end
+
+      it "starts from what is shown", :aggregate_failures do
+        checked = %w[period view group show_all].to_h do |name|
+          [ name, form.at_css(%(input[name="preferences[#{name}]"]))["value"] ]
+        end
+
+        expect(checked).to eq("period" => "weekly", "view" => "rows", "group" => "assignees", "show_all" => "false")
+      end
+
+      it "hides and disables what does not apply", :aggregate_failures do
+        %w[showing shape].each do |name|
+          expect(field(name)).to have_attributes(attributes: include("hidden"))
+          expect(field(name).at_css("input")).to have_attributes(attributes: include("disabled"))
+        end
+        expect(field("group")["hidden"]).to be_nil
+      end
+
+      it "gives the dialog its target and copy", :aggregate_failures do
+        dialog = painted.at_css("[data-slot=dialog]")
+
+        expect(dialog["data-shadcn--event-calendar-target"]).to eq("preferencesDialog")
+        expect(dialog.at_css("[data-slot=dialog-title]").text).to eq("Preferences")
+        expect(dialog.at_css("[data-slot=dialog-description]").text).to eq("Open the calendar this way every time.")
+        expect(dialog.at_css("[data-slot=dialog-trigger]")).to be_nil
+      end
+
+      it "labels the view question for the week and for the month", :aggregate_failures do
+        labels = painted.css("form [data-preferences-when]:not(:has(input)):not(:has(button))")
+        by_text = labels.to_h { |node| [ node.text.strip, node["data-preferences-when"] ] }
+
+        expect(by_text).to include("Show the month as" => "monthly", "Show the week as" => "weekly")
+      end
+
+      it "gives each view its own tokens" do
+        options = form.css("[data-slot=radio-group-item][data-value]").select { |node| %w[grid rows hours].include?(node["data-value"]) }
+        tokens = options.to_h { |node| [ node["data-value"], node.ancestors("[data-preferences-when]").first["data-preferences-when"] ] }
+
+        expect(tokens).to eq("grid" => "monthly", "rows" => "monthly weekly", "hours" => "monthly weekly")
+      end
+    end
+
+    context "when the host keeps it in the browser" do
+      before do
+        render_calendar(reading: :hours, preferences: :local, restore: true,
+                        preferences_url: ->(set) { "/c?#{set.to_query}" })
+      end
+
+      it "ships every set's URL", :aggregate_failures do
+        urls = JSON.parse(root["#{prefix}-urls-value"])
+
+        expect(urls.size).to eq(26)
+        expect(urls["preferences[period]=monthly&preferences[view]=hours&preferences[shape]=chips"])
+          .to eq("/c?period=monthly&shape=chips&view=hours")
+      end
+
+      it "names the current set, the storage key and restore", :aggregate_failures do
+        expect(root["#{prefix}-value"]).to eq("local")
+        expect(root["#{prefix}-current-value"])
+          .to eq("preferences[period]=monthly&preferences[view]=hours&preferences[shape]=chips")
+        expect(root["#{prefix}-storage-value"]).to eq("shadcn--event-calendar:preferences:default")
+        expect(root["#{prefix}-restore-value"]).to eq("true")
+      end
+
+      it "saves in the browser", :aggregate_failures do
+        expect(form["action"]).to eq("#")
+        expect(form["data-action"]).to include("submit->shadcn--event-calendar#savePreferences")
+        expect(form["data-action"]).to include("change->shadcn--event-calendar#refinePreferences")
+      end
+    end
+
+    it "leaves the auto reading alone" do
+      render_calendar(reading: :auto, preferences: :local, preferences_url: ->(_) { "/" })
+
+      expect(painted.css("[data-slot=dialog]")).to be_empty
+      expect(root.attributes.keys.grep(/preferences|restore/)).to be_empty
+    end
+
+    it "asks the shape only when more than one is offered" do
+      render_calendar(reading: :hours, shapes: [ :chips ], preferences: :host, preferences_save_url: "/prefs")
+
+      expect(form.css(%([name="preferences[shape]"]))).to be_empty
+    end
+  end
 end

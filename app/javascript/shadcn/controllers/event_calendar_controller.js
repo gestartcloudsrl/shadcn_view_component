@@ -25,9 +25,17 @@ import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 // "lowest free lane" rather than "next free lane".
 export default class extends Controller {
   static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
-                     "prototypes", "groupLabel", "announcer" ]
+                     "prototypes", "groupLabel", "announcer", "preferencesDialog", "preferencesForm" ]
 
   static values = {
+    // The saved-view preferences, drawn by the server when a host asks for
+    // them: the mode, the current set's key, where it is remembered, whether to
+    // go there on arrival, and every set's URL.
+    preferences: String,
+    preferencesCurrent: String,
+    preferencesStorage: String,
+    preferencesRestore: Boolean,
+    preferencesUrls: Object,
     month: String,
     // The application's today, not the browser's — `Time.zone` and a laptop's
     // clock disagree by a day for a few hours out of every twenty-four, and the
@@ -221,6 +229,13 @@ export default class extends Controller {
 
     this.dispatch("show-all", { detail: { showAll: !pressed } })
   }
+
+  // The three preferences actions: named by the markup, behaviour still to come.
+  openPreferences() {}
+
+  refinePreferences() {}
+
+  savePreferences(event) {}
 
   select(event) {
     const day = event.currentTarget.dataset.day

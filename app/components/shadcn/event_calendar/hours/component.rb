@@ -222,6 +222,10 @@ module Shadcn
 
         def reading_options = [ (shape_items if shape_choice?) ].compact
 
+        def panel? = true
+
+        def preference_values = { period:, view: :hours, shape: }
+
         def shape_items
           safe_join([
             render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.hours.label") },

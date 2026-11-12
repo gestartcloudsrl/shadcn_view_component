@@ -77,8 +77,10 @@ module Shadcn
 
         def cell_role = "listitem"
 
+        def preference_values = { period: :daily, showing:, group:, shape: }
+
         # The panel's hooks, private as they are on the base class.
-        private :period, :view_choices, :cell_role
+        private :period, :view_choices, :cell_role, :preference_values
 
         # The scale has to start where the axes do, and here that is not the
         # date column's `w-14`: cut by operator the left column is the name at
