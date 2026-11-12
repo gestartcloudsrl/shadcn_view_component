@@ -70,7 +70,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
 | `preferences:` | `nil` | `:local` or `:host`: the panel gets a *Preferences* item and the dialog it opens. Drawn by the readings with a panel only. `nil` and `false` are off, so `preferences: feature_on? && :host` works; any other value raises |
-| `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, max_chips: }`, the keys that apply), the URL that draws it |
+| `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, max_chips: }`, the keys that apply), the URL that draws it. Where the set asks the chip limit it is also called with two numbers (23 and 45) to find where a typed one goes, so it must write `max_chips` into the URL once, as given, or leave it out; anything else raises `ArgumentError` at render time |
 | `preferences_save_url:` | `nil` | `:host` only, and required there: where the dialog's form is sent, as `PATCH` |
 | `restore:` | `false` | `:local` only: this request is the bare arrival, so go to the stored set if there is one |
 | `**attributes` | | HTML on the root; `class` and `data-action` add to the gem's |
@@ -271,8 +271,9 @@ a view you expect to take in at a glance.
 
 **A week can also be drawn as rows** — the month's rows-arrangement row for
 each of its seven days: the date column, then the day's chips in a strip
-ordered by time, grouped by event or by assignee, with the heat ramp, the cap
-of three and *Show all* exactly as the month's rows have them. The timeline
+ordered by time, grouped by event or by assignee, with the heat ramp, the chip
+cap (`max_chips:`, three by default) and *Show all* exactly as the month's rows
+have them. The timeline
 answers *when*; the rows answer *what is on, and whose*. A host asks for them
 with `reading: :weekly, arrangement: :rows` — a string from `params` works —
 and `reading: :weekly` alone, or any other `arrangement:`, is still the
@@ -1770,6 +1771,12 @@ unchanged: a choice made there is for now, and does not touch the saved set.
   reaches the browser, so the dummy skips verification on that one action. The
   token comes from a standard `form_with`; a host's own system spec is where it
   is checked end to end.
+- **The chip limit's error is the browser's.** A number outside 1–99, or an
+  empty field, is stopped by the field's own `min`, `max`, `step` and
+  `required`, so the bubble that says why is written by the browser, in the
+  browser's language rather than the app's locale, and styled by it. The
+  server-side check is `Preferences#normalize` returning `nil`, which in
+  `:host` mode is the host's to answer.
 - **A stale mark after a wrong `preferences_url:`.** When the wrong URL lands on
   a page with `restore:` false, the one-shot mark stays, and the next bare
   arrival in that tab spends it instead of restoring. One skipped restore, only
