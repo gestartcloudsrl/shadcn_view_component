@@ -86,13 +86,16 @@ module Shadcn
         "shadcn-event-calendar-preferences-#{@preference_hex}-#{question}-#{part}"
       end
 
-      def preference_table = @preference_table ||= Preferences.new(shapes:, agenda: @agenda)
+      def preference_table = @preference_table ||= Preferences.new(shapes:, agenda: @agenda, views:)
 
       # What the reading is drawing right now, as one of `Preferences#sets`.
       def preference_current
         @preference_current ||= begin
           values = preference_values
-          preference_table.normalize(values) || preference_table.normalize(values.merge(showing: :both))
+          # Last, a reading drawing a view the host no longer offers starts the
+          # dialog on the first set it does.
+          preference_table.normalize(values) || preference_table.normalize(values.merge(showing: :both)) ||
+            preference_table.normalize(preference_table.sets.first)
         end
       end
 
@@ -319,11 +322,15 @@ module Shadcn
       def preference_option(form, question, value, selected)
         id = preference_id(question, value)
         tokens = (preference_table.when(question, value) if question == :view)
+        # A period drawn in one view is not asked it; the controller reads the
+        # view off the period's own radio to work out what follows.
+        only = (preference_table.only_view(value) if question == :period)
         shown = tokens.nil? || tokens.include?(preference_current[:period].to_s)
 
         tag.div(
           safe_join([
-            render(RadioGroup::Item::Component.new(value:, checked: value == selected, id:)),
+            render(RadioGroup::Item::Component.new(value:, checked: value == selected, id:,
+                                                   "data-preferences-view": only)),
             render(Label::Component.new(for: id)) { preference_label(question, value) }
           ]),
           "data-slot": "event-calendar-preference-option", class: "flex items-center gap-2",

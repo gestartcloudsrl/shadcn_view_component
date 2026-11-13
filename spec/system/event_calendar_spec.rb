@@ -1822,6 +1822,37 @@ RSpec.describe "Event calendar", :js do
       end
     end
 
+    # A host offering the grid and the timeline only: the week has one view, so
+    # the dialog does not ask it, and what follows is the timeline's question.
+    describe "a host offering some views" do
+      before do
+        visit density("period=monthly&view=grid&preferences=local&views=grid,hours")
+        wait_for_stimulus
+      end
+
+      it "asks the week nothing about its view and saves its timeline", :aggregate_failures do
+        open_preferences
+        choose("weekly")
+
+        expect(page).to have_no_css(question(:view))
+        expect(page).to have_css(question(:shape))
+        expect(page).to have_no_css("#{dialog} input[type=number]")
+
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/period=weekly/)
+        expect(page).to have_current_path(/view=hours/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=weekly&preferences[shape]=chips")
+      end
+
+      it "still asks the month, with only the views given" do
+        open_preferences
+
+        expect(all("#{question(:view)} [role=radio]").map { |radio| radio["value"] }).to eq(%w[grid hours])
+      end
+    end
+
     describe "coming back" do
       it "opens on the saved view from a bare arrival", :aggregate_failures do
         store("shadcn--event-calendar:preferences:default", weekly_rows)

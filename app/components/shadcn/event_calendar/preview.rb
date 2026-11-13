@@ -201,13 +201,14 @@ module Shadcn
       # @param to number
       # @param turbo select [off, panel, agenda]
       # @param shapes text
+      # @param views text
       # @param preferences select [off, local, host]
       # @param restore toggle
       # @param id text
       # @param broken_url toggle
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
-                  showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars",
+                  showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "grid,rows,hours",
                   preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
                   counts: true)
         cast = ActiveModel::Type::Boolean.new
@@ -220,7 +221,8 @@ module Shadcn
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
                     turbo:, shapes:, preferences:, id:, max_chips:,
                     # Only when off, so the default links stay the ones they were.
-                    counts: (false unless cast.cast(counts)) }.merge(changed).compact
+                    counts: (false unless cast.cast(counts)),
+                    views: (views unless views.to_s == "grid,rows,hours") }.merge(changed).compact
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -311,6 +313,13 @@ module Shadcn
         # `:host` posts to the dummy's `CalendarController`, which keeps it in
         # the session and shows what it kept.
         args[:shapes] = shapes.to_s.split(",").map(&:strip).map(&:to_sym)
+        args[:views] = views.to_s.split(",").map(&:strip).map(&:to_sym)
+        # A period offered in one view has no `view` in its set: this host
+        # knows which one it is, from the same list it handed the calendar.
+        only_view = lambda do |period|
+          offered = (period == :weekly ? Component::WEEK_VIEWS : Component::VIEWS) & args[:views]
+          offered.first if offered.one?
+        end
         args[:id] = id if id.present?
         case preferences.to_s
         when "local"
@@ -321,6 +330,9 @@ module Shadcn
                         # asks to restore again, so it never draws the set.
                         # A host's own translation of the chip limit: "all"
                         # is the show-all toggle, a number is the limit.
+                        if %i[monthly weekly].include?(set[:period]) && !set.key?(:view)
+                          set = set.merge(view: only_view.call(set[:period]))
+                        end
                         chips = set[:max_chips]
                         set = set.except(:max_chips)
                         set = set.merge(show_all: true) if chips == :all

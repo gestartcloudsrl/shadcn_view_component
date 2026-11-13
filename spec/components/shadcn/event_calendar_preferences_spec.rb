@@ -86,6 +86,35 @@ RSpec.describe Shadcn::EventCalendar::Preferences do
     expect(preferences.normalize(period: "monthly", view: "hours", max_chips: "abc")).to eq(period: :monthly, view: :hours, shape: :chips)
   end
 
+  context "when the host offers only some views" do
+    subject(:preferences) { described_class.new(shapes: %i[chips bars], agenda: true, views: %i[grid hours]) }
+
+    it "does not ask the view of a period left with one, and its sets carry none", :aggregate_failures do
+      expect(preferences.when(:view)).to eq(%w[monthly])
+      expect(preferences.only_view(:weekly)).to eq(:hours)
+      expect(preferences.sets.select { |set| set[:period] == :weekly })
+        .to contain_exactly({ period: :weekly, shape: :chips }, { period: :weekly, shape: :bars })
+      expect(preferences.sets).not_to include(a_hash_including(view: :rows))
+    end
+
+    it "normalises a single-view period with or without its view", :aggregate_failures do
+      expect(preferences.normalize(period: "weekly")).to eq(period: :weekly, shape: :chips)
+      expect(preferences.normalize(period: "weekly", view: "hours", shape: "bars")).to eq(period: :weekly, shape: :bars)
+      expect(preferences.normalize(period: "weekly", view: "rows")).to be_nil
+    end
+
+    it "shows each view option only where the view is asked" do
+      expect(preferences.when(:view, :hours)).to eq(%w[monthly])
+    end
+
+    it "drops a week left with no view" do
+      grid = described_class.new(shapes: %i[chips], agenda: false, views: %i[grid])
+
+      expect([ grid.periods, grid.when(:view), grid.sets.find { |set| set[:period] == :monthly } ])
+        .to eq([ %i[monthly daily], [], { period: :monthly, group: :events } ])
+    end
+  end
+
   it "publishes the range a typed limit is checked against" do
     expect(described_class::MAX_CHIPS_RANGE).to eq(1..99)
   end

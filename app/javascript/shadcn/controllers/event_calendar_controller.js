@@ -387,11 +387,14 @@ export default class extends Controller {
   }
 
   // What the period and its second answer say, as the tokens `Preferences`
-  // writes: the period, and `period:view` (or `daily:showing`).
+  // writes: the period, and `period:view` (or `daily:showing`). A period the
+  // host offers in one view is not asked it; its radio names that view.
   preferencesContext(form) {
     const answer = (question) => form.querySelector(`input[name="preferences[${question}]"]`)?.value
     const period = answer("period")
-    const second = period === "daily" ? answer("showing") : answer("view")
+    const only = form.querySelector(`input[name="preferences[period]"]`)?.closest("[role=radiogroup]")
+      ?.querySelector(`[role=radio][data-value="${CSS.escape(period ?? "")}"]`)?.dataset.preferencesView
+    const second = period === "daily" ? answer("showing") : (only ?? answer("view"))
 
     return new Set([ "always", period, `${period}:${second}` ])
   }

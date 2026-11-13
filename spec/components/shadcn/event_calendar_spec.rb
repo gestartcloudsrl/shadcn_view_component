@@ -1359,6 +1359,57 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # `spec/system/event_calendar_spec.rb`.
   # A host whose people never want bars: one shape offered is that shape every
   # time, and nothing on the toolbar names either.
+  # The views a host offers. The panel and the dialog narrow to them; what is
+  # drawn is still the host's `reading:`.
+  describe "#views" do
+    def panel_values(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), **options))
+      painted.css("[data-slot=dropdown-menu-radio-item]").map { |item| item["data-value"] }
+    end
+
+    def headings = painted.css("[data-slot=dropdown-menu-label]").map { |label| label.text.strip }
+
+    it "offers only the views given, in the gem's order" do
+      expect(panel_values(reading: :workload, views: %i[hours grid]).first(5))
+        .to eq(%w[monthly weekly daily grid hours])
+    end
+
+    it "stops asking the view of a month left with one" do
+      panel_values(reading: :workload, views: [ :grid ])
+
+      expect(headings).not_to include("Show the month as")
+    end
+
+    it "drops the week when no view is left for it" do
+      expect(panel_values(reading: :workload, views: [ :grid ])).not_to include("weekly")
+    end
+
+    it "stops asking the week's view when it has one" do
+      expect(panel_values(reading: :weekly, views: %i[grid hours])).not_to include("rows", "hours")
+    end
+
+    it "ignores unknown names, and none left is every view" do
+      expect(panel_values(reading: :workload, views: %i[timeline])).to include("grid", "rows", "hours")
+    end
+
+    it "tells the dialog's period which view it is drawn in when it has one", :aggregate_failures do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, views: %i[grid hours],
+                                        preferences: :host, preferences_save_url: "/prefs"))
+      period = ->(name) { painted.at_css(%(form [role=radio][data-value="#{name}"])) }
+
+      expect(period.call("weekly")["data-preferences-view"]).to eq("hours")
+      expect(period.call("monthly")["data-preferences-view"]).to be_nil
+      expect(painted.css("form [role=radio][data-value=rows]")).to be_empty
+    end
+
+    it "starts the dialog on an offered set when the reading draws one that is not" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :hours, views: %i[grid],
+                                        preferences: :host, preferences_save_url: "/prefs"))
+
+      expect(painted.at_css(%(form [role=radio][data-value=monthly]))["aria-checked"]).to eq("true")
+    end
+  end
+
   # The badge counting a day's events, and on a day by assignee each person's.
   # It is also what carries the heat ramp, so off means no ramp either.
   describe "#counts" do

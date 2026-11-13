@@ -11,8 +11,8 @@ module Shadcn
     # shows and hides fields all read one table instead of three copies of it.
     #
     # A plain object like `Schedule`, because it renders nothing. It is built
-    # from the two things a host decides, `shapes:` and `agenda:`; the rest is
-    # fixed.
+    # from the things a host decides, `shapes:`, `views:` and `agenda:`; the
+    # rest is fixed.
     class Preferences
       # The form order, and the key order of every set.
       QUESTIONS = %i[period view showing group shape max_chips].freeze
@@ -52,21 +52,29 @@ module Shadcn
 
       ALWAYS = %w[always].freeze
 
-      attr_reader :shapes
+      attr_reader :shapes, :views
 
       # @param shapes [Array<Symbol>] the shapes the host offers; the question
       #   is only asked when there is more than one
       # @param agenda [Boolean] whether a day may be shown as a list
-      def initialize(shapes:, agenda:)
+      # @param views [Array<Symbol>] the views the host offers, of `:grid`,
+      #   `:rows` and `:hours`. A period with one of them is not asked the view
+      #   and its sets carry none, as a single shape is not asked; a week with
+      #   none (`[:grid]`) is not a period at all.
+      def initialize(shapes:, agenda:, views: VIEWS.values.flatten.uniq)
         @shapes = shapes.to_a.map(&:to_sym)
         @agenda = !!agenda
+        @views = views.to_a.map(&:to_sym)
       end
 
+      # The periods offered: the day always, a month or a week only with a view
+      # to draw it in.
+      def periods = PERIODS.select { |period| seconds(period).any? }
       # One set per valid answer to the listed questions, keys in `QUESTIONS`
       # order and only those that apply to it. The `FREE` questions are left
       # out: `#asks?` says which sets take one.
       def sets
-        @sets ||= PERIODS.flat_map do |period|
+        @sets ||= periods.flat_map do |period|
           seconds(period).flat_map do |second|
             context = context(period, second)
             asked = QUESTIONS.select { |question| applies?(question, context) } - FREE
@@ -102,9 +110,9 @@ module Shadcn
       def normalize(given)
         given = given.to_h.transform_keys(&:to_sym)
         period = given[:period]&.to_sym
-        return unless PERIODS.include?(period)
+        return unless periods.include?(period)
 
-        second = period == :daily ? given[:showing]&.to_sym : given[:view]&.to_sym
+        second = period == :daily ? given[:showing]&.to_sym : (given[:view]&.to_sym || only_view(period))
         return unless seconds(period).include?(second)
 
         context = context(period, second)
@@ -128,11 +136,19 @@ module Shadcn
       # shown in. `["always"]` for the period; none for a question that is not
       # being asked at all.
       def when(question, value = nil)
-        return VIEW_APPLIES.fetch(value.to_sym).dup if question == :view && value
+        return VIEW_APPLIES.fetch(value.to_sym) & asked_views if question == :view && value
         return ALWAYS.dup if APPLIES.fetch(question).nil?
         return [] if question == :shape && shapes.size <= 1
+        return asked_views if question == :view
 
         APPLIES.fetch(question).dup
+      end
+
+      # The view a period is drawn in when it offers only one, which is why it
+      # is not asked; `nil` when there is a choice, or none.
+      def only_view(period)
+        choices = period == :daily ? [] : seconds(period)
+        choices.first if choices.size == 1
       end
 
       # The same string on both sides: the controller rebuilds it from
@@ -147,14 +163,18 @@ module Shadcn
       def seconds(period)
         return SHOWING + (@agenda ? %i[agenda] : []) if period == :daily
 
-        VIEWS.fetch(period)
+        VIEWS.fetch(period) & views
       end
+
+      # The periods whose view is a question: those with more than one.
+      def asked_views = APPLIES.fetch(:view).select { |period| seconds(period.to_sym).size > 1 }
 
       def context(period, second) = [ period.to_s, "#{period}:#{second}" ]
 
       def applies?(question, context)
         return true if question == :period
         return false if question == :shape && shapes.size <= 1
+        return seconds(context.first.to_sym).size > 1 if question == :view && context.first != "daily"
 
         (APPLIES.fetch(question) & context).any?
       end

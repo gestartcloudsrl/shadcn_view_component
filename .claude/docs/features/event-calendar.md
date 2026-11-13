@@ -69,6 +69,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
+| `views:` | `[:grid, :rows, :hours]` | the views offered, `:hours` being the timeline (the words `view_url:` is handed). The panel and the preferences dialog offer only these: a period left with one is not asked which, and the week, left with none by `[:grid]`, is not offered. What is drawn is still the host's `reading:`, so a host should not link to a view it took out. Unknown names are ignored, and none left means every view |
 | `counts:` | `true` | `false` hides the badge that counts a day's events (and, on the day by assignee, each person's). The badge is also what wears the heat ramp, so the ramp goes with it; the chips, the "+N" and *Show all* stay. Cast as Rails casts a boolean, so `"false"` from `params` is off. The readings without a badge (`:auto`) ignore it |
 | `preferences:` | `nil` | `:local` or `:host`: the panel gets a *Preferences* item and the dialog it opens. Drawn by the readings with a panel only. `nil` and `false` are off, so `preferences: feature_on? && :host` works; any other value raises |
 | `preferences_url:` | `nil` | `:local` only, and required there: given one complete set (`{ period:, view:, showing:, group:, shape:, max_chips: }`, the keys that apply), the URL that draws it. Where the set asks the chip limit it is also called with two numbers (23 and 45) to find where a typed one goes, so it must write `max_chips` into the URL once, as given, or leave it out; anything else raises `ArgumentError` at render time |
@@ -1575,13 +1576,20 @@ question follows which.
 | question | answers | asked when |
 |---|---|---|
 | `period` | Monthly · Weekly · Daily | always |
-| `view` | Grid · Rows · Timeline for a month; Rows · Timeline for a week | the period is Monthly or Weekly. Its heading follows the period ("Show the month as" / "Show the week as") and so does the group's `aria-labelledby` |
+| `view` | Grid · Rows · Timeline for a month; Rows · Timeline for a week, narrowed to the host's `views:` | the period is Monthly or Weekly and has more than one view. Its heading follows the period ("Show the month as" / "Show the week as") and so does the group's `aria-labelledby` |
 | `showing` | Timeline only · List only · Timeline and list | the period is Daily. *List only* only when the day has an agenda |
 | `group` | By event · By assignee | the view groups: grid, rows, the day |
 | `shape` | the host's `shapes:` | the view has an axis and `shapes:` offers more than one |
 | `max_chips` | *At most* [a number from 1 to 99] · All | the view caps its chips: grid, rows |
 
-Twenty complete sets in all, with both shapes and an agenda, not counting the
+A period the host offers in one view (`views: [:grid, :hours]` leaves the week
+only the timeline) is not asked it, as a single shape is not: its sets carry no
+`view`, and a host reading a set back takes the period's one view. The period's
+radio carries that view as `data-preferences-view`, so the controller can still
+work out what the questions under it are. A period with no view left, the
+week under `views: [:grid]`, is not offered.
+
+Twenty complete sets in all, with every view, both shapes and an agenda, not counting the
 chip limit: a typed number multiplies nothing, so `Preferences#sets` leaves
 `max_chips` out (`Preferences::FREE`) and `#asks?(:max_chips, set)` says which
 sets take one.
@@ -1692,6 +1700,7 @@ reading:
 | monthly · hours | `reading: :hours`, `shape:` |
 | weekly · rows | `reading: :weekly, arrangement: :rows`, `group:`, and the chip limit as for the month |
 | weekly · hours | `reading: :weekly`, `shape:` |
+| a period with no `view` | the one view `views:` leaves it; the set arrives without it |
 | daily | `reading: :daily`, `showing:`, `group:`, `shape:` |
 
 The rule that every URL the calendar is handed must carry `period` (below,

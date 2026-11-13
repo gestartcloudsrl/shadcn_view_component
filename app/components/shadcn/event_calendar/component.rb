@@ -423,7 +423,7 @@ module Shadcn
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :view_url, :shapes, :counts
+                  :view_url, :shapes, :counts, :views
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -493,6 +493,13 @@ module Shadcn
       #   the trigger stops naming it: a host whose people never want bars
       #   should not have them mentioned. Unknown names are ignored, and
       #   none left means every shape.
+      # @param views [Array<Symbol>] the views the options panel and the
+      #   preferences dialog offer, of `:grid`, `:rows` and `:hours` (the
+      #   timeline) — the words `view_url:` is handed. A period left with one
+      #   is not asked which, and a week left with none (`[:grid]`) is not
+      #   offered. What is drawn is still the host's `reading:`: this narrows
+      #   the choices, it does not redirect a request. Unknown names are
+      #   ignored, and none left means every view.
       # @param counts [Boolean] whether each day (and, on a day by assignee,
       #   each person) shows the badge counting its events. On by default; off,
       #   the badge is not drawn, and with it goes the heat ramp it carries.
@@ -515,7 +522,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     view_url: nil, movable: false, shapes: SHAPES, counts: true,
+                     view_url: nil, movable: false, shapes: SHAPES, views: VIEWS, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
@@ -536,6 +543,8 @@ module Shadcn
         @view_url = view_url
         @shapes = SHAPES & Array(shapes).map { |name| name.to_s.to_sym }
         @shapes = SHAPES if @shapes.empty?
+        @views = VIEWS & Array(views).map { |name| name.to_s.to_sym }
+        @views = VIEWS if @views.empty?
         @counts = ActiveModel::Type::Boolean.new.cast(counts) != false
         @movable = !!movable
         require_identities! if @movable
@@ -758,7 +767,7 @@ module Shadcn
             ])
           end
           dropdown.with_menu_content(class: "w-56") do
-            safe_join([ period_options, (view_options if view_choices.any?), *reading_options,
+            safe_join([ period_options, (view_options if view_choices.size > 1), *reading_options,
                         (preferences_item if preferences?) ].compact)
           end
         end
@@ -769,7 +778,7 @@ module Shadcn
           render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.period.label") },
           render(DropdownMenu::Separator::Component.new),
           render(DropdownMenu::RadioGroup::Component.new) do
-            safe_join(PERIODS.map { |name| period_option(name) })
+            safe_join(periods.map { |name| period_option(name) })
           end
         ])
       end
@@ -784,6 +793,9 @@ module Shadcn
       end
 
       def daily? = view == :daily
+
+      # The periods the panel offers: a week only when `views:` leaves it one.
+      def periods = PERIODS.select { |name| name != :weekly || WEEK_VIEWS.intersect?(views) }
 
       # Which of `PERIODS` this reading is. The panel decided it with
       # `(name == :daily) == daily?` — a comparison that can only ever answer
@@ -818,7 +830,7 @@ module Shadcn
       # The views this period offers, and what the panel calls the question.
       # A month has all three; a week overrides both in `Week`; a day has one
       # view and so no question at all.
-      def view_choices = VIEWS
+      def view_choices = VIEWS & views
 
       def view_heading = shadcn_t("event_calendar.view.label")
 
@@ -826,7 +838,7 @@ module Shadcn
       # the panel decides, so it can be read without opening it.
       def view_label
         where = shadcn_t("event_calendar.period.#{period}")
-        here = shadcn_t("event_calendar.view.#{view}") if view_choices.any?
+        here = shadcn_t("event_calendar.view.#{view}") if view_choices.size > 1
 
         safe_join([ where, here, reading_label ].compact, " · ")
       end
