@@ -31,7 +31,13 @@ module Shadcn
       def element_attributes(**defaults)
         super(**{
           "data-size" => size,
-          "data-controller" => "shadcn--avatar"
+          # Only when there is an image to wait for. The controller's whole job
+          # is swapping the image for the fallback once it has loaded or
+          # failed, and `connect()` returns immediately without one — so an
+          # initials-only avatar was paying for a Stimulus instance that does
+          # nothing. A month of a busy workload calendar renders eleven hundred
+          # of them.
+          "data-controller" => ("shadcn--avatar" if image?)
         }.merge(defaults))
       end
 

@@ -1,0 +1,66 @@
+# Italian, for the one preview that has to show a host's language:
+# `event_calendar/phone`, where the toolbar's width is decided by words the
+# gem does not ship. Only what that page reads is here. Every other key falls
+# back to the gem's English through `shadcn_t`, and `date.*` is what
+# `I18n.l` needs to name a day and a month.
+it:
+  date:
+    day_names: [domenica, lunedì, martedì, mercoledì, giovedì, venerdì, sabato]
+    abbr_day_names: [dom, lun, mar, mer, gio, ven, sab]
+    month_names: [~, gennaio, febbraio, marzo, aprile, maggio, giugno, luglio, agosto, settembre, ottobre, novembre, dicembre]
+    abbr_month_names: [~, gen, feb, mar, apr, mag, giu, lug, ago, set, ott, nov, dic]
+    order: [day, month, year]
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d %b"
+      long: "%d %B %Y"
+  shadcn_view_component:
+    event_calendar:
+      previous_day: Vai al giorno precedente
+      next_day: Vai al giorno successivo
+      today: Oggi
+      empty: Niente in programma.
+      all_day: Tutto il giorno
+      agenda_label: Eventi del giorno selezionato
+      agenda_format: "%A %-d %B"
+      day_label: "%{date}, %{events}"
+      event_count:
+        one: 1 evento
+        other: "%{count} eventi"
+      preferences:
+        item: Preferenze
+        title: Preferenze
+        description: Apri il calendario sempre così.
+        save: Salva
+        cancel: Annulla
+        max_chips: Lavori mostrati per giorno
+        max_chips_all: Tutti
+        max_chips_number: Al massimo
+      period:
+        label: Mostra
+        monthly: Mensile
+        weekly: Settimanale
+        daily: Giornaliero
+      daily:
+        label: Mostra il giorno come
+        axis: Solo timeline
+        agenda: Solo elenco
+        rows: Righe
+        both: Timeline ed elenco
+        axis_label: Ore del giorno
+      hours:
+        label: Mostra ogni lavoro come
+        bars: Barre
+        chips: Etichette
+      view:
+        label: Mostra il mese come
+        week_label: Mostra la settimana come
+        grid: Griglia
+        rows: Righe
+        hours: Timeline
+      group:
+        label: Raggruppa
+        assignees: Per assegnatario
+        events: Per evento
+        show_all: Mostra tutti
+      time_format: "%H:%M"

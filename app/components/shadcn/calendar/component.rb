@@ -542,7 +542,13 @@ module Shadcn
       # One pattern, localized once and then handed to the controller as text —
       # rather than a weekday glued onto a formatted date on one side and not
       # the other, which is how the two first disagreed.
-      def day_label_format = "%A, #{I18n.t('date.formats.long')}"
+      # The host's long date, with its day unpadded: the name has to contain
+      # the "3" the button shows, and "August 03" does not — a voice-control
+      # user saying "click 3" has nothing to match (WCAG 2.5.3; axe's
+      # `label-content-name-mismatch`). Substituted rather than written out so
+      # a host's own order and words survive; `%-d` is a token the
+      # controller's `strftime` shim knows, so the browser writes it the same.
+      def day_label_format = "%A, #{I18n.t('date.formats.long').gsub('%d', '%-d')}"
 
       def day_label(day)
         label = I18n.l(day, format: day_label_format)

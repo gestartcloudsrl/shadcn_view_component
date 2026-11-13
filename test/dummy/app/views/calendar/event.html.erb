@@ -1,0 +1,6 @@
+<%# What an agenda row's `url:` answers with. The `<turbo-frame id="event">`
+    matches the one inside the Sheet, so Turbo swaps this into it; without Turbo
+    the browser lands on this page, which is the row being a link. %>
+<turbo-frame id="event" class="flex flex-col gap-3 p-4">
+  <h2 class="pe-8 text-base font-semibold">Event <%= @id %></h2>
+</turbo-frame>

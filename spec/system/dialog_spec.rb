@@ -170,3 +170,52 @@ RSpec.describe "Sheet", :js do
     expect(page).to have_no_css(content)
   end
 end
+
+# A `role="dialog"` with no name is announced as "dialog" and nothing else, and
+# a host's `getByRole("dialog", { name: … })` cannot find it. Every modal the
+# shared controller drives — Dialog, AlertDialog, Sheet, Drawer — takes its name
+# from its own Title and its description from its own Description.
+RSpec.describe "A modal's name", :js do
+  def named(content)
+    page.evaluate_script(<<~JS, content)
+      ((content) => {
+        const text = (attribute) => (content.getAttribute(attribute) || "").split(/\\s+/).filter(Boolean)
+          .map((id) => document.getElementById(id)?.textContent.trim()).join(" ")
+        return { name: text("aria-labelledby"), description: text("aria-describedby") }
+      })(arguments[0])
+    JS
+  end
+
+  {
+    dialog: [ "Edit profile", "Make changes to your profile here. Click save when you are done." ],
+    alert_dialog: [ "Are you absolutely sure?", "This action cannot be undone. It will permanently delete your account." ],
+    sheet: [ "Edit profile", "Make changes to your profile here." ],
+    drawer: [ "Move goal", "Set your daily activity goal." ]
+  }.each do |family, (title, description)|
+    it "names the #{family} from its title and describes it from its description", :aggregate_failures do
+      visit_preview(family)
+      wait_for_stimulus
+      slot = family.to_s.tr("_", "-")
+      first("[data-slot=#{slot}-trigger]").click
+      content = find("[data-slot=#{slot}-content][data-state=open]")
+
+      expect(named(content)).to eq("name" => title, "description" => description)
+    end
+  end
+
+  # A name the caller gave is the caller's. The controller has already wired
+  # the title at connect, so the example stands in for a server-rendered
+  # `aria-label` by swapping the two before the dialog renders again.
+  it "leaves an aria-label the caller set" do
+    visit_preview(:dialog)
+    wait_for_stimulus
+    page.execute_script(<<~JS)
+      const content = document.querySelector("[data-slot=dialog-content]")
+      content.removeAttribute("aria-labelledby")
+      content.setAttribute("aria-label", "Mine")
+    JS
+    click_button "Edit profile"
+
+    expect(find("[data-slot=dialog-content][data-state=open]")["aria-labelledby"]).to be_nil
+  end
+end

@@ -1,0 +1,23 @@
+<%# The week as the month's rows: a day per row, its jobs in a strip ordered by
+    time, no clock axis. Asked for with `arrangement: :rows`; `reading:
+    :weekly` alone is the timeline in `weekly`.
+
+    The busy generator, as `weekly` uses, so the cap and its "+N" show. The
+    `day_url:` is what keeps the selected day's list under the week: this
+    reading is drawn by the server, and the list is the server's too. %>
+<div class="flex flex-col gap-8">
+  <% [ [ :events, "By event" ], [ :assignees, "By assignee" ] ].each do |group, heading| %>
+    <section class="flex flex-col gap-2">
+      <h3 class="text-sm font-medium"><%= heading %></h3>
+      <%= render(Shadcn::EventCalendar::Component.new(
+            reading: :weekly,
+            arrangement: :rows,
+            group:,
+            month: Date.new(2026, 8, 1),
+            selected: Date.new(2026, 8, 5),
+            day_url: ->(date) { "/calendar/days/#{date.iso8601}" },
+            events: Shadcn::EventCalendar::Preview.workload_events
+          )) %>
+    </section>
+  <% end %>
+</div>

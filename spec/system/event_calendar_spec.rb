@@ -1,0 +1,2085 @@
+# frozen_string_literal: true
+
+require "spec_helper"
+
+# Like the calendar, this component is rendered twice — `Schedule` packs the
+# month on the server and `event_calendar_controller.js` packs it again for
+# every month reached from the nav. So the first example is not about a feature.
+# It is about the two packers agreeing, which is the thing this design risks:
+# a bar in a different row after pressing › is the failure nothing else sees.
+RSpec.describe "Event calendar", :js do
+  # The server decides what "today" is and hands it to the controller, so
+  # freezing Ruby's clock settles both sides. The browser's own clock is
+  # deliberately not consulted — it can be a day off from `Time.zone`.
+  around { |example| travel_to(Date.new(2026, 8, 12)) { example.run } }
+
+  let(:calendar) { "[data-slot=event-calendar]" }
+  let(:title) { "#{calendar} [data-slot=event-calendar-title]" }
+  let(:agenda) { "#{calendar} [data-slot=event-calendar-agenda]" }
+
+  # Clicking a trigger is not the same as having a menu: the panel's items are
+  # links, so a click that lands while Turbo is still swapping pages hits the
+  # *old* trigger — and because that menu is open, the click closes it rather
+  # than opening anything. Waiting on the content's own state is what tells the
+  # two apart, and turns a silently closed menu into a failure that says so
+  # instead of an empty list three lines further down.
+  def open_panel
+    find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-trigger]").click
+    find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dropdown-menu-content][data-state=open]")
+  end
+
+  def nav_button(label) = find("#{calendar} [data-slot=event-calendar-nav] button[aria-label='#{label}']")
+
+  def day(date) = find("#{calendar} [data-day='#{date}']")
+
+  # Read twice in one example, before and after a scroll, so it cannot be a
+  # `let`.
+  def frame_offscreen?
+    page.evaluate_script(<<~JS)
+      (() => {
+        const frame = document.querySelector("turbo-frame#day")
+        if (!frame) return null
+
+        const box = frame.getBoundingClientRect()
+        return box.top >= window.innerHeight || box.bottom <= 0
+      })()
+    JS
+  end
+
+  # A method, not a `let`: it is asked the same question about two cells and in
+  # two palettes within one example. The cell is found inside the script rather
+  # than passed in — Capybara hands an element argument to a wrapper this does
+  # not sit inside, and the call comes back empty.
+  # Which element is painted on top, over the middle of a named bar. No
+  # attribute records that, and the layer the bars live in is
+  # `pointer-events-none`, so a hit test cannot reach them — switching that on
+  # for the length of the question changes what *answers* a hit test, not what
+  # is drawn above what.
+  def topmost_over(title)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const chip = document.querySelector("#{calendar} [data-slot=event-calendar-event][title='#{title}']")
+        if (!chip) return "assente"
+
+        const layer = chip.closest("[data-slot=event-calendar-segments]")
+        const was = layer.style.pointerEvents
+
+        chip.scrollIntoView({ block: "center" })
+        const box = chip.getBoundingClientRect()
+
+        layer.style.pointerEvents = "auto"
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+        layer.style.pointerEvents = was
+
+        if (hit?.closest("[data-slot=event-calendar-event]")) return "event-calendar-event"
+        return hit?.closest("[data-slot]")?.dataset?.slot ?? "nothing"
+      })()
+    JS
+  end
+
+  def outline_of(date)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const el = document.querySelector("[data-slot=event-calendar-day][data-day='#{date}']")
+        if (!el) return "assente"
+
+        const s = getComputedStyle(el)
+        return s.outlineStyle === "none" ? "none" : `${s.outlineWidth} ${s.outlineStyle}`
+      })()
+    JS
+  end
+
+  def agenda_titles = all("#{calendar} [data-slot=item-title]", visible: :all).map(&:text)
+
+  # Normalised, because the two renderers write attributes in their own order
+  # and one of them goes through Rails' escaping. What is compared is everything
+  # a person or a screen reader would tell apart: which cells exist, what state
+  # each is in, and where every bar was laid.
+  def month_in_the_page
+    page.evaluate_script(<<~JS)
+      (() => {
+        const root = document.querySelector("#{calendar}")
+        const days = [...root.querySelectorAll("[data-slot=event-calendar-day]")].map((cell) => ({
+          day: cell.dataset.day,
+          state: [ cell.dataset.today, cell.dataset.selected, cell.dataset.outside ].join("|"),
+          label: cell.getAttribute("aria-label"),
+          text: cell.textContent.trim(),
+          marks: [...cell.querySelectorAll("[data-slot=event-calendar-day-tick]")].map((tick) => tick.dataset.color)
+        }))
+        const bars = [...root.querySelectorAll("[data-slot=event-calendar-event]")].map((bar) => ({
+          color: bar.dataset.color,
+          at: `${bar.style.gridColumn} / ${bar.style.gridRow}`,
+          text: bar.textContent.trim(),
+          cut: [ bar.dataset.continuesBefore, bar.dataset.continuesAfter ].join("|")
+        }))
+
+        return {
+          days,
+          bars,
+          overflow: root.dataset.overflow || "",
+          labelled: root.dataset.labelled || "",
+          tick: root.style.getPropertyValue("--event-calendar-tick"),
+          title: root.querySelector("[data-slot=event-calendar-title]").textContent
+        }
+      })()
+    JS
+  end
+
+  it "draws the same month the server would have drawn", :aggregate_failures do
+    visit_preview("event_calendar")
+    wait_for_stimulus
+    nav_button("Go to the Next Month").click
+    expect(page).to have_css(title, text: "September 2026")
+    nav_button("Go to the Previous Month").click
+    expect(page).to have_css(title, text: "August 2026")
+    in_the_browser = month_in_the_page
+
+    visit "/lookbook/preview/shadcn/event_calendar/month?month=2026-08-01"
+    expect(page).to have_css(title, text: "August 2026")
+    from_the_server = month_in_the_page
+
+    expect(in_the_browser).to eq(from_the_server)
+    expect(in_the_browser["days"].size).to eq(42)
+    expect(in_the_browser["bars"]).not_to be_empty
+  end
+
+  describe "the nav" do
+    before do
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    it "steps a month at a time in both directions", :aggregate_failures do
+      nav_button("Go to the Next Month").click
+      expect(page).to have_css(title, text: "September 2026")
+
+      nav_button("Go to the Previous Month").click
+      nav_button("Go to the Previous Month").click
+      expect(page).to have_css(title, text: "July 2026")
+    end
+
+    it "comes back to today's month, on today", :aggregate_failures do
+      nav_button("Go to the Next Month").click
+      click_on "Today"
+
+      expect(page).to have_css(title, text: "August 2026")
+      expect(day("2026-08-12")["aria-selected"]).to eq("true")
+    end
+
+    # A month whose cells all fit gets its extra row back. Asserted because the
+    # attribute is the only thing standing between the "+2" line and the bar
+    # above it, and it is set in two places.
+    it "gives the cells back their row in a month that does not need one" do
+      nav_button("Go to the Next Month").click
+
+      expect(page).to have_css("#{calendar}:not([data-overflow])")
+    end
+
+    # The events a component was given are the ones the server had, and the
+    # month you navigate to may have others. This is the only way a host can
+    # find out, so it is a contract rather than an implementation detail.
+    it "announces the month it moved to" do
+      page.execute_script(<<~JS)
+        window.movedTo = null
+        document.addEventListener("shadcn--event-calendar:month-change", (event) => {
+          window.movedTo = event.detail.month
+        })
+      JS
+      nav_button("Go to the Next Month").click
+
+      expect(page.evaluate_script("window.movedTo")).to eq("2026-09-01")
+    end
+  end
+
+  # Forty-two tabbable buttons with no arrows and no geometry was the state
+  # this shipped in; the gem's own `Calendar` has implemented the date-grid
+  # pattern all along, two directories away.
+  describe "the keyboard" do
+    before do
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    def press(key)
+      page.execute_script(<<~JS)
+        document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "#{key}", bubbles: true }))
+      JS
+    end
+
+    it "gives the whole month one tab stop", :aggregate_failures do
+      stops = all("#{calendar} [data-slot=event-calendar-day][tabindex='0']", visible: :all)
+
+      expect(stops.size).to eq(1)
+      expect(stops.first["data-day"]).to eq("2026-08-20")
+    end
+
+    it "moves by day and by week", :aggregate_failures do
+      day("2026-08-20").click
+      day("2026-08-20").native.send_keys(:arrow_right)
+      expect(focused).to eq("2026-08-21")
+
+      press("ArrowDown")
+      expect(focused).to eq("2026-08-28")
+
+      press("Home")
+      expect(focused).to eq("2026-08-24")
+    end
+
+    # Stepping off the edge is a month change, and the tab stop goes with it.
+    it "crosses the grid's edge into the next month", :aggregate_failures do
+      day("2026-08-20").click
+      day("2026-08-20").native.send_keys(:page_down)
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "September 2026")
+      expect(focused).to eq("2026-09-20")
+    end
+  end
+
+  describe "choosing a day" do
+    before do
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    it "reads that day's events out underneath", :aggregate_failures do
+      day("2026-08-21").click
+
+      expect(page).to have_css("#{agenda} [data-slot=event-calendar-agenda-title]", text: "Friday, August 21")
+      expect(agenda_titles).to eq([ "Conference", "Birthday Party" ])
+    end
+
+    # `aria-selected` is absent rather than "false" on the days that are not,
+    # which is what the gem's `Calendar` writes — and the tab stop travels with
+    # it, so the month keeps exactly one.
+    it "moves the selection, and the tab stop with it", :aggregate_failures do
+      day("2026-08-21").click
+
+      expect(day("2026-08-21")["aria-selected"]).to eq("true")
+      expect(day("2026-08-20")["aria-selected"]).to be_nil
+      expect(all("#{calendar} [data-slot=event-calendar-day][tabindex='0']", visible: :all).size).to eq(1)
+    end
+
+    # `aria-selected` is the fact; this is whether anyone can see it. The tint
+    # alone separated a selected cell from a plain one by 0.030 of perceptual
+    # lightness in the light palette against 0.124 in the dark, which is why
+    # clicking a day read as nothing happening. Asserted in both palettes for
+    # that reason — the one that was too weak is the one the specs emulate.
+    it "marks the selected day with something visible, in either palette", :aggregate_failures do
+      day("2026-08-21").click
+
+      %w[light dark].each do |palette|
+        page.execute_script("document.documentElement.classList.toggle('dark', #{palette == 'dark'})")
+
+        expect(outline_of("2026-08-21")).to eq("2px solid")
+        expect(outline_of("2026-08-20")).to eq("none")
+      end
+    end
+
+    # The outline that makes the selection visible sits on the cell, and the cell
+    # is opaque — so raising it above the bar layer to keep the outline off its
+    # neighbours hid every bar crossing it. "Conference" runs the 19th to the
+    # 21st, so its middle is over the selected day rather than beside it.
+    it "still draws the bars crossing the day it selected" do
+      expect(topmost_over("Conference")).to eq("event-calendar-event")
+    end
+
+    # The same cell property, reached the other way: `focus-visible` raises a
+    # cell too, and it is the older of the two — so the day a keyboard is
+    # standing on hid its own events before a selection could.
+    it "still draws them under the day the keyboard is on", :aggregate_failures do
+      day("2026-08-20").click
+      press(:arrow_right)
+
+      expect(page.evaluate_script("document.activeElement.dataset.day")).to eq("2026-08-21")
+      expect(topmost_over("Birthday Party")).to eq("event-calendar-event")
+      # And the ring the cell was being raised for is still drawn, which is the
+      # half of the fix that is an argument rather than an observation
+      # everywhere else: it is `ring-inset`, so it was never at risk.
+      expect(page.evaluate_script("getComputedStyle(document.activeElement).boxShadow")).to include("inset")
+    end
+
+    it "says so when there is nothing on the day", :aggregate_failures do
+      day("2026-08-05").click
+
+      expect(page).to have_css("#{agenda} [data-slot=event-calendar-agenda-empty]", text: "Nothing scheduled.")
+      expect(agenda_titles).to be_empty
+    end
+
+    # The bars are decoration — `aria-hidden`, `pointer-events-none` — because
+    # the day button already carries the count and the agenda reads the events
+    # out in full. One tap target per day, at every width.
+    it "keeps the day the only thing that can be clicked" do
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-segments][aria-hidden=true]", visible: :all)
+    end
+  end
+
+  # `Space` on a row of the agenda, the arrows, `Space` again. The agenda is the
+  # only place a keyboard can take hold of an event: the bars carry
+  # `aria-hidden`, so a tab stop on one would be a violation rather than a
+  # choice, and a crossing event is one *row* there rather than a bar a week.
+  describe "moving an event from the keyboard" do
+    before do
+      visit_preview("event_calendar", :movable)
+      wait_for_stimulus
+    end
+
+    def agenda_row(id) = find("#{calendar} [data-slot=event-calendar-agenda-item][data-event-id='#{id}']")
+
+    # Read either side of a move, so it cannot be a `let`.
+    def dates_of(id)
+      page.evaluate_script(<<~JS)
+        (() => {
+          const root = document.querySelector("#{calendar}")
+          const one = JSON.parse(root.getAttribute("data-shadcn--event-calendar-events-value"))
+            .find((event) => event.id === "#{id}")
+          return [ one.from, one.to || one.from ]
+        })()
+      JS
+    end
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    # `e5` is Standup, on the 20th, which is the day the preview selects — so it
+    # is in the agenda, and the arrows carry it one day on from there.
+    it "takes a row and puts it on another day", :aggregate_failures do
+      expect(dates_of("e5")).to eq(%w[2026-08-20 2026-08-20])
+
+      agenda_row("e5").send_keys(:space)
+      expect(focused).to eq("2026-08-20")
+
+      press(:arrow_right)
+      press(:space)
+
+      expect(dates_of("e5")).to eq(%w[2026-08-21 2026-08-21])
+      expect(focused).to eq("2026-08-21")
+    end
+
+    it "puts the focus back on the row it came from when it is cancelled", :aggregate_failures do
+      agenda_row("e5").send_keys(:space)
+      press(:arrow_right)
+      press(:escape)
+
+      expect(dates_of("e5")).to eq(%w[2026-08-20 2026-08-20])
+      expect(page.evaluate_script("document.activeElement?.dataset?.eventId")).to eq("e5")
+    end
+
+    it "carries the whole of a crossing event, which is one row and two bars" do
+      agenda_row("e4").send_keys(:space)
+      press(:arrow_right)
+      press(:space)
+
+      expect(dates_of("e4")).to eq(%w[2026-08-20 2026-08-22])
+    end
+
+    it "hands the host an id, two dates and a way back", :aggregate_failures do
+      page.execute_script(<<~JS)
+        window.__moves = []
+        document.addEventListener("shadcn--event-calendar:event-move", (event) => {
+          window.__moves.push([ event.detail.id, event.detail.from, event.detail.to ])
+          window.__revert = event.detail.revert
+        })
+      JS
+
+      agenda_row("e5").send_keys(:space)
+      press(:arrow_right)
+      press(:space)
+
+      expect(page.evaluate_script("window.__moves")).to eq([ %w[e5 2026-08-21 2026-08-21] ])
+
+      page.execute_script("window.__revert()")
+
+      expect(dates_of("e5")).to eq(%w[2026-08-20 2026-08-20])
+    end
+
+    it "says nothing at all when nothing is moved" do
+      page.execute_script(<<~JS)
+        window.__moves = []
+        document.addEventListener("shadcn--event-calendar:event-move", () => window.__moves.push(1))
+      JS
+
+      agenda_row("e5").send_keys(:space)
+      press(:space)
+
+      expect(page.evaluate_script("window.__moves")).to be_empty
+    end
+  end
+
+  # A move is silent otherwise. The agenda's own `aria-live` says the day's list
+  # changed, which is a side effect of a move and not a message about one — and
+  # the only `role="status"` this component had is the title, which holds the
+  # month and is rewritten on every navigation.
+  describe "what a move says out loud" do
+    before do
+      visit_preview("event_calendar", :movable)
+      wait_for_stimulus
+    end
+
+    def announced
+      page.evaluate_script(
+        "document.querySelector(\"#{calendar} [data-slot=event-calendar-announcer]\")?.textContent"
+      )
+    end
+
+    def agenda_row(id) = find("#{calendar} [data-slot=event-calendar-agenda-item][data-event-id='#{id}']")
+
+    it "names the event when it is taken and the day when it lands", :aggregate_failures do
+      expect(announced).to eq("")
+
+      agenda_row("e5").send_keys(:space)
+      expect(announced).to include("Standup")
+
+      press(:arrow_right)
+      press(:space)
+      expect(announced).to include("Standup").and include("August 21")
+    end
+
+    it "says so when it is put back" do
+      agenda_row("e5").send_keys(:space)
+      press(:arrow_right)
+      press(:escape)
+
+      expect(announced).to include("August 20")
+    end
+
+    it "leaves the month's own region to the month" do
+      agenda_row("e5").send_keys(:space)
+
+      expect(find("#{calendar} [data-slot=event-calendar-title]").text).to eq("August 2026")
+    end
+  end
+
+  # The other hand. A grip rather than the whole bar, and the second example is
+  # the reason why: with the bar grabbable, the day underneath lost its centre
+  # on 17 of the 27 days that had events, and clicking one stopped working.
+  describe "moving an event with a pointer" do
+    before do
+      visit_preview("event_calendar", :movable)
+      wait_for_stimulus
+    end
+
+    def dates_of(id)
+      page.evaluate_script(<<~JS)
+        (() => {
+          const one = JSON.parse(document.querySelector("#{calendar}")
+            .getAttribute("data-shadcn--event-calendar-events-value"))
+            .find((event) => event.id === "#{id}")
+          return [ one.from, one.to || one.from ]
+        })()
+      JS
+    end
+
+    def haul(handle, to)
+      page.driver.browser.action.click_and_hold(handle.native).move_to(day(to).native).release.perform
+    end
+
+    # `e4` is Conference, 19–21 August: one bar over three columns, its grip on
+    # the 19th. Dropping it on the 20th is one day, not two — the shift comes
+    # from the day the grip is on and not from anywhere else.
+    it "shifts by the day the grip is on" do
+      haul(find("#{calendar} [data-slot=event-calendar-event][data-event-id='e4'] " \
+                "[data-slot=event-calendar-event-grip]", match: :first), "2026-08-20")
+
+      expect(dates_of("e4")).to eq(%w[2026-08-20 2026-08-22])
+    end
+
+    it "leaves the day underneath its bars clickable", :aggregate_failures do
+      expect(topmost_over("Conference")).to eq("event-calendar-event")
+
+      day("2026-08-13").click
+
+      expect(day("2026-08-13")["aria-selected"]).to eq("true")
+    end
+
+    # The agenda's colour bar is the row's grip. It has no day on the grid, so
+    # it is relative to the day the agenda is showing — the same rule the
+    # keyboard follows, for the same reason.
+    it "drags a row by the bar it leads with" do
+      haul(find("#{calendar} [data-slot=event-calendar-agenda-item][data-event-id='e5'] " \
+                "[data-slot=event-calendar-agenda-mark]"), "2026-08-22")
+
+      expect(dates_of("e5")).to eq(%w[2026-08-22 2026-08-22])
+    end
+  end
+
+  # Seven days of one axis. Server-drawn, so `‹` and `›` are links and the week
+  # arrives from the server rather than being redrawn here.
+  describe "the weekly reading" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density?period=weekly&month=2026-08-05&most=6"
+      wait_for_stimulus
+    end
+
+    it "steps a week rather than a month", :aggregate_failures do
+      expect(find("#{calendar} [data-slot=event-calendar-title]").text).to eq("3 – 9 August 2026")
+
+      # Not `nav_button`: that helper looks for a `button`, and with a
+      # `month_url:` the nav renders anchors — which is the whole point of a
+      # reading the server draws.
+      find("#{calendar} [data-slot=event-calendar-nav] [aria-label='Go to the Next Week']").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
+                               text: "10 – 16 August 2026")
+      expect(all("#{calendar} [data-slot=event-calendar-day]").size).to eq(7)
+    end
+
+    # The week's own view question: rows or the timeline, and a step keeps the
+    # one you picked — `view_url:` is handed `:rows`, and the host is what
+    # remembers it was the week's rows rather than the month's.
+    it "switches the week to rows and keeps them across a step", :aggregate_failures do
+      open_panel
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the week as", "Show each job as" ])
+
+      find("[data-slot=dropdown-menu-radio-item][data-value=rows]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Weekly · Rows")
+      expect(all("#{calendar} [data-slot=event-calendar-day]").size).to eq(7)
+
+      find("#{calendar} [data-slot=event-calendar-nav] [aria-label='Go to the Next Week']").click
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "10 – 16 August 2026")
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Weekly · Rows")
+    end
+  end
+
+  # Both cuts of a cell used to be rendered with one hidden, which made the menu
+  # free and everything else twice as expensive. A cell renders the grouping it
+  # is showing now, and the panel is links to the other state.
+  describe "the options panel, as links" do
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=8&colored=true"
+      wait_for_stimulus
+    end
+
+    it "renders one grouping, not both", :aggregate_failures do
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-item]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-assignee]", visible: :all)
+    end
+
+    it "swaps which one on the server", :aggregate_failures do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=assignees]").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-assignee]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-item]", visible: :all)
+    end
+
+    # One panel, narrowing: the period, then how to read it, then the only
+    # question that reading has. The toolbar used to carry a control per answer,
+    # and most of them were always about a view you were not in.
+    it "narrows from the period to the question the view has", :aggregate_failures do
+      open_panel
+
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the month as", "Group by" ])
+      expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
+        .to eq([ "Monthly", "Weekly", "Daily", "Grid", "Rows", "Timeline", "By assignee", "By event" ])
+    end
+
+    # A day has one arrangement, so the monthly question goes; the grouping
+    # stays, because "who is where" is a question a day gets asked more than a
+    # month does.
+    #
+    # The shape stayed too, and this example used to assert that it did not —
+    # fixing a defect in place as though it were the design. A day inherits both
+    # the `shape:` argument and the drawing of it from `Hours`, so leaving it off
+    # the panel did not mean a day had no shape: it meant a day had one nobody
+    # could see or change.
+    it "swaps the monthly question for the day's own", :aggregate_failures do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      # The item is a link, so the day arrives over Turbo — and the trigger is
+      # the one element that says which page you are on, because it names the
+      # state it opens. Without this the panel is opened on whichever page
+      # happens to be mounted, which is the month often enough to pass.
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Daily")
+
+      open_panel
+
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the day as", "Show each job as", "Group by" ])
+      expect(page.all("[data-slot=dropdown-menu-radio-item]").map(&:text))
+        .to eq([ "Monthly", "Weekly", "Daily", "Timeline only", "List only", "Timeline and list",
+                 "Chips", "Bars", "By assignee", "By event" ])
+    end
+
+    # And it goes again when there is no axis for it to decide, which is the
+    # rule the rest of the panel follows: a question is drawn when the view it
+    # belongs to is the view you are in.
+    it "drops the shape when the day is showing its list alone", :aggregate_failures do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Daily")
+
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=agenda]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "List only")
+
+      open_panel
+
+      expect(page.all("[data-slot=dropdown-menu-label]").map(&:text))
+        .to eq([ "Show", "Show the day as", "Group by" ])
+    end
+
+    # The period and the view are two questions, and the answer to one has to
+    # survive the other. It did not: the panel's *Monthly* item was given
+    # `view_url.call(:grid)`, so a host that keeps the two apart could not tell
+    # "show me the month again" from "draw the month as a grid" — leaving the
+    # day sent you back to grid however you had been reading the month. The
+    # callback now says `:monthly`.
+    it "comes back to the view it was reading the month in", :aggregate_failures do
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=4"
+      wait_for_stimulus
+
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=daily]").click
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Daily")
+
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=monthly]").click
+
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Monthly")
+      expect(page).to have_css("#{calendar} [data-slot=dropdown-menu-trigger]", text: "Timeline")
+    end
+
+    it "carries the month across to the hours view" do
+      open_panel
+      find("[data-slot=dropdown-menu-radio-item][data-value=hours]").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
+    end
+  end
+
+  # The workload reading is server-drawn — its cells hold crews and clients the
+  # payload does not carry — so its nav dispatches and leaves the DOM alone.
+  # Redrawing anyway is what put August's people on September's dates, and
+  # re-deriving `labelled` from density alone is what ran both readings at once.
+  describe "the workload reading's navigation", :aggregate_failures do
+    it "announces the month and changes nothing else" do
+      visit "/lookbook/preview/shadcn/event_calendar/workload"
+      wait_for_stimulus
+
+      moved = page.evaluate_script(<<~JS)
+        (() => {
+          let month = null
+          document.addEventListener("shadcn--event-calendar:month-change", (e) => { month = e.detail.month },
+                                    { once: true })
+          document.querySelector("[data-slot=event-calendar-nav] button[aria-label='Go to the Next Month']").click()
+          return month
+        })()
+      JS
+
+      expect(moved).to eq("2026-09-01")
+      expect(page).to have_css("#{calendar}:not([data-labelled])")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-tick]", visible: :all)
+    end
+  end
+
+  # The `day_url:` path end to end, which only a browser can show. Two things
+  # happen on one click and neither needs a line of JavaScript in the host:
+  # Turbo sends the response into the frame inside the Sheet, and the dialog
+  # action opens it. The model and the route are in `test/dummy` — the same
+  # reason `/chat` exists for the message scroller.
+  describe "a host putting the day view in a sheet" do
+    let(:sheet) { "[data-slot=sheet-content]" }
+
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=panel&month=2026-08-01"
+      wait_for_stimulus
+    end
+
+    it "starts closed, with no agenda of its own", :aggregate_failures do
+      expect(page).to have_no_css("#{sheet}[data-state=open]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-agenda]", visible: :all)
+    end
+
+    it "opens the sheet and fills it, on one click", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+
+      expect(page).to have_css("#{sheet}[data-state=open]")
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
+    end
+
+    it "swaps a different day into the open sheet", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "August 13")
+
+      find("body").send_keys(:escape)
+      find("#{calendar} [data-day='2026-08-20']").click
+
+      expect(page).to have_css("turbo-frame#day h2", text: "August 20")
+    end
+
+    # The point of the example: a cell shows what a cell can show, and the rest
+    # is one request away.
+    it "shows the fields the calendar could not carry", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+      frame = find("turbo-frame#day")
+
+      expect(frame).to have_link(href: %r{\Atel:})
+      expect(frame.text).to include("Bologna")
+      expect(frame.text).to match(/confirmed|pencilled|done/)
+    end
+  end
+
+  # The other half of the same idea, and the cheaper one: the day view goes into
+  # the agenda the calendar already has, rather than into a Sheet. `agenda_as:`
+  # is what makes that possible, and it was asserted only at the component level
+  # — that the element is a `turbo-frame` and the cell names it. Whether a click
+  # then actually swaps a day into it is a browser's question, and nothing was
+  # asking it.
+  describe "a host owning the day view, in the agenda" do
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=agenda&month=2026-08-01"
+      wait_for_stimulus
+    end
+
+    it "makes the day a link rather than a button" do
+      expect(page).to have_css("a[data-slot=event-calendar-day][data-day='2026-08-13']")
+    end
+
+    it "swaps the day into the agenda, and swaps it again", :aggregate_failures do
+      find("#{calendar} [data-day='2026-08-13']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
+
+      find("#{calendar} [data-day='2026-08-20']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 20")
+    end
+
+    # The half that swapping does not cover, and the half a person notices: the
+    # agenda sits under six weeks of grid, so the frame updated 335px below the
+    # fold and the click read as nothing happening. Turbo's `autoscroll` brings
+    # it up. Asserted as *in the viewport* rather than as "the attribute is
+    # there", because the attribute was never the claim.
+    it "brings the day into view rather than updating it off-screen" do
+      expect(frame_offscreen?).to be(true)
+
+      find("#{calendar} [data-day='2026-08-13']").click
+      expect(page).to have_css("turbo-frame#day h2", text: "Thursday, August 13")
+
+      expect(page.document).to have_selector(:xpath, "//*", wait: 0) # settle
+      expect(frame_offscreen?).to be(false)
+    end
+  end
+
+  # A reading the server draws whole ships no `prototypes` template, because
+  # there is nothing to redraw from — and `connect` read it regardless, so the
+  # controller threw on every one of them. Nothing visibly broke, which is why
+  # it lasted: Stimulus catches the throw and `data-action` binds independently,
+  # so the keyboard and the selection went on working. What shipped was a
+  # console error on every page a host puts one of these on.
+  #
+  # Asserted per reading rather than once, because the three arrive at it
+  # differently — two arrangements of workload and a different component for
+  # hours — and a guard that covered one would look like it covered all.
+  describe "a reading the server draws whole" do
+    %w[workload workload_by_assignee hours].each do |preview|
+      it "connects its controller without throwing, on #{preview}" do
+        page.driver.browser.logs.get(:browser)
+        visit "/lookbook/preview/shadcn/event_calendar/#{preview}"
+        wait_for_stimulus
+
+        errors = page.driver.browser.logs.get(:browser).reject { |log| log.level == "WARNING" }
+
+        expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
+      end
+    end
+  end
+
+  # The one option whose effect is a stylesheet rather than a render. `rows:`
+  # in `shadcn.css` carries the breakpoint and the override behind one name, so
+  # what is asserted here is that both halves still fire: the width alone below
+  # `lg`, and the attribute alone above it.
+  #
+  # It was a toggle button until the panel took it; the behaviour did not
+  # change, only who asks for it.
+  describe "the grid and rows views" do
+    subject(:week) { find("#{calendar} [data-slot=event-calendar-week]", match: :first, visible: :all) }
+
+    def display_of(node) = page.evaluate_script("getComputedStyle(arguments[0]).display", node)
+
+    def paint(node) = page.evaluate_script("getComputedStyle(arguments[0]).backgroundColor", node)
+
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=6"
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.manage.window.resize_to(1400, 1000) }
+
+    context "when the window is wide" do
+      it "lays the month out as a grid until rows is asked for" do
+        expect(display_of(week)).to eq("block")
+      end
+
+      it "lays it out as rows once it is", :aggregate_failures do
+        open_panel
+        find("[data-slot=dropdown-menu-radio-item][data-value=rows]").click
+
+        expect(page).to have_css("#{calendar}[data-arrangement=rows]")
+        expect(display_of(week)).to eq("contents")
+      end
+
+      # The half an eye can see. Asserted as a colour rather than a class,
+      # because what matters is that a pressed toggle and an unpressed one do
+      # not look alike — the pressed one borrows the solid `default` variant,
+      # and a rename of that should not fail here.
+      it "makes a pressed toggle look different from an unpressed one" do
+        find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Show all").click
+
+        pressed = paint(find("#{calendar} [data-slot=button][aria-pressed=true]", text: "Show all"))
+
+        expect(pressed).not_to eq(paint(find("#{calendar} [data-slot=button]", text: "Today")))
+      end
+    end
+
+    context "when the window is narrow" do
+      before do
+        page.driver.browser.manage.window.resize_to(820, 900)
+        visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=6"
+        wait_for_stimulus
+      end
+
+      # The breakpoint alone, with nothing asked for: below `lg` the grid view
+      # is rows anyway, because seven columns on a phone is what rows avoid.
+      it "is already rows" do
+        expect(display_of(week)).to eq("contents")
+      end
+    end
+  end
+
+  # The hours reading draws its scale once, above the month, so the only thing
+  # keeping an hour label over the gridline it names is that the two boxes are
+  # the same box. Nothing else in the suite can see that: the scale and the
+  # axis are different elements, both render, and axe has no opinion.
+  #
+  # They were 16px apart, which is a day cell's `px-2` and `gap-2` — the scale
+  # is not inside a cell and had neither.
+  describe "the hour scale" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=6"
+      wait_for_stimulus
+    end
+
+    it "sits over the axis it names, to the pixel", :aggregate_failures do
+      boxes = page.evaluate_script(<<~JS)
+        (() => {
+          const scale = document.querySelector("[data-slot=event-calendar-ruler] > span:last-child")
+          const axis = [...document.querySelectorAll("[data-slot=event-calendar-day-track]")]
+                         .find((t) => t.offsetParent)
+          const [a, b] = [scale.getBoundingClientRect(), axis.getBoundingClientRect()]
+          return { left: Math.round(b.left - a.left), width: Math.round(b.width - a.width) }
+        })()
+      JS
+
+      expect(boxes["left"]).to eq(0)
+      expect(boxes["width"]).to eq(0)
+    end
+  end
+
+  # A component spec can only see what the style attribute says, and it said
+  # `--for:100%` while the chip rendered 124px wide inside a 1270px axis: the
+  # class carried both `w-auto` and `w-(--for)`, and the one Tailwind emitted
+  # last won. Only a browser can tell those two apart.
+  describe "an all-day chip in the hours reading" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=hours&most=2&all_day=1&from=7&to=19"
+      wait_for_stimulus
+    end
+
+    it "is as wide as the day" do
+      widths = page.evaluate_script(<<~JS)
+        (() => {
+          const chip = [...document.querySelectorAll("[data-slot=event-calendar-day-item]")]
+            .find((c) => c.style.cssText.includes("--for") && c.offsetParent)
+          const axis = chip.closest("[data-slot=event-calendar-day-track]")
+          return { chip: Math.round(chip.getBoundingClientRect().width),
+                   axis: Math.round(axis.getBoundingClientRect().width) }
+        })()
+      JS
+
+      expect(widths["chip"]).to eq(widths["axis"])
+    end
+
+    # The width's consequence, and the reason this is measured rather than
+    # eyeballed: the crew rides `ml-auto` to the end of the head, which is right
+    # at 124px and absurd at 1270 — the faces a metre from the label they belong
+    # to. Asserted as the gap between them, so it cannot pass by the chip having
+    # quietly stopped being wide.
+    # A chip drawn at its duration can still be narrower than its own clock,
+    # three faces and a "+1" — and `overflow-hidden` cut the crew in half rather
+    # than letting it be as wide as what it says. The duration is a floor for
+    # the width, not a cap.
+    #
+    # Both halves are asserted together because each alone has a trivial wrong
+    # answer: nothing clips if every chip is enormous, nothing overlaps if every
+    # chip is tiny.
+    it "cuts nothing off, and still overlaps nothing", :aggregate_failures do
+      counts = page.evaluate_script(<<~JS)
+        (() => {
+          let clipped = 0, overlaps = 0
+          for (const chip of document.querySelectorAll("[data-slot=event-calendar-day-item]"))
+            if (chip.scrollWidth > chip.clientWidth + 1) clipped++
+          for (const axis of document.querySelectorAll("[data-slot=event-calendar-day-track]")) {
+            const b = [...axis.querySelectorAll("[data-slot=event-calendar-day-item]")]
+              .map((c) => c.getBoundingClientRect())
+            for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++)
+              if (Math.min(b[i].right, b[j].right) - Math.max(b[i].left, b[j].left) > 1 &&
+                  Math.min(b[i].bottom, b[j].bottom) - Math.max(b[i].top, b[j].top) > 1) overlaps++
+          }
+          return { clipped, overlaps }
+        })()
+      JS
+
+      expect(counts["clipped"]).to eq(0)
+      expect(counts["overlaps"]).to eq(0)
+    end
+
+    it "keeps the crew beside the label, not at the far end" do
+      gap = page.evaluate_script(<<~JS)
+        (() => {
+          const chip = [...document.querySelectorAll("[data-slot=event-calendar-day-item]")]
+            .find((c) => c.style.cssText.includes("--for") && c.offsetParent &&
+                         c.querySelector("[data-slot=avatar-group]"))
+          const label = chip.querySelector("[data-slot=event-calendar-day-time]")
+          const crew = chip.querySelector("[data-slot=avatar-group]")
+          return Math.round(crew.getBoundingClientRect().left - label.getBoundingClientRect().right)
+        })()
+      JS
+
+      expect(gap).to be < 16
+    end
+  end
+
+  # The whole point of the lanes, and the only place it can be checked: a job
+  # that crosses days has to land on the same row in every cell it appears in,
+  # or it reads as several jobs that happen to share a name. Two things can
+  # break it and neither is visible in HTML — a row held open that is shorter
+  # than a real one, and a band that starts wherever the day above it ends.
+  describe "a job that crosses days, across a week" do
+    it "sits on one line in every cell" do
+      visit "/lookbook/preview/shadcn/event_calendar/density" \
+            "?view=grid&most=30&all_day=1&spanning=2&group=events"
+      wait_for_stimulus
+
+      rows = page.evaluate_script(<<~JS)
+        (() => {
+          const rows = {}
+          for (const cell of document.querySelectorAll("[data-slot=event-calendar-day]")) {
+            for (const chip of cell.querySelectorAll("[data-slot=event-calendar-day-item]")) {
+              const text = chip.querySelector("[data-slot=event-calendar-day-text]")
+              if (!text || !text.textContent.includes("day job")) continue
+              ;(rows[text.textContent.trim()] ||= []).push(
+                Math.round(chip.getBoundingClientRect().top - cell.getBoundingClientRect().top))
+            }
+          }
+          return rows
+        })()
+      JS
+
+      expect(rows.values).to all(satisfy { |tops| tops.uniq.one? })
+    end
+  end
+
+  # A workload row is a fixed 80px of chips that scroll sideways, and nothing
+  # asserted it: its rules moved out of the shared frame when the hours reading
+  # needed a cell that grows with its lanes, the move silently did not land, and
+  # three commits shipped with rows that were as tall as their contents.
+  #
+  # It also has no band to align. A day is a row there, so what would have to
+  # line up is an *x*, and that is decided by the widths of the chips before it
+  # — 193, 202 and 214 pixels for three of them, because a chip is as wide as
+  # its client's name and its crew. The held rows are a grid idea and are
+  # hidden here.
+  describe "the rows arrangement" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/density" \
+            "?view=rows&most=6&all_day=1&spanning=3&group=events"
+      wait_for_stimulus
+    end
+
+    it "keeps every row the same fixed height" do
+      heights = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("[data-slot=event-calendar-day]")]
+          .filter((cell) => cell.offsetParent)
+          .map((cell) => Math.round(cell.getBoundingClientRect().height))
+      JS
+
+      expect(heights.uniq).to eq([ 80 ])
+    end
+
+    # A held row is `invisible`, which keeps its layout space — so a driver
+    # reporting it as "not displayed" would pass this whether or not the rule
+    # that removes it exists. The computed `display` is the only thing that can
+    # tell those apart, and removing it is the point: in a strip the space is
+    # a meaningless indent.
+    it "takes no space for a held row, having nothing to align" do
+      displays = page.evaluate_script(<<~JS)
+        [...document.querySelectorAll("[data-slot=event-calendar-day-held]")]
+          .map((held) => getComputedStyle(held).display)
+      JS
+
+      expect(displays.uniq - [ "none" ]).to be_empty
+    end
+  end
+
+  # A server-drawn reading has no other way to change month: its cells hold
+  # crews and clients `#portable_events` does not carry, so the controller
+  # announces the ask and leaves the DOM alone. `month_url:` is the whole of its
+  # navigation, and what a host wires to its own route.
+  describe "walking the months in a server-drawn reading" do
+    # Explicit, because these examples read a desktop layout and the suite runs
+    # in a random order behind ones that resize the window to a phone.
+    before { page.driver.browser.manage.window.resize_to(1400, 1000) }
+
+    it "moves and keeps the view it was in", :aggregate_failures do
+      visit "/lookbook/preview/shadcn/event_calendar/density?month=2026-08-01&view=hours&most=4"
+      wait_for_stimulus
+
+      # One month at a time, each waited for. Clicking twice in a row raced the
+      # navigation the first click starts: the second `find` could resolve
+      # against the page on its way out, and the month it asked for was the one
+      # already being left — August to September, twice. Roughly one run in
+      # four, and the same shape as the options panel's flake, which is why the
+      # cure is the same one: wait for the page you are about to click on.
+      %w[September October].each do |month|
+        find("#{calendar} [aria-label='Go to the Next Month']").click
+        expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "#{month} 2026")
+      end
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
+
+      find("#{calendar} [aria-label='Go to the Previous Month']").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]", text: "September 2026")
+    end
+
+    # `Today` is the same link with `Date.current` in it, so it comes back from
+    # anywhere in one step rather than stepping back a month at a time. It was
+    # dead for as long as the preview passed no `month_url:` — which is also
+    # what a host that passes none gets, by contract: the controller announces
+    # `month-change` and leaves the DOM alone.
+    it "comes back to this month from wherever it is" do
+      visit "/lookbook/preview/shadcn/event_calendar/density?month=2026-10-01&view=grid&most=3"
+      wait_for_stimulus
+
+      find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Today").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
+                               text: I18n.l(Date.current, format: "%B %Y"))
+    end
+  end
+
+  # A month needs its date column because forty-two rows have to say which is
+  # which; a day does not, and it was charging the axis a `w-14` to repeat what
+  # the title already says. Hidden in CSS, so only a browser can see it gone.
+  describe "the daily reading" do
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/lookbook/preview/shadcn/event_calendar/density" \
+            "?period=daily&month=2026-08-04&most=8&from=7&to=19"
+      wait_for_stimulus
+    end
+
+    # The same check the month's scale gets, and it needs its own because the
+    # left column is a different width here — the operator's name at `w-32` cut
+    # by operator, nothing at all cut by event. The two were 72 pixels apart.
+    %w[assignees events].each do |group|
+      it "sits its scale over the axis, cut by #{group}", :aggregate_failures do
+        visit "/lookbook/preview/shadcn/event_calendar/density" \
+              "?period=daily&month=2026-08-01&most=10&group=#{group}&from=7&to=19"
+        wait_for_stimulus
+
+        boxes = page.evaluate_script(<<~JS)
+          (() => {
+            const scale = document.querySelector("[data-slot=event-calendar-ruler] > span:last-child")
+            const axis = [...document.querySelectorAll("[data-slot=event-calendar-day-track]")]
+                           .find((track) => track.offsetParent)
+            const [a, b] = [scale.getBoundingClientRect(), axis.getBoundingClientRect()]
+            return { left: Math.round(b.left - a.left), width: Math.round(b.width - a.width) }
+          })()
+        JS
+
+        expect(boxes["left"]).to eq(0)
+        expect(boxes["width"]).to eq(0)
+      end
+    end
+
+    it "gives the axis the whole width", :aggregate_failures do
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-head]")
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-ruler]")
+    end
+
+    it "walks a day at a time" do
+      find("#{calendar} [aria-label='Go to the Next Day']").click
+
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-title]",
+                               text: "Wednesday, August 5")
+    end
+  end
+
+  # Not a narrower desktop: a different reading. Below `sm` a cell is a number
+  # and its dots, and the events are read in the agenda — a cell that width can
+  # hold a title or be legible, and not both.
+  describe "on a phone" do
+    before do
+      page.driver.browser.manage.window.resize_to(390, 844)
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.manage.window.resize_to(1400, 1000) }
+
+    it "shows marks in the cells instead of bars", :aggregate_failures do
+      expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-tick]")
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-event]")
+    end
+
+    it "still reads the day out underneath" do
+      day("2026-08-21").click
+
+      expect(agenda_titles).to eq([ "Conference", "Birthday Party" ])
+    end
+  end
+
+  # The toolbar, at the widths of the phones a host's users hold. Through the
+  # device emulation rather than `resize_to`: headless Chrome will not make a
+  # window narrower than 500px, so `resize_to(390, …)` measures at 500, where
+  # the day's nav already fitted. That is how the overflow got past this file.
+  # A month taller than the window: past its first week the column names
+  # scrolled away, and a cell said its day number but not which weekday.
+  describe "the weekday row in a tall month" do
+    before do
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width: 1400, height: 400, deviceScaleFactor: 1, mobile: false)
+      visit_preview("event_calendar")
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride") }
+
+    # Where the row and the grid are once the page has scrolled `by` past the
+    # grid's own top.
+    def scrolled(by:, offset: nil)
+      page.evaluate_script(<<~JS)
+        (() => {
+          if (#{offset.to_json}) document.documentElement.style.setProperty("--event-calendar-sticky-top", #{offset.to_json});
+          const grid = document.querySelector("[data-slot=event-calendar-grid]");
+          window.scrollTo(0, 0);
+          window.scrollTo(0, grid.getBoundingClientRect().top + #{by});
+          const row = grid.querySelector("[data-slot=event-calendar-weekdays]");
+          return { row: Math.round(row.getBoundingClientRect().top),
+                   grid: Math.round(grid.getBoundingClientRect().top) };
+        })()
+      JS
+    end
+
+    it "stays at the top of the window while the weeks scroll under it", :aggregate_failures do
+      at = scrolled(by: 200)
+
+      expect(at["grid"]).to eq(-200)
+      expect(at["row"]).to eq(0)
+    end
+
+    it "stops below a host's fixed bar when the host names its height", :aggregate_failures do
+      at = scrolled(by: 200, offset: "48px")
+
+      expect(at["row"]).to eq(48)
+    end
+
+    # Opaque with the surface the calendar sits on, which is what showed
+    # through the tint before the row was opaque. In the dark palette the page
+    # and a card differ (0.145 against 0.205), so that is where it shows.
+    it "is opaque with the surface it sits on", :aggregate_failures do
+      colors = page.evaluate_script(<<~JS)
+        (() => {
+          document.documentElement.classList.add("dark");
+          const calendar = document.querySelector("[data-slot=event-calendar]");
+          const row = calendar.querySelector("[data-slot=event-calendar-weekdays]");
+          const probe = document.createElement("div");
+          document.body.append(probe);
+          const token = (name) => { probe.style.backgroundColor = `var(${name})`;
+                                    return getComputedStyle(probe).backgroundColor; };
+          const read = () => getComputedStyle(row).backgroundColor;
+          const page = read();
+          calendar.parentElement.dataset.slot = "card";
+          const card = read();
+          calendar.style.setProperty("--event-calendar-sticky-bg", "var(--muted)");
+          const host = read();
+          return { page, card, host, background: token("--background"), cardToken: token("--card"),
+                   muted: token("--muted") };
+        })()
+      JS
+
+      expect(colors["page"]).to eq(colors["background"])
+      expect(colors["card"]).to eq(colors["cardToken"])
+      expect(colors["card"]).not_to eq(colors["page"])
+      expect(colors["host"]).to eq(colors["muted"])
+    end
+
+    it "stays in its place before the grid reaches the top" do
+      at = scrolled(by: -50)
+
+      expect(at["row"]).to eq(at["grid"] + 1)
+    end
+  end
+
+  describe "the toolbar on a phone" do
+    def at_width(width)
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width:, height: 844, deviceScaleFactor: 1, mobile: true)
+      yield
+    ensure
+      page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+    end
+
+    # scrollWidth over clientWidth, for the page and for each part of the
+    # toolbar: equal means nothing is wider than the box it sits in.
+    def widths
+      page.evaluate_script(<<~JS)
+        (() => {
+          const measure = (element) => [ element.scrollWidth, element.clientWidth ];
+          const header = document.querySelector("[data-slot=event-calendar-header]");
+          return { page: measure(document.documentElement), header: measure(header),
+                   nav: measure(header.querySelector("[data-slot=event-calendar-nav]")) };
+        })()
+      JS
+    end
+
+    {
+      "the month" => "default",
+      "the month as rows" => "density?period=monthly&view=rows",
+      "the month's timeline" => "density?period=monthly&view=hours",
+      "the week's timeline" => "density?period=weekly&view=hours",
+      "the week as rows" => "density?period=weekly&view=rows",
+      "the day" => "density?period=daily",
+      "the day, in Italian" => "phone"
+    }.each do |name, path|
+      [ 360, 390, 412 ].each do |width|
+        it "keeps #{name}'s toolbar inside #{width}px", :aggregate_failures do
+          at_width(width) do
+            visit "/lookbook/preview/shadcn/event_calendar/#{path}"
+            wait_for_stimulus
+
+            measured = widths
+            expect(measured["page"].first).to eq(width)
+            measured.each { |part, (scroll, client)| expect(scroll).to eq(client), "#{part}: #{scroll}/#{client}" }
+          end
+        end
+      end
+    end
+
+    it "keeps every control whole, wrapping onto lines of its own" do
+      at_width(390) do
+        visit "/lookbook/preview/shadcn/event_calendar/phone"
+        wait_for_stimulus
+
+        sizes = page.evaluate_script(<<~JS)
+          Array.from(document.querySelectorAll("[data-slot=event-calendar-nav] :is(a, button)"))
+            .filter((control) => control.getClientRects().length)
+            .map((control) => Math.round(control.getBoundingClientRect().height))
+        JS
+        expect(sizes.size).to eq(4)
+        expect(sizes).to all(eq(32))
+      end
+    end
+  end
+
+  # Below `lg` the day's axis is wider than the phone and scrolls sideways,
+  # with nothing inside that takes focus. The grid is its own tab stop, so
+  # the hours past the edge are reached from the keyboard.
+  #
+  # This passes without the fix too, and that is worth knowing rather than a
+  # reason to drop it: the Chrome this suite drives already makes such a
+  # scroller focusable by itself, and other browsers are not known to. What
+  # pins the fix is the component spec (the three attributes) and axe's
+  # `scrollable-region-focusable` on `event_calendar/phone`. This pins what a
+  # keyboard actually gets.
+  describe "the day's timeline on a phone" do
+    before do
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width: 390, height: 844, deviceScaleFactor: 1, mobile: true)
+      visit_preview("event_calendar", :phone)
+      wait_for_stimulus
+    end
+
+    after { page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride") }
+
+    def grid_state = page.evaluate_script(<<~JS)
+      (() => {
+        const grid = document.querySelector("[data-slot=event-calendar-grid]");
+        return { focused: document.activeElement === grid, left: grid.scrollLeft };
+      })()
+    JS
+
+    # Cut by operator, each row leads with the person's name. The track
+    # scrolls under it; the name has to stay, or past the first hours no row
+    # says whose it is.
+    it "keeps each row's name in view while the hours scroll", :aggregate_failures do
+      offsets = page.evaluate_script(<<~JS)
+        (() => {
+          const grid = document.querySelector("[data-slot=event-calendar-grid]");
+          grid.scrollLeft = 400;
+          const left = grid.getBoundingClientRect().left;
+          return Array.from(grid.querySelectorAll("[data-slot=event-calendar-resource]"))
+            .map((name) => Math.round(name.getBoundingClientRect().left - left));
+        })()
+      JS
+
+      expect(offsets).not_to be_empty
+      expect(offsets).to all(be_between(0, 2))
+    end
+
+    it "is reached with Tab and scrolled with the arrows", :aggregate_failures do
+      20.times do
+        break if grid_state["focused"]
+
+        page.driver.browser.action.send_keys(:tab).perform
+      end
+      expect(grid_state["focused"]).to be(true)
+
+      page.driver.browser.action.send_keys(:arrow_right, :arrow_right).perform
+      Timeout.timeout(Capybara.default_max_wait_time) { sleep 0.05 until grid_state["left"].positive? }
+      expect(grid_state["left"]).to be_positive
+    end
+  end
+
+  # The row is a link, so what happens next is the host's: the attributes it
+  # put on the event are the only thing deciding between a Sheet and a page.
+  describe "opening an event from its row" do
+    before do
+      visit_preview("event_calendar", :event_links)
+      wait_for_stimulus
+    end
+
+    it "opens it in the Sheet when the host says so" do
+      find("[data-slot=event-calendar-agenda-row][href='/calendar/events/1']").send_keys(:enter)
+
+      expect(page).to have_css("[role=dialog] turbo-frame#event", text: "Event 1")
+    end
+
+    it "goes to its page when the host says nothing" do
+      find("[data-slot=event-calendar-agenda-row][href='/calendar/events/2']").send_keys(:enter)
+
+      expect(page).to have_current_path("/calendar/events/2")
+      expect(page).to have_css("h2", text: "Event 2")
+    end
+  end
+
+  # The same two events, in the month the browser redraws. A step away and back
+  # puts every bar and mark through the clone, and choosing the day puts the
+  # rows through it — so what is asserted here is the controller's copy of the
+  # row, never the server's.
+  describe "a row the browser built" do
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events"
+      wait_for_stimulus
+
+      nav_button("Go to the Next Month").click
+      expect(page).to have_css(title, text: "September 2026")
+      nav_button("Go to the Previous Month").click
+      expect(page).to have_css(title, text: "August 2026")
+      day("2026-08-05").click
+    end
+
+    let(:row) { find("#{agenda} [data-slot=event-calendar-agenda-row][href='/calendar/events/1']") }
+
+    def style_of(selector)
+      page.evaluate_script("document.querySelector(#{"#{calendar} #{selector}".to_json})?.getAttribute('style') || ''")
+    end
+
+    it "says what the event says", :aggregate_failures do
+      expect(row["data-turbo-frame"]).to eq("event")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-subtitle]", text: "Via Roma 12")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-description]", text: "flue check")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-done]")
+      expect(row).to have_css("[data-slot=event-calendar-agenda-attachment]")
+      expect(row.all("[data-slot=avatar-fallback]", visible: :all).map { |face| face.text(:all) }).to eq(%w[MR GB])
+      expect(row.all("[data-slot=avatar-badge]", visible: :all).map { |badge| badge["data-status"] })
+        .to eq(%w[done pending])
+    end
+
+    # The host's words where it gave some, the gem's where it did not — read
+    # off the controller's clone, which got them from the payload.
+    it "reads the host's labels and the gem's words where there are none", :aggregate_failures do
+      expect(row.find("[data-slot=event-calendar-agenda-done] .sr-only", visible: :all).text(:all))
+        .to eq("Service completed")
+      expect(row.find("[data-slot=event-calendar-agenda-attachment] .sr-only", visible: :all).text(:all))
+        .to eq("Has an attachment")
+      expect(row.all("[data-slot=avatar-badge]", visible: :all).map { |badge| badge.text(:all).strip })
+        .to eq([ "Marco Rossi signed the report", "Pending" ])
+    end
+
+    it "opens it in the Sheet on Enter" do
+      row.send_keys(:enter)
+
+      expect(page).to have_css("[role=dialog] turbo-frame#event", text: "Event 1")
+    end
+
+    it "keeps a host colour and gives a fixed one none", :aggregate_failures do
+      host = [ "[data-slot=event-calendar-agenda-item][data-color=host]",
+               "[data-slot=event-calendar-event][title='Boiler service']",
+               "[data-slot=event-calendar-day-tick][data-color=host]" ]
+      fixed = [ "[data-slot=event-calendar-agenda-item][data-color=green]",
+                "[data-slot=event-calendar-event][title='Flue inspection']",
+                "[data-slot=event-calendar-day-tick][data-color=green]" ]
+
+      expect(host.map { |selector| style_of(selector) }).to all(include("--event-color: var(--chart-2)"))
+      expect(fixed.map { |selector| style_of(selector) }).to all(satisfy { |style| !style.include?("--event-color") })
+    end
+
+    it "leaves out what an event does not say", :aggregate_failures do
+      plain = find("#{agenda} [data-slot=event-calendar-agenda-row][href='/calendar/events/2']")
+
+      expect(plain["data-turbo-frame"]).to be_nil
+      expect(plain).to have_no_css("[data-slot=event-calendar-agenda-subtitle], " \
+                                   "[data-slot=event-calendar-agenda-description], " \
+                                   "[data-slot=event-calendar-agenda-done], [data-slot=avatar-badge]",
+                                   visible: :all)
+      expect(plain.all("[data-slot=avatar-fallback]", visible: :all).map { |face| face.text(:all) }).to eq(%w[LV])
+    end
+  end
+
+  # `Component#in_bands`' browser half. The gallery has no day with two host
+  # colours, so the example hands the controller one — the payload it already
+  # has, plus two copies of the host-coloured event, one under another
+  # property — and then steps away and back so the marks are the clone's.
+  describe "two host colours on one day, in the browser's marks" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events"
+      wait_for_stimulus
+
+      page.execute_script(<<~JS, calendar)
+        const root = document.querySelector(arguments[0])
+        const name = "data-shadcn--event-calendar-events-value"
+        const events = JSON.parse(root.getAttribute(name))
+        const host = events.find((event) => event.colorProperty === "--chart-2")
+        events.push({ ...host, title: "Other", colorProperty: "--chart-4", dayOrder: 2 },
+                    { ...host, title: "Again", dayOrder: 3 })
+        root.setAttribute(name, JSON.stringify(events))
+      JS
+
+      nav_button("Go to the Next Month").click
+      expect(page).to have_css(title, text: "September 2026")
+      nav_button("Go to the Previous Month").click
+      expect(page).to have_css(title, text: "August 2026")
+    end
+
+    let(:ticks) do
+      page.evaluate_script(<<~JS)
+        [ ...document.querySelectorAll(#{"#{calendar} [data-day='2026-08-05'] [data-slot=event-calendar-day-tick]".to_json}) ]
+          .map((tick) => [ tick.style.getPropertyValue("--event-color") || tick.dataset.color,
+                           tick.dataset.runBefore || null, tick.dataset.runAfter || null ])
+      JS
+    end
+
+    it "bands them apart, and closes the gap only inside each" do
+      expect(ticks).to eq([ [ "green", nil, nil ], [ "var(--chart-2)", nil, "true" ],
+                            [ "var(--chart-2)", "true", nil ], [ "var(--chart-4)", nil, nil ] ])
+    end
+  end
+
+  # A movable row used to be two tab stops — the `<li>` and the `<a>` in it —
+  # and Enter on the first did nothing. With a url the link is the one stop:
+  # Enter is the link's and Space still picks the row up.
+  describe "a movable row that is also a link" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events&movable=true"
+      wait_for_stimulus
+    end
+
+    let(:item) { find("#{agenda} [data-slot=event-calendar-agenda-item][data-event-id='2']") }
+    let(:link) { item.find("a[href='/calendar/events/2']") }
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    it "is one tab stop, and the stop is the link", :aggregate_failures do
+      expect(item["tabindex"]).to be_nil
+      expect(item.all("[tabindex='0'], a[href]").size).to eq(1)
+    end
+
+    it "goes to its page on Enter" do
+      link.send_keys(:enter)
+
+      expect(page).to have_current_path("/calendar/events/2")
+    end
+
+    it "is picked up on Space", :aggregate_failures do
+      link.send_keys(:space)
+
+      expect(find("#{calendar} [data-slot=event-calendar-announcer]", visible: :all).text(:all))
+        .to include("Flue inspection")
+      expect(focused).to eq("2026-08-05")
+    end
+
+    it "gives the focus back to the link when the pick is cancelled" do
+      link.send_keys(:space)
+      press(:escape)
+
+      expect(page.evaluate_script("document.activeElement?.getAttribute('href')")).to eq("/calendar/events/2")
+    end
+  end
+
+  # The panel answers "show me this now"; the dialog answers "show me this every
+  # time". Everything here is against `density`, whose `preferences_url:` is
+  # its own `here`, so a saved set is a URL this same preview can be asked for.
+  describe "preferences" do
+    let(:dialog) { "#{calendar} [data-slot=dialog-content]" }
+    # The scripts `on_every_page` registered, removed again after each example.
+    let(:scripts) { [] }
+
+    def weekly_rows
+      Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :events, max_chips: 3)
+    end
+
+    def monthly_grid
+      Shadcn::EventCalendar::Preferences.key(period: :monthly, view: :grid, group: :events, max_chips: 3)
+    end
+
+    def density(query) = "/lookbook/preview/shadcn/event_calendar/density?#{query}"
+
+    def open_preferences
+      open_panel
+      find("#{calendar} [data-slot=dropdown-menu-item]", text: "Preferences").click
+      find("#{dialog}[data-state=open]")
+    end
+
+    def choose(value) = find("#{dialog} [role=radio][value='#{value}']").click
+
+    def chip_limit = find("#{dialog} input[type=number]", visible: :all)
+
+    def chip_limits_sent
+      page.evaluate_script(%(Array.from(new FormData(document.querySelector("#{dialog} form")).getAll("preferences[max_chips]"))))
+    end
+
+    # Six questions are taller than a laptop held low or a phone on its side.
+    # The panel stops at the window and its questions scroll, so Save is
+    # always reachable.
+    after do
+      scripts.each do |identifier|
+        page.driver.browser.execute_cdp("Page.removeScriptToEvaluateOnNewDocument", identifier:)
+      end
+    end
+
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/up"
+      page.execute_script("localStorage.clear(); sessionStorage.clear()")
+    end
+
+    it "stays inside a short window, its questions scrolling and Save in view", :aggregate_failures do
+      page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride",
+                                      width: 1280, height: 420, deviceScaleFactor: 1, mobile: false)
+      visit density("period=monthly&view=rows&preferences=local")
+      wait_for_stimulus
+      open_preferences
+
+      measured = page.evaluate_script(<<~JS)
+        (() => {
+          const content = document.querySelector("[data-slot=dialog-content][data-state=open]");
+          const body = content.querySelector("[data-slot=event-calendar-preferences-body]");
+          const save = content.querySelector("[type=submit]").getBoundingClientRect();
+          const box = content.getBoundingClientRect();
+          return { top: box.top, bottom: box.bottom, window: innerHeight, saveBottom: save.bottom,
+                   scrolls: body.scrollHeight > body.clientHeight };
+        })()
+      JS
+
+      expect(measured["top"]).to be >= 0
+      expect(measured["bottom"]).to be <= measured["window"]
+      expect(measured["saveBottom"]).to be <= measured["bottom"]
+      expect(measured["scrolls"]).to be(true)
+    ensure
+      page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+    end
+
+    def question(name) = "#{dialog} [data-slot=event-calendar-preference]:has(input[name='preferences[#{name}]'])"
+
+    def checked(name) = find("#{question(name)} [role=radio][aria-checked=true]")["value"]
+
+    def stored(key) = page.evaluate_script("localStorage.getItem(arguments[0])", key)
+
+    def store(key, value) = page.execute_script("localStorage.setItem(arguments[0], arguments[1])", key, value)
+
+    # A script that runs before anything on every page this tab loads, which is
+    # the only way to be ahead of `connect`: restoring is the first thing it
+    # does.
+    def on_every_page(source)
+      scripts << page.driver.browser.execute_cdp("Page.addScriptToEvaluateOnNewDocument", source:)["identifier"]
+    end
+
+    # How many documents this tab has loaded since `count_loads`, kept in
+    # `sessionStorage` so a reload cannot reset it.
+    def count_loads
+      on_every_page(<<~JS)
+        try { sessionStorage.setItem("loads", String(Number(sessionStorage.getItem("loads") || 0) + 1)) } catch {}
+      JS
+    end
+
+    def loads = page.evaluate_script("Number(sessionStorage.getItem('loads'))")
+
+    def refuse_storage
+      on_every_page(<<~JS)
+        Storage.prototype.setItem = () => { throw new DOMException("refused", "SecurityError") }
+        Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError") }
+      JS
+    end
+
+
+
+    describe "the dialog" do
+      before do
+        visit density("period=weekly&view=rows&preferences=local")
+        wait_for_stimulus
+      end
+
+      it "opens from the panel on the current answers", :aggregate_failures do
+        open_preferences
+
+        expect(checked(:period)).to eq("weekly")
+        expect(checked(:view)).to eq("rows")
+        # The menu closing hands the focus back to its trigger; the dialog has
+        # to end up holding it anyway.
+        expect(page.evaluate_script(
+          "!!document.activeElement.closest('[data-slot=dialog-content]')"
+        )).to be(true)
+      end
+
+      # What a host's test reaches it by: `getByRole("dialog", { name: "Preferences" })`.
+      it "is a dialog named by its title and described by its description", :aggregate_failures do
+        content = open_preferences
+        name = page.evaluate_script(<<~JS, content)
+          ((content) => ["aria-labelledby", "aria-describedby"]
+            .map((attribute) => document.getElementById(content.getAttribute(attribute))?.textContent.trim()))(arguments[0])
+        JS
+
+        expect(content["role"]).to eq("dialog")
+        expect(name).to eq([ "Preferences", "Open the calendar this way every time." ])
+      end
+
+      it "starts again from what is drawn after a Cancel" do
+        open_preferences
+        choose("daily")
+        find("#{dialog} [data-slot=dialog-close]", text: "Cancel").click
+        expect(page).to have_no_css("#{dialog}[data-state=open]")
+
+        open_preferences
+
+        expect(checked(:period)).to eq("weekly")
+      end
+
+      # Weekly has no grid, so the hidden `view` was pre-filled with the month's
+      # first option; going to Monthly and back must land on one the week has.
+      it "re-asks when the period changes", :aggregate_failures do
+        open_preferences
+        choose("monthly")
+
+        expect(page).to have_css("#{dialog} label", text: "Show the month as")
+        expect(page).to have_no_css("#{dialog} label", text: "Show the week as")
+        expect(page).to have_css("#{dialog} [role=radio][value=grid]")
+        expect(checked(:view)).to eq("rows")
+        expect(page).to have_no_css(question(:showing))
+
+        choose("grid")
+        choose("weekly")
+
+        expect(page).to have_no_css("#{dialog} [role=radio][value=grid]")
+        expect(checked(:view)).to eq("rows")
+
+        choose("daily")
+
+        expect(page).to have_no_css(question(:view))
+        expect(find("#{dialog} input[name='preferences[view]']", visible: :all)).to be_disabled
+        expect(page).to have_css(question(:showing))
+      end
+
+      # A name pointing at a heading that is hidden is a name nobody hears.
+      it "names the view by the heading that is showing" do
+        open_preferences
+        group = find("#{question(:view)} [role=radiogroup]")
+        choose("monthly")
+
+        expect(find(id: group["aria-labelledby"]).text).to eq("Show the month as")
+
+        choose("weekly")
+
+        expect(find(id: group["aria-labelledby"]).text).to eq("Show the week as")
+      end
+
+      it "saves to the browser and goes there at once", :aggregate_failures do
+        open_preferences
+        choose("daily")
+        choose("agenda")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/period=daily/)
+        expect(page).to have_current_path(/showing=agenda/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=daily&preferences[showing]=agenda&preferences[group]=events")
+      end
+
+      # The chip limit: a typed number keeps the toggle off and the cells at
+      # that many, "All" is the toggle on. The weekly rows the dialog opens on
+      # are a capped view, so the question is there without changing the
+      # period. 4 is neither the default nor a number the dialog once listed.
+      it "saves a typed chip limit and draws that many", :aggregate_failures do
+        open_preferences
+        chip_limit.set("4")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/max_chips=4/)
+        expect(page).to have_current_path(/show_all=false/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=weekly&preferences[view]=rows&preferences[group]=events&preferences[max_chips]=4")
+        counts = all("#{calendar} [data-slot=event-calendar-day-items]").map do |items|
+          items.all("[data-slot=event-calendar-day-item]", visible: :all).size
+        end
+        expect(counts.max).to eq(4)
+      end
+
+      # What a host's test reaches it by: `getByRole("spinbutton", { name: … })`.
+      it "names the field and its radio from one label", :aggregate_failures do
+        open_preferences
+
+        expect([ chip_limit.native.aria_role, chip_limit.native.accessible_name ]).to eq([ "spinbutton", "At most" ])
+        radio = find("#{dialog} [role=radio][value=number]")
+        expect(radio.native.accessible_name).to eq("At most")
+      end
+
+      it "sends the number or All, never both", :aggregate_failures do
+        open_preferences
+
+        expect(chip_limits_sent).to eq([ "3" ])
+
+        choose("all")
+
+        expect(chip_limit).to be_disabled
+        expect(chip_limits_sent).to eq([ "all" ])
+
+        find("#{dialog} label", text: "At most").click
+
+        expect(chip_limit).not_to be_disabled
+        expect(chip_limits_sent).to eq([ "3" ])
+      end
+
+      it "asks the limit only where a view caps its chips", :aggregate_failures do
+        open_preferences
+        choose("monthly")
+        choose("hours")
+
+        expect(chip_limit).not_to be_visible
+        expect(chip_limit).to be_disabled
+        expect(chip_limits_sent).to be_empty
+
+        choose("grid")
+
+        expect(chip_limit).to be_visible
+        expect(chip_limits_sent).to eq([ "3" ])
+      end
+
+      it "keeps a number out of range from being saved", :aggregate_failures do
+        open_preferences
+        chip_limit.set("100")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_css("#{dialog}[data-state=open]")
+        expect(page.evaluate_script("document.activeElement.type")).to eq("number")
+        expect(stored("shadcn--event-calendar:preferences:default")).to be_nil
+      end
+
+      it "starts again from the limit drawn after a Cancel" do
+        open_preferences
+        chip_limit.set("9")
+        choose("all")
+        find("#{dialog} [data-slot=dialog-close]", text: "Cancel").click
+        open_preferences
+
+        expect([ chip_limit.value, chip_limits_sent ]).to eq([ "3", [ "3" ] ])
+      end
+
+      it "saves All as the show-all toggle", :aggregate_failures do
+        open_preferences
+        choose("all")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/show_all=true/)
+        expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-rest]")
+        expect(find("#{calendar} [data-slot=event-calendar-nav] [aria-pressed]", text: "Show all")["aria-pressed"])
+          .to eq("true")
+      end
+
+      it "changes nothing on Cancel", :aggregate_failures do
+        open_preferences
+        choose("daily")
+        find("#{dialog} [data-slot=dialog-close]", text: "Cancel").click
+
+        expect(page).to have_no_css("#{dialog}[data-state=open]")
+        expect(page).to have_current_path(/period=weekly/)
+        expect(stored("shadcn--event-calendar:preferences:default")).to be_nil
+      end
+    end
+
+    # A host offering the grid and the timeline only: the week has one view, so
+    # the dialog does not ask it, and what follows is the timeline's question.
+    describe "a host offering some views" do
+      before do
+        visit density("period=monthly&view=grid&preferences=local&views=grid,hours")
+        wait_for_stimulus
+      end
+
+      it "asks the week nothing about its view and saves its timeline", :aggregate_failures do
+        open_preferences
+        choose("weekly")
+
+        expect(page).to have_no_css(question(:view))
+        expect(page).to have_css(question(:shape))
+        expect(page).to have_no_css("#{dialog} input[type=number]")
+
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/period=weekly/)
+        expect(page).to have_current_path(/view=hours/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=weekly&preferences[shape]=chips")
+      end
+
+      it "still asks the month, with only the views given" do
+        open_preferences
+
+        expect(all("#{question(:view)} [role=radio]").map { |radio| radio["value"] }).to eq(%w[grid hours])
+      end
+    end
+
+    # A host offering the day as rows and as its timeline: "Rows" is one more
+    # answer to "Show the day as", and what it saves is a day with a chip limit.
+    describe "a host offering the day as rows" do
+      before do
+        visit density("period=daily&showing=both&preferences=local&views=daily:rows hours")
+        wait_for_stimulus
+      end
+
+      it "goes from the timeline to the rows through the panel", :aggregate_failures do
+        open_panel
+        find("#{calendar} [data-slot=dropdown-menu-radio-item][data-value=rows]").click
+
+        expect(page).to have_current_path(/showing=rows/)
+        expect(page).to have_css("#{calendar} [data-slot=event-calendar-day]", count: 1)
+        expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-ruler]")
+      end
+
+      it "saves the day as rows with a typed limit", :aggregate_failures do
+        open_preferences
+        choose("rows")
+
+        expect(page).to have_no_css(question(:shape))
+        chip_limit.set("6")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/showing=rows/)
+        expect(page).to have_current_path(/max_chips=6/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=daily&preferences[showing]=rows&preferences[group]=events&preferences[max_chips]=6")
+      end
+    end
+
+    it "asks a day offered only as rows nothing about what it shows", :aggregate_failures do
+      visit density("period=monthly&view=grid&preferences=local&views=daily:rows")
+      wait_for_stimulus
+      open_preferences
+      choose("daily")
+
+      expect(page).to have_no_css(question(:showing))
+      expect(page).to have_css("#{dialog} input[type=number]")
+
+      find("#{dialog} [type=submit]").click
+
+      expect(page).to have_current_path(/showing=rows/)
+      expect(stored("shadcn--event-calendar:preferences:default"))
+        .to eq("preferences[period]=daily&preferences[group]=events&preferences[max_chips]=3")
+    end
+
+    describe "coming back" do
+      it "opens on the saved view from a bare arrival", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default", weekly_rows)
+        visit density("preferences=local&restore=true")
+
+        expect(page).to have_current_path(/period=weekly/)
+        expect(page).to have_current_path(/view=rows/)
+      end
+
+      it "stays put without restore", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default", weekly_rows)
+        count_loads
+        visit density("preferences=local&restore=false")
+        wait_for_stimulus
+        sleep 1
+
+        expect(loads).to eq(1)
+        expect(page).to have_current_path(density("preferences=local&restore=false"))
+      end
+
+      # Saved while the host offered bars; the host has since stopped. The key
+      # names a set the map no longer has, and there is nowhere to go.
+      it "ignores a stored set the host no longer offers", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default",
+              "preferences[period]=weekly&preferences[view]=hours&preferences[shape]=bars")
+        count_loads
+        visit density("preferences=local&restore=true&shapes=chips")
+        wait_for_stimulus
+        sleep 1
+
+        expect(loads).to eq(1)
+        expect(page).to have_current_path(density("preferences=local&restore=true&shapes=chips"))
+      end
+
+      # A host whose URL does not draw the set it was handed: `broken_url`
+      # drops `group` and keeps `restore`, so the page it lands on draws
+      # another set and asks to restore again. One wasted redirect, then it
+      # stays.
+      it "asks a host's URL once, even when it draws another set", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default",
+              Shadcn::EventCalendar::Preferences.key(period: :weekly, view: :rows, group: :assignees,
+                                                     max_chips: 3))
+        count_loads
+        visit density("preferences=local&restore=true&broken_url=true")
+        expect(page).to have_current_path(/period=weekly/)
+        wait_for_stimulus
+        sleep Capybara.default_max_wait_time
+
+        expect(loads).to eq(2)
+        expect(page).to have_current_path(/period=weekly/)
+      end
+
+      it "restores again on the next bare arrival after a restore that landed" do
+        store("shadcn--event-calendar:preferences:default", weekly_rows)
+        visit density("preferences=local&restore=true")
+        expect(page).to have_current_path(/period=weekly/)
+        wait_for_stimulus
+
+        visit density("preferences=local&restore=true")
+
+        expect(page).to have_current_path(/period=weekly/)
+      end
+
+      it "does not loop on the set already drawn", :aggregate_failures do
+        store("shadcn--event-calendar:preferences:default", monthly_grid)
+        count_loads
+        visit density("preferences=local&restore=true")
+        wait_for_stimulus
+        sleep Capybara.default_max_wait_time
+
+        expect(loads).to eq(1)
+        expect(page).to have_current_path(density("preferences=local&restore=true"))
+      end
+    end
+
+    # A private window, or a host's storage blocked by policy: the person still
+    # gets the view they chose, it is only not remembered.
+    describe "a browser that refuses storage" do
+      before do
+        refuse_storage
+        page.driver.browser.logs.get(:browser)
+      end
+
+      # The dummy app has no favicon, and whether Chrome asks for one before
+      # the log is read is timing: that 404 is the page's, not the storage's.
+      def errors
+        page.driver.browser.logs.get(:browser)
+            .reject { |log| log.level == "WARNING" || log.message.include?("/favicon.ico") }
+      end
+
+      it "still goes where Save says", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=local")
+        wait_for_stimulus
+        open_preferences
+        choose("daily")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/period=daily/)
+        expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
+      end
+
+      it "restores nothing", :aggregate_failures do
+        visit density("preferences=local&restore=true")
+        wait_for_stimulus
+        sleep 1
+
+        expect(page).to have_current_path(density("preferences=local&restore=true"))
+        expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
+      end
+    end
+
+    it "keys by the calendar's id" do
+      visit density("period=weekly&view=rows&preferences=local&id=crew")
+      wait_for_stimulus
+      open_preferences
+      choose("daily")
+      find("#{dialog} [type=submit]").click
+
+      expect(page).to have_current_path(/period=daily/)
+      expect(stored("shadcn--event-calendar:preferences:crew")).to start_with("preferences[period]=daily")
+      expect(stored("shadcn--event-calendar:preferences:default")).to be_nil
+    end
+
+    # The test environment turns forgery protection off, and with it off the
+    # form carries no token — which is exactly the half a host relies on. On
+    # here, so the dialog is drawn as a host's would be; the dummy records
+    # whether the token arrived rather than verifying it, because a Lookbook
+    # preview is rendered in a nested request whose session never reaches the
+    # browser (see `CalendarController#save_preferences`).
+    describe "posting to the host" do
+      around do |example|
+        protection = ActionController::Base.allow_forgery_protection
+        ActionController::Base.allow_forgery_protection = true
+        example.run
+      ensure
+        ActionController::Base.allow_forgery_protection = protection
+      end
+
+      it "posts to the host", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=host")
+        wait_for_stimulus
+        open_preferences
+
+        expect(page).to have_css("#{dialog} form input[name=authenticity_token]", visible: :all)
+
+        choose("daily")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path("/calendar/preferences")
+        saved = JSON.parse(find("#calendar-preferences").text)
+        expect(saved).to include("period" => "daily", "showing" => "both")
+        expect(saved).not_to have_key("view")
+        expect(saved).not_to have_key("max_chips")
+        expect(find("#calendar-preferences")["data-token"]).to eq("true")
+      end
+
+      it "posts the chip limit to the host as all", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=host")
+        wait_for_stimulus
+        open_preferences
+        choose("all")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path("/calendar/preferences")
+        saved = JSON.parse(find("#calendar-preferences").text)
+        expect(saved).to eq("period" => "weekly", "view" => "rows", "group" => "events", "max_chips" => "all")
+      end
+
+      it "posts a typed chip limit to the host as its number", :aggregate_failures do
+        visit density("period=weekly&view=rows&preferences=host")
+        wait_for_stimulus
+        open_preferences
+        chip_limit.set("7")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path("/calendar/preferences")
+        saved = JSON.parse(find("#calendar-preferences").text)
+        expect(saved).to eq("period" => "weekly", "view" => "rows", "group" => "events", "max_chips" => "7")
+      end
+    end
+  end
+end

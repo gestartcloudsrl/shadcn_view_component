@@ -8,9 +8,9 @@ written.
 
 | | |
 |---|---|
-| [decisions/01-architecture.md](decisions/01-architecture.md) | project shape, the cva/`cn` mapping, `Shadcn::` namespacing, no-npm rule, the `part` macro, FormBuilder, performance, tooling |
+| [decisions/01-architecture.md](decisions/01-architecture.md) | project shape, the cva/`cn` mapping, `Shadcn::` namespacing, no-npm rule, the `part` macro, FormBuilder, when a component grows a second reading and where that seam is, performance, tooling |
 | [decisions/02-javascript.md](decisions/02-javascript.md) | how Radix was reimplemented: `display: contents` roots, why nothing is portalled, the Popover API top layer, `turbo:morph` |
-| [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the rejected reverse-parity check, system-spec pitfalls, what each `vendor/` reference is worth and why a control measurement is not optional |
+| [decisions/03-testing.md](decisions/03-testing.md) | what each spec proves and does **not**, the reverse-parity *token-set diff* that was rejected — the spec itself exists and gates CI — system-spec pitfalls, what each `vendor/` reference is worth and why a control measurement is not optional |
 | [decisions/04-bugs-fixed.md](decisions/04-bugs-fixed.md) | the council's findings and their fixes — a list of things not to reintroduce |
 | [features/README.md](features/README.md) | per component: 1:1, adapted, extended or ours — the answer a host wants, written to be lifted into the public README |
 | [todo.md](todo.md) | open work, ordered by what blocks a release, plus what is deliberately not being done |
@@ -32,6 +32,15 @@ written.
 | [features/resizable.md](features/resizable.md) | panels as flex shares rather than `react-resizable-panels`, and the class upstream renders that reads an attribute upstream stopped rendering |
 | [features/chart.md](features/chart.md) | the one family whose package was doing the work: what `chart.tsx` actually is, why the frame is 1:1 and the four shapes are ours, and why the graphic is `aria-hidden` with a `sr-only` table beside it |
 | [features/calendar.md](features/calendar.md) | the calendar without `react-day-picker`: a third of the package is locale data and another fifth is other calendar systems, the grid that now exists twice, and what keeps the two copies honest |
+| [features/event-calendar.md](features/event-calendar.md) | the event calendar, which is ours because shadcn has the day picker and no event calendar: FullCalendar's `dayGridMonth` as the reference, the lane packing that is the part neither markup nor a browser, the rule that a cell either names its events or shows their shape, the three readings it was split into and the day the period switch asks for |
+| [specs/2026-08-27-event-calendar-drag-to-move-design.md](specs/2026-08-27-event-calendar-drag-to-move-design.md) | moving an event: what a spike found once the write path turned out to be the easy half — the bars that cannot hold a focus, the agenda that can, the morph that is not a rollback, and what making a chip grabbable costs the day |
+| [plans/2026-08-27-event-calendar-drag-to-move.md](plans/2026-08-27-event-calendar-drag-to-move.md) | the plan moving an event was built from — and, unusually, a record of what building it corrected in the design: the shift the arrows travel, the region an announcement goes in, and a colour the first draft deleted |
+| [specs/2026-08-31-event-calendar-week-view-design.md](specs/2026-08-31-event-calendar-week-view-design.md) | the week: seven aligned day-rows rather than a continuous axis or seven columns, why a third period breaks a panel built for two, and the two pieces deliberately left for later |
+| [specs/2026-11-09-event-calendar-event-content-design.md](specs/2026-11-09-event-calendar-event-content-design.md) | what an event says and where it opens: generic fields drawn by the gem rather than a host slot, the chip kept as decoration inside the day's target and the list row made the link, the host's colour as a mark only |
+| [specs/2026-11-10-event-calendar-week-rows-design.md](specs/2026-11-10-event-calendar-week-rows-design.md) | the week as rows or timeline: the month's rows-arrangement row for each of the seven days, grouped by event or by assignee, the timeline staying the default, and the day list kept under both |
+| [plans/2026-08-31-event-calendar-week-view.md](plans/2026-08-31-event-calendar-week-view.md) | the week, built from a spike that had already run it — three tasks, the boolean the panel decided the period with, and two steps that deliberately refuse to predict their own failure |
+| [plans/2026-11-09-event-calendar-event-content.md](plans/2026-11-09-event-calendar-event-content.md) | seven tasks: the fields on `Event`, the host colour, the chip, the row and its attributes, a Sheet preview, then the client-drawn month last |
+| [plans/2026-11-10-event-calendar-week-rows.md](plans/2026-11-10-event-calendar-week-rows.md) | three tasks: the week as a module and its view question, `WeeklyRows` on the workload reading, then the preview, the playground and the docs |
 | [features/toaster.md](features/toaster.md) | the toaster, which is ours rather than a port: why there was nothing to reproduce, what was kept from sonner, and the three ways a Rails app raises one |
 
 Written during the initial port and hardening pass, 2026-08-05/06. Anything

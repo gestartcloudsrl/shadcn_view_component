@@ -1,0 +1,17 @@
+<div class="flex items-center gap-4">
+  <%#
+    The other half of what `shadcn--avatar` is for: a picture that fails leaves
+    the initials showing rather than a broken-image icon. The source is a data
+    URI that cannot decode, so the failure needs nothing from the network.
+
+    Its own preview rather than a sixth avatar on `default`, because a picture
+    that fails writes to the browser console whichever way it is broken — a
+    404, a bad URL, a truncated file — and `smoke_spec` visits every family's
+    `default` and expects its console silent. Here it is read by the snapshot
+    and the accessibility specs, neither of which listens.
+  %>
+  <%= render(Shadcn::Avatar::Component.new) do |a| %>
+    <% a.with_image(src: "data:image/png;base64,not-a-png", alt: "Grace Hopper") %>
+    <% a.with_fallback { "GH" } %>
+  <% end %>
+</div>

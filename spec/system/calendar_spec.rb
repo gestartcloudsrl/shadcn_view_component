@@ -101,7 +101,7 @@ RSpec.describe "Calendar", :js do
       all("#{calendar} nav button").last.click
 
       expect(find("#{calendar} td[data-day='2026-09-02'] button")["aria-label"])
-        .to eq("Wednesday, September 02, 2026")
+        .to eq("Wednesday, September 2, 2026")
     end
 
     it "leaves one day tabbable in the month it lands on", :aggregate_failures do

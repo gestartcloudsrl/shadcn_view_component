@@ -1,0 +1,11 @@
+<%# `movable:` needs an id on every event, which is also the smallest example of
+    what a host has to do: the ids here stand in for whatever a real
+    application's records are keyed by. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      movable: true,
+      events: Shadcn::EventCalendar::Preview.sample_events.each_with_index.map { |event, index|
+        event.merge(id: "e#{index}")
+      }
+    )) %>

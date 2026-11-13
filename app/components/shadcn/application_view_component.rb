@@ -203,8 +203,13 @@ module Shadcn
       end
     end
 
+    # `.presence`, so that joining nothing to nothing leaves nothing: a
+    # component that decides it wants no controller writes `nil`, and without
+    # this the join turns that decision into `data-action=""` — an attribute
+    # `element_attributes`' own `compact` can no longer see, because it is
+    # looking for a nil and now finds a string.
     def append_action(hash, value)
-      hash["data-action"] = [ hash["data-action"], value ].compact.join(" ")
+      hash["data-action"] = [ hash["data-action"], value ].compact.join(" ").presence
     end
 
     # The same treatment `data-action` gets, and for the same reason: Stimulus
@@ -219,7 +224,7 @@ module Shadcn
     # select: choosing a client was supposed to reload its locations, and simply
     # stopped doing so.
     def append_controller(hash, value)
-      hash["data-controller"] = [ hash["data-controller"], value ].compact.join(" ")
+      hash["data-controller"] = [ hash["data-controller"], value ].compact.join(" ").presence
     end
   end
 end

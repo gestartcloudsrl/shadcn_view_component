@@ -46,11 +46,25 @@ RSpec.describe "the gallery boots" do
 
   controllers.each do |family, identifier|
     it "loads #{family} with #{identifier} connected and no JavaScript error" do
+      # Drained *before* the visit, not only after. The session is one browser
+      # for the whole suite and this buffer is per session, so an error raised
+      # by any earlier page — in any spec file — sits there until something
+      # reads it, and the something is whichever family's example ran next.
+      # That is how a controller throwing on the event calendar's server-drawn
+      # previews was reported, for months of CI runs, as `dropdown_menu`.
+      page.driver.browser.logs.get(:browser)
+
       visit_preview(family)
       wait_for_stimulus
 
       errors = page.driver.browser.logs.get(:browser).reject { |log| log.level == "WARNING" }
-      expect(errors.map(&:message)).to be_empty
+
+      # Failed with the message rather than on it, because the useful half is
+      # the end: Stimulus logs "Error connecting controller" and *then* names
+      # the controller and the throw, and a bare `be_empty` on the array shows
+      # RSpec's elided inspection instead. A CI failure nobody can reproduce
+      # locally is one where the whole string is the entire evidence.
+      expect(errors).to be_empty, -> { errors.map(&:message).join("\n\n") }
 
       # Scoped to the identifier on purpose: the gallery layout carries a
       # ModeToggle and a ThemeSelector, so a bare `[data-controller]` is

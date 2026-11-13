@@ -37,10 +37,19 @@ RSpec.describe "Ruby ↔ Stimulus contract" do
     identifier && [ identifier, attribute.delete_prefix("#{identifier}-") ]
   end
 
-  used_controllers = scan.call(/"data-controller"\s*=>\s*"(shadcn--[a-z-]+)"/).map(&:last).uniq
+  # The optional-paren form too: a component that attaches its controller only
+  # when it has something to do writes `=> ("shadcn--x" if …)`, and a scan that
+  # reads only the bare string would drop that family without saying so.
+  used_controllers = scan.call(/"data-controller"\s*=>\s*\(?"(shadcn--[a-z-]+)"/).map(&:last).uniq
   actions = scan.call(/(shadcn--[a-z-]+)#([a-zA-Z]+)/)
 
-  targets = scan.call(/"data-(shadcn--[a-z-]+)-target"\s*=>\s*"(\w+)"/)
+  # Both spellings. A component that builds its own markup writes
+  # `"data-…-target": "title"` in a `tag.*` call, where one that goes through
+  # `element_attributes` writes `"data-…-target" => "title"` — and this scan
+  # used to see only the second. The whole event calendar's targets were
+  # unchecked: renaming one left the suite green at 1544 examples and threw
+  # `Missing target element` in every host.
+  targets = scan.call(/"data-(shadcn--[a-z-]+)-target"\s*(?:=>|:)\s*"(\w+)"/)
   values = scan.call(/"data-(shadcn--[a-z-]+)-value"/).filter_map do |(file, attribute)|
     identifier, value = split.call(attribute)
     identifier && [ file, identifier, value ]
@@ -54,7 +63,9 @@ RSpec.describe "Ruby ↔ Stimulus contract" do
     expect(sources.size).to be >= 15, "no controller sources were read"
     expect(used_controllers.size).to be >= 12
     expect(actions.size).to be >= 35
-    expect(targets.size).to be >= 25
+    # 117 today. High enough that dropping either spelling from the target scan
+    # trips it: the colon form alone is 44 of them, across sixteen families.
+    expect(targets.size).to be >= 90
     expect(values.size).to be >= 40
   end
 

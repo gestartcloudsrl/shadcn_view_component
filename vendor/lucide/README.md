@@ -8,7 +8,7 @@ version recorded in `REVISION`, under the ISC `LICENSE` beside them.
 | `icons/` | `lucide-static/icons/*.svg` | `rake icons:build` |
 
 Only the icons the ported components render are here — lucide has about 1,500,
-and vendoring all of them would ship a megabyte to every host to draw twenty-one
+and vendoring all of them would ship a megabyte to every host to draw twenty-two
 things. What a *host* needs is its own business:
 `ShadcnViewComponent::IconRegistry.load_directory` takes a directory of files
 exactly like these.

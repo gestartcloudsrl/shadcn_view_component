@@ -1,0 +1,15 @@
+<%# The workload reading: a cell as a *measure* rather than a list. A month of
+    a small crew, coloured by what the job is for.
+
+    A template rather than a method, which is what puts it in front of
+    `snapshot_spec` and `accessibility_spec` — both glob `previews/*.html.erb`.
+    It spent its whole life as a method and so had no golden, no axe run and no
+    browser example, which is why four defects in it survived CI. Modest on
+    purpose: the parameterised `workload_density` preview is where the hundreds
+    live, and a golden nobody can read as a diff is a golden that means nothing. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      reading: :workload,
+      events: Shadcn::EventCalendar::Preview.workload_events(per_day: 0..3, crew: 1..4, colored: true, all_day: 1, spanning: 2)
+    )) %>
