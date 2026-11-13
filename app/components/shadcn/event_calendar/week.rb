@@ -17,7 +17,7 @@ module Shadcn
 
       # A week is drawn as rows or as the timeline. There is no grid: seven
       # narrow columns are what the rows were built to avoid.
-      def view_choices = EventCalendar::Component::WEEK_VIEWS & views
+      def view_choices = views.fetch(:weekly)
 
       def view_heading = shadcn_t("event_calendar.view.week_label")
 

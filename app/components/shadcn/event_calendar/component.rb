@@ -118,6 +118,38 @@ module Shadcn
       # put there.
       WEEK_VIEWS = %i[rows hours].freeze
 
+      # The views a day offers: one row, the week's rows cut down to it, or the
+      # timeline with its three ways of showing (`Daily::Component::SHOWING`).
+      DAY_VIEWS = %i[rows hours].freeze
+
+      # Every view each period can be drawn in, and what `views:` offers when a
+      # host says nothing: everything for a month and a week, and for a day the
+      # timeline alone, which is all a day was before it had rows.
+      PERIOD_VIEWS = { monthly: VIEWS, weekly: WEEK_VIEWS, daily: DAY_VIEWS }.freeze
+      DEFAULT_VIEWS = { monthly: VIEWS, weekly: WEEK_VIEWS, daily: %i[hours] }.freeze
+
+      # `views:` as the views each period offers. An Array is the same list for
+      # every period, each keeping the names it has; a Hash names periods one
+      # by one, and a period it does not name keeps its default. A period left
+      # with none is not offered. Unknown names are ignored, and a list naming
+      # nothing known — or narrowing every period away — is the default.
+      def self.views_by_period(views)
+        names = ->(list) { Array(list).map { |name| name.to_s.to_sym } }
+        offered =
+          case views
+          when nil then DEFAULT_VIEWS
+          when Hash
+            given = views.to_h.transform_keys(&:to_sym)
+            DEFAULT_VIEWS.to_h do |period, default|
+              [ period, given.key?(period) ? PERIOD_VIEWS.fetch(period) & names.call(given[period]) : default ]
+            end
+          else
+            PERIOD_VIEWS.transform_values { |list| list & names.call(views) }
+          end
+
+        offered.values.all?(&:empty?) ? DEFAULT_VIEWS : offered.transform_values(&:freeze).freeze
+      end
+
       # The period the toolbar switches between, above the views. A month has
       # three ways of being read and a day has one; `PERIODS` is what the panel
       # asks first, and `VIEWS` is only the monthly follow-up.
@@ -440,12 +472,19 @@ module Shadcn
       # what tells them apart, the keyword the month's rows already use.
       WEEKLY_ROWS = "Shadcn::EventCalendar::WeeklyRows::Component"
 
+      # And the day: `showing: :rows` is its rows, the answer the panel's
+      # "Show the day as" gives, so a host's `showing_url:` reaches it unchanged.
+      DAILY_ROWS = "Shadcn::EventCalendar::DailyRows::Component"
+
       def self.new(reading: :auto, **rest)
         renderer = RENDERERS[reading&.to_sym]
         # Built directly, `WeeklyRows` is already the week it would hand over
         # to — without this `reading: :weekly` would send it to the timeline.
         if renderer == RENDERERS[:weekly] && (name == WEEKLY_ROWS || rest[:arrangement]&.to_sym == :rows)
           renderer = WEEKLY_ROWS
+        end
+        if renderer == RENDERERS[:daily] && (name == DAILY_ROWS || rest[:showing]&.to_sym == :rows)
+          renderer = DAILY_ROWS
         end
 
         return super(reading:, **rest) if renderer.nil? || name == renderer
@@ -493,13 +532,15 @@ module Shadcn
       #   the trigger stops naming it: a host whose people never want bars
       #   should not have them mentioned. Unknown names are ignored, and
       #   none left means every shape.
-      # @param views [Array<Symbol>] the views the options panel and the
-      #   preferences dialog offer, of `:grid`, `:rows` and `:hours` (the
-      #   timeline) — the words `view_url:` is handed. A period left with one
-      #   is not asked which, and a week left with none (`[:grid]`) is not
+      # @param views [Array<Symbol>, Hash{Symbol => Array<Symbol>}, nil] the
+      #   views the options panel and the preferences dialog offer, of `:grid`,
+      #   `:rows` and `:hours` (the timeline) — the words `view_url:` is
+      #   handed. An Array is every period's list; a Hash
+      #   (`{ daily: [:rows] }`) narrows the periods it names. A day takes
+      #   `:rows` and `:hours`, and offers only `:hours` unless asked. A period
+      #   left with one is not asked which, and one left with none is not
       #   offered. What is drawn is still the host's `reading:`: this narrows
-      #   the choices, it does not redirect a request. Unknown names are
-      #   ignored, and none left means every view.
+      #   the choices, it does not redirect a request. See `.views_by_period`.
       # @param counts [Boolean] whether each day (and, on a day by assignee,
       #   each person) shows the badge counting its events. On by default; off,
       #   the badge is not drawn, and with it goes the heat ramp it carries.
@@ -522,7 +563,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     view_url: nil, movable: false, shapes: SHAPES, views: VIEWS, counts: true,
+                     view_url: nil, movable: false, shapes: SHAPES, views: nil, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
@@ -543,8 +584,7 @@ module Shadcn
         @view_url = view_url
         @shapes = SHAPES & Array(shapes).map { |name| name.to_s.to_sym }
         @shapes = SHAPES if @shapes.empty?
-        @views = VIEWS & Array(views).map { |name| name.to_s.to_sym }
-        @views = VIEWS if @views.empty?
+        @views = self.class.views_by_period(views)
         @counts = ActiveModel::Type::Boolean.new.cast(counts) != false
         @movable = !!movable
         require_identities! if @movable
@@ -794,8 +834,8 @@ module Shadcn
 
       def daily? = view == :daily
 
-      # The periods the panel offers: a week only when `views:` leaves it one.
-      def periods = PERIODS.select { |name| name != :weekly || WEEK_VIEWS.intersect?(views) }
+      # The periods the panel offers: those `views:` leaves a view.
+      def periods = PERIODS.select { |name| views.fetch(name).any? }
 
       # Which of `PERIODS` this reading is. The panel decided it with
       # `(name == :daily) == daily?` — a comparison that can only ever answer
@@ -830,7 +870,7 @@ module Shadcn
       # The views this period offers, and what the panel calls the question.
       # A month has all three; a week overrides both in `Week`; a day has one
       # view and so no question at all.
-      def view_choices = VIEWS & views
+      def view_choices = views.fetch(:monthly)
 
       def view_heading = shadcn_t("event_calendar.view.label")
 

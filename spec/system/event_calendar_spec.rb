@@ -1853,6 +1853,54 @@ RSpec.describe "Event calendar", :js do
       end
     end
 
+    # A host offering the day as rows and as its timeline: "Rows" is one more
+    # answer to "Show the day as", and what it saves is a day with a chip limit.
+    describe "a host offering the day as rows" do
+      before do
+        visit density("period=daily&showing=both&preferences=local&views=daily:rows hours")
+        wait_for_stimulus
+      end
+
+      it "goes from the timeline to the rows through the panel", :aggregate_failures do
+        open_panel
+        find("#{calendar} [data-slot=dropdown-menu-radio-item][data-value=rows]").click
+
+        expect(page).to have_current_path(/showing=rows/)
+        expect(page).to have_css("#{calendar} [data-slot=event-calendar-day]", count: 1)
+        expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-ruler]")
+      end
+
+      it "saves the day as rows with a typed limit", :aggregate_failures do
+        open_preferences
+        choose("rows")
+
+        expect(page).to have_no_css(question(:shape))
+        chip_limit.set("6")
+        find("#{dialog} [type=submit]").click
+
+        expect(page).to have_current_path(/showing=rows/)
+        expect(page).to have_current_path(/max_chips=6/)
+        expect(stored("shadcn--event-calendar:preferences:default"))
+          .to eq("preferences[period]=daily&preferences[showing]=rows&preferences[group]=events&preferences[max_chips]=6")
+      end
+    end
+
+    it "asks a day offered only as rows nothing about what it shows", :aggregate_failures do
+      visit density("period=monthly&view=grid&preferences=local&views=daily:rows")
+      wait_for_stimulus
+      open_preferences
+      choose("daily")
+
+      expect(page).to have_no_css(question(:showing))
+      expect(page).to have_css("#{dialog} input[type=number]")
+
+      find("#{dialog} [type=submit]").click
+
+      expect(page).to have_current_path(/showing=rows/)
+      expect(stored("shadcn--event-calendar:preferences:default"))
+        .to eq("preferences[period]=daily&preferences[group]=events&preferences[max_chips]=3")
+    end
+
     describe "coming back" do
       it "opens on the saved view from a bare arrival", :aggregate_failures do
         store("shadcn--event-calendar:preferences:default", weekly_rows)

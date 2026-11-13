@@ -196,7 +196,7 @@ module Shadcn
       # @param counts toggle
       # @param group select [events, assignees]
       # @param shape select [chips, bars]
-      # @param showing select [both, axis, agenda]
+      # @param showing select [both, axis, agenda, rows]
       # @param from number
       # @param to number
       # @param turbo select [off, panel, agenda]
@@ -208,7 +208,7 @@ module Shadcn
       # @param broken_url toggle
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
-                  showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "grid,rows,hours",
+                  showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "",
                   preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
                   counts: true)
         cast = ActiveModel::Type::Boolean.new
@@ -222,7 +222,7 @@ module Shadcn
                     turbo:, shapes:, preferences:, id:, max_chips:,
                     # Only when off, so the default links stay the ones they were.
                     counts: (false unless cast.cast(counts)),
-                    views: (views unless views.to_s == "grid,rows,hours") }.merge(changed).compact
+                    views: views.presence }.merge(changed).compact
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -278,6 +278,13 @@ module Shadcn
             # that date is the grid the week is found in.
             common.merge(reading: :weekly, selected: shown, window: (from.to_i..to.to_i),
                          shape: shape.to_sym, shape_url: ->(form) { here.call(shape: form) })
+          elsif daily && showing.to_s == "rows"
+            # The day as the week's rows: the same chip limit and Show all.
+            common.merge(reading: :daily, showing: :rows, selected: shown, group: group.to_sym,
+                         show_all: cast.cast(show_all), show_all_url: ->(all) { here.call(show_all: all) },
+                         max_chips: max_chips.to_i,
+                         showing_url: ->(half) { here.call(showing: half) },
+                         group_url: ->(cut) { here.call(group: cut) })
           elsif daily
             common.merge(reading: :daily, selected: shown,
                          window: (from.to_i..to.to_i), shape: shape.to_sym,
@@ -313,13 +320,19 @@ module Shadcn
         # `:host` posts to the dummy's `CalendarController`, which keeps it in
         # the session and shows what it kept.
         args[:shapes] = shapes.to_s.split(",").map(&:strip).map(&:to_sym)
-        args[:views] = views.to_s.split(",").map(&:strip).map(&:to_sym)
-        # A period offered in one view has no `view` in its set: this host
-        # knows which one it is, from the same list it handed the calendar.
-        only_view = lambda do |period|
-          offered = (period == :weekly ? Component::WEEK_VIEWS : Component::VIEWS) & args[:views]
-          offered.first if offered.one?
-        end
+        # "grid,rows,hours" is every period's list; "daily:rows" or
+        # "monthly:grid hours;daily:rows" names periods one by one.
+        args[:views] =
+          if views.blank? then nil
+          elsif views.include?(":")
+            views.split(";").to_h { |pair| period, list = pair.split(":"); [ period.strip.to_sym, list.to_s.split(/[\s,]+/) ] }
+          else views.split(",").map(&:strip)
+          end
+        # A period offered in one view has no `view` (or, for a day, no
+        # `showing`) in its set: this host knows which one it is, from the same
+        # list it handed the calendar.
+        offered = Preferences.new(shapes: args[:shapes], agenda: true,
+                                  views: Component.views_by_period(args[:views]))
         args[:id] = id if id.present?
         case preferences.to_s
         when "local"
@@ -330,9 +343,8 @@ module Shadcn
                         # asks to restore again, so it never draws the set.
                         # A host's own translation of the chip limit: "all"
                         # is the show-all toggle, a number is the limit.
-                        if %i[monthly weekly].include?(set[:period]) && !set.key?(:view)
-                          set = set.merge(view: only_view.call(set[:period]))
-                        end
+                        second = set[:period] == :daily ? :showing : :view
+                        set = set.merge(second => offered.only_view(set[:period])) unless set.key?(second)
                         chips = set[:max_chips]
                         set = set.except(:max_chips)
                         set = set.merge(show_all: true) if chips == :all

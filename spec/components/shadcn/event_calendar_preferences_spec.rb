@@ -8,6 +8,8 @@ require "spec_helper"
 RSpec.describe Shadcn::EventCalendar::Preferences do
   subject(:preferences) { described_class.new(shapes: %i[chips bars], agenda: true) }
 
+  def by_period(views) = Shadcn::EventCalendar::Component.views_by_period(views)
+
   it "asks each view only its own questions" do
     expect(preferences.sets).to include(
       { period: :monthly, view: :grid, group: :events },
@@ -87,7 +89,7 @@ RSpec.describe Shadcn::EventCalendar::Preferences do
   end
 
   context "when the host offers only some views" do
-    subject(:preferences) { described_class.new(shapes: %i[chips bars], agenda: true, views: %i[grid hours]) }
+    subject(:preferences) { described_class.new(shapes: %i[chips bars], agenda: true, views: by_period(%i[grid hours])) }
 
     it "does not ask the view of a period left with one, and its sets carry none", :aggregate_failures do
       expect(preferences.when(:view)).to eq(%w[monthly])
@@ -108,10 +110,39 @@ RSpec.describe Shadcn::EventCalendar::Preferences do
     end
 
     it "drops a week left with no view" do
-      grid = described_class.new(shapes: %i[chips], agenda: false, views: %i[grid])
+      grid = described_class.new(shapes: %i[chips], agenda: false, views: by_period(%i[grid]))
 
-      expect([ grid.periods, grid.when(:view), grid.sets.find { |set| set[:period] == :monthly } ])
-        .to eq([ %i[monthly daily], [], { period: :monthly, group: :events } ])
+      expect([ grid.periods, grid.when(:view), grid.sets ])
+        .to eq([ %i[monthly], [], [ { period: :monthly, group: :events }, { period: :monthly, group: :assignees } ] ])
+    end
+  end
+
+  # The day's rows: one more answer to "Show the day as", offered only where
+  # `views:` names it for the day.
+  context "when the host offers the day as rows" do
+    it "asks the day rows or its timeline, rows first", :aggregate_failures do
+      both = described_class.new(shapes: %i[chips bars], agenda: true, views: by_period({ daily: %i[rows hours] }))
+
+      expect(both.sets.filter_map { |set| set[:showing] if set[:period] == :daily }.uniq).to eq(%i[rows both axis agenda])
+      expect(both.sets).to include({ period: :daily, showing: :rows, group: :events })
+      expect(both.asks?(:max_chips, { period: :daily, showing: :rows })).to be(true)
+      expect(both.when(:showing)).to eq(%w[daily])
+    end
+
+    it "does not ask a day left only its rows what it shows", :aggregate_failures do
+      rows = described_class.new(shapes: %i[chips bars], agenda: true, views: by_period({ daily: %i[rows] }))
+
+      expect(rows.when(:showing)).to eq([])
+      expect(rows.only_view(:daily)).to eq(:rows)
+      expect(rows.asks?(:max_chips, { period: :daily, group: :events })).to be(true)
+      expect(rows.sets.select { |set| set[:period] == :daily })
+        .to contain_exactly({ period: :daily, group: :events }, { period: :daily, group: :assignees })
+      expect(rows.normalize(period: "daily", group: "assignees", max_chips: "5"))
+        .to eq(period: :daily, group: :assignees, max_chips: 5)
+    end
+
+    it "keeps a day to its timeline unless asked" do
+      expect(preferences.sets).not_to include(a_hash_including(period: :daily, showing: :rows))
     end
   end
 
@@ -120,6 +151,6 @@ RSpec.describe Shadcn::EventCalendar::Preferences do
   end
 
   it "asks the chip limit only where a view caps its chips" do
-    expect(preferences.when(:max_chips)).to eq(%w[monthly:grid monthly:rows weekly:rows])
+    expect(preferences.when(:max_chips)).to eq(%w[monthly:grid monthly:rows weekly:rows daily:rows])
   end
 end

@@ -17,6 +17,7 @@ module Shadcn
       # each job is* and cannot show a gap.
       class Component < Hours::Component
         include Groupings
+        include Day
 
         SHOWING = %i[axis agenda both].freeze
 
@@ -68,19 +69,9 @@ module Shadcn
           super(**attributes)
         end
 
-        def view = :daily
-
-        def period = :daily
-
-        # One view, so no view question on the panel.
-        def view_choices = []
-
-        def cell_role = "listitem"
-
         def preference_values = { period: :daily, showing:, group:, shape: }
 
-        # The panel's hooks, private as they are on the base class.
-        private :period, :view_choices, :cell_role, :preference_values
+        private :preference_values
 
         # The scale has to start where the axes do, and here that is not the
         # date column's `w-14`: cut by operator the left column is the name at
@@ -137,43 +128,6 @@ module Shadcn
         # the arrangement question off a day: a question is on the panel when
         # the view it belongs to is the view you are in.
         def reading_options = [ showing_items, (shape_items if axis? && shape_choice?), grouping_items ].compact
-
-        def showing_items
-          safe_join([
-            render(DropdownMenu::Label::Component.new) { shadcn_t("event_calendar.daily.label") },
-            render(DropdownMenu::Separator::Component.new),
-            render(DropdownMenu::RadioGroup::Component.new) do
-              safe_join(SHOWING.map { |name| showing_item(name) })
-            end
-          ])
-        end
-
-        def showing_item(name)
-          href = showing_url&.call(name)
-
-          render(DropdownMenu::RadioItem::Component.new(
-            value: name, checked: name == showing,
-            **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#reshow" })
-          )) { shadcn_t("event_calendar.daily.#{name}") }
-        end
-
-        # The title is a date rather than a month, because that is what changed.
-        def title
-          tag.div(I18n.l(selected, format: agenda_format),
-                  "data-slot": "event-calendar-title", class: TITLE_CLASS,
-                  role: "status", "aria-live": "polite")
-        end
-
-        # `‹` and `›` step a day here, not a month.
-        def step_button(direction)
-          target = selected + (direction == :previous ? -1 : 1)
-
-          nav_button(target, size: :"icon-sm", action: STEP_ACTIONS.fetch(direction),
-                     label: shadcn_t("event_calendar.#{direction}_day")) do
-            render(Icon::Component.new(direction == :previous ? "chevron-left" : "chevron-right",
-                                       class: CHEVRON_CLASS))
-          end
-        end
 
         # One day's row, with the scale above it — no weekday strip, no weeks,
         # and no `role="grid"`, because there is no grid to describe.

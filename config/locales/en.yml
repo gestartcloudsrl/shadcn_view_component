@@ -92,6 +92,7 @@ en:
         label: Show the day as
         axis: Timeline only
         agenda: List only
+        rows: Rows
         both: Timeline and list
         # The timeline's own name: below `lg` it scrolls sideways, so it is a
         # region with a tab stop, and a region has to be called something.

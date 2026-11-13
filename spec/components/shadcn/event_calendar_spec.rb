@@ -1410,6 +1410,89 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  # The day as one of the week's rows: `reading: :daily, showing: :rows`.
+  describe "the day as rows" do
+    let(:events) do
+      Array.new(5) do |index|
+        { title: "Job #{index + 1}", starts_at: Time.zone.local(2026, 8, 4, 8 + index), assignees: [ { name: "Ada" } ] }
+      end
+    end
+
+    def render_day(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), reading: :daily,
+                                        showing: :rows, events:, views: { daily: %i[rows hours] }, **options))
+    end
+
+    def panel_values = painted.css("[data-slot=dropdown-menu-radio-item]").map { |item| item["data-value"] }
+
+    it "is the workload's row for that day, with no clock", :aggregate_failures do
+      render_day
+
+      expect(parts("event-calendar-day").map { |day| day["data-day"] }).to eq([ "2026-08-04" ])
+      expect(parts("event-calendar-day-item").size).to eq(3)
+      expect(parts("event-calendar-day-rest").map { |rest| rest.text.strip }).to eq([ "+2" ])
+      expect(parts("event-calendar-ruler")).to be_empty
+    end
+
+    it "takes the chip limit" do
+      render_day(max_chips: 4)
+
+      expect(parts("event-calendar-day-item").size).to eq(4)
+    end
+
+    it "takes Show all" do
+      render_day(show_all: true)
+
+      expect(parts("event-calendar-day-item").size).to eq(5)
+    end
+
+    it "asks the day rows or its timeline, rows checked" do
+      render_day
+
+      expect(panel_values.first(7)).to eq(%w[monthly weekly daily rows axis agenda both])
+    end
+
+    it "links each answer through showing_url" do
+      render_day(showing_url: ->(half) { "/day?showing=#{half}" })
+      links = painted.css("a[data-slot=dropdown-menu-radio-item]").to_h { |item| [ item["data-value"], item["href"] ] }
+
+      expect(links).to include("rows" => "/day?showing=rows", "axis" => "/day?showing=axis")
+    end
+
+    it "steps a day, as the timeline does" do
+      render_day(month_url: ->(date) { "/m/#{date}" })
+
+      expect(painted.css("[data-slot=event-calendar-nav] a").map { |link| link["href"] }).to include("/m/2026-08-03", "/m/2026-08-05")
+    end
+
+    it "is not asked what it shows when it is the day's only view" do
+      render_day(views: { daily: %i[rows] })
+
+      expect(panel_values).not_to include("rows", "axis")
+    end
+
+    it "is not offered on a day's timeline unless views: names it" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), reading: :daily))
+
+      expect(panel_values).to include("axis", "both").and(satisfy { |values| !values.include?("rows") })
+    end
+
+    it "offers rows on the day's timeline when views: names it" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 4), reading: :daily,
+                                        views: %i[grid rows hours]))
+
+      expect(panel_values).to include("rows", "axis")
+    end
+
+    it "is saved as a day showing rows, with its chip limit" do
+      render_day(max_chips: 7, preferences: :host, preferences_save_url: "/prefs")
+      root = painted.at_css("[data-controller~='shadcn--event-calendar']")
+
+      expect(root["data-shadcn--event-calendar-preferences-current-value"])
+        .to eq("preferences[period]=daily&preferences[showing]=rows&preferences[group]=events&preferences[max_chips]=7")
+    end
+  end
+
   # The badge counting a day's events, and on a day by assignee each person's.
   # It is also what carries the heat ramp, so off means no ramp either.
   describe "#counts" do

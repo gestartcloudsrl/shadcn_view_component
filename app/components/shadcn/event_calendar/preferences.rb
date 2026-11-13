@@ -43,7 +43,7 @@ module Shadcn
         showing: %w[daily],
         group: %w[monthly:grid monthly:rows weekly:rows daily],
         shape: %w[monthly:hours weekly:hours daily:both daily:axis],
-        max_chips: %w[monthly:grid monthly:rows weekly:rows]
+        max_chips: %w[monthly:grid monthly:rows weekly:rows daily:rows]
       }.freeze
 
       # The `view` options carry tokens of their own: a grid only exists in a
@@ -57,18 +57,18 @@ module Shadcn
       # @param shapes [Array<Symbol>] the shapes the host offers; the question
       #   is only asked when there is more than one
       # @param agenda [Boolean] whether a day may be shown as a list
-      # @param views [Array<Symbol>] the views the host offers, of `:grid`,
-      #   `:rows` and `:hours`. A period with one of them is not asked the view
-      #   and its sets carry none, as a single shape is not asked; a week with
-      #   none (`[:grid]`) is not a period at all.
-      def initialize(shapes:, agenda:, views: VIEWS.values.flatten.uniq)
+      # @param views [Hash{Symbol => Array<Symbol>}] the views each period
+      #   offers, as `Component.views_by_period` spells them: `:grid`, `:rows`
+      #   and `:hours` for a month or a week, `:rows` and `:hours` for a day.
+      #   A period with one second answer is not asked it and its sets carry
+      #   none, as a single shape is not asked; one with none is not a period.
+      def initialize(shapes:, agenda:, views: Component::DEFAULT_VIEWS)
         @shapes = shapes.to_a.map(&:to_sym)
         @agenda = !!agenda
-        @views = views.to_a.map(&:to_sym)
+        @views = views.to_h { |period, list| [ period.to_sym, Array(list).map(&:to_sym) ] }
       end
 
-      # The periods offered: the day always, a month or a week only with a view
-      # to draw it in.
+      # The periods offered: those with a view to draw them in.
       def periods = PERIODS.select { |period| seconds(period).any? }
       # One set per valid answer to the listed questions, keys in `QUESTIONS`
       # order and only those that apply to it. The `FREE` questions are left
@@ -85,7 +85,8 @@ module Shadcn
 
       # Whether a set — one of `#sets`, or a whole one — is asked `question`.
       def asks?(question, set)
-        second = set[:period] == :daily ? set[:showing] : set[:view]
+        # A period offered in one view has none in its set: it is that one.
+        second = (set[:period] == :daily ? set[:showing] : set[:view]) || only_view(set[:period])
         applies?(question, context(set[:period], second))
       end
 
@@ -112,7 +113,7 @@ module Shadcn
         period = given[:period]&.to_sym
         return unless periods.include?(period)
 
-        second = period == :daily ? given[:showing]&.to_sym : (given[:view]&.to_sym || only_view(period))
+        second = (period == :daily ? given[:showing] : given[:view])&.to_sym || only_view(period)
         return unless seconds(period).include?(second)
 
         context = context(period, second)
@@ -140,14 +141,18 @@ module Shadcn
         return ALWAYS.dup if APPLIES.fetch(question).nil?
         return [] if question == :shape && shapes.size <= 1
         return asked_views if question == :view
+        if question == :showing
+          return seconds(:daily).size > 1 ? APPLIES.fetch(:showing).dup : []
+        end
 
         APPLIES.fetch(question).dup
       end
 
       # The view a period is drawn in when it offers only one, which is why it
-      # is not asked; `nil` when there is a choice, or none.
+      # is not asked — for a day, what it shows; `nil` when there is a choice,
+      # or none.
       def only_view(period)
-        choices = period == :daily ? [] : seconds(period)
+        choices = seconds(period)
         choices.first if choices.size == 1
       end
 
@@ -160,10 +165,14 @@ module Shadcn
       private
 
       # What follows the period: the view, or for a day what it shows.
+      # A day's row first, then the timeline's ways of showing.
       def seconds(period)
-        return SHOWING + (@agenda ? %i[agenda] : []) if period == :daily
+        offered = views.fetch(period, [])
+        return VIEWS.fetch(period) & offered unless period == :daily
 
-        VIEWS.fetch(period) & views
+        rows = offered.include?(:rows) ? %i[rows] : []
+        hours = offered.include?(:hours) ? SHOWING + (@agenda ? %i[agenda] : []) : []
+        rows + hours
       end
 
       # The periods whose view is a question: those with more than one.
@@ -175,6 +184,7 @@ module Shadcn
         return true if question == :period
         return false if question == :shape && shapes.size <= 1
         return seconds(context.first.to_sym).size > 1 if question == :view && context.first != "daily"
+        return seconds(:daily).size > 1 if question == :showing && context.first == "daily"
 
         (APPLIES.fetch(question) & context).any?
       end

@@ -45,6 +45,7 @@ it:
         label: Mostra il giorno come
         axis: Solo timeline
         agenda: Solo elenco
+        rows: Righe
         both: Timeline ed elenco
         axis_label: Ore del giorno
       hours:
