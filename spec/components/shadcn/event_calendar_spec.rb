@@ -1359,6 +1359,51 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # `spec/system/event_calendar_spec.rb`.
   # A host whose people never want bars: one shape offered is that shape every
   # time, and nothing on the toolbar names either.
+  # The badge counting a day's events, and on a day by assignee each person's.
+  # It is also what carries the heat ramp, so off means no ramp either.
+  describe "#counts" do
+    let(:events) do
+      [ { title: "Fit-out", starts_at: Time.zone.local(2026, 8, 4, 9), ends_at: Time.zone.local(2026, 8, 4, 11),
+          assignees: [ { name: "Ada" } ] },
+        { title: "Survey", starts_at: Time.zone.local(2026, 8, 4, 13), ends_at: Time.zone.local(2026, 8, 4, 14),
+          assignees: [ { name: "Ada" } ] } ]
+    end
+
+    readings = {
+      "the workload month" => { reading: :workload },
+      "the month's timeline" => { reading: :hours },
+      "the week as rows" => { reading: :weekly, arrangement: :rows },
+      "the week's timeline" => { reading: :weekly },
+      "the day by assignee" => { reading: :daily, group: :assignees }
+    }
+
+    readings.each do |name, reading|
+      context "with #{name}" do
+        let(:options) { reading.merge(selected: Date.new(2026, 8, 4), events:) }
+
+        it "counts by default" do
+          render_inline(calendar)
+
+          expect(parts("event-calendar-day-count").map { |badge| badge.text.strip }).to include("2")
+        end
+
+        it "draws no count when asked not to, as Rails casts a boolean", :aggregate_failures do
+          [ false, "false", "0" ].each do |off|
+            render_inline(described_class.new(month: Date.new(2026, 8, 1), **options, counts: off))
+
+            expect(parts("event-calendar-day-count")).to be_empty, off.inspect
+          end
+        end
+      end
+    end
+
+    it "keeps the chips when the count goes" do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, events:, counts: false))
+
+      expect(parts("event-calendar-day-item")).not_to be_empty
+    end
+  end
+
   describe "a host offering one shape" do
     let(:shown) do
       painted.css("[data-slot=dropdown-menu-radio-item]").map { |item| item["data-value"] } +

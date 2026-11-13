@@ -193,6 +193,7 @@ module Shadcn
       # @param colored toggle
       # @param show_all toggle
       # @param max_chips number
+      # @param counts toggle
       # @param group select [events, assignees]
       # @param shape select [chips, bars]
       # @param showing select [both, axis, agenda]
@@ -207,7 +208,8 @@ module Shadcn
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars",
-                  preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3)
+                  preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
+                  counts: true)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -216,7 +218,9 @@ module Shadcn
         here = lambda do |**changed|
           state = { month:, period:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
-                    turbo:, shapes:, preferences:, id:, max_chips: }.merge(changed).compact
+                    turbo:, shapes:, preferences:, id:, max_chips:,
+                    # Only when off, so the default links stay the ones they were.
+                    counts: (false unless cast.cast(counts)) }.merge(changed).compact
 
           "/lookbook/preview/shadcn/event_calendar/density?#{state.to_query}"
         end
@@ -249,7 +253,7 @@ module Shadcn
         # the week's from the month's is this host's state, not a new word.
         daily = period.to_s == "daily"
         weekly = period.to_s == "weekly"
-        common = { month: shown, events:,
+        common = { month: shown, events:, counts: cast.cast(counts),
                    view_url: lambda { |name|
                      case name.to_s
                      when "daily", "weekly", "monthly" then here.call(period: name)

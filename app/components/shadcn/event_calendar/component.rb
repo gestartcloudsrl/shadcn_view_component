@@ -423,7 +423,7 @@ module Shadcn
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes,
-                  :view_url, :shapes
+                  :view_url, :shapes, :counts
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -493,6 +493,10 @@ module Shadcn
       #   the trigger stops naming it: a host whose people never want bars
       #   should not have them mentioned. Unknown names are ignored, and
       #   none left means every shape.
+      # @param counts [Boolean] whether each day (and, on a day by assignee,
+      #   each person) shows the badge counting its events. On by default; off,
+      #   the badge is not drawn, and with it goes the heat ramp it carries.
+      #   Cast the way Rails casts a boolean, so `"false"` from params is off.
       # @param preferences [Symbol, nil] `:local` keeps a person's preferred view
       #   in their browser, `:host` sends the form to `preferences_save_url:`;
       #   absent, there is no preferences item at all. Readings without a panel
@@ -511,7 +515,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
-                     view_url: nil, movable: false, shapes: SHAPES,
+                     view_url: nil, movable: false, shapes: SHAPES, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
         @month = Calendar::Month.new(month || Date.current, week_starts_on:)
@@ -532,6 +536,7 @@ module Shadcn
         @view_url = view_url
         @shapes = SHAPES & Array(shapes).map { |name| name.to_s.to_sym }
         @shapes = SHAPES if @shapes.empty?
+        @counts = ActiveModel::Type::Boolean.new.cast(counts) != false
         @movable = !!movable
         require_identities! if @movable
         initialize_preferences(preferences, preferences_url, preferences_save_url, restore)

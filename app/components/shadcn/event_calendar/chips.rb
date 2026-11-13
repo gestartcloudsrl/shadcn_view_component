@@ -183,7 +183,7 @@ module Shadcn
       end
 
       def count_chip(count)
-        return if count.zero?
+        return if count.zero? || !counts
 
         render(Badge::Component.new(
         variant: :outline, class: COUNT_CLASS,
