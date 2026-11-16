@@ -24,22 +24,16 @@ with no widget opening by accident.
   cell is a button, so this falls out of the click. Under `day_url:` the cell
   is an `<a>`, which Space does not activate, so there it is Enter only *(Claude's
   call: making Space open a link would be a key binding of ours on a link)*.
-  Escape closes, and the focus returns to whatever opened the drawer: the day
-  when it was the day, the summary button when it was the button. That is the
-  dialog controller's own focus restore, kept as it is *(Claude's call)*.
+  Escape closes, and the focus returns to the day that opened it, which is the
+  dialog controller's own focus restore.
 - **The second tap does not dispatch `select` again.** The selection did not
   change, so `select` branches on `day === selectedValue` and opens instead.
-- **Under the grid there is a summary row instead of the list:** the selected
-  date and its count, as one button that opens the drawer (*"Mercoledì 18
-  novembre · 3 eventi"*). It is the visible way in for anyone who does not know
-  the gesture, and the accessible one (see *Accessibility*). It replaces the
-  list (the list moves into the drawer), it is its own
-  `data-slot="event-calendar-agenda-summary"`, and with `agenda: false` it is
-  absent. Any class of ours it needs gets a `reverse_parity_spec` `ours`
-  entry with its reason. It also replaces the
-  "small *Open* on the selected cell" floated in the conversation *(Claude's
-  call: a button inside the cell would be a second target in a day, which the
-  mobile reading's one-target-per-day rule forbids)*.
+- **Nothing is drawn under the grid** (agreed, 2026-11-16: "sotto la griglia
+  mensile non deve apparire più nulla"). The list moves into the drawer, and
+  no summary row or button takes its place. The way in is the selected day
+  itself. That costs discoverability for a sighted person who does not know the
+  gesture, and the cost is accepted. The selected cell tells assistive
+  technology instead (see *Accessibility*).
 - **Tapping another day while the drawer is open** is not the path: the
   drawer's overlay covers the grid and its focus trap holds the keyboard.
   Nothing makes the page `inert`, so the builder verifies that a tap through
@@ -89,10 +83,19 @@ grip on the bars is unchanged.
 
 The agenda is today the only full textual reading of the events reading: the
 bars are `aria-hidden` because the agenda says everything they do not. With
-the drawer, the list is out of the accessibility tree until opened. What
-replaces it at rest is the summary button, which carries the date and the count
-and is announced by the existing `aria-live="polite"` when the selection
-changes. This is a real regression in how directly the events can be reached,
+the drawer, the list is out of the accessibility tree until opened, and
+nothing visible replaces it. What replaces it for assistive technology:
+
+- **The selected cell says it opens something:** `aria-haspopup="dialog"` and
+  `aria-expanded` on the selected cell only, and an `aria-describedby` hint
+  (*"Premi di nuovo per vedere gli eventi"*). The other cells select, so they
+  carry neither *(Claude's call)*.
+- **The selection is announced** in a visually hidden `aria-live="polite"`
+  region, which is not drawn under the grid: the date, the count and the same
+  hint (*"Mercoledì 18 novembre, 3 eventi. Premi di nuovo per vederli."*). It
+  is what the agenda's live region announced, minus the list.
+
+This is a real regression in how directly the events can be reached. It is
 accepted because the feature is opt-in and the events are one Enter away.
 
 ## Left to the builder
@@ -102,12 +105,12 @@ accepted because the feature is opt-in and the events are one Enter away.
 - How a link cell tells "selected" on click under `day_url:` with
   `agenda_as: :"turbo-frame"`, where a frame swap does not re-render the grid.
   Measure whether `aria-selected` is stale after the swap before choosing.
-- The copy and i18n keys for the summary button and the drawer's title,
+- The copy and i18n keys for the hint, the announcement and the drawer's title,
   English in the gem and Italian in the dummy app.
 - A Lookbook preview, so the snapshot and axe specs cover the drawer closed
   and open, and system specs for: first tap selects without opening, second
-  tap opens, Enter twice opens, Escape returns focus, the summary button
-  opens, and `day_url:` navigates then opens.
+  tap opens, Enter twice opens, Escape returns focus, nothing is
+  rendered under the grid, and `day_url:` navigates then opens.
 - The feature doc's Options table and a short section.
 - Checking, rather than assuming, that a Sheet opened from a row stacks above
   the drawer in the dialog controller's layers, and the `Drawer`'s direction
