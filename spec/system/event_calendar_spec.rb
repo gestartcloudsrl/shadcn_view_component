@@ -2082,4 +2082,97 @@ RSpec.describe "Event calendar", :js do
       end
     end
   end
+
+  # The agenda as a bottom drawer. The preview selects the 20th, so the first
+  # tap on any other day only selects, and a tap on the day already selected is
+  # the one that opens. The 21st has three events and the 22nd none.
+  describe "the agenda as a drawer" do
+    let(:drawer) { "[data-slot=drawer-content]" }
+
+    before do
+      visit_preview("event_calendar", :agenda_drawer)
+      wait_for_stimulus
+      page.execute_script(<<~JS)
+        window.selections = 0
+        document.querySelector("[data-slot=event-calendar]")
+          .addEventListener("shadcn--event-calendar:select", () => window.selections += 1)
+      JS
+    end
+
+    def selections = page.evaluate_script("window.selections")
+
+    it "selects on the first tap and opens nothing", :aggregate_failures do
+      day("2026-08-21").click
+
+      expect(day("2026-08-21")["aria-selected"]).to eq("true")
+      expect(selections).to eq(1)
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+    end
+
+    it "opens the drawer with that day on a tap on the selected day", :aggregate_failures do
+      day("2026-08-21").click
+      day("2026-08-21").click
+
+      expect(page).to have_css("[role=dialog][aria-labelledby]", visible: :visible)
+      expect(find("[role=dialog]")).to have_text("Friday, August 21")
+      expect(selections).to eq(1)
+      expect(find("#{calendar} [data-day='2026-08-21']", visible: :all)["aria-expanded"]).to eq("true")
+    end
+
+    it "opens on Enter twice and gives the focus back to the day on Escape", :aggregate_failures do
+      day("2026-08-21").click
+      day("2026-08-21").send_keys(:enter)
+      expect(page).to have_css("[role=dialog]", visible: :visible)
+
+      page.send_keys(:escape)
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(page.evaluate_script("document.activeElement.dataset.day")).to eq("2026-08-21")
+      expect(day("2026-08-21")["aria-expanded"]).to eq("false")
+    end
+
+    it "announces the selection together with the hint", :aggregate_failures do
+      day("2026-08-21").click
+
+      text = find("[data-slot=event-calendar-selection]", visible: :all).text(:all)
+      expect(text).to include("August 21", "3 events", "Press again to see the events.")
+    end
+
+    it "moves the hint with the selection", :aggregate_failures do
+      day("2026-08-21").click
+
+      expect(all("#{calendar} [aria-haspopup]").map { |cell| cell["data-day"] }).to eq([ "2026-08-21" ])
+      expect(all("#{calendar} [aria-describedby]").map { |cell| cell["data-day"] }).to eq([ "2026-08-21" ])
+    end
+
+    # Navigating selects September's 1st by itself, so it already carries the
+    # hint and the very next tap on it is the second one.
+    it "opens the new day after navigating", :aggregate_failures do
+      nav_button("Go to the Next Month").click
+      expect(day("2026-09-01")["aria-haspopup"]).to eq("dialog")
+      day("2026-09-01").click
+
+      expect(find("[role=dialog]")).to have_text("Tuesday, September 1")
+    end
+
+    it "closes on a tap on the overlay without selecting what is under it", :aggregate_failures do
+      day("2026-08-20").click
+      expect(page).to have_css("[role=dialog]", visible: :visible)
+
+      find("[data-slot=drawer-overlay]", visible: :all).click(x: 5, y: 5)
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(day("2026-08-20")["aria-selected"]).to eq("true")
+      expect(selections).to eq(0)
+    end
+
+    it "opens an empty day on Nothing scheduled." do
+      day("2026-08-22").click
+      day("2026-08-22").click
+
+      expect(find("[role=dialog]")).to have_text("Nothing scheduled.")
+    end
+
+    it "draws nothing under the grid while it is closed" do
+      expect(page).to have_no_css("[data-slot=event-calendar-agenda]", visible: :visible)
+    end
+  end
 end

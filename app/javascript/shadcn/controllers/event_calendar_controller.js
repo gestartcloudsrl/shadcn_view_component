@@ -32,13 +32,13 @@ export default class extends Controller {
     // The saved-view preferences, drawn by the server when a host asks for
     // them: the mode, the current set's key, where it is remembered, whether to
     // go there on arrival, and every set's URL.
-    // Whether the agenda is a drawer that a second press on the selected day opens.
-    drawer: Boolean,
     preferences: String,
     preferencesCurrent: String,
     preferencesStorage: String,
     preferencesRestore: Boolean,
     preferencesUrls: Object,
+    // Whether the agenda is a drawer that a second press on the selected day opens.
+    drawer: Boolean,
     month: String,
     // The application's today, not the browser's — `Time.zone` and a laptop's
     // clock disagree by a day for a few hours out of every twenty-four, and the
@@ -507,10 +507,63 @@ export default class extends Controller {
     const day = event.currentTarget.dataset.day
     if (!day) return
 
+    // A press on the day that is already selected is the second tap: it opens
+    // the day's drawer rather than selecting again, so `select` is not
+    // dispatched twice for one choice.
+    if (this.drawerValue && day === this.selectedValue) return this.openDay(event)
+
     this.selectedValue = day
     this.markSelection()
     this.renderAgenda()
+    this.announceSelection()
     this.dispatch("select", { detail: { date: day, events: this.eventsOn(day) } })
+  }
+
+  // Opens the drawer on the selected day. The agenda is drawn first, so the
+  // drawer never opens on the day it was showing before.
+  openDay() {
+    if (!this.hasAgendaDrawerTarget) return
+
+    this.renderAgenda()
+    this.agendaDrawer?.open()
+  }
+
+  // Same shape as `preferencesDialog`: the drawer's root carries the dialog
+  // controller, and this is the way to its `open()`.
+  get agendaDrawer() {
+    return this.application.getControllerForElementAndIdentifier(this.agendaDrawerTarget, "shadcn--dialog")
+  }
+
+  // The region is polite and the cell's own label does not change, so what a
+  // screen reader hears for a new selection is written here: the day, its
+  // count and the hint that a second press shows the events.
+  announceSelection() {
+    if (!this.drawerValue || !this.hasSelectionAnnouncerTarget) return
+
+    const cell = this.cellFor(this.selectedValue)
+    const hint = this.element.querySelector("[data-slot='event-calendar-drawer-hint']")
+    if (!cell || !hint) return
+
+    this.selectionAnnouncerTarget.textContent = `${cell.getAttribute("aria-label")}. ${hint.textContent}`
+  }
+
+  // `aria-expanded` follows the drawer, whichever way it was opened or closed.
+  agendaDrawerTargetConnected(drawer) {
+    this.drawerListener = (event) => {
+      if (event.target !== drawer) return
+      this.selectedCell()?.setAttribute("aria-expanded", event.type.endsWith(":open") ? "true" : "false")
+    }
+    drawer.addEventListener("shadcn--dialog:open", this.drawerListener)
+    drawer.addEventListener("shadcn--dialog:close", this.drawerListener)
+  }
+
+  agendaDrawerTargetDisconnected(drawer) {
+    drawer.removeEventListener("shadcn--dialog:open", this.drawerListener)
+    drawer.removeEventListener("shadcn--dialog:close", this.drawerListener)
+  }
+
+  selectedCell() {
+    return this.element.querySelector("[data-slot='event-calendar-day'][aria-selected='true']")
   }
 
   // `month-change` is the hook a host needs and this component cannot provide:
@@ -542,6 +595,26 @@ export default class extends Controller {
     if (chosen) cell.setAttribute("aria-selected", "true")
     else cell.removeAttribute("aria-selected")
     cell.setAttribute("tabindex", chosen ? "0" : "-1")
+    this.markOpener(cell, chosen)
+  }
+
+  // The selected cell, and only that one, says a second press opens a dialog
+  // and points at the hint that says so. Here rather than in `markSelection`
+  // because `fillDay` also calls this, so a month reached from the nav carries
+  // it as well.
+  markOpener(cell, chosen) {
+    if (!this.drawerValue) return
+
+    const hint = this.element.querySelector("[data-slot='event-calendar-drawer-hint']")
+    if (chosen && hint) {
+      cell.setAttribute("aria-haspopup", "dialog")
+      cell.setAttribute("aria-expanded", "false")
+      cell.setAttribute("aria-describedby", hint.id)
+    } else {
+      cell.removeAttribute("aria-haspopup")
+      cell.removeAttribute("aria-expanded")
+      cell.removeAttribute("aria-describedby")
+    }
   }
 
   markSelection() {
