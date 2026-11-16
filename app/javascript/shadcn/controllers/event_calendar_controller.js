@@ -510,7 +510,9 @@ export default class extends Controller {
     // A press on the day that is already selected is the second tap: it opens
     // the day's drawer rather than selecting again, so `select` is not
     // dispatched twice for one choice.
-    if (this.drawerValue && day === this.selectedValue) return this.openDay(event)
+    // A pending pick is not a second tap: Enter on the selected day while an
+    // event is held would open the drawer over it.
+    if (this.drawerValue && day === this.selectedValue) return this.pickedId ? undefined : this.openDay(event)
 
     this.selectedValue = day
     this.markSelection()
@@ -544,7 +546,7 @@ export default class extends Controller {
       event.preventDefault()
     }
 
-    if (!this.hasAgendaDrawerTarget) return
+    if (!this.hasAgendaDrawerTarget || this.pickedId) return
 
     this.renderAgenda()
     this.agendaDrawer?.open()
@@ -749,8 +751,8 @@ export default class extends Controller {
     // three. Against the event's start instead, one press of → moved
     // 19–21 to 21–23, and that is the version this began as.
     this.pickedFrom = this.selectedValue
-    // In a drawer the grid is inert while it is open, so the pick goes on on
-    // the grid. The close restores the focus to what had it before the drawer
+    // In a drawer the overlay and the focus trap keep the grid out of reach
+    // while it is open (nothing sets `inert`), so the pick goes on on the grid. The close restores the focus to what had it before the drawer
     // opened, and that has to be over before the day takes it.
     if (this.drawerValue) this.agendaDrawer?.close()
     this.render()

@@ -1123,6 +1123,29 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # A move dispatches the host's own id, and an event has none unless the host
   # gave it one. These are the two halves of that: the identity travelling into
   # the DOM, and the render refusing to go on without it.
+  describe "the row grip with the agenda as a drawer" do
+    let(:events) { [ { id: "b", title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9, 0) } ] }
+
+    def marks(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), events:,
+                                        movable: true, **options))
+      painted.css("[data-slot=event-calendar-agenda-mark]")
+    end
+
+    it "carries no grabRow action and no grip cursor in the drawer", :aggregate_failures do
+      rows = marks(agenda: :drawer)
+      expect(rows).not_to be_empty
+      expect(rows.map { |mark| mark["data-action"] }).to all(be_nil)
+      expect(rows.map { |mark| mark["class"] }).to all(satisfy { |klass| !klass.include?("cursor-grab") })
+    end
+
+    it "still carries both by default", :aggregate_failures do
+      rows = marks
+      expect(rows.map { |mark| mark["data-action"] }).to all(include("grabRow"))
+      expect(rows.map { |mark| mark["class"] }).to all(include("cursor-grab"))
+    end
+  end
+
   describe "#movable" do
     let(:events) do
       [ { id: "a", title: "Conference", starts_at: Date.new(2026, 8, 19), ends_at: Date.new(2026, 8, 21) },

@@ -1045,6 +1045,10 @@ module Shadcn
         )
       end
 
+      # A link cell opens the drawer on the day that is already selected, and
+      # otherwise lets the link go. The caller's own actions are added to it.
+      OPEN_DAY_ACTION = "click->shadcn--event-calendar#openDay"
+
       # A link when the caller can name the day's URL, a button otherwise — the
       # shape `#nav_button` already has for the months. A link is the whole of
       # what a host needs to open a drawer or swap a frame: no listener, no URL
@@ -1052,11 +1056,8 @@ module Shadcn
       #
       # The two cannot share a gesture. With a URL the click navigates and the
       # controller's `select` is left off, so the server decides what the day
-      # shows and `aria-selected` follows it.
-      # A link cell opens the drawer on the day that is already selected, and
-      # otherwise lets the link go. The caller's own actions are added to it.
-      OPEN_DAY_ACTION = "click->shadcn--event-calendar#openDay"
-
+      # shows. `aria-selected` follows it, except with a drawer and a frame:
+      # the grid sits outside the frame, so `openDay` marks the clicked cell.
       def day_cell(day, on_day:, assignees:, hidden:)
         href = day_url&.call(day)
 
@@ -1361,6 +1362,13 @@ module Shadcn
       #
       # `prototype:` is the `<template>`'s, and draws every part a row can
       # have, empty — see `#prototypes`.
+      # The grip on a row drags it to another day. Inside the drawer it is not
+      # drawn: the drawer's own `press` captures the pointer on any press in the
+      # panel, which leaves `grabRow` with a drag that never moves and a
+      # `[data-picked]` that sticks. A pick there goes by the keyboard (Space on
+      # the row) and the bars' grips stay.
+      def row_grip? = movable? && !agenda_drawer?
+
       def agenda_item(event, prototype: false)
         tag.li(agenda_row(event, prototype:), "data-slot": "event-calendar-agenda-item", "data-color": event.color,
                style: color_style(event).presence, "data-event-id": (event.id if movable?),
@@ -1374,8 +1382,8 @@ module Shadcn
       def agenda_row(event, prototype: false)
         body = safe_join([
           tag.span("", "data-slot": "event-calendar-agenda-mark",
-                   class: [ AGENDA_MARK_CLASS, (AGENDA_MARK_GRIP_CLASS if movable?) ],
-                   "data-action": ("pointerdown->shadcn--event-calendar#grabRow" if movable?)),
+                   class: [ AGENDA_MARK_CLASS, (AGENDA_MARK_GRIP_CLASS if row_grip?) ],
+                   "data-action": ("pointerdown->shadcn--event-calendar#grabRow" if row_grip?)),
           render(Item::Content::Component.new(class: AGENDA_CONTENT_CLASS).with_content(
           safe_join([
             render(Item::Title::Component.new(class: AGENDA_EVENT_TITLE_CLASS)

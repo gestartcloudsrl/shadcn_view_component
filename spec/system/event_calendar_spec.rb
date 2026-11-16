@@ -2139,7 +2139,8 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
-  # In a modal drawer the grid is inert, so a pick made from a row closes the
+  # In a modal drawer the overlay and the focus trap keep the grid out of reach
+  # (nothing sets `inert`), so a pick made from a row closes the
   # drawer and goes on on the grid, with the focus on the event's day.
   describe "moving an event from the drawer" do
     before do
@@ -2168,6 +2169,26 @@ RSpec.describe "Event calendar", :js do
       page.send_keys(:space)
       expect(page).to have_css("#{calendar} [data-day='2026-08-21']:focus")
       expect(start_of("e5")).to eq("2026-08-21")
+    end
+
+    it "offers no grip drag on a row", :aggregate_failures do
+      marks = all("[role=dialog] [data-slot=event-calendar-agenda-mark]")
+      expect(marks).not_to be_empty
+      expect(marks.map { |mark| mark["data-action"] }).to all(be_nil)
+      expect(marks.map { |mark| mark["class"] }).to all(satisfy { |klass| !klass.include?("cursor-grab") })
+    end
+
+    it "does not open the drawer on Enter on the selected day while an event is held", :aggregate_failures do
+      find("[role=dialog] [data-slot=event-calendar-agenda-item][data-event-id='e5']").send_keys(:space)
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(focused).to eq("2026-08-20")
+
+      page.send_keys(:enter)
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(day("2026-08-20")["aria-expanded"]).to eq("false")
+
+      page.send_keys(:escape)
+      expect(start_of("e5")).to eq("2026-08-20")
     end
 
     it "puts it back on Escape without reopening the drawer", :aggregate_failures do
@@ -2251,8 +2272,17 @@ RSpec.describe "Event calendar", :js do
     end
 
     it "opens on Enter twice and gives the focus back to the day on Escape", :aggregate_failures do
-      day("2026-08-21").click
-      day("2026-08-21").send_keys(:enter)
+      # Arrows move the focus without selecting, so the 21st is focused and
+      # unselected until the first Enter.
+      day("2026-08-20").send_keys(:right)
+      expect(page).to have_css("#{calendar} [data-day='2026-08-21']:focus")
+      expect(day("2026-08-21")["aria-selected"]).to be_nil
+
+      page.send_keys(:enter)
+      expect(day("2026-08-21")["aria-selected"]).to eq("true")
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+
+      page.send_keys(:enter)
       expect(page).to have_css("[role=dialog]", visible: :visible)
 
       page.send_keys(:escape)

@@ -439,6 +439,14 @@ noting that it would not have delivered the component that raised the question:
       row* — none has been run, so none is documented. See
       [the feature doc](features/event-calendar.md#the-agenda-in-a-drawer).
 
+- [ ] **`agenda: :drawer` follow-ups.** Link cells (`day_url:`) never announce
+      the selection: on a full-page link the navigation would cut it, and a
+      frame-backed drawer stays silent because `openDay` marks the cell without
+      calling `announceSelection`. And a Turbo morph while the drawer is open is
+      unverified (the morph may strip the open state, or the dialog may hide
+      without tearing down its scroll lock and dismiss layer).
+      [The feature doc](features/event-calendar.md#the-agenda-in-a-drawer).
+
 - [ ] **The event calendar's desktop month takes two clicks to open an event**
       (the day, then the row), where it took one. Events open from the row in
       the day's list and the chip stays decoration, see

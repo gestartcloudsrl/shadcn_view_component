@@ -1436,9 +1436,11 @@ option is opt-in and the events are one press away. What stands in for it: the
 selected cell, and only that one, carries `aria-haspopup="dialog"`,
 `aria-expanded` (following the drawer's open and close events) and an
 `aria-describedby` hint; and a visually hidden `role="status"` region announces
-the day, its count and the hint when a tap (or Enter) selects a day. It is
+the day, its count and the hint when a tap (or Enter) selects a button cell. It is
 written from `select` only, so a selection made by the nav or by default is not
-announced. The agenda's own
+announced, and **link cells (`day_url:`) do not announce**: on a full-page link
+the navigation would cut it off, and with a frame-backed drawer `openDay` marks
+the cell but stays silent (a follow-up, see the [todo](../todo.md)). The agenda's own
 `aria-live` is off in a drawer because the drawer is closed when the selection
 moves. The copy is `event_calendar.drawer_hint` in the gem's locale file, which
 is English.
@@ -1447,7 +1449,14 @@ is English.
 pick continues on the grid, with the focus on the event's day; Escape puts the
 event back and the focus returns to that day without reopening the drawer
 (`event_calendar_controller.js`, the pick and `cancelPick`). The pointer grip on
-the bars is unchanged.
+the bars is unchanged. The rows' own grip is not drawn in a drawer: the drawer's
+`press` re-captures the pointer, so a drag from it never moved the event and left
+`[data-picked]` stuck. Enter on the selected day does not open the drawer while a
+pick is pending.
+
+**Not verified: a Turbo morph while the drawer is open.** Whether the morph strips
+the open state the script set, or the dialog hides without tearing down its
+scroll lock and dismiss layer, has not been measured.
 
 **Known gap: a row cannot open a host's Sheet.** The recipe in *What an event
 says* (`attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } }`)
