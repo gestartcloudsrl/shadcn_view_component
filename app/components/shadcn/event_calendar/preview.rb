@@ -15,8 +15,13 @@ module Shadcn
       # choose a day and `Space` puts it down; a pointer drags the grip on a
       # bar. The calendar dispatches and stops there — saving is the host's, and
       # this preview has no host, so a move survives until the page reloads.
-      def movable
-        render_with_template
+      #
+      # `agenda=drawer` puts the agenda in a drawer, where `Space` on a row
+      # closes it and carries the pick onto the grid.
+      #
+      # @param agenda select [below, drawer]
+      def movable(agenda: "below")
+        render_with_template(locals: { agenda: agenda.to_s == "drawer" ? :drawer : true })
       end
 
       # A week: seven days of the hours axis over one window, so the same hour
@@ -163,8 +168,10 @@ module Shadcn
       #
       # @param reading select [weekly, events]
       # @param movable toggle
-      def event_links(reading: "weekly", movable: false)
+      # @param agenda select [below, drawer]
+      def event_links(reading: "weekly", movable: false, agenda: "below")
         render_with_template(locals: { reading: reading.to_sym,
+                                       agenda: agenda.to_s == "drawer" ? :drawer : true,
                                        movable: ActiveModel::Type::Boolean.new.cast(movable) || false })
       end
 

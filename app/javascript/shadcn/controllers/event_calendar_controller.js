@@ -749,6 +749,10 @@ export default class extends Controller {
     // three. Against the event's start instead, one press of → moved
     // 19–21 to 21–23, and that is the version this began as.
     this.pickedFrom = this.selectedValue
+    // In a drawer the grid is inert while it is open, so the pick goes on on
+    // the grid. The close restores the focus to what had it before the drawer
+    // opened, and that has to be over before the day takes it.
+    if (this.drawerValue) this.agendaDrawer?.close()
     this.render()
     this.focusDay(parse(this.selectedValue))
   }
@@ -779,8 +783,10 @@ export default class extends Controller {
     )
 
     // The link, when the row is one: a row with a url has no stop of its own,
-    // and focusing the `<li>` would quietly put the focus nowhere.
-    if (row) (row.querySelector("a[href]") || row).focus()
+    // and focusing the `<li>` would quietly put the focus nowhere. Not at all
+    // in a drawer, which stays closed: the row is in it, and the day is where
+    // the pick began.
+    if (row && !this.drawerValue) (row.querySelector("a[href]") || row).focus()
     else this.focusDay(parse(picked.from))
   }
 

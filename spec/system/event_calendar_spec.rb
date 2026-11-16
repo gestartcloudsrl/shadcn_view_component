@@ -2139,6 +2139,80 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # In a modal drawer the grid is inert, so a pick made from a row closes the
+  # drawer and goes on on the grid, with the focus on the event's day.
+  describe "moving an event from the drawer" do
+    before do
+      visit "/lookbook/preview/shadcn/event_calendar/movable?agenda=drawer"
+      wait_for_stimulus
+      day("2026-08-20").click
+      expect(page).to have_css("[role=dialog]", visible: :visible)
+    end
+
+    def focused = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    def start_of(id)
+      page.evaluate_script(<<~JS)
+        JSON.parse(document.querySelector("#{calendar}").getAttribute("data-shadcn--event-calendar-events-value"))
+          .find((event) => event.id === "#{id}").from
+      JS
+    end
+
+    it "closes the drawer on Space and goes on on the grid", :aggregate_failures do
+      find("[role=dialog] [data-slot=event-calendar-agenda-item][data-event-id='e5']").send_keys(:space)
+
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(focused).to eq("2026-08-20")
+
+      page.send_keys(:right)
+      page.send_keys(:space)
+      expect(page).to have_css("#{calendar} [data-day='2026-08-21']:focus")
+      expect(start_of("e5")).to eq("2026-08-21")
+    end
+
+    it "puts it back on Escape without reopening the drawer", :aggregate_failures do
+      find("[role=dialog] [data-slot=event-calendar-agenda-item][data-event-id='e5']").send_keys(:space)
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+
+      page.send_keys(:right)
+      page.send_keys(:escape)
+      expect(focused).to eq("2026-08-20")
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(start_of("e5")).to eq("2026-08-20")
+    end
+  end
+
+  describe "a Sheet over the drawer" do
+    it "opens on top and closes first", :aggregate_failures do
+      visit "/lookbook/preview/shadcn/event_calendar/event_links?reading=events&agenda=drawer"
+      wait_for_stimulus
+      day("2026-08-05").click
+      expect(page).to have_css("[data-slot=drawer-content]", visible: :visible)
+
+      # Through the Sheet's own controller, not by clicking the row: a row's
+      # `shadcn--dialog#open` is resolved by Stimulus against the nearest dialog
+      # controller above it, which from inside the drawer is the drawer itself.
+      page.execute_script(<<~JS)
+        const sheet = document.querySelector("[data-slot=sheet-content]").closest("[data-controller~='shadcn--dialog']")
+        window.Stimulus.getControllerForElementAndIdentifier(sheet, "shadcn--dialog").open()
+      JS
+      expect(page).to have_css("[data-slot=sheet-content]", visible: :visible)
+
+      on_top = page.evaluate_script(<<~JS)
+        (() => {
+          const sheet = document.querySelector("[data-slot=sheet-content]")
+          const box = sheet.getBoundingClientRect()
+          return sheet.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))
+        })()
+      JS
+      expect(on_top).to be(true)
+
+      page.send_keys(:escape)
+      expect(page).to have_no_css("[data-slot=sheet-content]", visible: :visible)
+      expect(page).to have_css("[data-slot=drawer-content]", visible: :visible)
+    end
+  end
+
   # The agenda as a bottom drawer. The preview selects the 20th, so the first
   # tap on any other day only selects, and a tap on the day already selected is
   # the one that opens. The 21st has three events and the 22nd none.

@@ -5,6 +5,7 @@
       month: Date.new(2026, 8, 1),
       selected: Date.new(2026, 8, 20),
       movable: true,
+      agenda: local_assigns.fetch(:agenda, true),
       events: Shadcn::EventCalendar::Preview.sample_events.each_with_index.map { |event, index|
         event.merge(id: "e#{index}")
       }

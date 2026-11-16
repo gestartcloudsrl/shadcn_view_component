@@ -21,6 +21,7 @@
     the controller builds itself. %>
 <% reading = local_assigns.fetch(:reading, :weekly) %>
 <% movable = local_assigns.fetch(:movable, false) %>
+<% agenda = local_assigns.fetch(:agenda, true) %>
 <% placed = reading == :weekly ? { window: (7..19), day_url: ->(date) { "/calendar/days/#{date.iso8601}" } } : {} %>
 <%= render(Shadcn::Sheet::Component.new) do |sheet| %>
   <% sheet.with_dialog_content(side: :right, class: "w-full sm:max-w-md",
@@ -35,6 +36,7 @@
         month: Date.new(2026, 8, 1),
         selected: Date.new(2026, 8, 5),
         movable:,
+        agenda:,
         **placed,
         events: [
           { **(movable ? { id: "1" } : {}), title: "Boiler service", starts_at: Time.zone.local(2026, 8, 5, 9),
