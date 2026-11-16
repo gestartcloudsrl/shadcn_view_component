@@ -117,6 +117,10 @@ module Shadcn
         # day, server-side, so there is nothing to wait for.
         def agenda? = @agenda && showing != :axis
 
+        # The day draws its own agenda beside the axis; there is no grid to
+        # leave it out of, so `agenda: :drawer` does not apply.
+        def agenda_drawer? = false
+
         def reading_label
           safe_join([ shadcn_t("event_calendar.daily.#{showing}"), grouping_label ], " · ")
         end

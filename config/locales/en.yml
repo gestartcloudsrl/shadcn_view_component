@@ -44,6 +44,7 @@ en:
         done: Done
         pending: Pending
       agenda_label: Events on the selected day
+      drawer_hint: Press again to see the events.
       # The "+2" a cell shows when it has more events than lanes. A template
       # rather than a sentence: the controller re-renders it for a month the
       # server never drew.

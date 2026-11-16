@@ -510,10 +510,13 @@ module Shadcn
       #   a button and the controller redraws the agenda in place.
       # @param day_attributes [Hash] merged onto every day cell — where a
       #   `data: { turbo_frame: … }` goes
-      # @param agenda [Boolean] whether to render the built-in day view. `false`
+      # @param agenda [Boolean, Symbol] whether to render the built-in day view. `false`
       #   when the host has somewhere better to put it — a Sheet, a panel — and
       #   the day link is what fills it. It is not a leftover: it is what the
       #   *Day* tab will be made of when the toolbar grows a view switcher.
+      #   `:drawer` draws it in a bottom drawer that a second press on the
+      #   selected day opens, and leaves the grid with nothing under it. The day
+      #   reading draws its own day and ignores it.
       # @param agenda_as [Symbol] the agenda's element. `:"turbo-frame"` makes
       #   the agenda itself the thing a day link swaps, without this gem
       #   mentioning Turbo anywhere.
@@ -573,7 +576,8 @@ module Shadcn
         @month_url = month_url
         @day_url = day_url
         @day_attributes = day_attributes
-        @agenda = agenda
+        # `:drawer` also arrives as the string a params hash carries.
+        @agenda = agenda.to_s == "drawer" ? :drawer : agenda
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
         # Checked against its list. Unchecked, `reading: :workLoad` off a params
@@ -652,6 +656,8 @@ module Shadcn
           # controller's own default is false, and every calendar in a host's
           # app that never moves anything would otherwise carry the byte.
           "data-shadcn--event-calendar-movable-value" => ("true" if movable?),
+          # Omitted when off, for the same reason.
+          "data-shadcn--event-calendar-drawer-value" => ("true" if agenda_drawer?),
           "data-shadcn--event-calendar-reading-value" => reading,
           # Whether the browser may redraw this month, crossed as the *fact*
           # rather than as a list of reading names for the controller to check
@@ -696,8 +702,9 @@ module Shadcn
       end
 
       def call
-        render_element(body: safe_join([ header, grid, (agenda if agenda?), announcer,
-                                        (prototypes if client_drawn?) ].compact))
+        render_element(body: safe_join([ header, grid, (agenda_drawer? ? agenda_drawer : agenda if agenda?),
+                                        (drawer_hint if agenda_drawer?), (selection_announcer if agenda_drawer?),
+                                        announcer, (prototypes if client_drawn?) ].compact))
       end
 
       private
@@ -972,6 +979,10 @@ module Shadcn
       # an agenda that had been working and nothing went red.
       def agenda? = @agenda && (client_drawn? || day_url.present?)
 
+      # The agenda in a drawer rather than under the grid. Only where `agenda?`
+      # holds, so a calendar with nowhere to put the agenda has no drawer either.
+      def agenda_drawer? = @agenda == :drawer && agenda?
+
       # `data-*` a reading needs on the root for its own rules to key off.
       def reading_attributes = {}
 
@@ -1048,6 +1059,7 @@ module Shadcn
         tag.public_send(href ? :a : :button,
           safe_join(cell_body(day, on_day:, assignees:, hidden:)),
           **(href ? { href: } : { type: "button", "data-action": "click->shadcn--event-calendar#select" }),
+          **(day == selected && agenda_drawer? ? drawer_opener : {}),
           **day_attributes,
           "data-slot": "event-calendar-day",
           class: DAY_CLASS,
@@ -1254,6 +1266,41 @@ module Shadcn
 
       # --- the agenda -----------------------------------------------------------
 
+      # What the selected cell says when a second press opens the drawer. Only
+      # that cell: the others select, they do not open anything. Spread before
+      # `day_attributes`, so a host's own still win.
+      def drawer_opener
+        { "aria-haspopup": "dialog", "aria-expanded": "false", "aria-describedby": drawer_id("drawer-hint") }
+      end
+
+      # One per instance, like `#preference_id`, so two calendars on a page do
+      # not point at each other's title or hint.
+      def drawer_id(part)
+        @drawer_hex ||= SecureRandom.hex(4)
+        "shadcn-event-calendar-#{@drawer_hex}-#{part}"
+      end
+
+      # The agenda in a bottom drawer, named by its own title. The drawer is the
+      # calendar's to find — `agendaDrawer` — the way the preferences dialog is.
+      def agenda_drawer
+        render(Drawer::Component.new("data-shadcn--event-calendar-target": "agendaDrawer")) do |drawer|
+          drawer.with_dialog_content("aria-labelledby": drawer_id("agenda-title")) { agenda }
+        end
+      end
+
+      def drawer_hint
+        tag.span(shadcn_t("event_calendar.drawer_hint"), "data-slot": "event-calendar-drawer-hint",
+                 id: drawer_id("drawer-hint"), class: "sr-only")
+      end
+
+      # Empty until the controller says which day a press chose. The agenda's
+      # own `aria-live` is off in a drawer: it is closed when the selection
+      # moves, so it would say nothing, and this is what speaks instead.
+      def selection_announcer
+        tag.div("", "data-slot": "event-calendar-selection", class: "sr-only", role: "status",
+                "aria-live": "polite", "data-shadcn--event-calendar-target": "selectionAnnouncer")
+      end
+
       # The mobile reading surface, and the desktop detail panel — one mechanism
       # rather than two, which is what lets the grid have a single tap target
       # per day at every width.
@@ -1273,7 +1320,8 @@ module Shadcn
                          "data-slot": "event-calendar-agenda-count", class: AGENDA_COUNT_CLASS,
                          "data-shadcn--event-calendar-target": ("agendaCount" unless day_url))
               ]),
-              "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS
+              "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS,
+              id: (drawer_id("agenda-title") if agenda_drawer?)
             ),
             tag.ul(safe_join(on_day.map { |event| agenda_item(event) }),
                    "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS,
@@ -1290,7 +1338,7 @@ module Shadcn
           # The live region is the controller's: it exists because the agenda
           # changes under a pointer that never left the grid. A frame swap is a
           # navigation, and Turbo announces those itself.
-          "aria-live": ("polite" unless day_url),
+          "aria-live": ("polite" unless day_url || agenda_drawer?),
           "aria-label": shadcn_t("event_calendar.agenda_label")
         )
       end

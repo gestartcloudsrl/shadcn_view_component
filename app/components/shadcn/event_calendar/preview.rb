@@ -115,6 +115,15 @@ module Shadcn
         render_with_template
       end
 
+      # The day's agenda in a bottom drawer instead of under the grid: the first
+      # press on a day selects it, a second opens the drawer. A template rather
+      # than a call to `density`, which has the same knob (`agenda=drawer`), for
+      # the reason `preferences` is one. At a phone's width, since that is where
+      # the grid has no room for a panel beside it.
+      def agenda_drawer
+        render_with_template
+      end
+
       # A person's preferred view, kept in the browser: the panel's last item
       # opens a dialog asking its questions for next time. A template rather
       # than a call to `density`, because the snapshot and accessibility specs
@@ -200,6 +209,7 @@ module Shadcn
       # @param from number
       # @param to number
       # @param turbo select [off, panel, agenda]
+      # @param agenda select [below, drawer]
       # @param shapes text
       # @param views text
       # @param preferences select [off, local, host]
@@ -210,7 +220,7 @@ module Shadcn
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "",
                   preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
-                  counts: true)
+                  counts: true, agenda: "below")
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -220,6 +230,7 @@ module Shadcn
           state = { month:, period:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
                     turbo:, shapes:, preferences:, id:, max_chips:,
+                    agenda: (agenda unless agenda.to_s == "below"),
                     # Only when off, so the default links stay the ones they were.
                     counts: (false unless cast.cast(counts)),
                     views: views.presence }.merge(changed).compact
@@ -334,6 +345,7 @@ module Shadcn
         offered = Preferences.new(shapes: args[:shapes], agenda: true,
                                   views: Component.views_by_period(args[:views]))
         args[:id] = id if id.present?
+        args[:agenda] = :drawer if agenda.to_s == "drawer"
         case preferences.to_s
         when "local"
           args.merge!(preferences: :local, restore: cast.cast(restore) || false,

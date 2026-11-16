@@ -435,6 +435,99 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  describe "the agenda as a drawer" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda: :drawer,
+                          events: [ { title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9) } ])
+    end
+
+    before { render_inline(calendar) }
+
+    it "draws the agenda inside a drawer" do
+      expect(painted).to have_css("[data-slot=drawer-content] [data-slot=event-calendar-agenda]", visible: :all)
+    end
+
+    it "draws nothing between the grid and the drawer" do
+      expect(painted).to have_no_css("[data-slot=event-calendar] > [data-slot=event-calendar-agenda]")
+    end
+
+    it "targets the drawer root for the controller" do
+      expect(painted).to have_css("[data-slot=drawer][data-shadcn--event-calendar-target=agendaDrawer]")
+    end
+
+    it "names the drawer by the agenda's title" do
+      title = painted.at_css("[data-slot=event-calendar-agenda-title]")
+
+      expect(title["id"]).to match(/\Ashadcn-event-calendar-\h{8}-agenda-title\z/)
+      expect(painted.at_css("[data-slot=drawer-content]")["aria-labelledby"]).to eq(title["id"])
+    end
+
+    it "leaves the live announcing to the selection region" do
+      expect(painted.at_css("[data-slot=event-calendar-agenda]")["aria-live"]).to be_nil
+    end
+
+    it "marks only the selected cell as opening a dialog", :aggregate_failures do
+      expect(painted).to have_css("[data-day='2026-08-20'][aria-haspopup=dialog][aria-expanded=false]")
+      expect(painted.css("[aria-haspopup=dialog][data-slot=event-calendar-day]").size).to eq(1)
+    end
+
+    it "describes the selected cell with the hint", :aggregate_failures do
+      hint = painted.at_css("[data-slot=event-calendar-drawer-hint]")
+
+      expect(hint.text).to eq("Press again to see the events.")
+      expect(hint["class"]).to include("sr-only")
+      expect(day("2026-08-20")["aria-describedby"]).to eq(hint["id"])
+    end
+
+    it "carries a polite live region for the selection" do
+      expect(painted).to have_css(
+        "[data-slot=event-calendar-selection][role=status][aria-live=polite]" \
+        "[data-shadcn--event-calendar-target=selectionAnnouncer]", text: ""
+      )
+    end
+
+    it "tells the controller the drawer is on" do
+      expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-drawer-value"]).to eq("true")
+    end
+
+    it "gives two calendars distinct ids" do
+      ids = Array.new(2) do
+        render_inline(described_class.new(month: Date.new(2026, 8, 1), agenda: :drawer))
+          .at_css("[data-slot=event-calendar-drawer-hint]")["id"]
+      end
+
+      expect(ids.uniq.size).to eq(2)
+    end
+
+    context "when the value comes from params" do
+      subject(:calendar) { described_class.new(month: Date.new(2026, 8, 1), agenda: "drawer") }
+
+      it "still draws the drawer" do
+        expect(painted).to have_css("[data-slot=drawer-content] [data-slot=event-calendar-agenda]", visible: :all)
+      end
+    end
+
+    context "with the day reading" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), reading: :daily, showing: :both, agenda: :drawer)
+      end
+
+      it "ignores :drawer" do
+        expect(painted).to have_no_css("[data-slot=drawer-content]", visible: :all)
+      end
+    end
+
+    context "without it" do
+      subject(:calendar) { described_class.new(month: Date.new(2026, 8, 1)) }
+
+      it "renders no drawer, hint or popup marker", :aggregate_failures do
+        expect(painted).to have_no_css("[data-slot=drawer], [data-slot=event-calendar-drawer-hint]", visible: :all)
+        expect(painted).to have_no_css("[aria-haspopup], [data-slot=event-calendar-selection]")
+        expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-drawer-value"]).to be_nil
+      end
+    end
+  end
+
   describe "#max_events" do
     it "clamps to what the lanes and the cell height can express", :aggregate_failures do
       expect(described_class.new(max_events: 99).max_events).to eq(6)

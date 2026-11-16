@@ -26,12 +26,14 @@ import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 export default class extends Controller {
   static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
                      "prototypes", "groupLabel", "announcer", "preferencesDialog", "preferencesForm",
-                     "preferencesLimit" ]
+                     "preferencesLimit", "agendaDrawer", "selectionAnnouncer" ]
 
   static values = {
     // The saved-view preferences, drawn by the server when a host asks for
     // them: the mode, the current set's key, where it is remembered, whether to
     // go there on arrival, and every set's URL.
+    // Whether the agenda is a drawer that a second press on the selected day opens.
+    drawer: Boolean,
     preferences: String,
     preferencesCurrent: String,
     preferencesStorage: String,
