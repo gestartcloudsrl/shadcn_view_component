@@ -1,7 +1,7 @@
 # Event calendar: the day's agenda in a drawer
 
-**Status:** agreed in conversation, 2026-11-16. Feeds an implementation plan;
-not itself a plan.
+**Status:** built (2026-11-16). Agreed in conversation the same day; the
+implementation plan has been carried out.
 
 **The question:** on a phone the agenda under the grid pushes the page long
 and changes under the thumb on every tap. The person wants the grid alone on
@@ -38,8 +38,11 @@ with no widget opening by accident.
   drawer's overlay covers the grid and its focus trap holds the keyboard.
   Nothing makes the page `inert`, so the builder verifies that a tap through
   the overlay closes the drawer rather than reaching a cell.
-- **A row opens the event as now:** its `url:` and `attributes:`. A host that
-  opens a Sheet from a row gets the Sheet over the drawer, in the top layer.
+- **A row opens the event as now:** its `url:` and `attributes:`. A Sheet
+  opened through its own controller stacks over the drawer and closes first on
+  Escape. A row's `shadcn--dialog#open` does *not* open a host's Sheet, because
+  Stimulus resolves it to the drawer's own controller: a known gap, in
+  [todo.md](../todo.md).
 
 ## The API
 

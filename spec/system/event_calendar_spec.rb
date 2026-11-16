@@ -2189,7 +2189,8 @@ RSpec.describe "Event calendar", :js do
       day("2026-08-05").click
       expect(page).to have_css("[data-slot=drawer-content]", visible: :visible)
 
-      # Through the Sheet's own controller, not by clicking the row: a row's
+      # Through the Sheet's own controller, not by clicking the row (known gap,
+      # see .claude/docs/todo.md): a row's
       # `shadcn--dialog#open` is resolved by Stimulus against the nearest dialog
       # controller above it, which from inside the drawer is the drawer itself.
       page.execute_script(<<~JS)

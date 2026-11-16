@@ -63,7 +63,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `month_url:` | `nil` | given a `Date`, that month's URL. Present, the nav is links and the server draws the month |
 | `day_url:` | `nil` | given a `Date`, that day's URL. Present, a cell is a link and the server owns what a click shows |
 | `day_attributes:` | `{}` | merged onto every day cell, e.g. `data: { turbo_frame: … }` |
-| `agenda:` | `true` | `false` drops the built-in day list, for a host that shows the day elsewhere |
+| `agenda:` | `true` | `false` drops the built-in day list, for a host that shows the day elsewhere; `:drawer` draws it in a bottom drawer that a second press on the selected day opens ([below](#the-agenda-in-a-drawer)) |
 | `agenda_as:` | `:div` | the agenda's element; `:"turbo-frame"` makes it what a day link swaps |
 | `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id` |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
@@ -1098,7 +1098,9 @@ row stays a small `<a>`. An attribute name no element can carry (`"on click"`)
 is escaped the way Rails' `tag` escapes it (`on_click`), on the server's row and
 in the payload alike, so the browser's `setAttribute` never throws on it. Without
 `url:` there is no link, and `attributes:` are dropped. A drawer is
-`attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } }`.
+`attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } }`
+— except from a row inside `agenda: :drawer`, where that action reaches the
+agenda's own drawer (see [the agenda in a drawer](#the-agenda-in-a-drawer)).
 There is no JavaScript event and no id emitted: what a click shows is the
 server's, and with no `attributes:` the row is a plain link that still works
 with JavaScript off. The `event_links` preview (Lookbook) shows one event
@@ -1387,6 +1389,70 @@ the more useful shape for the thing being shown: **a component never sees a
 record.** `Appointment.for_calendar` maps ten fields down to six, and the four
 that stay behind — where it is, who to ring, what state it is in, the note from
 last time — are what appears when a day is opened.
+
+### The agenda in a drawer
+
+`agenda: :drawer` takes the list out from under the grid and puts it in the
+gem's own `Drawer`, from the bottom, at every width. `true` stays the default:
+the gem is published, and changing what every host renders is not this option's
+call. It applies where the reading has an agenda to move (`agenda?` in
+`component.rb`), so a calendar with no `day_url:` and no browser-drawn month has
+no drawer either, and `reading: :daily` keeps its own list (`daily/component.rb`
+sets `agenda_drawer?` to false).
+
+**The gesture is select, then open.** The first tap on a day selects it and
+dispatches `select`, as without the option. A tap on the day that is *already*
+selected opens the drawer and does not dispatch `select` again
+(`event_calendar_controller.js`, `select`). There is no time window, so the
+second tap can come a minute later; a timed double tap was rejected because it
+is the phone's zoom gesture and the *activate* gesture under VoiceOver and
+TalkBack. The day selected by default (today on load, the 1st after the nav's
+›) counts as already selected, so its first tap opens the drawer; the
+controller's `select` does the same for any day equal to `selectedValue`. From
+the keyboard, Enter or Space on a button cell does the same through the click.
+
+**Link cells.** With `day_url:` the cell is an `<a>` and carries
+`click->shadcn--event-calendar#openDay`. A plain primary click on the selected
+link opens the drawer instead of navigating. Any other click, and any modified
+one (meta, ctrl, shift, alt), is left to the link. A link is not activated by
+Space, so there it is Enter only.
+
+**What was measured, in 83ea4ac.** With `agenda_as: :"turbo-frame"` the frame
+lives inside the closed drawer and the grid is outside it, so after a frame swap
+`aria-selected` stayed on the previous day: the 1st stayed selected after
+clicking the 13th while the frame showed the 13th. `openDay` therefore marks
+the clicked link cell selected before the link goes. A click on another day
+swaps the frame inside the closed drawer; a click on the selected day opens it.
+`spec/system/event_calendar_spec.rb` covers it.
+
+**What it costs for assistive technology.** The agenda is the only full text
+reading of the events reading, and in a drawer it is out of the accessibility
+tree until opened. Nothing visible replaces it; this is accepted because the
+option is opt-in and the events are one press away. What stands in for it: the
+selected cell, and only that one, carries `aria-haspopup="dialog"`,
+`aria-expanded` (following the drawer's open and close events) and an
+`aria-describedby` hint; and a visually hidden `role="status"` region announces
+the day, its count and the hint on every selection. The agenda's own
+`aria-live` is off in a drawer because the drawer is closed when the selection
+moves. The copy is `event_calendar.drawer_hint` in the gem's locale file, which
+is English.
+
+**Moving an event.** With `movable:`, Space on a row closes the drawer and the
+pick continues on the grid, with the focus on the event's day; Escape puts the
+event back and the focus returns to that day without reopening the drawer
+(`event_calendar_controller.js`, the pick and `cancelPick`). The pointer grip on
+the bars is unchanged.
+
+**Known gap: a row cannot open a host's Sheet.** The recipe in *What an event
+says* (`attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open" } }`)
+does not work from a row inside the drawer. Stimulus resolves
+`shadcn--dialog#open` against the nearest `shadcn--dialog` controller above the
+element, and from a row that is the agenda's own drawer, not the host's Sheet.
+What was checked is narrower: a Sheet opened through *its own* controller lands
+on top of the drawer and Escape closes it first (the system spec "a Sheet over
+the drawer", which opens the Sheet by calling its controller from script, not by
+clicking a row). No working recipe for opening it from a row has been tried, so
+none is given here; see the [todo](../todo.md).
 
 ## Lazy loading, when a host needs it
 

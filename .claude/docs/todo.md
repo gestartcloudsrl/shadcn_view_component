@@ -425,6 +425,18 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **A row inside `agenda: :drawer` cannot open a host's Sheet.** The
+      documented recipe, `attributes: { data: { turbo_frame: "event", action:
+      "shadcn--dialog#open" } }`, resolves in Stimulus to the nearest
+      `shadcn--dialog` controller above the row, and inside the drawer that is
+      the agenda's own drawer. Found while checking that a Sheet stacks over the
+      drawer (228210c). What is established: a Sheet opened through its own
+      controller lands on top and Escape closes it first
+      (`spec/system/event_calendar_spec.rb`, "a Sheet over the drawer", which
+      calls the controller from script). What is not: any way to open it *from a
+      row* — none has been run, so none is documented. See
+      [the feature doc](features/event-calendar.md#the-agenda-in-a-drawer).
+
 - [ ] **The event calendar's desktop month takes two clicks to open an event**
       (the day, then the row), where it took one. Events open from the row in
       the day's list and the chip stays decoration, see
