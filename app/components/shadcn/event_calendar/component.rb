@@ -521,7 +521,7 @@ module Shadcn
       #   the agenda itself the thing a day link swaps, without this gem
       #   mentioning Turbo anywhere.
       # @param agenda_attributes [Hash] merged onto the agenda — where its `id`
-      #   goes
+      #   goes. Its `class` joins the agenda's and wins a conflict.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -1337,15 +1337,26 @@ module Shadcn
                   hidden: on_day.any?,
                   "data-shadcn--event-calendar-target": ("agendaEmpty" unless day_url))
           ]),
-          **agenda_attributes,
-          "data-slot": "event-calendar-agenda", class: AGENDA_CLASS,
-          role: "region",
-          # The live region is the controller's: it exists because the agenda
-          # changes under a pointer that never left the grid. A frame swap is a
-          # navigation, and Turbo announces those itself.
-          "aria-live": ("polite" unless day_url || agenda_drawer?),
-          "aria-label": shadcn_t("event_calendar.agenda_label")
+          **agenda_root_attributes(
+            class: AGENDA_CLASS, role: "region",
+            # The live region is the controller's: it exists because the agenda
+            # changes under a pointer that never left the grid. A frame swap is
+            # a navigation, and Turbo announces those itself.
+            "aria-live": ("polite" unless day_url || agenda_drawer?),
+            "aria-label": shadcn_t("event_calendar.agenda_label")
+          )
         )
+      end
+
+      # The agenda's own attributes under the host's `agenda_attributes:`, with
+      # the gem's precedence: the host's keys win, `class` joins and is
+      # tailwind-merged in the host's favour, and `data-slot` stays ours. It was
+      # a literal hash with the defaults written after the splat, so a host's
+      # `class` or `aria-label` was silently replaced.
+      def agenda_root_attributes(**defaults)
+        merged = merge_attributes(defaults, agenda_attributes).except("data-slot")
+        merged["class"] = ShadcnViewComponent.cn(merged["class"]).presence
+        { "data-slot" => "event-calendar-agenda", **merged }.compact.symbolize_keys
       end
 
       # Nothing rather than "0 events" — an empty day already says so in the

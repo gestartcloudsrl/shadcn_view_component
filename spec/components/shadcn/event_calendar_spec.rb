@@ -456,6 +456,37 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  describe "#agenda_attributes" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1),
+                          agenda_attributes: { class: "mt-6 max-w-lg", "aria-label": "Today's jobs", id: "day" })
+    end
+
+    before { render_inline(calendar) }
+
+    let(:agenda) { painted.at_css("[data-slot=event-calendar-agenda]") }
+
+    it "joins the host's class to the agenda's, the host winning a conflict" do
+      expect(agenda["class"].split).to contain_exactly("mt-6", "max-w-lg")
+    end
+
+    it "lets the host's other attributes win", :aggregate_failures do
+      expect(agenda["aria-label"]).to eq("Today's jobs")
+      expect(agenda["id"]).to eq("day")
+      expect(agenda["role"]).to eq("region")
+    end
+
+    context "when the host passes a data-slot" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), agenda_attributes: { "data-slot": "mine" })
+      end
+
+      it "keeps the gem's" do
+        expect(painted).to have_css("[data-slot=event-calendar-agenda]")
+      end
+    end
+  end
+
   describe "the agenda as a drawer" do
     subject(:calendar) do
       described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda: :drawer,

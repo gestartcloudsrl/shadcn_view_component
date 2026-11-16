@@ -196,7 +196,7 @@ module Shadcn
             safe_join(schedule.assignees_on(selected).map { |assignee, count|
               assignee_section(assignee, count)
             }),
-            **agenda_attributes, "data-slot": "event-calendar-agenda", class: AGENDA_CLASS)
+            **agenda_root_attributes(class: AGENDA_CLASS))
         end
 
         def assignee_section(assignee, count)

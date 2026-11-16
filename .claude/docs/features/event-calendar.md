@@ -65,7 +65,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `day_attributes:` | `{}` | merged onto every day cell, e.g. `data: { turbo_frame: … }` |
 | `agenda:` | `true` | `false` drops the built-in day list, for a host that shows the day elsewhere; `:drawer` draws it in a bottom drawer that a second press on the selected day opens ([below](#the-agenda-in-a-drawer)) |
 | `agenda_as:` | `:div` | the agenda's element; `:"turbo-frame"` makes it what a day link swaps |
-| `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id` |
+| `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id`; its `class` joins the agenda's and wins a conflict |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
