@@ -521,7 +521,29 @@ export default class extends Controller {
 
   // Opens the drawer on the selected day. The agenda is drawn first, so the
   // drawer never opens on the day it was showing before.
-  openDay() {
+  //
+  // From a link cell the event is the click on the `<a>`, and the link is left
+  // to navigate unless the day is already the selected one, the press is a
+  // plain primary click and no modifier asks for a new tab or window. When it
+  // does navigate, the clicked cell is marked selected first: the grid sits
+  // outside the frame the response lands in, so nothing else would move the
+  // selection off the previous day.
+  openDay(event) {
+    const link = event?.currentTarget?.tagName === "A" ? event.currentTarget : null
+
+    if (link) {
+      const plain = event.button === 0 && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+
+      if (!(plain && link.getAttribute("aria-selected") === "true")) {
+        if (plain && link.dataset.day) {
+          this.selectedValue = link.dataset.day
+          this.markSelection()
+        }
+        return
+      }
+      event.preventDefault()
+    }
+
     if (!this.hasAgendaDrawerTarget) return
 
     this.renderAgenda()

@@ -1053,6 +1053,10 @@ module Shadcn
       # The two cannot share a gesture. With a URL the click navigates and the
       # controller's `select` is left off, so the server decides what the day
       # shows and `aria-selected` follows it.
+      # A link cell opens the drawer on the day that is already selected, and
+      # otherwise lets the link go. The caller's own actions are added to it.
+      OPEN_DAY_ACTION = "click->shadcn--event-calendar#openDay"
+
       def day_cell(day, on_day:, assignees:, hidden:)
         href = day_url&.call(day)
 
@@ -1060,7 +1064,7 @@ module Shadcn
           safe_join(cell_body(day, on_day:, assignees:, hidden:)),
           **(href ? { href: } : { type: "button", "data-action": "click->shadcn--event-calendar#select" }),
           **(day == selected && agenda_drawer? ? drawer_opener : {}),
-          **day_attributes,
+          **(href && agenda_drawer? ? merge_attributes({ "data-action": OPEN_DAY_ACTION }, day_attributes).symbolize_keys : day_attributes),
           "data-slot": "event-calendar-day",
           class: DAY_CLASS,
           "data-day": day.iso8601,

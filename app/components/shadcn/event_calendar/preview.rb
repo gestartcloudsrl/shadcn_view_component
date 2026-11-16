@@ -208,7 +208,8 @@ module Shadcn
       # @param showing select [both, axis, agenda, rows]
       # @param from number
       # @param to number
-      # @param turbo select [off, panel, agenda]
+      # @param turbo select [off, panel, agenda, link]
+      # @param day text
       # @param agenda select [below, drawer]
       # @param shapes text
       # @param views text
@@ -220,7 +221,7 @@ module Shadcn
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "",
                   preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
-                  counts: true, agenda: "below")
+                  counts: true, agenda: "below", day: nil)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -229,7 +230,7 @@ module Shadcn
         here = lambda do |**changed|
           state = { month:, period:, view:, most:, all_day:, spanning:, colored: cast.cast(colored),
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
-                    turbo:, shapes:, preferences:, id:, max_chips:,
+                    turbo:, shapes:, preferences:, id:, max_chips:, day:,
                     agenda: (agenda unless agenda.to_s == "below"),
                     # Only when off, so the default links stay the ones they were.
                     counts: (false unless cast.cast(counts)),
@@ -370,6 +371,14 @@ module Shadcn
         end
 
         return render_component(**args) unless owned
+
+        # **link** — plain links that load a page, no frame: the host answers
+        # a day with the same calendar, `day` selected. What the drawer's second
+        # press is for, since the first is a navigation.
+        if turbo.to_s == "link"
+          return render_component(**args, selected: (Date.parse(day) if day.present?),
+                                  day_url: ->(date) { here.call(day: date.iso8601) })
+        end
 
         if turbo.to_s == "agenda"
           return render_component(**args,

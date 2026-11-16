@@ -2083,6 +2083,62 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # The same drawer when the cells are links: the server draws the selected
+  # day and a click on another day navigates, so only the second press on the
+  # selected one is the calendar's to answer.
+  describe "link cells with the agenda as a drawer" do
+    let(:url) { "/lookbook/preview/shadcn/event_calendar/density?turbo=link&agenda=drawer&month=2026-08-01&day=2026-08-20" }
+
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit url
+      wait_for_stimulus
+    end
+
+    it "navigates on a click on another day", :aggregate_failures do
+      day("2026-08-13").click
+
+      expect(page).to have_current_path(/day=2026-08-13/)
+      expect(day("2026-08-13")["aria-selected"]).to eq("true")
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+    end
+
+    it "opens the drawer instead on a click on the selected day", :aggregate_failures do
+      before_url = page.current_url
+      day("2026-08-20").click
+
+      expect(page).to have_css("[role=dialog]", visible: :visible)
+      expect(page.current_url).to eq(before_url)
+    end
+
+    it "opens on Enter on the selected link" do
+      day("2026-08-20").send_keys(:enter)
+
+      expect(page).to have_css("[role=dialog]", visible: :visible)
+    end
+
+    # Measured: with the agenda a frame in the drawer, the swap leaves the grid
+    # alone, so `aria-selected` stayed on the previous day until the click
+    # marked the clicked one itself.
+    it "moves the selection when a frame swap does not", :aggregate_failures do
+      visit "/lookbook/preview/shadcn/event_calendar/density?turbo=agenda&agenda=drawer&month=2026-08-01"
+      wait_for_stimulus
+      old = find("#{calendar} [aria-selected=true]")["data-day"]
+
+      day("2026-08-13").click
+
+      expect(page).to have_css("turbo-frame#day h2", text: "August 13", visible: :all)
+      expect(day("2026-08-13")["aria-selected"]).to eq("true")
+      expect(day(old)["aria-selected"]).to be_nil
+    end
+
+    it "navigates on a modified click", :aggregate_failures do
+      page.driver.browser.action.key_down(:control).click(day("2026-08-20").native).key_up(:control).perform
+
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+    end
+  end
+
   # The agenda as a bottom drawer. The preview selects the 20th, so the first
   # tap on any other day only selects, and a tap on the day already selected is
   # the one that opens. The 21st has three events and the 22nd none.

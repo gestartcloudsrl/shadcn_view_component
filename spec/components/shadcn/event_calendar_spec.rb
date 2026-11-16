@@ -361,6 +361,27 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # The day view, when the server owns it. A link is the whole of what a host
   # needs to open a drawer or swap a frame — no listener, no URL built by hand,
   # and it works before the JavaScript has loaded.
+  describe "#day_url with the agenda as a drawer" do
+    def links(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20),
+                                        day_url: ->(date) { "/day/#{date.iso8601}" },
+                                        day_attributes: { data: { action: "mine#go" } }, **options))
+      page.all("a[data-slot=event-calendar-day]")
+    end
+
+    it "wires link cells to openDay", :aggregate_failures do
+      cells = links(agenda: :drawer)
+
+      expect(cells).not_to be_empty
+      expect(cells.map { |cell| cell["data-action"] })
+        .to all(eq("click->shadcn--event-calendar#openDay mine#go"))
+    end
+
+    it "wires none without the drawer" do
+      expect(links.map { |cell| cell["data-action"] }).to all(eq("mine#go"))
+    end
+  end
+
   describe "#day_url" do
     subject(:calendar) do
       described_class.new(month: Date.new(2026, 8, 1),
