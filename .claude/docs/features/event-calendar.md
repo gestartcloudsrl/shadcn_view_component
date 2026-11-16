@@ -1406,10 +1406,14 @@ selected opens the drawer and does not dispatch `select` again
 (`event_calendar_controller.js`, `select`). There is no time window, so the
 second tap can come a minute later; a timed double tap was rejected because it
 is the phone's zoom gesture and the *activate* gesture under VoiceOver and
-TalkBack. The day selected by default (today on load, the 1st after the nav's
-›) counts as already selected, so its first tap opens the drawer; the
-controller's `select` does the same for any day equal to `selectedValue`. From
-the keyboard, Enter or Space on a button cell does the same through the click.
+TalkBack. A day selected by default counts as already selected, so its first
+tap opens the drawer: that is today on load when today is in the shown month
+(the component falls back to the 1st otherwise, `defaultSelection` in the
+controller), and the 1st after the nav's ›. The nav case is the one a system
+spec covers ("opens the new day after navigating"); the controller's `select`
+does the same for any day equal to `selectedValue`. From the keyboard, Enter on
+a button cell does it through the click and is specced; Space is the native
+button behaviour and is not.
 
 **Link cells.** With `day_url:` the cell is an `<a>` and carries
 `click->shadcn--event-calendar#openDay`. A plain primary click on the selected
@@ -1421,7 +1425,7 @@ Space, so there it is Enter only.
 lives inside the closed drawer and the grid is outside it, so after a frame swap
 `aria-selected` stayed on the previous day: the 1st stayed selected after
 clicking the 13th while the frame showed the 13th. `openDay` therefore marks
-the clicked link cell selected before the link goes. A click on another day
+the clicked link cell selected before the link goes, for a plain click. A click on another day
 swaps the frame inside the closed drawer; a click on the selected day opens it.
 `spec/system/event_calendar_spec.rb` covers it.
 
@@ -1432,7 +1436,9 @@ option is opt-in and the events are one press away. What stands in for it: the
 selected cell, and only that one, carries `aria-haspopup="dialog"`,
 `aria-expanded` (following the drawer's open and close events) and an
 `aria-describedby` hint; and a visually hidden `role="status"` region announces
-the day, its count and the hint on every selection. The agenda's own
+the day, its count and the hint when a tap (or Enter) selects a day. It is
+written from `select` only, so a selection made by the nav or by default is not
+announced. The agenda's own
 `aria-live` is off in a drawer because the drawer is closed when the selection
 moves. The copy is `event_calendar.drawer_hint` in the gem's locale file, which
 is English.
@@ -1448,10 +1454,11 @@ says* (`attributes: { data: { turbo_frame: "event", action: "shadcn--dialog#open
 does not work from a row inside the drawer. Stimulus resolves
 `shadcn--dialog#open` against the nearest `shadcn--dialog` controller above the
 element, and from a row that is the agenda's own drawer, not the host's Sheet.
-What was checked is narrower: a Sheet opened through *its own* controller lands
-on top of the drawer and Escape closes it first (the system spec "a Sheet over
-the drawer", which opens the Sheet by calling its controller from script, not by
-clicking a row). No working recipe for opening it from a row has been tried, so
+The row click was observed not to open the Sheet while building (Task 4) and is
+explained by that resolution; no committed spec clicks a row. What a spec does
+pin: a Sheet opened through *its own* controller lands on top of the drawer and
+Escape closes it first ("a Sheet over the drawer", which calls the controller
+from script). No working recipe for opening it from a row has been tried, so
 none is given here; see the [todo](../todo.md).
 
 ## Lazy loading, when a host needs it

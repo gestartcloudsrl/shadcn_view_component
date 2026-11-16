@@ -430,7 +430,9 @@ noting that it would not have delivered the component that raised the question:
       "shadcn--dialog#open" } }`, resolves in Stimulus to the nearest
       `shadcn--dialog` controller above the row, and inside the drawer that is
       the agenda's own drawer. Found while checking that a Sheet stacks over the
-      drawer (228210c). What is established: a Sheet opened through its own
+      drawer (228210c). The row click was observed not to open the Sheet while
+      building and is explained by Stimulus' scope resolution; no committed spec
+      clicks a row. What a spec does pin: a Sheet opened through its own
       controller lands on top and Escape closes it first
       (`spec/system/event_calendar_spec.rb`, "a Sheet over the drawer", which
       calls the controller from script). What is not: any way to open it *from a
