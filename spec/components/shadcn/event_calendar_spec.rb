@@ -514,6 +514,24 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(painted.at_css("[data-slot=drawer-content]")["aria-labelledby"]).to eq(title["id"])
     end
 
+    it "centres the agenda in a column inside the full-width panel" do
+      expect(painted.at_css("[data-slot=event-calendar-agenda]")["class"].split)
+        .to include("mx-auto", "w-full", "max-w-md")
+    end
+
+    context "with a host width on the agenda" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), agenda: :drawer, agenda_attributes: { class: "max-w-xl" })
+      end
+
+      it "takes the host's", :aggregate_failures do
+        classes = painted.at_css("[data-slot=event-calendar-agenda]")["class"].split
+
+        expect(classes).to include("max-w-xl")
+        expect(classes).not_to include("max-w-md")
+      end
+    end
+
     it "leaves the live announcing to the selection region" do
       expect(painted.at_css("[data-slot=event-calendar-agenda]")["aria-live"]).to be_nil
     end

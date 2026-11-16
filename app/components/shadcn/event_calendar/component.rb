@@ -378,6 +378,13 @@ module Shadcn
       EVENT_TIME_CLASS = "shrink-0 tabular-nums"
       EVENT_TITLE_CLASS = "truncate"
       AGENDA_CLASS = "mt-3"
+      # A bottom drawer is as wide as the screen, and a list of rows at a
+      # laptop's width is a line the eye cannot follow across. Upstream's
+      # `examples/drawer-demo.tsx` (new-york-v4, read on GitHub — not vendored
+      # here) keeps the panel full width and centres a `mx-auto w-full
+      # max-w-sm` column in it. This is that column on the agenda, a step
+      # wider because a row carries a time and a subtitle; a phone still fills it.
+      AGENDA_DRAWER_CLASS = "mx-auto w-full max-w-md"
       AGENDA_TITLE_CLASS = "flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium"
       # How many, beside the date. Cheap at three events and the difference
       # between a list and a wall at sixty — a day this deep needs to say how
@@ -521,7 +528,8 @@ module Shadcn
       #   the agenda itself the thing a day link swaps, without this gem
       #   mentioning Turbo anywhere.
       # @param agenda_attributes [Hash] merged onto the agenda — where its `id`
-      #   goes. Its `class` joins the agenda's and wins a conflict.
+      #   goes. Its `class` joins the agenda's and wins a conflict, so under
+      #   `agenda: :drawer` a `max-w-*` here sets the column's width.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -1338,7 +1346,7 @@ module Shadcn
                   "data-shadcn--event-calendar-target": ("agendaEmpty" unless day_url))
           ]),
           **agenda_root_attributes(
-            class: AGENDA_CLASS, role: "region",
+            class: [ AGENDA_CLASS, (AGENDA_DRAWER_CLASS if agenda_drawer?) ], role: "region",
             # The live region is the controller's: it exists because the agenda
             # changes under a pointer that never left the grid. A frame swap is
             # a navigation, and Turbo announces those itself.

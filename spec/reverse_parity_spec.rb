@@ -501,7 +501,10 @@ RSpec.describe "reverse parity" do
     ],
     "event-calendar-agenda-item" => %w[data-[picked]:bg-accent data-[picked]:ring-2 data-[picked]:ring-ring],
     "event-calendar-event-dot" => %w[bg-(--event-color) size-1.5],
-    "event-calendar-agenda" => %w[mt-3],
+    # Under `agenda: :drawer`, upstream's drawer-demo column (`mx-auto w-full
+    # max-w-sm`, examples/drawer-demo.tsx — not vendored) one step wider,
+    # because a row carries a time and a subtitle. `AGENDA_DRAWER_CLASS`.
+    "event-calendar-agenda" => %w[mt-3 max-w-md],
     "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
     # The row's faces back on upstream's `bg-muted`, and inverted to

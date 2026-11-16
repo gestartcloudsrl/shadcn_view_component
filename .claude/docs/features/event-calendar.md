@@ -1400,6 +1400,16 @@ call. It applies where the reading has an agenda to move (`agenda?` in
 no drawer either, and `reading: :daily` keeps its own list (`daily/component.rb`
 sets `agenda_drawer?` to false).
 
+**Its size.** The panel is as wide as the screen, as upstream's
+`examples/drawer-demo.tsx` (new-york-v4) has it, and the agenda inside is a
+centred column, `mx-auto w-full max-w-md`: upstream's demo uses `max-w-sm`, and
+this is a step wider because a row carries a time and a subtitle. On a phone the
+column fills the panel. A host sets another width with a class in
+`agenda_attributes:`, which is tailwind-merged over the gem's. The height is the
+Drawer's: as tall as the day's rows, capped at
+`data-[vaul-drawer-direction=bottom]:max-h-[80vh]`. The
+component specs check the classes that come out, not the rendered sizes.
+
 **The gesture is select, then open.** The first tap on a day selects it and
 dispatches `select`, as without the option. A tap on the day that is *already*
 selected opens the drawer and does not dispatch `select` again
