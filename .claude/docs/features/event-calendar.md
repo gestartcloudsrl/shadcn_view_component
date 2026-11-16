@@ -66,6 +66,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `agenda:` | `true` | `false` drops the built-in day list, for a host that shows the day elsewhere; `:drawer` draws it in a bottom drawer that a second press on the selected day opens ([below](#the-agenda-in-a-drawer)) |
 | `agenda_as:` | `:div` | the agenda's element; `:"turbo-frame"` makes it what a day link swaps |
 | `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id`; its `class` joins the agenda's and wins a conflict |
+| `drawer_attributes:` | `{}` | `agenda: :drawer` only: merged onto the drawer's panel ([below](#the-agenda-in-a-drawer)) |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
@@ -1407,7 +1408,11 @@ this is a step wider because a row carries a time and a subtitle. On a phone the
 column fills the panel. A host sets another width with a class in
 `agenda_attributes:`, which is tailwind-merged over the gem's. The height is the
 Drawer's: as tall as the day's rows, capped at
-`data-[vaul-drawer-direction=bottom]:max-h-[80vh]`. The
+`data-[vaul-drawer-direction=bottom]:max-h-[80vh]`. A host lowers the cap with a
+class in `drawer_attributes:` under that same prefix, for example
+`data-[vaul-drawer-direction=bottom]:max-h-[50vh]`; a bare `max-h-[50vh]` is
+kept alongside and loses to the Drawer's, which compiles to a class plus
+`[data-vaul-drawer-direction=bottom]` (read in the dummy app's built CSS). The
 component specs check the classes that come out, not the rendered sizes.
 
 **The gesture is select, then open.** The first tap on a day selects it and

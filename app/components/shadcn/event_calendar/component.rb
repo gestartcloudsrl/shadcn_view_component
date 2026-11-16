@@ -461,7 +461,7 @@ module Shadcn
       end
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
-                  :day_url, :day_attributes, :agenda_as, :agenda_attributes,
+                  :day_url, :day_attributes, :agenda_as, :agenda_attributes, :drawer_attributes,
                   :view_url, :shapes, :counts, :views
 
       # The readings that are not this class. `.new` hands over to them, so a
@@ -530,6 +530,10 @@ module Shadcn
       # @param agenda_attributes [Hash] merged onto the agenda — where its `id`
       #   goes. Its `class` joins the agenda's and wins a conflict, so under
       #   `agenda: :drawer` a `max-w-*` here sets the column's width.
+      # @param drawer_attributes [Hash] `agenda: :drawer` only: merged onto the
+      #   drawer's content, the panel itself. Its height cap is the Drawer's
+      #   `data-[vaul-drawer-direction=bottom]:max-h-[80vh]`, so a host lowers
+      #   it with a class under that same prefix — a bare `max-h-*` loses to it.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -573,7 +577,7 @@ module Shadcn
       def initialize(month: nil, selected: nil, events: nil, max_events: 3,
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
-                     day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {},
+                     day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {}, drawer_attributes: {},
                      view_url: nil, movable: false, shapes: SHAPES, views: nil, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
@@ -588,6 +592,7 @@ module Shadcn
         @agenda = agenda.to_s == "drawer" ? :drawer : agenda
         @agenda_as = agenda_as
         @agenda_attributes = agenda_attributes
+        @drawer_attributes = drawer_attributes
         # Checked against its list. Unchecked, `reading: :workLoad` off a params
         # hash fell through every branch and rendered a silent fourth thing: no
         # bars, no `data-labelled`, no rows.
@@ -1297,7 +1302,7 @@ module Shadcn
       # calendar's to find — `agendaDrawer` — the way the preferences dialog is.
       def agenda_drawer
         render(Drawer::Component.new("data-shadcn--event-calendar-target": "agendaDrawer")) do |drawer|
-          drawer.with_dialog_content("aria-labelledby": drawer_id("agenda-title")) { agenda }
+          drawer.with_dialog_content(**drawer_attributes, "aria-labelledby": drawer_id("agenda-title")) { agenda }
         end
       end
 

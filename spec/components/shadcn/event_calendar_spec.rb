@@ -532,6 +532,25 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    context "with drawer_attributes" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), agenda: :drawer,
+                            drawer_attributes: { class: "data-[vaul-drawer-direction=bottom]:max-h-[50vh]",
+                                                 "aria-labelledby": "mine" })
+      end
+
+      let(:content) { painted.at_css("[data-slot=drawer-content]") }
+
+      it "puts the host's class on the panel in place of the Drawer's cap", :aggregate_failures do
+        expect(content["class"]).to include("data-[vaul-drawer-direction=bottom]:max-h-[50vh]")
+        expect(content["class"]).not_to include("data-[vaul-drawer-direction=bottom]:max-h-[80vh]")
+      end
+
+      it "keeps the panel named by the agenda's title" do
+        expect(content["aria-labelledby"]).to match(/-agenda-title\z/)
+      end
+    end
+
     it "leaves the live announcing to the selection region" do
       expect(painted.at_css("[data-slot=event-calendar-agenda]")["aria-live"]).to be_nil
     end
