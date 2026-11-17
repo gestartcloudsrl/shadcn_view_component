@@ -1,6 +1,6 @@
 # Event calendar: an event's detail inside the agenda drawer
 
-**Status:** agreed (2026-11-17), from a request written by Gestart; the three
+**Status:** built (2026-11-17; commits 145c574, c267558, e9cb586, 197fde6); agreed, from a request written by Gestart; the three
 calls below were approved as proposed, and `attributes:` was added.
 
 **The question:** with `agenda: :drawer`, a row of the day's agenda opens the

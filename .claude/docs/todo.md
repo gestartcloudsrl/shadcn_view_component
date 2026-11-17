@@ -438,6 +438,9 @@ noting that it would not have delivered the component that raised the question:
       calls the controller from script). What is not: any way to open it *from a
       row* — none has been run, so none is documented. See
       [the feature doc](features/event-calendar.md#the-agenda-in-a-drawer).
+      For an event's *detail*, `agenda_detail:` is the path and does not need
+      this; what stays open is a host's own Sheet from a row
+      ([the detail](features/event-calendar.md#an-events-detail-in-the-drawer)).
 
 - [ ] **`agenda: :drawer` follow-ups.** Link cells (`day_url:`) never announce
       the selection: on a full-page link the navigation would cut it, and a
