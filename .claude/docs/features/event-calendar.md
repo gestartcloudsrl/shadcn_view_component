@@ -1451,6 +1451,22 @@ link opens the drawer instead of navigating. Any other click, and any modified
 one (meta, ctrl, shift, alt), is left to the link. A link is not activated by
 Space, so there it is Enter only.
 
+**In the week.** The week is drawn on the server, so it has an agenda, and
+with it a drawer, only with `day_url:`: its cells are links, the first press on
+another day loads it selected and the second, on the selected one, opens the
+drawer, with the title, Escape, the detail and the focus of the month. Its days
+are `listitem`s, which ARIA does not let carry `aria-selected`, so the
+controller reads the selection from `data-selected`, which every day carries,
+and writes `aria-selected` only on a `gridcell` (`openDay`, `selectedCell`,
+`markSelected`). `aria-current="date"` was not the key: here it means today. The
+`agenda_drawer_week` preview (the week as rows) is under the snapshot and axe
+specs, axe again with its drawer open on the list and on a row's detail
+(`accessibility_spec.rb`), and `event_calendar_spec.rb` covers the two presses,
+Enter, Escape with the focus on the day, the detail's two Escapes, its button
+and the reopening on the list. The week's timeline (`reading: :weekly` without
+`arrangement: :rows`) goes through the same controller code and has no spec of
+its own.
+
 **What was measured, in 83ea4ac.** With `agenda_as: :"turbo-frame"` the frame
 lives inside the closed drawer and the grid is outside it, so after a frame swap
 `aria-selected` stayed on the previous day: the 1st stayed selected after

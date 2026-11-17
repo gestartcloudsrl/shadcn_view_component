@@ -1,0 +1,18 @@
+<%# The week as rows, its agenda in a drawer with a row's detail. The cells are
+    links back to this preview with the day chosen. See
+    `Preview#agenda_drawer_week`. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      reading: :weekly,
+      arrangement: :rows,
+      month: Date.new(2026, 8, 1),
+      selected: local_assigns.fetch(:selected, Date.new(2026, 8, 5)),
+      agenda: :drawer,
+      drawer_direction: :right,
+      agenda_detail: { frame: "agenda-detail", attributes: { target: "_top" } },
+      day_url: ->(day) { "/lookbook/preview/shadcn/event_calendar/agenda_drawer_week?day=#{day.iso8601}" },
+      events: [
+        { title: "Kitchen survey", starts_at: Time.zone.local(2026, 8, 5, 9), url: "/calendar/events/1" },
+        { title: "Boiler service", starts_at: Time.zone.local(2026, 8, 5, 11), url: "/calendar/events/2" },
+        { title: "Roof check", starts_at: Time.zone.local(2026, 8, 6, 10), url: "/calendar/events/3" }
+      ]
+    )) %>

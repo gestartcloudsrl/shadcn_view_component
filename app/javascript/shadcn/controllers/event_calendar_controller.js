@@ -542,7 +542,7 @@ export default class extends Controller {
     if (link) {
       const plain = event.button === 0 && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
 
-      if (!(plain && link.getAttribute("aria-selected") === "true")) {
+      if (!(plain && link.dataset.selected === "true")) {
         if (plain && link.dataset.day) {
           this.selectedValue = link.dataset.day
           this.markSelection()
@@ -676,8 +676,11 @@ export default class extends Controller {
     drawer.removeEventListener("shadcn--dialog:close", this.drawerListener)
   }
 
+  // `data-selected` rather than `aria-selected`: every day carries it, where
+  // `aria-selected` is only on a `gridcell` — the week's and the day's
+  // `listitem`s cannot take it.
   selectedCell() {
-    return this.element.querySelector("[data-slot='event-calendar-day'][aria-selected='true']")
+    return this.element.querySelector("[data-slot='event-calendar-day'][data-selected='true']")
   }
 
   // `month-change` is the hook a host needs and this component cannot provide:
@@ -704,9 +707,11 @@ export default class extends Controller {
   // --- the selection, and the keyboard that moves it ------------------------
 
   // `aria-selected` present only when true, and the single tab stop travels
-  // with it — the pair the gem's `Calendar` writes.
+  // with it — the pair the gem's `Calendar` writes. Only on a `gridcell`, as
+  // `Component#day_cell` draws it: ARIA does not allow it on the `listitem`
+  // days of the week and the day, where `data-selected` alone says it.
   markSelected(cell, chosen) {
-    if (chosen) cell.setAttribute("aria-selected", "true")
+    if (chosen && cell.getAttribute("role") === "gridcell") cell.setAttribute("aria-selected", "true")
     else cell.removeAttribute("aria-selected")
     cell.setAttribute("tabindex", chosen ? "0" : "-1")
     this.markOpener(cell, chosen)

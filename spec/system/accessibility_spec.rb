@@ -190,6 +190,29 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
+  # The week's days are `listitem`s that open a drawer on a second press, so
+  # what the selected one says about it (`aria-haspopup`, `aria-expanded`)
+  # sits on a role it does not sit on in the month. Audited with the drawer
+  # on the day's list and again on a row's detail, the whole page each time,
+  # with the day exemption above.
+  context "with the week's agenda drawer open" do
+    it "has no violations, on the list and on a row's detail", :aggregate_failures do
+      visit_preview(:event_calendar, :agenda_drawer_week)
+      wait_for_stimulus
+      find("[data-slot=event-calendar] [data-day='2026-08-05']").click
+      expect(page).to have_css("[data-slot=drawer-content][data-state=open]")
+
+      audit(skipping: label_in_name)
+      audit_label_in_name(excluding: label_in_name_exemptions["event_calendar"])
+
+      find("[data-slot=event-calendar-agenda-row]", text: "Boiler service").click
+      find("[data-slot=event-calendar-agenda-detail] turbo-frame#agenda-detail").assert_text("Event 2")
+
+      audit(skipping: label_in_name)
+      audit_label_in_name(excluding: label_in_name_exemptions["event_calendar"])
+    end
+  end
+
   context "with the alert dialog open" do
     it "has no violations" do
       visit_preview(:alert_dialog)

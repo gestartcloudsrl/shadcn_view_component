@@ -149,6 +149,18 @@ module Shadcn
         render_with_template(locals: { direction: direction.to_sym, day_links: })
       end
 
+      # The week as rows with the same drawer and detail. A week is drawn on the
+      # server, so its days are links — here to this preview with the day
+      # chosen — and the first press on another day selects it by loading the
+      # page; the second, on the selected one, opens the drawer. Its days are
+      # `listitem`s, which cannot carry `aria-selected`, so this is the preview
+      # that tells whether the drawer keys off something they do carry.
+      #
+      # @param day text
+      def agenda_drawer_week(day: "2026-08-05")
+        render_with_template(locals: { selected: Date.parse(day) })
+      end
+
       # A person's preferred view, kept in the browser: the panel's last item
       # opens a dialog asking its questions for next time. A template rather
       # than a call to `density`, because the snapshot and accessibility specs

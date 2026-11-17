@@ -2573,4 +2573,103 @@ RSpec.describe "Event calendar", :js do
       end
     end
   end
+
+  # The week as rows, drawn on the server, so its days are links: the first
+  # press on another day loads it selected, the second on the selected one
+  # opens the drawer, as in the month. Its days are `listitem`s, which ARIA
+  # does not let carry `aria-selected`, so what the drawer reads is
+  # `data-selected`.
+  describe "the week as rows with the agenda as a drawer" do
+    let(:drawer) { "[data-slot=drawer-content]" }
+
+    def week(day = "2026-08-05") = "/lookbook/preview/shadcn/event_calendar/agenda_drawer_week?day=#{day}"
+
+    def pane = "#{drawer} [data-slot=event-calendar-agenda-detail]"
+
+    def list = "#{drawer} [data-slot=event-calendar-agenda]"
+
+    def focused_day = page.evaluate_script("document.activeElement?.dataset?.day")
+
+    before do
+      page.driver.browser.manage.window.resize_to(1300, 900)
+      visit week
+      wait_for_stimulus
+    end
+
+    it "selects on the first press and opens nothing", :aggregate_failures do
+      day("2026-08-06").click
+
+      expect(page).to have_current_path(/day=2026-08-06/)
+      expect(day("2026-08-06")["data-selected"]).to eq("true")
+      expect(page).to have_no_css(drawer, visible: :visible)
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day][aria-selected]")
+    end
+
+    it "opens the drawer on the second press, titled by the day", :aggregate_failures do
+      day("2026-08-06").click
+      expect(page).to have_current_path(/day=2026-08-06/)
+      wait_for_stimulus
+      before_url = page.current_url
+
+      day("2026-08-06").click
+
+      expect(page).to have_css(drawer, visible: :visible)
+      expect(page.current_url).to eq(before_url)
+      expect(find(drawer).native.accessible_name).to include("August 6")
+      expect(find("#{list} [data-slot=event-calendar-agenda-row]")).to have_text("Roof check")
+      expect(day("2026-08-06")["aria-expanded"]).to eq("true")
+    end
+
+    it "closes on Escape with the focus back on the day", :aggregate_failures do
+      day("2026-08-05").click
+      expect(page).to have_css(drawer, visible: :visible)
+
+      page.send_keys(:escape)
+
+      expect(page).to have_no_css(drawer, visible: :visible)
+      expect(focused_day).to eq("2026-08-05")
+      expect(day("2026-08-05")["aria-expanded"]).to eq("false")
+    end
+
+    it "opens on Enter on the selected day" do
+      day("2026-08-05").send_keys(:enter)
+
+      expect(page).to have_css(drawer, visible: :visible)
+    end
+
+    it "shows a row's detail, goes back on the first Escape and closes on the second", :aggregate_failures do
+      day("2026-08-05").click
+      find("#{list} [data-slot=event-calendar-agenda-row]", text: "Boiler service").click
+      expect(page).to have_css(pane, visible: :visible)
+      find("#{pane} turbo-frame#agenda-detail").assert_text("Event 2")
+      expect(page.evaluate_script("document.activeElement?.textContent?.trim()")).to eq("Back to the day")
+
+      page.send_keys(:escape)
+      expect(page).to have_css(list, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.getAttribute('href')")).to eq("/calendar/events/2")
+
+      page.send_keys(:escape)
+      expect(page).to have_no_css(drawer, visible: :visible)
+      expect(focused_day).to eq("2026-08-05")
+    end
+
+    it "goes back to the day from the detail's button, and reopens on the list", :aggregate_failures do
+      day("2026-08-05").click
+      find("#{list} [data-slot=event-calendar-agenda-row]", text: "Boiler service").click
+      find("#{pane} turbo-frame#agenda-detail").assert_text("Event 2")
+
+      find("#{pane} [data-slot=event-calendar-agenda-back]").click
+      expect(page).to have_css(list, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.getAttribute('href')")).to eq("/calendar/events/2")
+
+      find("#{list} [data-slot=event-calendar-agenda-row]", text: "Boiler service").click
+      find("#{pane} turbo-frame#agenda-detail").assert_text("Event 2")
+      find("[data-slot=drawer-overlay]", visible: :all).click(x: 5, y: 5)
+      expect(page).to have_no_css(drawer, visible: :visible)
+
+      day("2026-08-05").click
+      expect(page).to have_css(list, visible: :visible)
+      expect(page).to have_no_css(pane, visible: :visible)
+    end
+  end
 end
