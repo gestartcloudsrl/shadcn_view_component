@@ -466,7 +466,7 @@ module Shadcn
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes, :drawer_attributes, :drawer_direction,
-                  :view_url, :shapes, :counts, :views
+                  :agenda_detail, :view_url, :shapes, :counts, :views
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -541,6 +541,13 @@ module Shadcn
       # @param drawer_direction [Symbol] `agenda: :drawer` only: the side the
       #   drawer comes from, `:bottom` (the default), `:right`, `:left` or
       #   `:top` — the Drawer's own directions, and anything else is `:bottom`.
+      # @param agenda_detail [Hash, nil] `agenda: :drawer` only:
+      #   `{ frame: "agenda-detail", attributes: {} }`. With a `frame:`, a row
+      #   with a `url:` opens its page inside the drawer, in a `<turbo-frame>`
+      #   with that id drawn beside the agenda, and a button goes back to the
+      #   day. `attributes:` is merged onto the frame — where `target: "_top"`
+      #   goes — except `id`, which is always `frame:`. A row's own
+      #   `data: { turbo_frame: }` beats the default.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -585,7 +592,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {}, drawer_attributes: {},
-                     drawer_direction: :bottom,
+                     drawer_direction: :bottom, agenda_detail: nil,
                      view_url: nil, movable: false, shapes: SHAPES, views: nil, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
@@ -602,6 +609,9 @@ module Shadcn
         @agenda_attributes = agenda_attributes
         @drawer_attributes = drawer_attributes
         @drawer_direction = drawer_direction
+        # Indifferent, so the string keys a params hash or a YAML file carries
+        # reach `frame:` too.
+        @agenda_detail = agenda_detail&.to_h&.with_indifferent_access
         # Checked against its list. Unchecked, `reading: :workLoad` off a params
         # hash fell through every branch and rendered a silent fourth thing: no
         # bars, no `data-labelled`, no rows.
@@ -680,6 +690,9 @@ module Shadcn
           "data-shadcn--event-calendar-movable-value" => ("true" if movable?),
           # Omitted when off, for the same reason.
           "data-shadcn--event-calendar-drawer-value" => ("true" if agenda_drawer?),
+          # The frame a row's link has to name for the controller to show the
+          # detail rather than leave the click to the link.
+          "data-shadcn--event-calendar-detail-frame-value" => (detail_frame if agenda_detail?),
           "data-shadcn--event-calendar-reading-value" => reading,
           # Whether the browser may redraw this month, crossed as the *fact*
           # rather than as a list of reading names for the controller to check
@@ -1005,6 +1018,12 @@ module Shadcn
       # holds, so a calendar with nowhere to put the agenda has no drawer either.
       def agenda_drawer? = @agenda == :drawer && agenda?
 
+      # The event's detail inside the drawer, in place of the list. Only in a
+      # drawer, and only once the host has named the frame Turbo fills.
+      def agenda_detail? = agenda_drawer? && detail_frame.present?
+
+      def detail_frame = agenda_detail&.dig(:frame).presence&.to_s
+
       # `data-*` a reading needs on the root for its own rules to key off.
       def reading_attributes = {}
 
@@ -1309,11 +1328,47 @@ module Shadcn
 
       # The agenda in a bottom drawer, named by its own title. The drawer is the
       # calendar's to find — `agendaDrawer` — the way the preferences dialog is.
+      #
+      # With `agenda_detail:` the drawer's Escape is the calendar's to hear
+      # first: while the detail is shown it goes back to the list instead.
       def agenda_drawer
-        render(Drawer::Component.new("data-shadcn--event-calendar-target": "agendaDrawer")) do |drawer|
+        escape = { "data-action": "shadcn--dialog:escape-key-down->shadcn--event-calendar#detailEscape" }
+        render(Drawer::Component.new("data-shadcn--event-calendar-target": "agendaDrawer",
+                                     **(agenda_detail? ? escape : {}))) do |drawer|
           drawer.with_dialog_content(**drawer_attributes, direction: drawer_direction,
-                                     "aria-labelledby": drawer_id("agenda-title")) { agenda }
+                                     "aria-labelledby": drawer_id("agenda-title")) do
+            safe_join([ agenda, (agenda_detail_pane if agenda_detail?) ].compact)
+          end
         end
+      end
+
+      # Beside the agenda, never inside it, so a day swapped in under
+      # `agenda_as: :"turbo-frame"` cannot take the frame with it. Hidden until
+      # a row opens it; the list and the pane are never shown together.
+      def agenda_detail_pane
+        tag.div(
+          safe_join([ agenda_back, agenda_frame ]),
+          "data-slot": "event-calendar-agenda-detail", class: AGENDA_DRAWER_CLASS, hidden: true,
+          "data-shadcn--event-calendar-target": "agendaDetail"
+        )
+      end
+
+      def agenda_back
+        render(Button::Component.new(
+          variant: :ghost, size: :sm, "data-slot": "event-calendar-agenda-back",
+          "data-shadcn--event-calendar-target": "agendaBack",
+          "data-action": "click->shadcn--event-calendar#showList"
+        ).with_content(safe_join([ render(Icon::Component.new("chevron-left")),
+                                   shadcn_t("event_calendar.agenda_back") ])))
+      end
+
+      # The host's `attributes:` over the gem's, as everywhere, but the `id` is
+      # `frame:` whatever they say: it is what every row's `data-turbo-frame`
+      # names.
+      def agenda_frame
+        merged = merge_attributes({ "data-shadcn--event-calendar-target" => "agendaFrame" },
+                                  agenda_detail[:attributes].to_h).except("id")
+        content_tag(:"turbo-frame", "", id: detail_frame, **merged.symbolize_keys)
       end
 
       def drawer_hint
@@ -1450,10 +1505,25 @@ module Shadcn
       # any caller's. `as:` and `size:` are Item's arguments, not attributes,
       # and are dropped from the host's hash so they stay the row's.
       def agenda_link(event)
-        merged = merge_attributes({ "class" => "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}" },
+        merged = merge_attributes({ "class" => "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}", **detail_link(event) },
                                   event.attributes.to_h.except(:as, :size, "as", "size"),
                                   { "href" => event.url, "data-slot" => "event-calendar-agenda-row" })
         Item::Component.new(**merged.symbolize_keys, size: :sm, as: :a)
+      end
+
+      # What points a row at the detail, as defaults under the event's own
+      # attributes. The frame is left off when the host names one in either
+      # spelling, rather than merged under it: the flat `data-turbo-frame`
+      # and a `data: { turbo_frame: }` are different keys to `merge_attributes`,
+      # and both would render — two attributes, of which the browser keeps the
+      # gem's.
+      def detail_link(event)
+        return {} unless agenda_detail?
+
+        own = normalize_attributes(event.attributes.to_h)
+        named = own.key?("data-turbo-frame") || own["data"].to_h.keys.any? { |key| key.to_s.tr("-", "_") == "turbo_frame" }
+        { "data-turbo-frame" => (detail_frame unless named),
+          "data-action" => "click->shadcn--event-calendar#openDetail" }.compact
       end
 
       # The title and the subtitle share one truncated line, the flags beside

@@ -1,0 +1,20 @@
+<%# A row's detail inside the agenda drawer. The 5th is selected; its first two
+    rows open in the frame, the third does not. See
+    `Preview#agenda_drawer_detail`. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 5),
+      agenda: :drawer,
+      drawer_direction: local_assigns.fetch(:direction, :right),
+      agenda_detail: { frame: "agenda-detail", attributes: { target: "_top" } },
+      day_url: (->(day) { "/calendar/days/#{day.iso8601}" } if local_assigns.fetch(:day_links, false)),
+      events: [
+        { title: "Kitchen survey", starts_at: Time.zone.local(2026, 8, 5, 9), url: "/calendar/events/1" },
+        { title: "Boiler service", starts_at: Time.zone.local(2026, 8, 5, 11), url: "/calendar/events/2" },
+        { title: "Reminders", starts_at: Time.zone.local(2026, 8, 5, 14), url: "/turbo-probe/one",
+          attributes: { data: { turbo: false } } }
+      ] + Array.new(18) { |index|
+        { title: "Site visit #{index + 1}",
+          starts_at: Time.zone.local(2026, 8, 6, 7 + (index / 2), (index % 2) * 30) }
+      }
+    )) %>

@@ -136,6 +136,19 @@ module Shadcn
         render_with_template
       end
 
+      # A row's detail inside the drawer, in place of the list: the 5th's first
+      # two rows open their page in the drawer's `<turbo-frame>`, and a button
+      # goes back to the day. The third says `data: { turbo: false }` and
+      # leaves the page as a plain link. The 6th is longer than the panel, for
+      # the scroll. `day_links` makes the cells links, so the rows are the
+      # server's rather than the browser's.
+      #
+      # @param direction select [right, bottom]
+      # @param day_links toggle
+      def agenda_drawer_detail(direction: "right", day_links: false)
+        render_with_template(locals: { direction: direction.to_sym, day_links: })
+      end
+
       # A person's preferred view, kept in the browser: the panel's last item
       # opens a dialog asking its questions for next time. A template rather
       # than a call to `density`, because the snapshot and accessibility specs

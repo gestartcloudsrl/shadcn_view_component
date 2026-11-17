@@ -26,7 +26,8 @@ import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 export default class extends Controller {
   static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
                      "prototypes", "groupLabel", "announcer", "preferencesDialog", "preferencesForm",
-                     "preferencesLimit", "agendaDrawer", "selectionAnnouncer" ]
+                     "preferencesLimit", "agendaDrawer", "selectionAnnouncer", "agendaDetail", "agendaFrame",
+                     "agendaBack" ]
 
   static values = {
     // The saved-view preferences, drawn by the server when a host asks for
@@ -39,6 +40,9 @@ export default class extends Controller {
     preferencesUrls: Object,
     // Whether the agenda is a drawer that a second press on the selected day opens.
     drawer: Boolean,
+    // The `<turbo-frame>` the drawer shows an event's detail in, under
+    // `agenda_detail:`; empty when there is none.
+    detailFrame: String,
     month: String,
     // The application's today, not the browser's — `Time.zone` and a laptop's
     // clock disagree by a day for a few hours out of every twenty-four, and the
@@ -580,6 +584,14 @@ export default class extends Controller {
     drawer.addEventListener("shadcn--dialog:open", this.drawerListener)
     drawer.addEventListener("shadcn--dialog:close", this.drawerListener)
   }
+
+  // The detail pane under `agenda_detail:`, declared here so the markup's
+  // actions resolve; what they do is the next step's.
+  openDetail() {}
+
+  showList() {}
+
+  detailEscape() {}
 
   agendaDrawerTargetDisconnected(drawer) {
     drawer.removeEventListener("shadcn--dialog:open", this.drawerListener)

@@ -641,6 +641,126 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  describe "agenda_detail:" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda:, agenda_detail:,
+                          events:)
+    end
+
+    let(:agenda) { :drawer }
+    let(:agenda_detail) { { frame: "agenda-detail", attributes: { target: "_top", id: "hijacked" } } }
+
+    def events
+      [ { title: "Standup", starts_at: Time.zone.local(2026, 8, 20, 9), url: "/calendar/events/1" },
+        { title: "Elsewhere", starts_at: Time.zone.local(2026, 8, 20, 10), url: "/calendar/events/2",
+          attributes: { data: { turbo_frame: "other", action: "click->host#track" } } },
+        { title: "Note", starts_at: Time.zone.local(2026, 8, 20, 11) } ]
+    end
+    def pane = painted.at_css("[data-slot=event-calendar-agenda-detail]")
+    def template = Nokogiri::HTML5.fragment(rendered_content.to_s).at_css("template")
+
+    def row(title) = painted.css("a[data-slot=event-calendar-agenda-row]").find { |link| link.text.include?(title) }
+
+    before { render_inline(calendar) }
+
+    it "draws a hidden pane after the agenda inside the drawer's content", :aggregate_failures do
+      content = painted.at_css("[data-slot=drawer-content]")
+
+      expect(pane["hidden"]).not_to be_nil
+      expect(pane["data-shadcn--event-calendar-target"]).to eq("agendaDetail")
+      expect(pane.parent).to eq(content)
+      expect(pane.previous_element["data-slot"]).to eq("event-calendar-agenda")
+    end
+
+    it "gives the pane the agenda's column and scroll" do
+      expect(pane["class"].split).to include("mx-auto", "w-full", "max-w-md", "min-h-0", "overflow-y-auto")
+    end
+
+    it "draws the frame with the configured id and the host's attributes", :aggregate_failures do
+      frame = pane.at_css("turbo-frame")
+
+      expect(frame["id"]).to eq("agenda-detail")
+      expect(frame["target"]).to eq("_top")
+      expect(frame["data-shadcn--event-calendar-target"]).to eq("agendaFrame")
+    end
+
+    it "draws the back button before the frame", :aggregate_failures do
+      back = pane.at_css("[data-slot=event-calendar-agenda-back]")
+
+      expect(back.name).to eq("button")
+      expect(back.text.strip).to eq("Back to the day")
+      expect(back["data-shadcn--event-calendar-target"]).to eq("agendaBack")
+      expect(back["data-action"]).to eq("click->shadcn--event-calendar#showList")
+      expect(back).to have_css("svg")
+      expect(back.next_element.name).to eq("turbo-frame")
+    end
+
+    it "points a link row at the frame", :aggregate_failures do
+      expect(row("Standup")["data-turbo-frame"]).to eq("agenda-detail")
+      expect(row("Standup")["data-action"]).to eq("click->shadcn--event-calendar#openDetail")
+    end
+
+    it "lets a row's own frame win and joins its action", :aggregate_failures do
+      expect(row("Elsewhere")["data-turbo-frame"]).to eq("other")
+      expect(row("Elsewhere")["data-action"].split)
+        .to contain_exactly("click->shadcn--event-calendar#openDetail", "click->host#track")
+    end
+
+    it "gives the link prototype the browser clones the same defaults", :aggregate_failures do
+      link = Nokogiri::HTML5.fragment(template.inner_html).at_css("a[data-slot=event-calendar-agenda-row]")
+
+      expect(link["data-turbo-frame"]).to eq("agenda-detail")
+      expect(link["data-action"]).to eq("click->shadcn--event-calendar#openDetail")
+    end
+
+    it "tells the controller the frame" do
+      expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-detail-frame-value"])
+        .to eq("agenda-detail")
+    end
+
+    it "listens for the drawer's Escape" do
+      expect(painted.at_css("[data-slot=drawer]")["data-action"])
+        .to eq("shadcn--dialog:escape-key-down->shadcn--event-calendar#detailEscape")
+    end
+
+    context "with string keys" do
+      let(:agenda_detail) { { "frame" => "agenda-detail" } }
+
+      it "still draws the frame" do
+        expect(pane.at_css("turbo-frame")["id"]).to eq("agenda-detail")
+      end
+    end
+
+    shared_examples "no detail" do
+      it "draws and wires none of it", :aggregate_failures do
+        expect(painted).to have_no_css("[data-slot=event-calendar-agenda-detail], turbo-frame", visible: :all)
+        expect(row("Standup")["data-turbo-frame"]).to be_nil
+        expect(painted.to_html).not_to include("openDetail", "detailEscape")
+        expect(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-detail-frame-value"])
+          .to be_nil
+        expect(template.inner_html).not_to include("data-turbo-frame", "openDetail")
+      end
+    end
+
+    context "without the option" do
+      let(:agenda_detail) { nil }
+
+      it_behaves_like "no detail"
+    end
+
+    context "without frame:" do
+      let(:agenda_detail) { { attributes: { target: "_top" } } }
+
+      it_behaves_like "no detail"
+    end
+
+    context "with the agenda under the grid" do
+      let(:agenda) { true }
+
+      it_behaves_like "no detail"
+    end
+  end
+
   describe "#max_events" do
     it "clamps to what the lanes and the cell height can express", :aggregate_failures do
       expect(described_class.new(max_events: 99).max_events).to eq(6)

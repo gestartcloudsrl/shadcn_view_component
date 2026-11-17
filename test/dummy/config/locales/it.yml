@@ -23,6 +23,7 @@ it:
       all_day: Tutto il giorno
       agenda_label: Eventi del giorno selezionato
       drawer_hint: Premi di nuovo per vedere gli eventi.
+      agenda_back: Torna al giorno
       agenda_format: "%A %-d %B"
       day_label: "%{date}, %{events}"
       event_count:

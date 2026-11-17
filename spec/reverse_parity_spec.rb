@@ -505,6 +505,9 @@ RSpec.describe "reverse parity" do
     # max-w-sm`, examples/drawer-demo.tsx — not vendored) one step wider,
     # because a row carries a time and a subtitle. `AGENDA_DRAWER_CLASS`.
     "event-calendar-agenda" => %w[mt-3 max-w-md],
+    # The detail pane under `agenda_detail:` takes the list's place, so it
+    # takes the list's column: the same `AGENDA_DRAWER_CLASS`.
+    "event-calendar-agenda-detail" => %w[max-w-md],
     "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
     # The row's faces back on upstream's `bg-muted`, and inverted to
