@@ -235,8 +235,8 @@
 <div data-slot="drawer-content" role="dialog" aria-modal="true" tabindex="-1" data-state="closed" hidden="hidden" data-vaul-drawer="" data-vaul-drawer-direction="right" data-vaul-snap-points="false" data-shadcn--dialog-target="content" data-shadcn--drawer-target="content" data-action="pointerdown-&gt;shadcn--drawer#press pointermove-&gt;shadcn--drawer#move pointerup-&gt;shadcn--drawer#release pointercancel-&gt;shadcn--drawer#release" aria-labelledby="shadcn-event-calendar-x-agenda-title" class="group/drawer-content fixed z-50 flex h-auto flex-col bg-background data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:border-b data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-lg data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm">
 <div class="mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full bg-muted group-data-[vaul-drawer-direction=bottom]/drawer-content:block">
 </div>
-<div data-slot="event-calendar-agenda" class="mt-3 mx-auto w-full max-w-md min-h-0 overflow-y-auto" role="region" aria-label="Events on the selected day">
-<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium" id="shadcn-event-calendar-x-agenda-title">
+<div data-slot="event-calendar-agenda" class="mt-3 mx-auto w-full max-w-md min-h-0 overflow-y-auto relative" role="region" aria-label="Events on the selected day">
+<div data-slot="event-calendar-agenda-title" class="flex flex-wrap items-baseline gap-x-2 px-2 text-sm font-medium mb-1.5 min-h-8 content-center pb-0 pr-10" id="shadcn-event-calendar-x-agenda-title">
 <span>Wednesday, August 5
 </span>
 <span data-slot="event-calendar-agenda-count" class="text-xs font-normal text-muted-foreground">2 events
@@ -270,6 +270,14 @@
 </ul>
 <p data-slot="event-calendar-agenda-empty" class="px-2 py-8 text-center text-sm text-muted-foreground" hidden="hidden">Nothing scheduled.
 </p>
+<button data-slot="event-calendar-agenda-close" type="button" data-action="shadcn--dialog#close" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-8 absolute top-0 right-0">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+<path d="M18 6 6 18"/>
+<path d="m6 6 12 12"/>
+</svg>
+<span class="sr-only">Close
+</span>
+</button>
 </div>
 <div data-slot="event-calendar-agenda-detail" class="mx-auto w-full max-w-md min-h-0 overflow-y-auto" hidden="hidden" data-shadcn--event-calendar-target="agendaDetail">
 <button data-slot="event-calendar-agenda-back" data-variant="ghost" data-size="sm" data-shadcn--event-calendar-target="agendaBack" data-action="click-&gt;shadcn--event-calendar#showList" class="inline-flex shrink-0 items-center justify-center text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#39;size-&#39;])]:size-4 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-8 gap-1.5 rounded-md px-3 has-[&gt;svg]:px-2.5">

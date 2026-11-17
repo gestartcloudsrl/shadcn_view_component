@@ -406,6 +406,12 @@ module Shadcn
       # `mt-auto flex flex-col gap-2 p-4`. It does not scroll: the list does.
       AGENDA_FOOTER_CLASS = "mx-auto w-full max-w-md"
       AGENDA_TITLE_CLASS = "flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium"
+      # The drawer's title line is the X's 32px tall, its lines centred in it
+      # (the gap under it a margin, so the 32px are the line's alone),
+      # and stops short of the X at its end. `top-0` rather than a negative
+      # offset: the agenda scrolls, and would clip anything above its top.
+      AGENDA_DRAWER_TITLE_CLASS = "mb-1.5 min-h-8 content-center pb-0 pr-10"
+      AGENDA_CLOSE_CLASS = "absolute top-0 right-0"
       # How many, beside the date. Cheap at three events and the difference
       # between a list and a wall at sixty — a day this deep needs to say how
       # deep before you start scrolling it.
@@ -1527,19 +1533,22 @@ module Shadcn
       def agenda
         on_day = schedule.on(selected)
 
+        title = tag.div(
+          safe_join([
+            tag.span(I18n.l(selected, format: agenda_format),
+                     "data-shadcn--event-calendar-target": ("agendaDate" unless day_url)),
+            tag.span(agenda_count(on_day.size),
+                     "data-slot": "event-calendar-agenda-count", class: AGENDA_COUNT_CLASS,
+                     "data-shadcn--event-calendar-target": ("agendaCount" unless day_url))
+          ]),
+          "data-slot": "event-calendar-agenda-title",
+          class: ShadcnViewComponent.cn(AGENDA_TITLE_CLASS, (AGENDA_DRAWER_TITLE_CLASS if agenda_drawer?)),
+          id: (drawer_id("agenda-title") if agenda_drawer?)
+        )
+
         tag.public_send(agenda_as,
           safe_join([
-            tag.div(
-              safe_join([
-                tag.span(I18n.l(selected, format: agenda_format),
-                         "data-shadcn--event-calendar-target": ("agendaDate" unless day_url)),
-                tag.span(agenda_count(on_day.size),
-                         "data-slot": "event-calendar-agenda-count", class: AGENDA_COUNT_CLASS,
-                         "data-shadcn--event-calendar-target": ("agendaCount" unless day_url))
-              ]),
-              "data-slot": "event-calendar-agenda-title", class: AGENDA_TITLE_CLASS,
-              id: (drawer_id("agenda-title") if agenda_drawer?)
-            ),
+            title,
             tag.ul(safe_join(on_day.map { |event| agenda_item(event) }),
                    "data-slot": "event-calendar-agenda-list", class: AGENDA_LIST_CLASS,
                    "data-action": ("keydown->shadcn--event-calendar#agendaKeydown" if movable?),
@@ -1547,10 +1556,11 @@ module Shadcn
             tag.p(shadcn_t("event_calendar.empty"),
                   "data-slot": "event-calendar-agenda-empty", class: AGENDA_EMPTY_CLASS,
                   hidden: on_day.any?,
-                  "data-shadcn--event-calendar-target": ("agendaEmpty" unless day_url))
-          ]),
+                  "data-shadcn--event-calendar-target": ("agendaEmpty" unless day_url)),
+            (agenda_close if agenda_drawer?)
+          ].compact),
           **agenda_root_attributes(
-            class: [ AGENDA_CLASS, (AGENDA_DRAWER_CLASS if agenda_drawer?) ], role: "region",
+            class: [ AGENDA_CLASS, (AGENDA_DRAWER_CLASS if agenda_drawer?), ("relative" if agenda_drawer?) ], role: "region",
             # The live region is the controller's: it exists because the agenda
             # changes under a pointer that never left the grid. A frame swap is
             # a navigation, and Turbo announces those itself.
@@ -1558,6 +1568,22 @@ module Shadcn
             "aria-label": shadcn_t("event_calendar.agenda_label")
           )
         )
+      end
+
+      # In a drawer the day's title shares its line with a close button, the X
+      # upstream's Dialog draws in its corner and the Drawer has none of — and
+      # drawn the Dialog's way: last in the markup and placed over the title's
+      # line, so the focus still opens on the day rather than on the X, and
+      # «Close» is no part of the title that names the drawer. Inside the
+      # agenda, so a day swapped in under `agenda_as: :"turbo-frame"` brings
+      # its own.
+      def agenda_close
+        render(Drawer::Close::Component.new(
+          class: Button::Component.variant_classes(variant: :ghost, size: :"icon-sm", class: AGENDA_CLOSE_CLASS),
+          "data-slot": "event-calendar-agenda-close"
+        )) do
+          safe_join([ render(Icon::Component.new("x")), tag.span(shadcn_t("dialog.close"), class: "sr-only") ])
+        end
       end
 
       # The agenda's own attributes under the host's `agenda_attributes:`, with

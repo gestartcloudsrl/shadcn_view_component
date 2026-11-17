@@ -518,7 +518,10 @@ RSpec.describe "reverse parity" do
     # button lines up with the rows above it rather than running the width of
     # a bottom drawer. No Drawer of the gem's own adds it.
     "drawer-footer" => %w[max-w-md],
-    "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
+    # In the drawer the title's line is the height of the close button that
+    # sits at its end (`AGENDA_DRAWER_TITLE_CLASS`): 32px with its lines
+    # centred, the gap under it a margin, and room left for the X.
+    "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline min-h-8 content-center pb-0 mb-1.5 pr-10],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
     # The row's faces back on upstream's `bg-muted`, and inverted to
     # `bg-background` where the row is `bg-accent` — see `AGENDA_AVATARS_CLASS`.

@@ -514,6 +514,39 @@ RSpec.describe Shadcn::EventCalendar::Component do
       expect(painted.at_css("[data-slot=drawer-content]")["aria-labelledby"]).to eq(title["id"])
     end
 
+    describe "the close button" do
+      let(:agenda) { painted.at_css("[data-slot=drawer-content] [data-slot=event-calendar-agenda]") }
+      let(:close) { agenda.at_css("[data-slot=event-calendar-agenda-close]") }
+
+      it "closes the drawer, named for a screen reader", :aggregate_failures do
+        expect(close.name).to eq("button")
+        expect(close["type"]).to eq("button")
+        expect(close["data-action"]).to eq("shadcn--dialog#close")
+        expect(close.at_css("svg")).to be_present
+        expect(close.at_css(".sr-only").text).to eq("Close")
+      end
+
+      it "comes last in the agenda, so the focus opens on the day" do
+        expect(agenda.element_children.last).to eq(close)
+      end
+
+      it "sits over the title's line and stays out of the drawer's name", :aggregate_failures do
+        title = agenda.at_css("[data-slot=event-calendar-agenda-title]")
+
+        expect(agenda["class"].split).to include("relative")
+        expect(close["class"].split).to include("absolute", "top-0", "right-0", "size-8")
+        expect(title["class"].split).to include("min-h-8", "pr-10")
+        expect(title.at_css("[data-slot=event-calendar-agenda-close]")).to be_nil
+      end
+
+      it "is the drawer's alone: the agenda under the grid has none", :aggregate_failures do
+        render_inline(described_class.new(month: Date.new(2026, 8, 1)))
+
+        expect(painted).to have_css("[data-slot=event-calendar-agenda]")
+        expect(painted).to have_no_css("[data-slot=event-calendar-agenda-close]")
+      end
+    end
+
     it "centres the agenda in a column inside the full-width panel" do
       expect(painted.at_css("[data-slot=event-calendar-agenda]")["class"].split)
         .to include("mx-auto", "w-full", "max-w-md")

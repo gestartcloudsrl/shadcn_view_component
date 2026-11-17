@@ -2349,6 +2349,19 @@ RSpec.describe "Event calendar", :js do
       expect(selections).to eq(0)
     end
 
+    it "closes on its X, on the title's line, and gives the focus back to the day", :aggregate_failures do
+      day("2026-08-20").click
+      close = find("#{drawer} [data-slot=event-calendar-agenda-close]")
+      title = find("#{drawer} [data-slot=event-calendar-agenda-title] span", match: :first)
+
+      middle = ->(el) { page.evaluate_script("(r => r.top + r.height / 2)(arguments[0].getBoundingClientRect())", el) }
+      expect(middle.(close)).to be_within(1).of(middle.(title))
+
+      close.click
+      expect(page).to have_no_css("[role=dialog]", visible: :visible)
+      expect(page.evaluate_script("document.activeElement.dataset.day")).to eq("2026-08-20")
+    end
+
     it "opens an empty day on Nothing scheduled." do
       day("2026-08-22").click
       day("2026-08-22").click
@@ -2756,6 +2769,17 @@ RSpec.describe "Event calendar", :js do
       expect(page).to have_no_css(drawer, visible: :visible)
       expect(focused_day).to eq("2026-08-05")
       expect(day("2026-08-05")["aria-expanded"]).to eq("false")
+    end
+
+    # The X is last in the markup, so where the rows are links the focus
+    # still opens on the first of them, as it did before there was an X.
+    it "closes on its X, drawn by the server with the day", :aggregate_failures do
+      day("2026-08-05").click
+      expect(page.evaluate_script("document.activeElement.dataset.slot")).to eq("event-calendar-agenda-row")
+      find("#{list} [data-slot=event-calendar-agenda-close]").click
+
+      expect(page).to have_no_css(drawer, visible: :visible)
+      expect(focused_day).to eq("2026-08-05")
     end
 
     it "opens on Enter on the selected day" do

@@ -1477,6 +1477,27 @@ headless Chrome from the bottom and from the right. The system spec pins it from
 the right only; the bottom shares the class. Scrolling by touch, against the
 drawer's own drag, has not been tried on a device.
 
+**Its close button.** An X at the end of the day's title, on the same line:
+the Drawer's own `Close` (`shadcn--dialog#close`) in a ghost `icon-sm`
+button, named «Close» by an `sr-only` span (`dialog.close`, the key the
+Dialog's X uses). Upstream's Drawer draws none; asked for by Gestart
+(2026-11-17), so a phone has a way out other than the drag and the overlay. It
+is drawn the way upstream's Dialog draws its X: last in the agenda's markup and
+placed over the title's line (`absolute top-0 right-0`, the agenda `relative`).
+So the focus still opens on the first row where the rows are links, as it did
+before, and «Close» stays out of the title that names the drawer. Where the rows
+are not links the X is the drawer's only control, and the focus opens on it, as
+the Dialog's does. The title's line is the button's 32px (`min-h-8
+content-center`, the gap under it a margin) so the two share a middle, and it
+stops `pr-10` short of the X. `top-0` rather than a negative offset, because
+the agenda scrolls and would clip it. It is inside the agenda, so a day the
+server draws again brings its own, and it scrolls away with the title. It is
+not in the detail pane, where the list is hidden: there the way back is the
+pane's own button and Escape. Specs: the component spec (the button, last in
+the agenda, out of the title, none under the grid), and `event_calendar_spec.rb`
+(the X's middle on the date's in the month, the focus on the first row in the
+week, and a press closing the drawer with the focus back on the day, in both).
+
 **From the side.** `drawer_direction: :right` (or `:left`) brings the panel in
 from that edge, with the Drawer's own side classes: the full height, `w-3/4`,
 and at most `max-w-sm` from `sm` up, so on a laptop it is a narrow column rather
