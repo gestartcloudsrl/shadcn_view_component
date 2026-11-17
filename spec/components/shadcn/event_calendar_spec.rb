@@ -723,6 +723,19 @@ RSpec.describe Shadcn::EventCalendar::Component do
         .to eq("shadcn--dialog:escape-key-down->shadcn--event-calendar#detailEscape")
     end
 
+    context "with a row naming its frame in the flat spelling" do
+      def events
+        [ { title: "Flat", starts_at: Time.zone.local(2026, 8, 20, 9), url: "/calendar/events/3",
+            attributes: { "data-turbo-frame" => "other" } } ]
+      end
+
+      it "keeps the row's frame, once", :aggregate_failures do
+        expect(row("Flat")["data-turbo-frame"]).to eq("other")
+        expect(rendered_content.to_s.scan(/<a[^>]*href="\/calendar\/events\/3"[^>]*>/).first.scan("data-turbo-frame").size)
+          .to eq(1)
+      end
+    end
+
     context "with string keys" do
       let(:agenda_detail) { { "frame" => "agenda-detail" } }
 
@@ -744,6 +757,12 @@ RSpec.describe Shadcn::EventCalendar::Component do
 
     context "without the option" do
       let(:agenda_detail) { nil }
+
+      it_behaves_like "no detail"
+    end
+
+    context "with something that is not a Hash" do
+      let(:agenda_detail) { "agenda-detail" }
 
       it_behaves_like "no detail"
     end

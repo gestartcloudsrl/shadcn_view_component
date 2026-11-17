@@ -547,7 +547,8 @@ module Shadcn
       #   with that id drawn beside the agenda, and a button goes back to the
       #   day. `attributes:` is merged onto the frame — where `target: "_top"`
       #   goes — except `id`, which is always `frame:`. A row's own
-      #   `data: { turbo_frame: }` beats the default.
+      #   `data: { turbo_frame: }` beats the default. Anything that is not a
+      #   Hash is the same as `nil`.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -610,8 +611,8 @@ module Shadcn
         @drawer_attributes = drawer_attributes
         @drawer_direction = drawer_direction
         # Indifferent, so the string keys a params hash or a YAML file carries
-        # reach `frame:` too.
-        @agenda_detail = agenda_detail&.to_h&.with_indifferent_access
+        # reach `frame:` too. Anything but a Hash is off rather than an error.
+        @agenda_detail = agenda_detail.with_indifferent_access if agenda_detail.is_a?(Hash)
         # Checked against its list. Unchecked, `reading: :workLoad` off a params
         # hash fell through every branch and rendered a silent fourth thing: no
         # bars, no `data-labelled`, no rows.
@@ -1515,8 +1516,8 @@ module Shadcn
       # attributes. The frame is left off when the host names one in either
       # spelling, rather than merged under it: the flat `data-turbo-frame`
       # and a `data: { turbo_frame: }` are different keys to `merge_attributes`,
-      # and both would render — two attributes, of which the browser keeps the
-      # gem's.
+      # and both would render as two `data-turbo-frame` attributes on one
+      # element.
       def detail_link(event)
         return {} unless agenda_detail?
 
