@@ -248,6 +248,15 @@ module Shadcn
       # `overflow-hidden` would clip the descenders of "agosto".
       TITLE_CLASS = "min-w-0 text-base leading-none font-semibold sm:text-lg"
       NAV_CLASS = "flex min-w-0 flex-wrap items-center gap-1"
+      # `legend:`. The dialog is the Dialog's own width, `sm:max-w-sm` rather
+      # than its `sm:max-w-lg`: a list of colours and short labels. The items
+      # are upstream's chart legend item (`flex items-center gap-1.5`,
+      # `vendor/shadcn/ui/chart.tsx`), stacked, a step wider apart since each is
+      # a sentence rather than a series name.
+      LEGEND_CONTENT_CLASS = "sm:max-w-sm"
+      LEGEND_LIST_CLASS = "flex flex-col gap-2.5 text-sm"
+      LEGEND_ITEM_CLASS = "flex items-center gap-1.5"
+      LEGEND_SWATCH_CLASS = "h-2 w-2 shrink-0 rounded-[2px] bg-(--event-color)"
       CHEVRON_CLASS = "size-4"
       # `overflow-clip`, not `overflow-hidden`: both cut the corners, but
       # `hidden` makes the frame a scroll container, and a `sticky` row inside
@@ -469,7 +478,7 @@ module Shadcn
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes, :drawer_attributes, :drawer_direction,
-                  :agenda_detail, :agenda_footer, :view_url, :shapes, :counts, :views
+                  :agenda_detail, :agenda_footer, :legend, :view_url, :shapes, :counts, :views
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -560,6 +569,12 @@ module Shadcn
       #   the detail as a row does. Called for every day the grid holds, since
       #   in the browser the selection moves without asking the server.
       #   Anything that does not respond to `call` is the same as `nil`.
+      # @param legend [Array<Hash>, nil] what the colours mean:
+      #   `[{ color: "--calendar-programmed", label: "Scheduled" }, ...]`, where
+      #   `color:` takes what an event's does — a palette name or a host's
+      #   custom property — and an unknown one is `default_color:`. Present, a
+      #   button in the nav opens a dialog listing them; an entry with no label
+      #   is left out, and none at all draws nothing.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -604,7 +619,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {}, drawer_attributes: {},
-                     drawer_direction: :bottom, agenda_detail: nil, agenda_footer: nil,
+                     drawer_direction: :bottom, agenda_detail: nil, agenda_footer: nil, legend: nil,
                      view_url: nil, movable: false, shapes: SHAPES, views: nil, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
@@ -625,6 +640,7 @@ module Shadcn
         # reach `frame:` too. Anything but a Hash is off rather than an error.
         @agenda_detail = agenda_detail.with_indifferent_access if agenda_detail.is_a?(Hash)
         @agenda_footer = agenda_footer if agenda_footer.respond_to?(:call)
+        @legend = legend_entries(legend, default_color)
         # Checked against its list. Unchecked, `reading: :workLoad` off a params
         # hash fell through every branch and rendered a silent fourth thing: no
         # bars, no `data-labelled`, no rows.
@@ -827,6 +843,7 @@ module Shadcn
           safe_join([
             *reading_controls,
             (preferences_dialog if preferences?),
+            (legend_dialog if legend.any?),
             nav_button(today, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
             end,
@@ -835,6 +852,48 @@ module Shadcn
           ].compact),
           "data-slot": "event-calendar-nav", class: NAV_CLASS
         )
+      end
+
+      # `legend:` as `[color, property, label]`, the colour by `Event`'s own
+      # rule so a swatch and an event given the same value look the same. A
+      # Hash with string keys, as YAML gives, is taken too.
+      def legend_entries(legend, default_color)
+        Array(legend).filter_map do |entry|
+          next unless entry.respond_to?(:to_h)
+
+          entry = entry.to_h.symbolize_keys
+          label = entry[:label].to_s.strip.presence or next
+          [ *Event.color_for(entry[:color], default_color:), label ]
+        end
+      end
+
+      # What the colours mean, behind a `circle-question-mark` beside the panel
+      # — an icon button named the way the panel's trigger is, by an `sr-only`
+      # span. The dialog is the gem's Dialog: its Escape, its focus return to
+      # the button, and a layer of its own in the dismiss stack, apart from the
+      # agenda's drawer. The swatch is upstream's chart legend square (`h-2 w-2
+      # shrink-0 rounded-[2px]`, `vendor/shadcn/ui/chart.tsx`) in the event's
+      # colour, `aria-hidden`: the label is what it means.
+      def legend_dialog
+        render(Dialog::Component.new) do |dialog|
+          dialog.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :"icon-sm")) do
+            safe_join([ render(Icon::Component.new("circle-question-mark")),
+                        tag.span(shadcn_t("event_calendar.legend"), class: "sr-only") ])
+          end
+          dialog.with_dialog_content(class: LEGEND_CONTENT_CLASS) do |content|
+            content.with_header { |header| header.with_title { shadcn_t("event_calendar.legend") } }
+            tag.ul(safe_join(legend.map { |color, property, label| legend_item(color, property, label) }),
+                   "data-slot": "event-calendar-legend-list", class: LEGEND_LIST_CLASS)
+          end
+        end
+      end
+
+      def legend_item(color, property, label)
+        swatch = tag.span("", "data-slot": "event-calendar-legend-swatch", "data-color": color,
+                              style: ("--event-color:var(#{property});" if property),
+                              class: LEGEND_SWATCH_CLASS, "aria-hidden": "true")
+        tag.li(safe_join([ swatch, tag.span(label) ]), "data-slot": "event-calendar-legend-item",
+               class: LEGEND_ITEM_CLASS)
       end
 
       # One panel instead of three buttons that ruled each other out.

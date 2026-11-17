@@ -75,12 +75,7 @@ module Shadcn
         #
         # A host colour is the exception: a String naming a custom property
         # (`HOST_COLOR`) is kept as `:host`, with the name beside it.
-        if color.is_a?(String) && color.match?(HOST_COLOR)
-          @color = :host
-          @color_property = color
-        else
-          @color = COLORS.include?(color&.to_sym) ? color.to_sym : fallback_color(default_color)
-        end
+        @color, @color_property = self.class.color_for(color, default_color:)
         @url = url
         @assignees = wrap_assignees(assignees || assignee)
         @subtitle = subtitle.presence
@@ -96,8 +91,14 @@ module Shadcn
 
       def attachment? = @attachment
 
-      def fallback_color(name) = COLORS.include?(name&.to_sym) ? name.to_sym : :default
-      private :fallback_color
+      # The rule above as `[name, property]`, for anything else that is drawn in
+      # an event's colour — the calendar's `legend:` takes the same values.
+      def self.color_for(color, default_color: :default)
+        return [ :host, color ] if color.is_a?(String) && color.match?(HOST_COLOR)
+        return [ color.to_sym, nil ] if COLORS.include?(color&.to_sym)
+
+        [ COLORS.include?(default_color&.to_sym) ? default_color.to_sym : :default, nil ]
+      end
 
       # `done:` and `attachment:` take a boolean, as they always have, or a
       # hash carrying the words a screen reader hears for the flag instead of

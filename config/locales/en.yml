@@ -47,6 +47,7 @@ en:
       drawer_hint: Press again to see the events.
       # The detail pane's way back to the list, under `agenda_detail:`.
       agenda_back: Back to the day
+      legend: "Legend"
       # The "+2" a cell shows when it has more events than lanes. A template
       # rather than a sentence: the controller re-renders it for a month the
       # server never drew.

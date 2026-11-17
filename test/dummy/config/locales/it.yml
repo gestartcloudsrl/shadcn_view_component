@@ -24,6 +24,7 @@ it:
       agenda_label: Eventi del giorno selezionato
       drawer_hint: Premi di nuovo per vedere gli eventi.
       agenda_back: Torna al giorno
+      legend: "Legenda"
       agenda_format: "%A %-d %B"
       day_label: "%{date}, %{events}"
       event_count:

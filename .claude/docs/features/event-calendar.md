@@ -70,6 +70,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `drawer_direction:` | `:bottom` | `agenda: :drawer` only: the side the drawer comes from, `:bottom`, `:right`, `:left` or `:top`; anything else is `:bottom` |
 | `agenda_detail:` | `nil` | `agenda: :drawer` only: a Hash `{ frame:, attributes: }` that opens a row's link in a Turbo Frame inside the drawer, in place of the list; anything that is not a Hash is off ([below](#an-events-detail-in-the-drawer)) |
 | `agenda_footer:` | `nil` | `agenda: :drawer` only: given a `Date`, a component or a string (escaped unless `html_safe`) for the foot of that day's list, or `nil` for none; drawn in the Drawer's footer, outside the scroll, hidden while a detail is shown; anything that does not respond to `call` is off ([below](#a-footer-under-the-days-list)) |
+| `legend:` | `nil` | what the colours mean: a list of `{ color:, label: }`, `color:` taking what an event's does; a button in the nav opens a dialog listing them, and none (or none with a label) draws nothing ([below](#the-legend)) |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
@@ -463,6 +464,47 @@ desktop, but the page's breakpoints still read the window. The system spec
 measures every reading at 360, 390 and 412 through device emulation, not
 `resize_to`, because headless Chrome will not make a window narrower than
 500px. At 500 the day's nav fitted, so the overflow got past the suite.
+
+### The legend
+
+Asked for by Gestart (2026-11-17), to take the colour key out from under the
+calendar.
+
+**The option.** `legend: [{ color:, label: }, …]`. `color:` takes what an
+event's does — a palette name or a host's custom property — through the same
+rule, `Event.color_for`, so an unknown name is `default_color:` and a swatch and
+an event given the same value are drawn in the same colour. String keys, as a
+YAML file gives, are taken too. An entry whose label is blank is left out; an
+empty list, `nil`, or nothing left draws no button and no markup.
+
+**The button.** An `icon-sm` outline button with lucide's
+`circle-question-mark` (lucide-static 1.31.0, the version `vendor/lucide`
+records), named «Legend» by an `sr-only` span the way the panel's trigger is
+(`event_calendar.legend`; the dummy app carries «Legenda»). It sits after the
+panel and the preferences, before Today, in every reading's nav.
+
+**The dialog.** The gem's Dialog, so Escape, the focus return to the button and
+its own layer in the dismiss stack are the Dialog's. Titled «Legend», no
+description, `sm:max-w-sm`. Each entry is upstream's chart legend item and
+square (`flex items-center gap-1.5`, `h-2 w-2 shrink-0 rounded-[2px]`,
+`vendor/shadcn/ui/chart.tsx`), the square in `--event-color` and
+`aria-hidden`, since the label is what it means.
+
+**On a phone.** At 390px, measured on the month, the month and the week as
+rows, the week's timeline and the day, the nav stays on one line and nothing
+scrolls sideways. In the day the extra 32px moves the nav under the title,
+which the month and the week as rows already do without it. The toolbar specs
+measure every reading with a legend at 360, 390 and 412, and that the nav is one
+line at 390.
+
+**What the specs cover.** The component specs: the markup, the colours, the
+string keys, the fallback, the blank labels, every reading's nav, nothing for an
+empty list. `spec/system/event_calendar_spec.rb` ("the legend"): no button
+without the option; the entries, the title and each swatch's computed colour
+against its token; Escape with the focus back on the button; the legend and the
+agenda's drawer each closed by its own Escape without touching the other. The
+`legend` preview is under the snapshot and the at-rest audit, and
+`accessibility_spec` audits it with the dialog open in both palettes.
 
 ### The day's timeline on a phone
 

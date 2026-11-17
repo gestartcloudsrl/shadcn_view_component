@@ -213,6 +213,21 @@ RSpec.describe "Accessibility", :js do
     end
   end
 
+  # `legend:`: the nav's icon button and the dialog it opens, the whole page
+  # with the dialog open, with the day exemption above.
+  context "with the event calendar's legend open" do
+    it "has no violations", :aggregate_failures do
+      visit_preview(:event_calendar, :legend)
+      wait_for_stimulus
+      find("[data-slot=event-calendar-nav] [data-slot=dialog-trigger]", text: "Legend").click
+      expect(page).to have_css("[data-slot=dialog-content][data-state=open]")
+
+      audit(skipping: label_in_name)
+      in_dark_mode { audit(skipping: label_in_name) }
+      audit_label_in_name(excluding: label_in_name_exemptions["event_calendar"])
+    end
+  end
+
   context "with the alert dialog open" do
     it "has no violations" do
       visit_preview(:alert_dialog)

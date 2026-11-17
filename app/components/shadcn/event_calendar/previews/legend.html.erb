@@ -1,0 +1,16 @@
+<%# A month whose colours mean something, and the legend that says what. See
+    `Preview#legend`. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 5),
+      legend: [
+        { color: :blue, label: "Scheduled, crew assigned" },
+        { color: :green, label: "Done" },
+        { color: "--color-amber-500", label: "Waiting for parts" }
+      ],
+      events: [
+        { title: "Kitchen survey", starts_at: Time.zone.local(2026, 8, 5, 9), color: :blue },
+        { title: "Boiler service", starts_at: Time.zone.local(2026, 8, 5, 11), color: :green },
+        { title: "Roof check", starts_at: Time.zone.local(2026, 8, 6, 10), color: "--color-amber-500" }
+      ]
+    )) %>

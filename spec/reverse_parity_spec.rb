@@ -501,6 +501,11 @@ RSpec.describe "reverse parity" do
     ],
     "event-calendar-agenda-item" => %w[data-[picked]:bg-accent data-[picked]:ring-2 data-[picked]:ring-ring],
     "event-calendar-event-dot" => %w[bg-(--event-color) size-1.5],
+    # `legend:`'s swatch is upstream's chart legend square (`h-2 w-2 shrink-0
+    # rounded-[2px]`, chart.tsx), whose colour is an inline `backgroundColor`;
+    # here it is the event's colour, set by the same `data-color` rules or the
+    # host's property, so a swatch and an event given one value match.
+    "event-calendar-legend-swatch" => %w[bg-(--event-color)],
     # Under `agenda: :drawer`, upstream's drawer-demo column (`mx-auto w-full
     # max-w-sm`, examples/drawer-demo.tsx — not vendored) one step wider,
     # because a row carries a time and a subtitle. `AGENDA_DRAWER_CLASS`.

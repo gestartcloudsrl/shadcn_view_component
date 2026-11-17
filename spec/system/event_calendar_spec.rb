@@ -1255,7 +1255,12 @@ RSpec.describe "Event calendar", :js do
       "the week's timeline" => "density?period=weekly&view=hours",
       "the week as rows" => "density?period=weekly&view=rows",
       "the day" => "density?period=daily",
-      "the day, in Italian" => "phone"
+      "the day, in Italian" => "phone",
+      "the month with a legend" => "density?legend=true",
+      "the month as rows with a legend" => "density?period=monthly&view=rows&legend=true",
+      "the week as rows with a legend" => "density?period=weekly&view=rows&legend=true",
+      "the week's timeline with a legend" => "density?period=weekly&view=hours&legend=true",
+      "the day with a legend" => "density?period=daily&legend=true"
     }.each do |name, path|
       [ 360, 390, 412 ].each do |width|
         it "keeps #{name}'s toolbar inside #{width}px", :aggregate_failures do
@@ -1267,6 +1272,25 @@ RSpec.describe "Event calendar", :js do
             expect(measured["page"].first).to eq(width)
             measured.each { |part, (scroll, client)| expect(scroll).to eq(client), "#{part}: #{scroll}/#{client}" }
           end
+        end
+      end
+    end
+
+    # The legend's button is one more 32px control. Measured at 390px, it
+    # keeps every reading's nav on a single line; in the day it moves the nav
+    # under the title, where the month and the week as rows already have it.
+    %w[monthly weekly daily].each do |period|
+      it "keeps the #{period} nav on one line with the legend's button at 390px" do
+        at_width(390) do
+          visit "/lookbook/preview/shadcn/event_calendar/density?period=#{period}&view=rows&legend=true"
+          wait_for_stimulus
+
+          lines = page.evaluate_script(<<~JS)
+            new Set(Array.from(document.querySelector("[data-slot=event-calendar-nav]").children)
+              .filter((control) => control.getClientRects().length)
+              .map((control) => Math.round(control.getBoundingClientRect().top))).size
+          JS
+          expect(lines).to eq(1)
         end
       end
     end
@@ -2789,6 +2813,74 @@ RSpec.describe "Event calendar", :js do
       expect(find("#{pane} turbo-frame#agenda-detail")).to have_css("h2", text: "New job on 2026-08-06")
       expect(page).to have_no_css("#{drawer} [data-shadcn--event-calendar-target=agendaFooter]", visible: :visible)
       expect(page.evaluate_script("document.activeElement?.textContent?.trim()")).to eq("Back to the day")
+    end
+  end
+
+  # `legend:`: what the colours mean, behind a button in the nav.
+  describe "the legend" do
+    let(:dialog) { "[data-slot=dialog-content]:has([data-slot=event-calendar-legend-list])" }
+
+    def legend_button = find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dialog-trigger]", text: "Legend")
+
+    def open_legend(query = "")
+      visit "/lookbook/preview/shadcn/event_calendar/density?legend=true#{query}"
+      wait_for_stimulus
+      legend_button.click
+      expect(page).to have_css(dialog, visible: :visible)
+    end
+
+    it "is not there without legend:" do
+      visit "/lookbook/preview/shadcn/event_calendar/density"
+      wait_for_stimulus
+
+      expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-legend-list]", visible: :all)
+    end
+
+    it "lists each entry in its colour, under the title Legend", :aggregate_failures do
+      open_legend
+
+      expect(find(dialog).native.accessible_name).to eq("Legend")
+      expect(all("#{dialog} [data-slot=event-calendar-legend-item]").map(&:text))
+        .to eq([ "Scheduled, crew assigned", "Done", "Waiting for parts", "Cancelled by the client",
+                 "A colour of the host's own" ])
+
+      colors = page.evaluate_script(<<~JS)
+        (() => {
+          const probe = document.createElement("div")
+          document.body.append(probe)
+          const token = (name) => { probe.style.backgroundColor = `var(${name})`; return getComputedStyle(probe).backgroundColor }
+          const swatches = [ ...document.querySelectorAll("[data-slot=event-calendar-legend-swatch]") ]
+          return { swatches: swatches.map((swatch) => getComputedStyle(swatch).backgroundColor),
+                   tokens: [ "--color-blue-500", "--color-emerald-500", "--color-amber-500", "--color-rose-500",
+                             "--color-violet-500" ].map(token) }
+        })()
+      JS
+      expect(colors["swatches"]).to eq(colors["tokens"])
+    end
+
+    it "closes on Escape with the focus back on its button", :aggregate_failures do
+      open_legend
+
+      page.send_keys(:escape)
+
+      expect(page).to have_no_css(dialog, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.textContent.trim()")).to eq("Legend")
+    end
+
+    # Two dialogs of the calendar's, each a layer of its own: Escape closes the
+    # one that is open and leaves the other alone, either way round.
+    it "leaves the agenda's drawer alone, and the drawer leaves it alone", :aggregate_failures do
+      open_legend("&turbo=link&agenda=drawer&month=2026-08-01&day=2026-08-20")
+      page.send_keys(:escape)
+      expect(page).to have_no_css(dialog, visible: :visible)
+      expect(page).to have_no_css("[data-slot=drawer-content]", visible: :visible)
+
+      day("2026-08-20").click
+      expect(page).to have_css("[data-slot=drawer-content]", visible: :visible)
+      expect(page).to have_no_css(dialog, visible: :visible)
+      page.send_keys(:escape)
+      expect(page).to have_no_css("[data-slot=drawer-content]", visible: :visible)
+      expect(page).to have_no_css(dialog, visible: :visible)
     end
   end
 end

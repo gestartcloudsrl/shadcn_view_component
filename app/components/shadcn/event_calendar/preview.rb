@@ -3,6 +3,17 @@
 module Shadcn
   module EventCalendar
     class Preview < ApplicationViewComponentPreview
+      # What the colours mean, for `density`'s `legend`: four of the palette's
+      # names the generator paints with under `colored`, and a host's own
+      # custom property, labelled as a host would.
+      LEGEND = [
+        { color: :blue, label: "Scheduled, crew assigned" },
+        { color: :green, label: "Done" },
+        { color: :amber, label: "Waiting for parts" },
+        { color: :rose, label: "Cancelled by the client" },
+        { color: "--color-violet-500", label: "A colour of the host's own" }
+      ].freeze
+
       # A month with something in it — the arrangement FullCalendar's own demo
       # uses, because it is the one that exercises the awkward cases: a bar that
       # crosses a week boundary, two events on the same day at different times,
@@ -42,6 +53,14 @@ module Shadcn
       # time, by event above and by assignee below. The other of the week's
       # two views, asked for with `arrangement: :rows`.
       def weekly_rows
+        render_with_template
+      end
+
+      # What the colours mean, behind the `?` in the nav: `legend:`, one entry a
+      # colour, a palette name or a host's custom property as an event takes.
+      # A template so the snapshot and the accessibility specs see it; the
+      # gallery's `density` has the same as its `legend` toggle.
+      def legend
         render_with_template
       end
 
@@ -257,11 +276,12 @@ module Shadcn
       # @param restore toggle
       # @param id text
       # @param broken_url toggle
+      # @param legend toggle
       def density(month: "2026-08-01", period: "monthly", view: "grid", most: 30, all_day: 1,
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "",
                   preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
-                  counts: true, agenda: "below", day: nil, drawer: "bottom")
+                  counts: true, agenda: "below", day: nil, drawer: "bottom", legend: false)
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -273,6 +293,7 @@ module Shadcn
                     turbo:, shapes:, preferences:, id:, max_chips:, day:,
                     agenda: (agenda unless agenda.to_s == "below"),
                     drawer: (drawer unless drawer.to_s == "bottom"),
+                    legend: (true if cast.cast(legend)),
                     # Only when off, so the default links stay the ones they were.
                     counts: (false unless cast.cast(counts)),
                     views: views.presence }.merge(changed).compact
@@ -309,6 +330,7 @@ module Shadcn
         daily = period.to_s == "daily"
         weekly = period.to_s == "weekly"
         common = { month: shown, events:, counts: cast.cast(counts),
+                   legend: (LEGEND if cast.cast(legend)),
                    view_url: lambda { |name|
                      case name.to_s
                      when "daily", "weekly", "monthly" then here.call(period: name)

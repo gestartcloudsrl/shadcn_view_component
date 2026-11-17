@@ -918,6 +918,70 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  describe "legend:" do
+    def calendar_with(legend, **options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), legend:, **options))
+      Nokogiri::HTML5.fragment(rendered_content.to_s)
+    end
+
+    def items(doc) = doc.css("[data-slot=event-calendar-legend-item]")
+
+    let(:legend) do
+      [ { color: "--calendar-programmed", label: "Assigned and scheduled" },
+        { color: :blue, label: "Waiting" },
+        { "color" => "amber", "label" => "From a YAML file" } ]
+    end
+
+    it "puts an icon button in the nav that opens a dialog titled Legend", :aggregate_failures do
+      doc = calendar_with(legend)
+      nav = doc.at_css("[data-slot=event-calendar-nav]")
+      trigger = nav.at_css("[data-slot=dialog-trigger]")
+
+      expect(trigger.at_css("svg.lucide-circle-question-mark")).not_to be_nil
+      expect(trigger.at_css(".sr-only").text).to eq("Legend")
+      expect(trigger.parent["data-slot"]).to eq("dialog")
+      expect(trigger.parent.parent).to eq(nav)
+      expect(doc.at_css("[data-slot=dialog-title]").text).to eq("Legend")
+    end
+
+    it "lists each entry with its colour, the swatch hidden from assistive technology", :aggregate_failures do
+      rows = items(calendar_with(legend))
+
+      expect(rows.map(&:text).map(&:strip)).to eq([ "Assigned and scheduled", "Waiting", "From a YAML file" ])
+      swatches = rows.map { |row| row.at_css("[data-slot=event-calendar-legend-swatch]") }
+      expect(swatches.map { |swatch| swatch["aria-hidden"] }.uniq).to eq([ "true" ])
+      expect(swatches.map { |swatch| swatch["data-color"] }).to eq(%w[host blue amber])
+      expect(swatches.first["style"]).to eq("--event-color:var(--calendar-programmed);")
+      expect(swatches.drop(1).map { |swatch| swatch["style"] }).to eq([ nil, nil ])
+    end
+
+    it "takes an unknown colour as the calendar's default, as an event does" do
+      swatch = calendar_with([ { color: :teal, label: "Odd" } ], default_color: :rose)
+               .at_css("[data-slot=event-calendar-legend-swatch]")
+
+      expect(swatch["data-color"]).to eq("rose")
+    end
+
+    it "leaves out an entry with no label" do
+      expect(items(calendar_with(legend + [ { color: :blue, label: " " }, { color: :blue } ])).size).to eq(3)
+    end
+
+    it "is in every reading's nav", :aggregate_failures do
+      { auto: {}, workload: {}, hours: {}, weekly: { arrangement: :rows }, daily: {} }.each do |reading, extra|
+        doc = calendar_with(legend, reading:, **extra)
+        expect(doc.css("[data-slot=event-calendar-nav] [data-slot=event-calendar-legend-list]").size).to eq(1), reading.to_s
+      end
+    end
+
+    [ nil, [], [ { color: :blue, label: "" } ] ].each do |empty|
+      it "draws nothing for #{empty.inspect}" do
+        doc = calendar_with(empty)
+
+        expect([ doc.at_css("[data-slot=event-calendar-legend-list]"), doc.at_css("[data-slot=dialog]") ]).to eq([ nil, nil ])
+      end
+    end
+  end
+
   describe "#max_events" do
     it "clamps to what the lanes and the cell height can express", :aggregate_failures do
       expect(described_class.new(max_events: 99).max_events).to eq(6)
