@@ -2572,6 +2572,109 @@ RSpec.describe "Event calendar", :js do
         expect(last_bottom).to be <= 0
       end
     end
+
+    # `agenda_footer:`, the preview's "Add job": a link at the foot of the list
+    # naming the detail's frame, so it opens there as a row does.
+    describe "with a footer" do
+      def footer = "#{drawer} [data-shadcn--event-calendar-target=agendaFooter]"
+
+      def add_job = find("#{footer} a", text: "Add job")
+
+      it "shows it under the list and opens it in the detail", :aggregate_failures do
+        open_drawer
+        expect(add_job[:href]).to end_with("/calendar/jobs/new?date=2026-08-05")
+
+        add_job.click
+
+        expect(page).to have_css(pane, visible: :visible)
+        expect(find(frame)).to have_css("h2", text: "New job on 2026-08-05")
+        expect(page).to have_no_css(footer, visible: :visible)
+        expect(focused_text).to eq("Back to the day")
+      end
+
+      it "comes back with the list, the focus on it, on the button and on Escape", :aggregate_failures do
+        open_drawer
+        add_job.click
+        find(frame).assert_text("New job")
+
+        find("#{pane} [data-slot=event-calendar-agenda-back]").click
+        expect(page).to have_css(footer, visible: :visible)
+        expect(focused_text).to eq("Add job")
+
+        add_job.click
+        find(frame).assert_text("New job")
+        page.send_keys(:escape)
+        expect(page).to have_css(footer, visible: :visible)
+        expect(focused_text).to eq("Add job")
+      end
+
+      # The month is drawn in the browser, so the server drew the footer once:
+      # the new day's comes from its template.
+      it "follows a day selected in the browser" do
+        open_drawer
+        page.send_keys(:escape)
+        expect(page).to have_no_css(drawer, visible: :visible)
+
+        day("2026-08-06").click
+        day("2026-08-06").click
+        expect(page).to have_css(drawer, visible: :visible)
+
+        expect(add_job[:href]).to end_with("/calendar/jobs/new?date=2026-08-06")
+      end
+
+      # A month drawn here, from the nav, was seen by the server only where the
+      # first grid held its days: September's first week was August's last row,
+      # so it has its footer; October has none, and the footer hides rather
+      # than carry another day's.
+      it "hides on a day the server never drew", :aggregate_failures do
+        visit "/lookbook/preview/shadcn/event_calendar/agenda_drawer_detail"
+        wait_for_stimulus
+        nav_button("Go to the Next Month").click
+        expect(page).to have_css("#{calendar} [data-day='2026-09-01'][data-selected]")
+        day("2026-09-01").click
+        expect(add_job[:href]).to end_with("/calendar/jobs/new?date=2026-09-01")
+        page.send_keys(:escape)
+        expect(page).to have_no_css(drawer, visible: :visible)
+
+        nav_button("Go to the Next Month").click
+        expect(page).to have_css("#{calendar} [data-day='2026-10-01'][data-selected]")
+        day("2026-10-01").click
+        expect(page).to have_css(drawer, visible: :visible)
+
+        expect(page).to have_no_css(footer, visible: :visible)
+        expect(page).to have_no_css("#{footer} > a", visible: :all)
+      end
+
+      # The 6th is longer than the panel: the list scrolls and the footer,
+      # outside it, stays at the foot of the panel.
+      %w[right bottom].each do |direction|
+        it "stays in view while a long list scrolls, from the #{direction}", :aggregate_failures do
+          visit "/lookbook/preview/shadcn/event_calendar/agenda_drawer_detail?direction=#{direction}"
+          wait_for_stimulus
+          day("2026-08-06").click
+          day("2026-08-06").click
+          expect(page).to have_css(drawer, visible: :visible)
+
+          scrolled, gap, inside = page.evaluate_script(<<~JS)
+            (() => {
+              const panel = document.querySelector("#{drawer}")
+              const list = panel.querySelector("[data-slot=event-calendar-agenda]")
+              const foot = panel.querySelector("[data-shadcn--event-calendar-target=agendaFooter]")
+              list.scrollTop = list.scrollHeight
+              const panelBox = panel.getBoundingClientRect()
+              const footBox = foot.getBoundingClientRect()
+              return [ list.scrollTop > 0,
+                       Math.round(footBox.top - list.getBoundingClientRect().bottom),
+                       footBox.bottom <= Math.ceil(panelBox.bottom) && footBox.bottom <= window.innerHeight ]
+            })()
+          JS
+
+          expect(scrolled).to be(true)
+          expect(gap).to be >= 0
+          expect(inside).to be(true)
+        end
+      end
+    end
   end
 
   # The week as rows, drawn on the server, so its days are links: the first
@@ -2670,6 +2773,22 @@ RSpec.describe "Event calendar", :js do
       day("2026-08-05").click
       expect(page).to have_css(list, visible: :visible)
       expect(page).to have_no_css(pane, visible: :visible)
+    end
+
+    it "carries the footer of the day the server selected, and opens it in the detail", :aggregate_failures do
+      day("2026-08-06").click
+      expect(page).to have_current_path(/day=2026-08-06/)
+      wait_for_stimulus
+      day("2026-08-06").click
+      expect(page).to have_css(drawer, visible: :visible)
+
+      link = find("#{drawer} [data-shadcn--event-calendar-target=agendaFooter] a", text: "Add job")
+      expect(link[:href]).to end_with("/calendar/jobs/new?date=2026-08-06")
+      link.click
+
+      expect(find("#{pane} turbo-frame#agenda-detail")).to have_css("h2", text: "New job on 2026-08-06")
+      expect(page).to have_no_css("#{drawer} [data-shadcn--event-calendar-target=agendaFooter]", visible: :visible)
+      expect(page.evaluate_script("document.activeElement?.textContent?.trim()")).to eq("Back to the day")
     end
   end
 end

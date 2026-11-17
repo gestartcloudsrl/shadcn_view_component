@@ -1,6 +1,6 @@
-<%# The week as rows, its agenda in a drawer with a row's detail. The cells are
-    links back to this preview with the day chosen. See
-    `Preview#agenda_drawer_week`. %>
+<%# The week as rows, its agenda in a drawer with a row's detail and "Add job"
+    at its foot. The cells are links back to this preview with the day chosen.
+    See `Preview#agenda_drawer_week`. %>
 <%= render(Shadcn::EventCalendar::Component.new(
       reading: :weekly,
       arrangement: :rows,
@@ -9,6 +9,10 @@
       agenda: :drawer,
       drawer_direction: :right,
       agenda_detail: { frame: "agenda-detail", attributes: { target: "_top" } },
+      agenda_footer: lambda { |day|
+        Shadcn::Button::Component.new(as: :a, class: "w-full", href: "/calendar/jobs/new?date=#{day.iso8601}",
+                                      data: { turbo_frame: "agenda-detail" }).with_content("Add job")
+      },
       day_url: ->(day) { "/lookbook/preview/shadcn/event_calendar/agenda_drawer_week?day=#{day.iso8601}" },
       events: [
         { title: "Kitchen survey", starts_at: Time.zone.local(2026, 8, 5, 9), url: "/calendar/events/1" },

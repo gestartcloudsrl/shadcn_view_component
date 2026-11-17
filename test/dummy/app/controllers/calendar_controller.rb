@@ -15,6 +15,12 @@ class CalendarController < ApplicationController
     @id = params[:id]
   end
 
+  # The form an `agenda_footer:` link opens. Only the date is read: the page is
+  # here to answer in the drawer's frame, not to create anything.
+  def new_job
+    @date = Date.parse(params[:date])
+  end
+
   # What a host does with `preferences: :host`, kept to its shape: take the
   # fields the dialog sent, keep them, and send the person back with a
   # `303`. A host keeps them on its user and redirects to its calendar; this

@@ -19,6 +19,10 @@ Rails.application.routes.draw do
   # One event, answering the `<turbo-frame id="event">` an agenda row points at.
   get "calendar/events/:id" => "calendar#event", as: :calendar_event
 
+  # What an `agenda_footer:` link points at: a form for a new job on a day,
+  # answering in the frame that asked for it, the drawer's detail.
+  get "calendar/jobs/new" => "calendar#new_job", as: :calendar_new_job
+
   # The host half of the calendar's `preferences: :host`: the dialog's form is
   # posted here, kept in the session and shown back, which is all a spec needs
   # to read what arrived.

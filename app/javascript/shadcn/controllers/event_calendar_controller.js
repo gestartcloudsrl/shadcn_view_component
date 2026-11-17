@@ -28,7 +28,7 @@ export default class extends Controller {
   static targets = [ "title", "weeks", "agendaDate", "agendaCount", "agendaList", "agendaEmpty",
                      "prototypes", "groupLabel", "announcer", "preferencesDialog", "preferencesForm",
                      "preferencesLimit", "agendaDrawer", "selectionAnnouncer", "agendaDetail", "agendaFrame",
-                     "agendaBack" ]
+                     "agendaBack", "agendaFooter" ]
 
   static values = {
     // The saved-view preferences, drawn by the server when a host asks for
@@ -599,10 +599,16 @@ export default class extends Controller {
   // link Turbo itself leaves to the browser: one with `download`, or a
   // `target` other than `_self` (turbo.js, `findLinkFromClickTarget`), where
   // the frame would never load and the drawer would be left on an empty pane.
+  //
+  // A row carries the action itself. The footer carries it for the links the
+  // host put in it, so there the link is the one the click landed in.
   openDetail(event) {
     if (!this.detailFrameValue || !this.hasAgendaDetailTarget) return
 
-    const link = event.currentTarget
+    const holder = event.currentTarget
+    const link = holder.matches("a[href]") ? holder : event.target.closest?.("a[href]")
+    if (!link || !holder.contains(link)) return
+
     const plain = event.button === 0 && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
     const turbos = !link.hasAttribute("download") && (!link.target || link.target === "_self")
     if (!plain || !turbos || link.closest("[data-turbo='false']") ||
@@ -612,6 +618,7 @@ export default class extends Controller {
     this.emptyDetail()
     this.agendaPane.hidden = true
     this.agendaDetailTarget.hidden = false
+    this.fillFooter()
     // The row that had the focus is hidden now, and the frame's content is the
     // host's and may not have arrived: the back button is the one element in
     // the pane the gem owns.
@@ -647,12 +654,39 @@ export default class extends Controller {
   // focus: what a close or a new day does, so the next opening never shows the
   // last detail and a stale one cannot flash before Turbo answers.
   resetDetail() {
-    if (!this.hasAgendaDetailTarget) return
+    if (this.hasAgendaDetailTarget) {
+      this.agendaDetailTarget.hidden = true
+      this.emptyDetail()
+      if (this.agendaPane) this.agendaPane.hidden = false
+      this.detailOpener = null
+    }
+    this.fillFooter()
+  }
 
-    this.agendaDetailTarget.hidden = true
-    this.emptyDetail()
-    if (this.agendaPane) this.agendaPane.hidden = false
-    this.detailOpener = null
+  // `agenda_footer:`: the selected day's, copied from the template the server
+  // drew for it, and shown only beside the list. A day with no template — the
+  // host's lambda answered `nil`, or the month was drawn here and the server
+  // never saw it — hides the footer. Copied only when the day changes, so a
+  // link that opened the detail is still the one the focus goes back to.
+  // Called from `resetDetail`, which every opening of the drawer goes through
+  // (`openDay`), and from `openDetail`: the footer is only ever seen open.
+  fillFooter() {
+    if (!this.hasAgendaFooterTarget) return
+
+    const footer = this.agendaFooterTarget
+    const day = this.selectedValue
+    if (footer.dataset.footerDay !== day) {
+      const template = [ ...footer.children ].find((child) => child.tagName === "TEMPLATE" && child.dataset.footerDay === day)
+
+      for (const node of [ ...footer.childNodes ]) if (node.nodeName !== "TEMPLATE") node.remove()
+      if (template) {
+        footer.prepend(template.content.cloneNode(true))
+        footer.dataset.footerDay = day
+      } else {
+        delete footer.dataset.footerDay
+      }
+    }
+    footer.hidden = this.detailShown || !footer.dataset.footerDay
   }
 
   emptyDetail() {

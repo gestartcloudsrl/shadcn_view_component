@@ -69,6 +69,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `drawer_attributes:` | `{}` | `agenda: :drawer` only: merged onto the drawer's panel ([below](#the-agenda-in-a-drawer)) |
 | `drawer_direction:` | `:bottom` | `agenda: :drawer` only: the side the drawer comes from, `:bottom`, `:right`, `:left` or `:top`; anything else is `:bottom` |
 | `agenda_detail:` | `nil` | `agenda: :drawer` only: a Hash `{ frame:, attributes: }` that opens a row's link in a Turbo Frame inside the drawer, in place of the list; anything that is not a Hash is off ([below](#an-events-detail-in-the-drawer)) |
+| `agenda_footer:` | `nil` | `agenda: :drawer` only: given a `Date`, a component or a string (escaped unless `html_safe`) for the foot of that day's list, or `nil` for none; drawn in the Drawer's footer, outside the scroll, hidden while a detail is shown; anything that does not respond to `call` is off ([below](#a-footer-under-the-days-list)) |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
@@ -1579,6 +1580,59 @@ covered: a touch device (the pane's scroll against the drawer's drag, as for the
 list); a Turbo morph while the drawer is open, unverified like the list's;
 `accessibility_spec` audits the `agenda_drawer_detail` preview at rest only, not
 with the detail shown.
+
+### A footer under the day's list
+
+Asked for by Gestart (2026-11-17), for an «Aggiungi intervento» that opens the
+creation form in the detail.
+
+**The option.** `agenda_footer: ->(day) { … }`, a lambda as `day_url:` is,
+because what it draws depends on the day. It answers a component (rendered) or
+a string (escaped unless `html_safe`); `nil` for a day means no footer on that
+day, and `agenda_footer: nil`, or anything that does not respond to `call`, means
+none at all and no markup. A host that cannot create on any day passes `nil`
+rather than a lambda answering it 42 times.
+
+**Where it is.** In the Drawer's own `DrawerFooter` (`mt-auto flex flex-col
+gap-2 p-4`, `vendor/shadcn/ui/drawer.tsx`), the last child of the drawer's
+content, after the list and the detail pane, in their column (`mx-auto w-full
+max-w-md`, `AGENDA_FOOTER_CLASS`). The list is the part that scrolls, so the
+footer stays at the foot of the panel without `sticky`. It is hidden while a
+row's detail is shown and comes back with the list.
+
+**Into the detail.** The footer's links are the host's markup, so the gem does
+not rewrite them: `openDetail` is on the footer, and takes the link the click
+landed in. A link the host gives `data-turbo-frame` equal to the detail's frame
+then goes the way a row does — the same rules (`turbo: false`, `download`, a
+`target`, a modified click) — with the focus on «Back to the day», and back
+on the link when the list returns. The footer is copied only when the day
+changes, which is what keeps that link the same element.
+
+**Which day.** The server calls the lambda for every day the grid holds (35 or
+42; the week's grid is the month it sits in, so the same), the selected day's
+drawn in place and each in a `<template data-footer-day>`. `fillFooter` in the
+controller copies the selected day's in whenever the drawer opens or a day is
+selected (`resetDetail`), because in the browser the selection moves without the
+server — a button cell's press, or a day swapped in under `agenda_as:
+:"turbo-frame"`, where the grid is not drawn again. One path for every host: a
+host whose server redraws the calendar on every day (Gestart's, under a
+`turbo-frame`) would need only the selected day, and the templates cost it the
+other 41 calls. `data-footer-day` and never `data-day`, which is what finds a
+cell. A day with no template — its lambda answered `nil`, or a month the browser
+drew from the nav that the server's grid did not hold — hides the footer rather
+than show another day's; a host with `month_url:` never meets the second case.
+
+**What the specs cover.** The component specs: the markup, the templates, the
+`nil`s, the escaping. `spec/system/event_calendar_spec.rb`, on the month
+(`agenda_drawer_detail`): under the list, opening in the detail with the footer
+hidden and the focus on the way back, the return by the button and by Escape
+with the focus on the link, a day selected in the browser, a day the server's
+grid held and one it did not, and the footer at the foot of the panel while a
+long list is scrolled to its end, from the right and from the bottom. On the week
+(`agenda_drawer_week`): the selected day's footer after the server selected it,
+opening in the detail. `accessibility_spec` audits the week with the drawer open,
+footer included. Not covered: a touch device, and a Turbo morph with the drawer
+open.
 
 ## Lazy loading, when a host needs it
 

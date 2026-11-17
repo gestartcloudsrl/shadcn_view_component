@@ -508,6 +508,11 @@ RSpec.describe "reverse parity" do
     # The detail pane under `agenda_detail:` takes the list's place, so it
     # takes the list's column: the same `AGENDA_DRAWER_CLASS`.
     "event-calendar-agenda-detail" => %w[max-w-md],
+    # The Drawer's own footer, drawn by the event calendar under
+    # `agenda_footer:` in the list's column (`AGENDA_FOOTER_CLASS`), so its
+    # button lines up with the rows above it rather than running the width of
+    # a bottom drawer. No Drawer of the gem's own adds it.
+    "drawer-footer" => %w[max-w-md],
     "event-calendar-agenda-title" => %w[pb-1.5 gap-x-2 items-baseline],
     "event-calendar-agenda-row" => %w[focus-visible:outline-none],
     # The row's faces back on upstream's `bg-muted`, and inverted to

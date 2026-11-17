@@ -1,0 +1,5 @@
+<%# What an `agenda_footer:` link answers with, in the frame Turbo asked for:
+    the drawer's detail frame, or a page of its own without Turbo. %>
+<turbo-frame id="<%= request.headers["Turbo-Frame"] || "new-job" %>" class="flex flex-col gap-3 p-4">
+  <h2 class="pe-8 text-base font-semibold">New job on <%= @date.iso8601 %></h2>
+</turbo-frame>

@@ -1,12 +1,16 @@
 <%# A row's detail inside the agenda drawer. The 5th is selected; its first two
-    rows open in the frame, the third does not. See
-    `Preview#agenda_drawer_detail`. %>
+    rows open in the frame, the third does not; "Add job" at the foot opens a
+    form there too. See `Preview#agenda_drawer_detail`. %>
 <%= render(Shadcn::EventCalendar::Component.new(
       month: Date.new(2026, 8, 1),
       selected: Date.new(2026, 8, 5),
       agenda: :drawer,
       drawer_direction: local_assigns.fetch(:direction, :right),
       agenda_detail: { frame: "agenda-detail", attributes: { target: "_top" } },
+      agenda_footer: lambda { |day|
+        Shadcn::Button::Component.new(as: :a, class: "w-full", href: "/calendar/jobs/new?date=#{day.iso8601}",
+                                      data: { turbo_frame: "agenda-detail" }).with_content("Add job")
+      },
       day_url: (->(day) { "/calendar/days/#{day.iso8601}" } if local_assigns.fetch(:day_links, false)),
       events: [
         { title: "Kitchen survey", starts_at: Time.zone.local(2026, 8, 5, 9), url: "/calendar/events/1" },

@@ -389,6 +389,9 @@ module Shadcn
       # side) and nothing in it scrolled: measured on a day of nineteen rows,
       # the last ones sat below the viewport with no way to reach them.
       AGENDA_DRAWER_CLASS = "mx-auto w-full max-w-md min-h-0 overflow-y-auto"
+      # `agenda_footer:` in the same column, over the Drawer footer's own
+      # `mt-auto flex flex-col gap-2 p-4`. It does not scroll: the list does.
+      AGENDA_FOOTER_CLASS = "mx-auto w-full max-w-md"
       AGENDA_TITLE_CLASS = "flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium"
       # How many, beside the date. Cheap at three events and the difference
       # between a list and a wall at sixty — a day this deep needs to say how
@@ -466,7 +469,7 @@ module Shadcn
 
       attr_reader :movable, :month, :selected, :max_events, :schedule, :reading, :month_url,
                   :day_url, :day_attributes, :agenda_as, :agenda_attributes, :drawer_attributes, :drawer_direction,
-                  :agenda_detail, :view_url, :shapes, :counts, :views
+                  :agenda_detail, :agenda_footer, :view_url, :shapes, :counts, :views
 
       # The readings that are not this class. `.new` hands over to them, so a
       # host writes `Component.new(reading: :hours)` and never names a subclass
@@ -549,6 +552,14 @@ module Shadcn
       #   goes — except `id`, which is always `frame:`. A row's own
       #   `data: { turbo_frame: }` beats the default. Anything that is not a
       #   Hash is the same as `nil`.
+      # @param agenda_footer [#call, nil] `agenda: :drawer` only: given a
+      #   `Date`, what goes at the foot of that day's list — a component, or a
+      #   string, escaped unless it is `html_safe` — or `nil` for none. Drawn in
+      #   the Drawer's footer, outside the part that scrolls, and hidden while a
+      #   row's detail is shown. A link in it naming the detail's frame opens in
+      #   the detail as a row does. Called for every day the grid holds, since
+      #   in the browser the selection moves without asking the server.
+      #   Anything that does not respond to `call` is the same as `nil`.
       # @param month_url [#call, nil] given a `Date`, the URL of that month.
       #   Present, the nav is links and the server draws the month; absent, the
       #   controller redraws it in the browser.
@@ -593,7 +604,7 @@ module Shadcn
                      week_starts_on: nil, reading: :auto,
                      default_color: :default, month_url: nil, day_url: nil,
                      day_attributes: {}, agenda: true, agenda_as: :div, agenda_attributes: {}, drawer_attributes: {},
-                     drawer_direction: :bottom, agenda_detail: nil,
+                     drawer_direction: :bottom, agenda_detail: nil, agenda_footer: nil,
                      view_url: nil, movable: false, shapes: SHAPES, views: nil, counts: true,
                      preferences: nil, preferences_url: nil, preferences_save_url: nil, restore: false,
                      **attributes)
@@ -613,6 +624,7 @@ module Shadcn
         # Indifferent, so the string keys a params hash or a YAML file carries
         # reach `frame:` too. Anything but a Hash is off rather than an error.
         @agenda_detail = agenda_detail.with_indifferent_access if agenda_detail.is_a?(Hash)
+        @agenda_footer = agenda_footer if agenda_footer.respond_to?(:call)
         # Checked against its list. Unchecked, `reading: :workLoad` off a params
         # hash fell through every branch and rendered a silent fourth thing: no
         # bars, no `data-labelled`, no rows.
@@ -1025,6 +1037,10 @@ module Shadcn
 
       def detail_frame = agenda_detail&.dig(:frame).presence&.to_s
 
+      # The foot of the drawer's list. Only in a drawer: under the grid the
+      # list does not scroll in a panel, and there is no detail to give way to.
+      def agenda_footer? = agenda_drawer? && agenda_footer.present?
+
       # `data-*` a reading needs on the root for its own rules to key off.
       def reading_attributes = {}
 
@@ -1338,7 +1354,7 @@ module Shadcn
                                      **(agenda_detail? ? escape : {}))) do |drawer|
           drawer.with_dialog_content(**drawer_attributes, direction: drawer_direction,
                                      "aria-labelledby": drawer_id("agenda-title")) do
-            safe_join([ agenda, (agenda_detail_pane if agenda_detail?) ].compact)
+            safe_join([ agenda, (agenda_detail_pane if agenda_detail?), (agenda_footer_part if agenda_footer?) ].compact)
           end
         end
       end
@@ -1352,6 +1368,40 @@ module Shadcn
           "data-slot": "event-calendar-agenda-detail", class: AGENDA_DRAWER_CLASS, hidden: true,
           "data-shadcn--event-calendar-target": "agendaDetail"
         )
+      end
+
+      # The Drawer's own footer, after the list and the pane, so it stays at the
+      # foot of the panel while the list scrolls above it, in the agenda's
+      # column. It holds the selected day's, and a `<template>` for every day
+      # the grid holds: a press selects a day in the browser, or a day swaps
+      # in under `agenda_as: :"turbo-frame"`, without the server drawing this
+      # again, and the controller copies that day's in. A day whose lambda
+      # answers `nil` has no template, and the footer is hidden on it.
+      #
+      # Its links are the host's markup, so the click is heard here, on the
+      # footer, and `openDetail` takes the link it landed in. The day is
+      # `data-footer-day`, never `data-day`, which is what finds a grid's cell.
+      def agenda_footer_part
+        contents = month.days.each_with_object({}) do |day, found|
+          content = agenda_footer_content(day)
+          found[day] = content if content.present?
+        end
+        current = contents[selected]
+
+        render(Drawer::Footer::Component.new(
+          class: AGENDA_FOOTER_CLASS, hidden: current.nil?, "data-footer-day": (selected.iso8601 if current),
+          "data-shadcn--event-calendar-target": "agendaFooter",
+          "data-action": "click->shadcn--event-calendar#openDetail"
+        )) do
+          safe_join([ current, *contents.map { |day, content| tag.template(content, "data-footer-day": day.iso8601) } ].compact)
+        end
+      end
+
+      def agenda_footer_content(day)
+        content = agenda_footer.call(day)
+        return if content.nil?
+
+        content.respond_to?(:render_in) ? render(content) : ERB::Util.html_escape(content.to_s)
       end
 
       def agenda_back

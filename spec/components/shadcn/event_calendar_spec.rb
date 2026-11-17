@@ -807,6 +807,96 @@ RSpec.describe Shadcn::EventCalendar::Component do
     end
   end
 
+  describe "agenda_footer:" do
+    subject(:calendar) do
+      described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda:,
+                          agenda_detail: { frame: "agenda-detail" }, agenda_footer:, events: [])
+    end
+
+    let(:agenda) { :drawer }
+    let(:agenda_footer) do
+      lambda do |day|
+        next if day == Date.new(2026, 8, 21)
+
+        Shadcn::Button::Component.new(as: :a, href: "/jobs/new?date=#{day.iso8601}",
+                                      data: { turbo_frame: "agenda-detail" }).with_content("Add job")
+      end
+    end
+
+    def doc = Nokogiri::HTML5.fragment(rendered_content.to_s)
+
+    def footer = doc.at_css("[data-shadcn--event-calendar-target=agendaFooter]")
+
+    def templates = footer.css("template")
+
+    before { render_inline(calendar) }
+
+    it "draws the drawer's footer last in its content, around the selected day's", :aggregate_failures do
+      expect(footer["data-slot"]).to eq("drawer-footer")
+      expect(footer.parent["data-slot"]).to eq("drawer-content")
+      expect(footer.parent.element_children.last["data-shadcn--event-calendar-target"]).to eq("agendaFooter")
+      expect(footer["hidden"]).to be_nil
+      expect(footer["data-footer-day"]).to eq("2026-08-20")
+      expect(footer.css("> a").map { |link| link["href"] }).to eq([ "/jobs/new?date=2026-08-20" ])
+      expect(footer["data-action"]).to eq("click->shadcn--event-calendar#openDetail")
+    end
+
+    it "keeps one template a day the grid shows, none for a day the lambda answers nil", :aggregate_failures do
+      days = painted.css("[data-slot=event-calendar-day]").map { |cell| cell["data-day"] } - [ "2026-08-21" ]
+
+      expect(templates.map { |template| template["data-footer-day"] }).to eq(days)
+      expect(doc.css("[data-day]").map { |node| node["data-slot"] }.uniq).to eq([ "event-calendar-day" ])
+      expect(templates.find { |template| template["data-footer-day"] == "2026-08-05" }.inner_html)
+        .to include("/jobs/new?date=2026-08-05")
+    end
+
+    context "when the selected day has no footer" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 21), agenda:, agenda_footer:,
+                            events: [])
+      end
+
+      it "is drawn hidden and empty" do
+        expect([ footer["hidden"].nil?, footer.css("> a").size ]).to eq([ false, 0 ])
+      end
+    end
+
+    it "takes a string the lambda returns, escaping it unless it is safe", :aggregate_failures do
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda:,
+                                        agenda_footer: ->(day) { "<b>#{day.day}</b>" }, events: []))
+      expect(footer.at_css("b")).to be_nil
+      expect(footer.text).to include("<b>20</b>")
+
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda:,
+                                        agenda_footer: ->(day) { "<b>#{day.day}</b>".html_safe }, events: []))
+      expect(footer.at_css("> b").text).to eq("20")
+    end
+
+    shared_examples "no footer" do
+      it "draws nothing" do
+        expect(doc.at_css("[data-shadcn--event-calendar-target=agendaFooter]")).to be_nil
+      end
+    end
+
+    context "when it is nil" do
+      let(:agenda_footer) { nil }
+
+      it_behaves_like "no footer"
+    end
+
+    context "when it is not callable" do
+      let(:agenda_footer) { "Add job" }
+
+      it_behaves_like "no footer"
+    end
+
+    context "with the agenda under the grid" do
+      let(:agenda) { true }
+
+      it_behaves_like "no footer"
+    end
+  end
+
   describe "#max_events" do
     it "clamps to what the lanes and the cell height can express", :aggregate_failures do
       expect(described_class.new(max_events: 99).max_events).to eq(6)
