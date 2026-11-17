@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
+import { tabbable } from "shadcn/focus"
 
 // The month the server drew, moved.
 //
@@ -594,13 +595,18 @@ export default class extends Controller {
   // the loading: this only swaps the list for the pane, and never prevents the
   // click. A row whose own attributes say otherwise — another frame, or
   // `data-turbo="false"` on it or above it — is left to navigate, and so is a
-  // modified or non-primary click, which asks for a new tab or window.
+  // modified or non-primary click, which asks for a new tab or window. So is a
+  // link Turbo itself leaves to the browser: one with `download`, or a
+  // `target` other than `_self` (turbo.js, `findLinkFromClickTarget`), where
+  // the frame would never load and the drawer would be left on an empty pane.
   openDetail(event) {
     if (!this.detailFrameValue || !this.hasAgendaDetailTarget) return
 
     const link = event.currentTarget
     const plain = event.button === 0 && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-    if (!plain || link.closest("[data-turbo='false']") || link.dataset.turboFrame !== this.detailFrameValue) return
+    const turbos = !link.hasAttribute("download") && (!link.target || link.target === "_self")
+    if (!plain || !turbos || link.closest("[data-turbo='false']") ||
+        link.dataset.turboFrame !== this.detailFrameValue) return
 
     this.detailOpener = link
     this.emptyDetail()
@@ -613,12 +619,18 @@ export default class extends Controller {
   }
 
   // Back to the day's list, with no request: it never left the page. The focus
-  // goes back to the row that opened the detail, if it is still there — a day
-  // swap under `agenda_as: :"turbo-frame"` can have replaced it.
+  // goes back to the row that opened the detail, if it is still there. A
+  // redraw of the rows, or a day swap under `agenda_as: :"turbo-frame"`, can
+  // have replaced it; then it goes to the list's first focusable element, or
+  // to the panel, so it never falls out of the drawer's focus trap with the
+  // back button it was on.
   showList() {
     const opener = this.detailOpener
     this.resetDetail()
-    if (opener?.isConnected) opener.focus()
+
+    const target = opener?.isConnected ? opener
+      : tabbable(this.agendaPane)[0] ?? this.agendaDrawerTarget.querySelector("[data-slot='drawer-content']")
+    target?.focus()
   }
 
   // The drawer's Escape, before it hides: while the detail is shown it goes

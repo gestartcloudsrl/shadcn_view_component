@@ -736,6 +736,33 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    # A `nil` or blank frame names none, so the gem's default applies — on the
+    # server's row and in the payload the browser's clone is drawn from, which
+    # drops the value and keeps the prototype's. `"_top"` is the opt-out.
+    context "with a row whose frame is nil or blank" do
+      def events
+        [ { title: "Flat nil", starts_at: Time.zone.local(2026, 8, 20, 9), url: "/calendar/events/4",
+            attributes: { "data-turbo-frame" => nil } },
+          { title: "Nested nil", starts_at: Time.zone.local(2026, 8, 20, 10), url: "/calendar/events/5",
+            attributes: { data: { turbo_frame: nil } } },
+          { title: "Blank", starts_at: Time.zone.local(2026, 8, 20, 11), url: "/calendar/events/6",
+            attributes: { "data-turbo-frame" => "" } } ]
+      end
+
+      def payload
+        JSON.parse(painted.at_css("[data-slot=event-calendar]")["data-shadcn--event-calendar-events-value"])
+      end
+
+      it "points the server's rows at the detail frame" do
+        expect([ "Flat nil", "Nested nil", "Blank" ].map { |title| row(title)["data-turbo-frame"] })
+          .to all(eq("agenda-detail"))
+      end
+
+      it "sends the browser no frame of its own, so the clone keeps the default" do
+        expect(payload.map { |event| event["attributes"].to_h.key?("data-turbo-frame") }).to all(be(false))
+      end
+    end
+
     context "with string keys" do
       let(:agenda_detail) { { "frame" => "agenda-detail" } }
 

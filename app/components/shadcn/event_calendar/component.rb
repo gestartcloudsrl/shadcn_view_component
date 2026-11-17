@@ -1507,7 +1507,7 @@ module Shadcn
       # and are dropped from the host's hash so they stay the row's.
       def agenda_link(event)
         merged = merge_attributes({ "class" => "#{AGENDA_ITEM_CLASS} #{AGENDA_LINK_CLASS}", **detail_link(event) },
-                                  event.attributes.to_h.except(:as, :size, "as", "size"),
+                                  row_attributes(event).except(:as, :size, "as", "size"),
                                   { "href" => event.url, "data-slot" => "event-calendar-agenda-row" })
         Item::Component.new(**merged.symbolize_keys, size: :sm, as: :a)
       end
@@ -1521,11 +1521,32 @@ module Shadcn
       def detail_link(event)
         return {} unless agenda_detail?
 
-        own = normalize_attributes(event.attributes.to_h)
-        named = own.key?("data-turbo-frame") || own["data"].to_h.keys.any? { |key| key.to_s.tr("-", "_") == "turbo_frame" }
+        own = normalize_attributes(row_attributes(event))
+        named = own.key?("data-turbo-frame") || own["data"].to_h.keys.any? { |key| turbo_frame_key?(key) }
         { "data-turbo-frame" => (detail_frame unless named),
           "data-action" => "click->shadcn--event-calendar#openDetail" }.compact
       end
+
+      # The event's attributes, less a `nil` or blank frame under
+      # `agenda_detail:`. A blank frame names none, so the gem's default
+      # applies; dropped here, before the merge, because a flat `nil` would
+      # otherwise win over the default and leave the row with no frame — while
+      # the browser's payload, which drops `nil`, kept it. A row that wants out
+      # of the drawer's frame says `"_top"`.
+      def row_attributes(event)
+        own = event.attributes.to_h
+        return own unless agenda_detail?
+
+        own.each_with_object({}) do |(key, value), kept|
+          if key.to_s == "data" && value.is_a?(Hash)
+            kept[key] = value.reject { |inner, frame| turbo_frame_key?(inner) && frame.blank? }
+          elsif !(key.to_s == "data-turbo-frame" && value.blank?)
+            kept[key] = value
+          end
+        end
+      end
+
+      def turbo_frame_key?(key) = key.to_s.tr("-", "_") == "turbo_frame"
 
       # The title and the subtitle share one truncated line, the flags beside
       # them. Plain title text when there is nothing else, so a row that says
@@ -1713,7 +1734,7 @@ module Shadcn
       # row's spelling of it: `setAttribute` throws on a name no element can
       # carry (`"on click"`), and one throw is the whole redraw.
       def portable_attributes(event)
-        pairs = merge_attributes(event.attributes.to_h.except(:as, :size, "as", "size")).flat_map do |name, value|
+        pairs = merge_attributes(row_attributes(event).except(:as, :size, "as", "size")).flat_map do |name, value|
           next [ [ name, value ] ] unless %w[data aria].include?(name) && value.is_a?(Hash)
 
           value.map { |key, inner| [ "#{name}-#{key.to_s.dasherize}", inner ] }

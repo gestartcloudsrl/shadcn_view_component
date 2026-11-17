@@ -1498,7 +1498,8 @@ explained by that resolution; no committed spec clicks a row. What a spec does
 pin: a Sheet opened through *its own* controller lands on top of the drawer and
 Escape closes it first ("a Sheet over the drawer", which calls the controller
 from script). No working recipe for opening it from a row has been tried, so
-none is given here; see the [todo](../todo.md). A host that wants a detail from a row uses `agenda_detail:` above instead.
+none is given here; see the [todo](../todo.md). A host that wants a detail
+from a row uses `agenda_detail:`, described below, instead.
 
 ### An event's detail in the drawer
 
@@ -1517,8 +1518,12 @@ Italian locale) and the frame.
 `attributes:` say. A row that names its own frame (`data-turbo-frame` or
 `data: { turbo_frame: }`) keeps it, and a row with `data-turbo="false"`
 navigates as it always did; `openDetail` also leaves any click that is not a
-plain primary click, and any link under `[data-turbo='false']`, to the browser
-(`event_calendar_controller.js`, `openDetail`). The gem leaves off its default
+plain primary click, any link under `[data-turbo='false']`, and any link with
+`download` or a `target` other than `_self` — the links Turbo itself leaves to
+the browser — to the browser (`event_calendar_controller.js`, `openDetail`).
+A `nil` or blank frame names none, so the default applies, on the server's row
+and on the browser's clone alike; a row that wants out of the drawer's frame
+says `data: { turbo_frame: "_top" }`. The gem leaves off its default
 when the event names a frame, because the flat and the nested spelling are
 different keys to `merge_attributes` and both would otherwise render on the
 `<a>`. Rows with no `url:` are not links and open nothing.
@@ -1531,7 +1536,9 @@ has one, and "navigates the whole page from a link in the detail" is the spec.
 
 **Escape, focus, name.** `openDetail` empties the frame, hides the list, shows
 the pane and focuses the back button. Back, or the first Escape, returns to the
-list and focuses the row that opened it if it is still connected. Escape comes
+list and focuses the row that opened it if it is still connected; if a redraw
+has replaced it, the list's first focusable element, or else the panel, so the
+focus stays inside the drawer. Escape comes
 through the dialog's cancelable `shadcn--dialog:escape-key-down`
 ([drawer.md](drawer.md)): the drawer's listener (`detailEscape`) cancels it only
 while the pane is shown and the event's target is the agenda's drawer, so a
@@ -1540,14 +1547,15 @@ drawer is untouched. The second Escape closes the drawer. The drawer keeps
 being named by the day; the detail does not rename it.
 
 **Reset.** Closing the drawer empties the frame and shows the list again, so
-the next opening starts on the list. `select` and `openDay` also reset; with the
-modal drawer open a day cannot be chosen, so the `select` one is in practice
-unreachable and is there for safety, not for a path anyone takes today.
+the next opening starts on the list. `select` and `openDay` also reset; on
+every path the specs take, the close has already done it, so they change
+nothing there.
 
 **What the specs cover, and what they do not.** `spec/system/event_calendar_spec.rb`
-("an event's detail in the drawer", on the `agenda_drawer_detail` preview, 10
-examples): the swap and the focus, back and the focus return, Escape twice, the
-reset on reopening, `turbo: false`, the page-level link, a stacked alert dialog
+("an event's detail in the drawer", on the `agenda_drawer_detail` preview, 12
+examples): the swap and the focus, back and the focus return, the focus when
+the opener is gone, Escape twice, the reset on reopening, `turbo: false`, a
+`target="_blank"` row staying on the list, the page-level link, a stacked alert dialog
 and Escape, days that are links too, and a long detail scrolling inside the pane
 from the right and from the bottom (with injected content: the dummy's answer is
 short). The component specs cover the markup and the precedence rules. Not

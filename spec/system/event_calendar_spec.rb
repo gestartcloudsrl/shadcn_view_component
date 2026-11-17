@@ -2449,6 +2449,44 @@ RSpec.describe "Event calendar", :js do
       expect(find(frame, visible: :all).text(:all)).to be_empty
     end
 
+    # Turbo leaves a link with a `target` other than `_self` (or `download`) to
+    # the browser, so the frame never loads and the drawer must stay on the
+    # list. Set by script after the drawer opens, because opening redraws the
+    # rows; the document-level listener keeps the new window from opening and
+    # runs after the row's own action.
+    it "stays on the list for a row Turbo will not load into the frame", :aggregate_failures do
+      open_drawer
+      page.execute_script(<<~JS)
+        document.addEventListener("click", (event) => event.preventDefault(), { once: true })
+        const row = [ ...document.querySelectorAll("#{list} [data-slot=event-calendar-agenda-row]") ]
+          .find((link) => link.textContent.includes("Boiler service"))
+        row.setAttribute("target", "_blank")
+      JS
+      row("Boiler service").click
+
+      expect(page).to have_css(list, visible: :visible)
+      expect(page).to have_no_css(pane, visible: :visible)
+      expect(page.windows.size).to eq(1)
+    end
+
+    # Any events update redraws the browser's rows, so the row that opened the
+    # detail can be gone by the time the person goes back. The focus must stay
+    # in the drawer's trap rather than fall to the body.
+    it "puts the focus on the list's first row when the opener is gone", :aggregate_failures do
+      open_drawer
+      open_detail
+      find(frame).assert_text("Event 2")
+      page.execute_script(<<~JS)
+        const calendar = document.querySelector("[data-slot=event-calendar]")
+        window.Stimulus.getControllerForElementAndIdentifier(calendar, "shadcn--event-calendar").renderAgenda()
+      JS
+
+      page.send_keys(:escape)
+
+      expect(page).to have_css(list, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.getAttribute('href')")).to eq("/calendar/events/1")
+    end
+
     it "lets a row with turbo: false navigate" do
       open_drawer
       row("Reminders").click
