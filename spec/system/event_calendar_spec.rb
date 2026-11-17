@@ -2368,4 +2368,171 @@ RSpec.describe "Event calendar", :js do
       expect(last_bottom).to be <= 0
     end
   end
+
+  # `agenda_detail:` on the preview of that name. The 5th is selected, so the
+  # first tap on it opens the drawer. Its rows: "Kitchen survey" and "Boiler
+  # service" open in the drawer's frame, "Reminders" carries `turbo: false`.
+  # The dummy's `calendar#event` answers in whichever frame asked, with a
+  # "Client page" link and a «Delete» confirmation inside.
+  describe "an event's detail in the drawer" do
+    let(:drawer) { "[data-slot=drawer-content]" }
+
+    def pane = "#{drawer} [data-slot=event-calendar-agenda-detail]"
+
+    def list = "#{drawer} [data-slot=event-calendar-agenda]"
+
+    def frame = "#{pane} turbo-frame#agenda-detail"
+
+    def row(title) = find("#{list} [data-slot=event-calendar-agenda-row]", text: title)
+
+    def open_drawer(query = "")
+      visit "/lookbook/preview/shadcn/event_calendar/agenda_drawer_detail#{query}"
+      wait_for_stimulus
+      day("2026-08-05").click
+      expect(page).to have_css(drawer, visible: :visible)
+    end
+
+    def open_detail(title = "Boiler service")
+      row(title).click
+      expect(page).to have_css(pane, visible: :visible)
+    end
+
+    def focused_text = page.evaluate_script("document.activeElement?.textContent?.trim()")
+
+    it "shows the row's detail in place of the list, with the focus on the way back", :aggregate_failures do
+      open_drawer
+      open_detail
+
+      expect(page).to have_no_css(list, visible: :visible)
+      expect(find(frame)).to have_css("h2", text: "Event 2")
+      expect(focused_text).to eq("Back to the day")
+    end
+
+    it "goes back to the list with the focus on the row that opened it", :aggregate_failures do
+      open_drawer
+      open_detail
+      find(frame).assert_text("Event 2")
+
+      find("#{pane} [data-slot=event-calendar-agenda-back]").click
+
+      expect(page).to have_css(list, visible: :visible)
+      expect(page).to have_no_css(pane, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.getAttribute('href')")).to eq("/calendar/events/2")
+    end
+
+    it "goes back on the first Escape and closes on the second", :aggregate_failures do
+      open_drawer
+      open_detail
+      find(frame).assert_text("Event 2")
+
+      page.send_keys(:escape)
+      expect(page).to have_css(list, visible: :visible)
+      expect(page).to have_css(drawer, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.getAttribute('href')")).to eq("/calendar/events/2")
+
+      page.send_keys(:escape)
+      expect(page).to have_no_css(drawer, visible: :visible)
+      expect(page.evaluate_script("document.activeElement.dataset.day")).to eq("2026-08-05")
+    end
+
+    it "reopens on the list with an empty frame", :aggregate_failures do
+      open_drawer
+      open_detail
+      find(frame).assert_text("Event 2")
+
+      find("[data-slot=drawer-overlay]", visible: :all).click(x: 5, y: 5)
+      expect(page).to have_no_css(drawer, visible: :visible)
+
+      day("2026-08-05").click
+      expect(page).to have_css(list, visible: :visible)
+      expect(page).to have_no_css(pane, visible: :visible)
+      expect(find(frame, visible: :all).text(:all)).to be_empty
+    end
+
+    it "lets a row with turbo: false navigate" do
+      open_drawer
+      row("Reminders").click
+
+      expect(page).to have_current_path("/turbo-probe/one")
+    end
+
+    # The frame's `target="_top"` is what sends a link with no frame of its own
+    # out of the drawer. Page one draws a calendar of its own, so what says the
+    # drawer is gone is its frame.
+    it "navigates the whole page from a link in the detail", :aggregate_failures do
+      open_drawer
+      open_detail
+      find(frame).click_link("Client page")
+
+      expect(page).to have_current_path("/turbo-probe/one")
+      expect(page).to have_css("[data-testid=page-one]")
+      expect(page).to have_no_css("turbo-frame#agenda-detail", visible: :all)
+    end
+
+    it "stacks a confirmation above the drawer and closes it first on Escape", :aggregate_failures do
+      open_drawer
+      open_detail
+      find(frame).click_button("Delete")
+      alert = "[data-slot=alert-dialog-content]"
+      expect(page).to have_css(alert, visible: :visible)
+
+      on_top = page.evaluate_script(<<~JS)
+        (() => {
+          const alert = document.querySelector("#{alert}")
+          const box = alert.getBoundingClientRect()
+          return alert.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))
+        })()
+      JS
+      expect(on_top).to be(true)
+
+      page.send_keys(:escape)
+      expect(page).to have_no_css(alert, visible: :visible)
+      expect(page).to have_css(pane, visible: :visible)
+
+      page.send_keys(:escape)
+      expect(page).to have_css(list, visible: :visible)
+      expect(page).to have_css(drawer, visible: :visible)
+    end
+
+    it "opens the detail from a row when the days are links too", :aggregate_failures do
+      open_drawer("?day_links=true")
+      open_detail("Kitchen survey")
+
+      expect(find(frame)).to have_css("h2", text: "Event 1")
+      expect(page).to have_no_css(list, visible: :visible)
+    end
+
+    # The detail is the host's and can be as long as it likes; the pane takes
+    # the agenda's scroll classes so its end stays reachable. Made tall by
+    # script, because what is measured is the pane, not the dummy's answer.
+    %w[right bottom].each do |direction|
+      it "scrolls a long detail inside the panel from the #{direction}", :aggregate_failures do
+        open_drawer("?direction=#{direction}")
+        open_detail
+        find(frame).assert_text("Event 2")
+
+        overflow, last_bottom = page.evaluate_script(<<~JS)
+          (() => {
+            const panel = document.querySelector("#{drawer}")
+            const pane = panel.querySelector("[data-slot=event-calendar-agenda-detail]")
+            const frame = pane.querySelector("turbo-frame")
+            for (let i = 0; i < 40; i++) {
+              const p = document.createElement("p")
+              p.textContent = `Line ${i + 1}`
+              frame.append(p)
+            }
+            const overflow = pane.scrollHeight - pane.clientHeight
+            pane.scrollTop = pane.scrollHeight
+            const last = frame.lastElementChild
+            // Rounded: from the bottom the pane is a fractional height and
+            // `scrollTop` an integer, so its furthest scroll stops 0.4px short.
+            return [ overflow, Math.round(last.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom) ]
+          })()
+        JS
+
+        expect(overflow).to be > 0
+        expect(last_bottom).to be <= 0
+      end
+    end
+  end
 end

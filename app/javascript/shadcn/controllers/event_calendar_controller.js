@@ -519,6 +519,7 @@ export default class extends Controller {
     if (this.drawerValue && day === this.selectedValue) return this.pickedId ? undefined : this.openDay(event)
 
     this.selectedValue = day
+    this.resetDetail()
     this.markSelection()
     this.renderAgenda()
     this.announceSelection()
@@ -552,6 +553,7 @@ export default class extends Controller {
 
     if (!this.hasAgendaDrawerTarget || this.pickedId) return
 
+    this.resetDetail()
     this.renderAgenda()
     this.agendaDrawer?.open()
   }
@@ -579,19 +581,83 @@ export default class extends Controller {
   agendaDrawerTargetConnected(drawer) {
     this.drawerListener = (event) => {
       if (event.target !== drawer) return
+      if (event.type.endsWith(":close")) this.resetDetail()
       this.selectedCell()?.setAttribute("aria-expanded", event.type.endsWith(":open") ? "true" : "false")
     }
     drawer.addEventListener("shadcn--dialog:open", this.drawerListener)
     drawer.addEventListener("shadcn--dialog:close", this.drawerListener)
   }
 
-  // The detail pane under `agenda_detail:`, declared here so the markup's
-  // actions resolve; what they do is the next step's.
-  openDetail() {}
+  // --- the detail pane, under `agenda_detail:` -------------------------------
+  //
+  // A row with a `url:` targets the drawer's frame by default, and Turbo does
+  // the loading: this only swaps the list for the pane, and never prevents the
+  // click. A row whose own attributes say otherwise — another frame, or
+  // `data-turbo="false"` on it or above it — is left to navigate, and so is a
+  // modified or non-primary click, which asks for a new tab or window.
+  openDetail(event) {
+    if (!this.detailFrameValue || !this.hasAgendaDetailTarget) return
 
-  showList() {}
+    const link = event.currentTarget
+    const plain = event.button === 0 && !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    if (!plain || link.closest("[data-turbo='false']") || link.dataset.turboFrame !== this.detailFrameValue) return
 
-  detailEscape() {}
+    this.detailOpener = link
+    this.emptyDetail()
+    this.agendaPane.hidden = true
+    this.agendaDetailTarget.hidden = false
+    // The row that had the focus is hidden now, and the frame's content is the
+    // host's and may not have arrived: the back button is the one element in
+    // the pane the gem owns.
+    if (this.hasAgendaBackTarget) this.agendaBackTarget.focus()
+  }
+
+  // Back to the day's list, with no request: it never left the page. The focus
+  // goes back to the row that opened the detail, if it is still there — a day
+  // swap under `agenda_as: :"turbo-frame"` can have replaced it.
+  showList() {
+    const opener = this.detailOpener
+    this.resetDetail()
+    if (opener?.isConnected) opener.focus()
+  }
+
+  // The drawer's Escape, before it hides: while the detail is shown it goes
+  // back to the list instead. A dialog inside the detail dispatches the same
+  // event and it bubbles here, so only the drawer's own counts.
+  detailEscape(event) {
+    if (event.target !== this.agendaDrawerTarget || !this.detailShown) return
+
+    event.preventDefault()
+    this.showList()
+  }
+
+  // The list again, the pane hidden and its frame emptied, without moving the
+  // focus: what a close or a new day does, so the next opening never shows the
+  // last detail and a stale one cannot flash before Turbo answers.
+  resetDetail() {
+    if (!this.hasAgendaDetailTarget) return
+
+    this.agendaDetailTarget.hidden = true
+    this.emptyDetail()
+    if (this.agendaPane) this.agendaPane.hidden = false
+    this.detailOpener = null
+  }
+
+  emptyDetail() {
+    if (!this.hasAgendaFrameTarget) return
+
+    this.agendaFrameTarget.removeAttribute("src")
+    this.agendaFrameTarget.replaceChildren()
+  }
+
+  get detailShown() {
+    return this.hasAgendaDetailTarget && !this.agendaDetailTarget.hidden
+  }
+
+  // The agenda inside the drawer, whatever element `agenda_as:` made it.
+  get agendaPane() {
+    return this.agendaDrawerTarget.querySelector("[data-slot='event-calendar-agenda']")
+  }
 
   agendaDrawerTargetDisconnected(drawer) {
     drawer.removeEventListener("shadcn--dialog:open", this.drawerListener)

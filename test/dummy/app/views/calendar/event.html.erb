@@ -1,6 +1,26 @@
-<%# What an agenda row's `url:` answers with. The `<turbo-frame id="event">`
-    matches the one inside the Sheet, so Turbo swaps this into it; without Turbo
-    the browser lands on this page, which is the row being a link. %>
-<turbo-frame id="event" class="flex flex-col gap-3 p-4">
+<%# What an agenda row's `url:` answers with. The frame takes the id Turbo asked
+    for, as a host's views do: `event` from the Sheet, `agenda-detail` from the
+    drawer's own frame under `agenda_detail:`. Without Turbo the browser lands on
+    this page, which is the row being a link.
+
+    Inside it, the two things the drawer's detail has to survive: a plain link,
+    which under the frame's `target="_top"` navigates the whole page, and a
+    confirmation, which stacks above the drawer and closes first on Escape. %>
+<turbo-frame id="<%= request.headers["Turbo-Frame"] || "event" %>" class="flex flex-col gap-3 p-4">
   <h2 class="pe-8 text-base font-semibold">Event <%= @id %></h2>
+
+  <%= link_to "Client page", turbo_probe_one_path, class: "underline" %>
+
+  <%= render(Shadcn::AlertDialog::Component.new) do |d| %>
+    <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :destructive)) { "Delete" } %>
+    <% d.with_dialog_content do |c| %>
+      <% c.with_header do |h| %>
+        <% h.with_title { "Delete this event?" } %>
+        <% h.with_description { "This action cannot be undone." } %>
+      <% end %>
+      <% c.with_footer do %>
+        <%= render(Shadcn::AlertDialog::Cancel::Component.new) { "Cancel" } %>
+      <% end %>
+    <% end %>
+  <% end %>
 </turbo-frame>
