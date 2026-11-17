@@ -77,6 +77,12 @@ export default class extends Controller {
       anchors: this.hasTriggerTarget ? [ this.triggerTarget ] : [],
       onDismiss: ({ reason }) => {
         if (reason === "pointerdown" && !this.dismissableValue) return
+
+        // Ports the `onEscapeKeyDown` prop of Radix's `Dialog.Content` (its
+        // `DismissableLayer` prop is the one vendored, in
+        // `vendor/radix/ui/hover-card.tsx`): `preventDefault()` keeps it open.
+        if (reason === "escape" && this.dispatch("escape-key-down", { cancelable: true }).defaultPrevented) return
+
         this.hide()
       }
     })

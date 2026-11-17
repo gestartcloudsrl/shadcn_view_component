@@ -32,6 +32,49 @@ RSpec.describe "Dialog", :js do
     expect(page.evaluate_script("window.__escapes")).to eq(1)
   end
 
+  # Radix's `onEscapeKeyDown` on `Dialog.Content`: a host that wants Escape to
+  # step back instead of close cancels the event.
+  describe "the escape-key-down event" do
+    def record_escapes(cancel:)
+      page.execute_script(<<~JS, cancel)
+        const cancel = arguments[0]
+        window.__escapeEvents = []
+        document.addEventListener("shadcn--dialog:escape-key-down", (event) => {
+          window.__escapeEvents.push(event.target.querySelector("[data-slot=dialog-title], [data-slot=sheet-title]")?.textContent.trim())
+          if (cancel) event.preventDefault()
+        })
+      JS
+    end
+
+    it "keeps the dialog open when a listener cancels it" do
+      record_escapes(cancel: true)
+      click_button "Edit profile"
+      press(:escape)
+
+      expect(page.evaluate_script("window.__escapeEvents.length")).to eq(1)
+      expect(page).to have_css(content)
+      expect(state_of(content)).to eq("open")
+    end
+
+    it "dispatches once and still closes when nothing cancels it" do
+      record_escapes(cancel: false)
+      click_button "Edit profile"
+      press(:escape)
+
+      expect(page).to have_no_css(content)
+      expect(page.evaluate_script("window.__escapeEvents.length")).to eq(1)
+    end
+
+    it "is not dispatched for a pointer dismissal" do
+      record_escapes(cancel: true)
+      click_button "Edit profile"
+      click_outside
+
+      expect(page).to have_no_css(content)
+      expect(page.evaluate_script("window.__escapeEvents.length")).to eq(0)
+    end
+  end
+
   context "when opened from the trigger" do
     before { click_button "Edit profile" }
 
@@ -159,6 +202,24 @@ RSpec.describe "Sheet", :js do
       expect(opened["data-state"]).to eq("open")
       expect(opened[:class]).to include("inset-y-0", "left-0")
     end
+  end
+
+  # Only the top layer receives Escape, so only its dialog dispatches.
+  it "dispatches escape-key-down on the top layer only" do
+    page.execute_script(<<~JS)
+      window.__escapeTargets = []
+      document.addEventListener("shadcn--dialog:escape-key-down", (event) => {
+        window.__escapeTargets.push(event.target.querySelector("[data-slot=sheet-trigger]").textContent.trim())
+      })
+    JS
+    click_button "Left"
+    page.execute_script("document.querySelectorAll('[data-slot=sheet-trigger]')[3].click()")
+    expect(page).to have_css(content, count: 2, visible: true)
+
+    press(:escape)
+
+    expect(page.evaluate_script("window.__escapeTargets.length")).to eq(1)
+    expect(page.evaluate_script("window.__escapeTargets[0]")).not_to eq("Left")
   end
 
   it "closes on Escape" do

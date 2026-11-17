@@ -68,6 +68,18 @@ that does not step in first — which is every platform this gem will actually
 ship to and none that it can be tested on here. See
 [testing](../decisions/03-testing.md).
 
+## Escape can be cancelled
+
+The shared `shadcn--dialog` controller dispatches a cancelable
+`shadcn--dialog:escape-key-down` on its own element when Escape reaches it,
+before it closes; a listener that calls `preventDefault()` keeps it open. It is
+the counterpart of the `onEscapeKeyDown` prop of Radix's `Dialog.Content`
+(`DismissableLayer`'s prop is the one vendored, in
+`vendor/radix/ui/hover-card.tsx`; Radix's dialog source is not). Pointer
+dismissal does not dispatch it, and only the top layer gets Escape.
+`spec/system/dialog_spec.rb` drives it on the Dialog and the Sheet; the Drawer
+shares the controller, and `drawer_spec.rb` still passes unchanged.
+
 ## The one addition: pointer capture
 
 vaul does not capture the pointer, and this port does. It is the only place
