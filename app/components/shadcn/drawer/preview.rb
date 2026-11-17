@@ -24,6 +24,13 @@ module Shadcn
       def scrollable_side
         render_with_template
       end
+
+      # A Select and a DropdownMenu inside the panel. Their content is a layer
+      # of its own in the top layer but still inside the drawer in the DOM, so
+      # a press on one of its items reaches the drawer's drag.
+      def with_layers
+        render_with_template
+      end
     end
   end
 end
