@@ -38,6 +38,10 @@ module Shadcn
       include Faces
       include PreferencesDialog
 
+      # The host's own words for the legend's dialog, beside or instead of
+      # `legend:` — see `#legend_dialog`.
+      renders_one :legend_content
+
       # Each colour is two custom properties, declared once on the root as
       # descendant rules rather than as utilities on every chip and every dot.
       # Two things follow, and both are the reason for the shape: an element is
@@ -569,7 +573,8 @@ module Shadcn
       #   the detail as a row does. Called for every day the grid holds, since
       #   in the browser the selection moves without asking the server.
       #   Anything that does not respond to `call` is the same as `nil`.
-      # @param legend [Array<Hash>, nil] what the colours mean:
+      # @param legend [Array<Hash>, nil] what the colours mean (and see
+      #   `with_legend_content`, for the host's own words in the same dialog):
       #   `[{ color: "--calendar-programmed", label: "Scheduled" }, ...]`, where
       #   `color:` takes what an event's does — a palette name or a host's
       #   custom property — and an unknown one is `default_color:`. Present, a
@@ -843,7 +848,7 @@ module Shadcn
           safe_join([
             *reading_controls,
             (preferences_dialog if preferences?),
-            (legend_dialog if legend.any?),
+            (legend_dialog if legend.any? || legend_content?),
             nav_button(today, size: :sm, action: "click->shadcn--event-calendar#today") do
               shadcn_t("event_calendar.today")
             end,
@@ -882,10 +887,22 @@ module Shadcn
           end
           dialog.with_dialog_content(class: LEGEND_CONTENT_CLASS) do |content|
             content.with_header { |header| header.with_title { shadcn_t("event_calendar.legend") } }
-            tag.ul(safe_join(legend.map { |color, property, label| legend_item(color, property, label) }),
-                   "data-slot": "event-calendar-legend-list", class: LEGEND_LIST_CLASS)
+            safe_join([ (legend_list if legend.any?), (legend_host_content if legend_content?) ].compact)
           end
         end
+      end
+
+      def legend_list
+        tag.ul(safe_join(legend.map { |color, property, label| legend_item(color, property, label) }),
+               "data-slot": "event-calendar-legend-list", class: LEGEND_LIST_CLASS)
+      end
+
+      # `with_legend_content`: whatever the host draws, under the list or in
+      # its place. No classes of the gem's: the dialog's own `gap-4` spaces it,
+      # and how it looks — or whether a swatch of its matches an event, through
+      # `--event-color` and `data-color` — is the host's to keep.
+      def legend_host_content
+        tag.div(legend_content, "data-slot": "event-calendar-legend-content")
       end
 
       def legend_item(color, property, label)

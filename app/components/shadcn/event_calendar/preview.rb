@@ -57,7 +57,8 @@ module Shadcn
       end
 
       # What the colours mean, behind the `?` in the nav: `legend:`, one entry a
-      # colour, a palette name or a host's custom property as an event takes.
+      # colour, a palette name or a host's custom property as an event takes,
+      # and a note of the host's own under it through `with_legend_content`.
       # A template so the snapshot and the accessibility specs see it; the
       # gallery's `density` has the same as its `legend` toggle.
       def legend

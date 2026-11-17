@@ -973,6 +973,33 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    # The host's own content, in the same dialog behind the same button: in
+    # place of the list when there is no `legend:`, under it when there is.
+    def calendar_with_content(legend)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), legend:)) do |calendar|
+        calendar.with_legend_content { "<p class='host-note'>Ask the office.</p>".html_safe }
+      end
+      Nokogiri::HTML5.fragment(rendered_content.to_s)
+    end
+
+    it "takes the host's content alone, with the button and the title", :aggregate_failures do
+      doc = calendar_with_content(nil)
+      body = doc.at_css("[data-slot=event-calendar-legend-content]")
+
+      expect(doc.at_css("[data-slot=event-calendar-nav] [data-slot=dialog-trigger] .sr-only").text).to eq("Legend")
+      expect(doc.at_css("[data-slot=dialog-title]").text).to eq("Legend")
+      expect(body.at_css("p.host-note").text).to eq("Ask the office.")
+      expect(doc.at_css("[data-slot=event-calendar-legend-list]")).to be_nil
+    end
+
+    it "puts the host's content under the list when both are given" do
+      slots = calendar_with_content(legend).at_css("[data-slot=dialog-content]").element_children
+                                           .map { |child| child["data-slot"] }
+
+      expect(slots).to include("event-calendar-legend-list", "event-calendar-legend-content")
+      expect(slots.index("event-calendar-legend-list")).to be < slots.index("event-calendar-legend-content")
+    end
+
     [ nil, [], [ { color: :blue, label: "" } ] ].each do |empty|
       it "draws nothing for #{empty.inspect}" do
         doc = calendar_with(empty)

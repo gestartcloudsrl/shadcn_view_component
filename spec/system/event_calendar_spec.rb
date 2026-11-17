@@ -2858,6 +2858,15 @@ RSpec.describe "Event calendar", :js do
       expect(colors["swatches"]).to eq(colors["tokens"])
     end
 
+    it "shows the host's own content under the list" do
+      visit_preview("event_calendar", :legend)
+      wait_for_stimulus
+      legend_button.click
+
+      expect(find("#{dialog} [data-slot=event-calendar-legend-content]"))
+        .to have_text("A job turns green once the crew marks it done on site.")
+    end
+
     it "closes on Escape with the focus back on its button", :aggregate_failures do
       open_legend
 
