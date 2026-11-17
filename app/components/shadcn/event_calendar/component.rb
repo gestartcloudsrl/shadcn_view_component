@@ -1378,11 +1378,18 @@ module Shadcn
       # again, and the controller copies that day's in. A day whose lambda
       # answers `nil` has no template, and the footer is hidden on it.
       #
+      # Where the agenda is the server's and is only ever drawn again with the
+      # whole calendar — `day_url:` and the default `agenda_as: :div` — so is
+      # this, and the lambda is called for the selected day alone. Any other
+      # `agenda_as:` may be what a day link swaps by itself, as a
+      # `turbo-frame` is, so it gets every day.
+      #
       # Its links are the host's markup, so the click is heard here, on the
       # footer, and `openDetail` takes the link it landed in. The day is
       # `data-footer-day`, never `data-day`, which is what finds a grid's cell.
       def agenda_footer_part
-        contents = month.days.each_with_object({}) do |day, found|
+        days = day_url && agenda_as.to_s == "div" ? [ selected ] : month.days
+        contents = days.each_with_object({}) do |day, found|
           content = agenda_footer_content(day)
           found[day] = content if content.present?
         end

@@ -1591,7 +1591,7 @@ because what it draws depends on the day. It answers a component (rendered) or
 a string (escaped unless `html_safe`); `nil` for a day means no footer on that
 day, and `agenda_footer: nil`, or anything that does not respond to `call`, means
 none at all and no markup. A host that cannot create on any day passes `nil`
-rather than a lambda answering it 42 times.
+rather than a lambda answering it for every day.
 
 **Where it is.** In the Drawer's own `DrawerFooter` (`mt-auto flex flex-col
 gap-2 p-4`, `vendor/shadcn/ui/drawer.tsx`), the last child of the drawer's
@@ -1608,22 +1608,25 @@ then goes the way a row does — the same rules (`turbo: false`, `download`, a
 on the link when the list returns. The footer is copied only when the day
 changes, which is what keeps that link the same element.
 
-**Which day.** The server calls the lambda for every day the grid holds (35 or
-42; the week's grid is the month it sits in, so the same), the selected day's
-drawn in place and each in a `<template data-footer-day>`. `fillFooter` in the
-controller copies the selected day's in whenever the drawer opens or a day is
-selected (`resetDetail`), because in the browser the selection moves without the
-server — a button cell's press, or a day swapped in under `agenda_as:
-:"turbo-frame"`, where the grid is not drawn again. One path for every host: a
-host whose server redraws the calendar on every day (Gestart's, under a
-`turbo-frame`) would need only the selected day, and the templates cost it the
-other 41 calls. `data-footer-day` and never `data-day`, which is what finds a
-cell. A day with no template — its lambda answered `nil`, or a month the browser
-drew from the nav that the server's grid did not hold — hides the footer rather
-than show another day's; a host with `month_url:` never meets the second case.
+**Which day.** It follows the agenda. With `day_url:` and the default
+`agenda_as: :div` the agenda is the server's and is only drawn again with the
+whole calendar, so a new day is a request that draws the footer too: the
+lambda is called once, for the selected day (Gestart's case, under its own
+`turbo-frame#calendar`). Otherwise the selection moves without the server
+drawing the footer again — a button cell's press without `day_url:`, or a day
+swapped in under `agenda_as: :"turbo-frame"`, or any other element, which a day
+link may swap by itself — and the lambda is called for every day the grid holds
+(35 or 42). Either way each day drawn is also a `<template data-footer-day>`,
+and `fillFooter` in the controller copies the selected day's in whenever the
+drawer opens or a day is selected (`resetDetail`). `data-footer-day` and never
+`data-day`, which is what finds a cell. A day with no template — its lambda
+answered `nil`, a day the single call did not cover, or a month the browser drew
+from the nav that the server's grid did not hold — hides the footer rather than
+show another day's; a host with `month_url:` never meets the last case.
 
 **What the specs cover.** The component specs: the markup, the templates, the
-`nil`s, the escaping. `spec/system/event_calendar_spec.rb`, on the month
+`nil`s, the escaping, one call under `day_url:` and every day under `agenda_as:
+:"turbo-frame"`. `spec/system/event_calendar_spec.rb`, on the month
 (`agenda_drawer_detail`): under the list, opening in the detail with the footer
 hidden and the focus on the way back, the return by the button and by Escape
 with the focus on the link, a day selected in the browser, a day the server's

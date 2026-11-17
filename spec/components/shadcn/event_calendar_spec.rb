@@ -850,6 +850,27 @@ RSpec.describe Shadcn::EventCalendar::Component do
         .to include("/jobs/new?date=2026-08-05")
     end
 
+    # With `day_url:` the server draws the agenda, and a new day is a request
+    # that draws the calendar again, footer and all: one call is enough. Not
+    # when the agenda is another element, which a day link may swap alone.
+    def calls_with_day_url(agenda_as)
+      calls = []
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 20), agenda:,
+                                        agenda_as:, day_url: ->(day) { "/days/#{day.iso8601}" }, events: [],
+                                        agenda_footer: ->(day) { calls << day && agenda_footer.call(day) }))
+      calls
+    end
+
+    it "calls the lambda for the selected day only under day_url:", :aggregate_failures do
+      expect(calls_with_day_url(:div)).to eq([ Date.new(2026, 8, 20) ])
+      expect(footer.css("> a").map { |link| link["href"] }).to eq([ "/jobs/new?date=2026-08-20" ])
+      expect(templates.map { |template| template["data-footer-day"] }).to eq([ "2026-08-20" ])
+    end
+
+    it "calls it for every day the grid holds when the agenda is a turbo-frame" do
+      expect(calls_with_day_url(:"turbo-frame").size).to eq(painted.css("[data-slot=event-calendar-day]").size)
+    end
+
     context "when the selected day has no footer" do
       subject(:calendar) do
         described_class.new(month: Date.new(2026, 8, 1), selected: Date.new(2026, 8, 21), agenda:, agenda_footer:,
