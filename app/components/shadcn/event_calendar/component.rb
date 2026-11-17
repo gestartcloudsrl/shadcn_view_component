@@ -384,7 +384,11 @@ module Shadcn
       # here) keeps the panel full width and centres a `mx-auto w-full
       # max-w-sm` column in it. This is that column on the agenda, a step
       # wider because a row carries a time and a subtitle; a phone still fills it.
-      AGENDA_DRAWER_CLASS = "mx-auto w-full max-w-md"
+      # `min-h-0 overflow-y-auto` because the panel is a flex column with a
+      # height cap (`max-h-[80vh]` from the bottom, the full height from a
+      # side) and nothing in it scrolled: measured on a day of nineteen rows,
+      # the last ones sat below the viewport with no way to reach them.
+      AGENDA_DRAWER_CLASS = "mx-auto w-full max-w-md min-h-0 overflow-y-auto"
       AGENDA_TITLE_CLASS = "flex flex-wrap items-baseline gap-x-2 px-2 pb-1.5 text-sm font-medium"
       # How many, beside the date. Cheap at three events and the difference
       # between a list and a wall at sixty — a day this deep needs to say how

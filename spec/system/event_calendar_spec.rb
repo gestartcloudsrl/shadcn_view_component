@@ -2352,5 +2352,20 @@ RSpec.describe "Event calendar", :js do
       expect(page).to have_css("#{drawer}[data-vaul-drawer-direction=right]", visible: :visible)
       expect(measure("return Math.round(innerWidth - panel.getBoundingClientRect().right)")).to eq(0)
     end
+
+    # Nineteen rows on the 20th, more than the panel is tall. Before the agenda
+    # scrolled, the last rows sat below the viewport with no way to reach them.
+    it "scrolls a full day inside the panel" do
+      expect(page).to have_css(drawer, visible: :visible)
+
+      last_bottom = measure(<<~JS)
+        const agenda = panel.querySelector("[data-slot=event-calendar-agenda]")
+        agenda.scrollTop = agenda.scrollHeight
+        const rows = panel.querySelectorAll("[data-slot=event-calendar-agenda-item]")
+        return rows[rows.length - 1].getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom
+      JS
+
+      expect(last_bottom).to be <= 0
+    end
   end
 end

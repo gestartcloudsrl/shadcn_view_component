@@ -1415,6 +1415,11 @@ class in `drawer_attributes:` under that same prefix, for example
 kept alongside and loses to the Drawer's, which compiles to a class plus
 `[data-vaul-drawer-direction=bottom]` (read in the dummy app's built CSS). The
 component specs check the classes that come out, not the rendered sizes.
+The agenda scrolls inside the panel (`min-h-0 overflow-y-auto`): without it a
+full day ran past the cap and its last rows could not be reached, measured in
+headless Chrome from the bottom and from the right. The system spec pins it from
+the right only; the bottom shares the class. Scrolling by touch, against the
+drawer's own drag, has not been tried on a device.
 
 **From the side.** `drawer_direction: :right` (or `:left`) brings the panel in
 from that edge, with the Drawer's own side classes: the full height, `w-3/4`,
