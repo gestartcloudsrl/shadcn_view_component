@@ -1,0 +1,14 @@
+<%# The agenda in a drawer from the right, at a laptop's width. The 20th is
+    selected and full, so the next press on it opens a list longer than the
+    panel. See `Preview#agenda_drawer_side`. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      agenda: :drawer,
+      drawer_direction: :right,
+      events: Shadcn::EventCalendar::Preview.workload_events(month: Date.new(2026, 8, 1), per_day: 0..3, crew: 1..3) +
+              Array.new(16) { |index|
+                { title: "Site visit #{index + 1}",
+                  starts_at: Time.zone.local(2026, 8, 20, 7 + (index / 2), (index % 2) * 30) }
+              }
+    )) %>

@@ -551,6 +551,30 @@ RSpec.describe Shadcn::EventCalendar::Component do
       end
     end
 
+    it "comes from the bottom by default" do
+      expect(painted.at_css("[data-slot=drawer-content]")["data-vaul-drawer-direction"]).to eq("bottom")
+    end
+
+    context "with drawer_direction" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), agenda: :drawer, drawer_direction: :right)
+      end
+
+      it "comes from that side" do
+        expect(painted.at_css("[data-slot=drawer-content]")["data-vaul-drawer-direction"]).to eq("right")
+      end
+    end
+
+    context "with a drawer_direction the Drawer does not have" do
+      subject(:calendar) do
+        described_class.new(month: Date.new(2026, 8, 1), agenda: :drawer, drawer_direction: "sideways")
+      end
+
+      it "falls back to the bottom" do
+        expect(painted.at_css("[data-slot=drawer-content]")["data-vaul-drawer-direction"]).to eq("bottom")
+      end
+    end
+
     it "leaves the live announcing to the selection region" do
       expect(painted.at_css("[data-slot=event-calendar-agenda]")["aria-live"]).to be_nil
     end

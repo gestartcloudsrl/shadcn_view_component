@@ -2336,4 +2336,21 @@ RSpec.describe "Event calendar", :js do
       expect(page).to have_no_css("[data-slot=event-calendar-agenda]", visible: :visible)
     end
   end
+
+  describe "the agenda as a drawer from the side" do
+    let(:drawer) { "[data-slot=drawer-content]" }
+
+    before do
+      visit_preview("event_calendar", :agenda_drawer_side)
+      wait_for_stimulus
+      day("2026-08-20").click
+    end
+
+    def measure(script) = page.evaluate_script("(() => { const panel = document.querySelector('#{drawer}'); #{script} })()")
+
+    it "slides in against the right edge", :aggregate_failures do
+      expect(page).to have_css("#{drawer}[data-vaul-drawer-direction=right]", visible: :visible)
+      expect(measure("return Math.round(innerWidth - panel.getBoundingClientRect().right)")).to eq(0)
+    end
+  end
 end

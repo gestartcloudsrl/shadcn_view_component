@@ -129,6 +129,13 @@ module Shadcn
         render_with_template
       end
 
+      # The same drawer from the side, at a laptop's width, where a bottom panel
+      # would run the whole screen. The 20th is a full day, so the list is
+      # longer than the panel and has to scroll inside it.
+      def agenda_drawer_side
+        render_with_template
+      end
+
       # A person's preferred view, kept in the browser: the panel's last item
       # opens a dialog asking its questions for next time. A template rather
       # than a call to `density`, because the snapshot and accessibility specs
@@ -218,6 +225,7 @@ module Shadcn
       # @param turbo select [off, panel, agenda, link]
       # @param day text
       # @param agenda select [below, drawer]
+      # @param drawer select [bottom, right, left, top]
       # @param shapes text
       # @param views text
       # @param preferences select [off, local, host]
@@ -228,7 +236,7 @@ module Shadcn
                   spanning: 3, colored: false, show_all: false, group: "events", shape: "chips",
                   showing: "both", from: 7, to: 23, turbo: "off", shapes: "chips,bars", views: "",
                   preferences: "off", restore: false, id: nil, broken_url: false, max_chips: 3,
-                  counts: true, agenda: "below", day: nil)
+                  counts: true, agenda: "below", day: nil, drawer: "bottom")
         cast = ActiveModel::Type::Boolean.new
         shown = Date.parse(month)
         # `restore` is left out on purpose: it marks *this* request as the bare
@@ -239,6 +247,7 @@ module Shadcn
                     show_all: cast.cast(show_all), group:, shape:, showing:, from:, to:,
                     turbo:, shapes:, preferences:, id:, max_chips:, day:,
                     agenda: (agenda unless agenda.to_s == "below"),
+                    drawer: (drawer unless drawer.to_s == "bottom"),
                     # Only when off, so the default links stay the ones they were.
                     counts: (false unless cast.cast(counts)),
                     views: views.presence }.merge(changed).compact
@@ -354,6 +363,7 @@ module Shadcn
                                   views: Component.views_by_period(args[:views]))
         args[:id] = id if id.present?
         args[:agenda] = :drawer if agenda.to_s == "drawer"
+        args[:drawer_direction] = drawer.to_sym unless drawer.to_s == "bottom"
         case preferences.to_s
         when "local"
           args.merge!(preferences: :local, restore: cast.cast(restore) || false,

@@ -67,6 +67,7 @@ not `:local` or `:host` or comes without its mode's URL (see
 | `agenda_as:` | `:div` | the agenda's element; `:"turbo-frame"` makes it what a day link swaps |
 | `agenda_attributes:` | `{}` | merged onto the agenda, e.g. its `id`; its `class` joins the agenda's and wins a conflict |
 | `drawer_attributes:` | `{}` | `agenda: :drawer` only: merged onto the drawer's panel ([below](#the-agenda-in-a-drawer)) |
+| `drawer_direction:` | `:bottom` | `agenda: :drawer` only: the side the drawer comes from, `:bottom`, `:right`, `:left` or `:top`; anything else is `:bottom` |
 | `view_url:` | `nil` | given `:monthly`, `:weekly`, `:daily`, `:grid`, `:rows` or `:hours`, that view's URL. Present, the options panel is links |
 | `movable:` | `false` | events can be moved; needs an `id:` on each |
 | `shapes:` | `[:chips, :bars]` | the shapes offered. One alone is drawn whatever `shape:` says, and the panel, its trigger and the preferences dialog stop mentioning shape at all. Every reading reads it, because the dialog on a month grid asks the shape for *Monthly · Timeline* |
@@ -1414,6 +1415,14 @@ class in `drawer_attributes:` under that same prefix, for example
 kept alongside and loses to the Drawer's, which compiles to a class plus
 `[data-vaul-drawer-direction=bottom]` (read in the dummy app's built CSS). The
 component specs check the classes that come out, not the rendered sizes.
+
+**From the side.** `drawer_direction: :right` (or `:left`) brings the panel in
+from that edge, with the Drawer's own side classes: the full height, `w-3/4`,
+and at most `max-w-sm` from `sm` up, so on a laptop it is a narrow column rather
+than a strip across the screen. There is no handle on a side, as upstream draws
+it only from the bottom. One direction at every width: a bottom drawer on a
+phone and a side one from a tablet up is not built. The `agenda_drawer_side`
+preview and a system spec cover the panel against the right edge.
 
 **The gesture is select, then open.** The first tap on a day selects it and
 dispatches `select`, as without the option. A tap on the day that is *already*
