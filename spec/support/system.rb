@@ -24,6 +24,24 @@ Capybara.register_driver :shadcn_headless_chrome do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome, options:)
 end
 
+# Capybara 3.40.0 (the latest release) ends every Chrome reset with
+# `Storage.clearDataForOrigin` and `origin: "*"`
+# (`selenium/driver_specializations/chrome_driver.rb`, `reset!`), and Chrome
+# 158 rejects it: "invalid argument: * is not a valid URL", raised after every
+# example. The one origin these specs use is the app server's, so that is the
+# one cleared — the preferences specs rely on its local storage starting empty.
+# Remove once Capybara stops sending the wildcard.
+module ClearTheServersOrigin
+  def execute_cdp(command, params = {})
+    if command == "Storage.clearDataForOrigin" && params[:origin] == "*"
+      server = Capybara.current_session.server
+      params = params.merge(origin: "http://#{server.host}:#{server.port}") if server
+    end
+    super
+  end
+end
+Capybara::Selenium::Driver::ChromeDriver.prepend(ClearTheServersOrigin)
+
 # How long Capybara waits for a page to catch up before failing. Five is right
 # on a machine that is not busy; a loaded one — or a CI runner sharing a core —
 # needs more, and raising it there is better than a suite that fails on the
