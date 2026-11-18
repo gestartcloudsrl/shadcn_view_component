@@ -789,6 +789,29 @@ RSpec.describe "Event calendar", :js do
     end
   end
 
+  # Without `show_all_url:` the checkbox only announces the ask; the menu's
+  # own `select` ticks it first, so the event carries what was asked for.
+  describe "Show all events without a URL" do
+    before do
+      visit_preview("event_calendar", :workload)
+      wait_for_stimulus
+      page.execute_script(<<~JS)
+        window.asked = []
+        document.querySelector("[data-slot=event-calendar]")
+          .addEventListener("shadcn--event-calendar:show-all", (event) => window.asked.push(event.detail.showAll))
+      JS
+    end
+
+    it "dispatches show-all with the box's new state", :aggregate_failures do
+      open_panel
+      find("[role=menuitemcheckbox]", text: "Show all events").click
+      expect(page.evaluate_script("window.asked")).to eq([ true ])
+
+      find("[role=menuitemcheckbox]", text: "Show all events").click
+      expect(page.evaluate_script("window.asked")).to eq([ true, false ])
+    end
+  end
+
   # The one option whose effect is a stylesheet rather than a render. `rows:`
   # in `shadcn.css` carries the breakpoint and the override behind one name, so
   # what is asserted here is that both halves still fire: the width alone below
@@ -823,16 +846,21 @@ RSpec.describe "Event calendar", :js do
         expect(display_of(week)).to eq("contents")
       end
 
-      # The half an eye can see. Asserted as a colour rather than a class,
-      # because what matters is that a pressed toggle and an unpressed one do
-      # not look alike — the pressed one borrows the solid `default` variant,
-      # and a rename of that should not fail here.
-      it "makes a pressed toggle look different from an unpressed one" do
-        find("#{calendar} [data-slot=event-calendar-nav] [data-slot=button]", text: "Show all").click
+      # Show all is the panel's checkbox, not a toggle on the toolbar: a
+      # pressed toggle read as well "showing all" as "press to show all".
+      it "shows every event from the panel's checkbox, ticked once it does", :aggregate_failures do
+        expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-nav] [aria-pressed]")
+        expect(page).to have_css("#{calendar} [data-slot=event-calendar-day-rest]")
 
-        pressed = paint(find("#{calendar} [data-slot=button][aria-pressed=true]", text: "Show all"))
+        open_panel
+        item = find("[role=menuitemcheckbox]", text: "Show all events")
+        expect(item["aria-checked"]).to eq("false")
+        item.click
 
-        expect(pressed).not_to eq(paint(find("#{calendar} [data-slot=button]", text: "Today")))
+        expect(page).to have_current_path(/show_all=true/)
+        expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-rest]")
+        open_panel
+        expect(find("[role=menuitemcheckbox]", text: "Show all events")["aria-checked"]).to eq("true")
       end
     end
 
@@ -1831,7 +1859,7 @@ RSpec.describe "Event calendar", :js do
 
         expect(page).to have_current_path(/show_all=true/)
         expect(page).to have_no_css("#{calendar} [data-slot=event-calendar-day-rest]")
-        expect(find("#{calendar} [data-slot=event-calendar-nav] [aria-pressed]", text: "Show all")["aria-pressed"])
+        expect(find("#{calendar} [role=menuitemcheckbox]", text: "Show all events", visible: :all)["aria-checked"])
           .to eq("true")
       end
 

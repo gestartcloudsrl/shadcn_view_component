@@ -71,14 +71,12 @@ scroller's load behaviour is asserted, because it is the realistic case.
 
 ## Coverage gaps worth closing
 
-- [ ] **The workload's «Show all» link carries `aria-pressed`.** With
-      `show_all_url:` it is an `<a>` from `nav_button(…, pressed: show_all)`,
-      and ARIA does not allow `aria-pressed` on a link: axe's
-      `aria-allowed-attr`, critical. Found on 2026-11-17 auditing
-      `density?legend=true`; the audit walks template previews and no template
-      preview of the workload reading has a `show_all_url:`, so nothing had
-      looked. Not fixed: a link that is also a toggle needs a decision (a
-      `button` with the URL in its action, or `aria-current`, or no state).
+- [x] **The workload's «Show all» link carried `aria-pressed`.** With
+      `show_all_url:` it was an `<a>` from `nav_button(…, pressed: show_all)`,
+      which ARIA does not allow (axe's `aria-allowed-attr`). Gone with the
+      toggle: *Show all events* is now a `menuitemcheckbox` in the options
+      panel, whose `aria-checked` a link may carry
+      ([event-calendar](features/event-calendar.md#show-all-events-in-the-panel)).
 
 - [x] **Reverse parity.** `spec/reverse_parity_spec.rb` compares the classes
       rendered on each `data-slot` against the whole vendored corpus. Took three

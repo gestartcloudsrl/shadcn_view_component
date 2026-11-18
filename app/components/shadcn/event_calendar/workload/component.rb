@@ -146,11 +146,11 @@ module Shadcn
         # button: two controls for one question is what the panel replaced.
         def view = arrangement == :rows ? :rows : :grid
 
-        def reading_controls = [ view_panel, show_all_toggle ]
+        def reading_controls = [ view_panel ]
 
         def reading_label = grouping_label
 
-        def reading_options = [ grouping_items ]
+        def reading_options = [ grouping_items, show_all_item ]
 
         def panel? = true
 
@@ -316,15 +316,6 @@ module Shadcn
         # the only information on the cell, and the events it is counting are
         # invisible until you open the day. The marks say all eighty-two.
 
-        # A toggle, and a link when the caller can name the URL of the other
-        # state — the shape `#nav_button` has for the months, and for the same
-        # reason: what it changes is what the *server* renders, now that the cap
-        # is applied there rather than by a class.
-        #
-        # It was a `Switch` while it was a class toggle. A switch hardcodes its
-        # own `type="button"` and its own controller, so it cannot become a link
-        # without fighting both, and a control whose job is to change server state
-        # should be the thing that can.
         # Rows at a width that would otherwise get the grid.
         #
         # `max-lg:hidden` rather than a condition in Ruby: below `lg` the rows
@@ -341,12 +332,26 @@ module Shadcn
         # for the shape it makes, the way `Show all` is: a person reading the
         # toolbar is choosing between crews and clock, not between two layouts.
 
-        def show_all_toggle
-          nav_button(nil, size: :sm, action: "click->shadcn--event-calendar#showAll",
-                     href: show_all_url&.call(!show_all),
-                     pressed: show_all) do
-            shadcn_t("event_calendar.group.show_all")
-          end
+        # Every chip, or the cap and its "+N": a checkbox in the options panel,
+        # under the grouping, rather than a toggle on the toolbar. The toggle's
+        # label named a state — pressed, it was a solid button reading "Show
+        # all", which reads as well as "showing all" as "press to show all" —
+        # and a checkbox says which without a second look. It is a display
+        # setting beside the grouping, as the cap it lifts is one in the
+        # preferences, and the toolbar is one button lighter on a phone. A link
+        # when `show_all_url:` names the other state, `showAll` otherwise. It
+        # was a `Switch` once, and a link it has to be: what it changes is
+        # what the server renders.
+        def show_all_item
+          href = show_all_url&.call(!show_all)
+
+          safe_join([
+            render(DropdownMenu::Separator::Component.new),
+            render(DropdownMenu::CheckboxItem::Component.new(
+              checked: show_all,
+              **(href ? { as: :a, href: } : { "data-action": "click->shadcn--event-calendar#showAll" })
+            )) { shadcn_t("event_calendar.group.show_all") }
+          ])
         end
 
         # Only the extra action goes here: the radio item already carries the

@@ -65,5 +65,5 @@ it:
         label: Raggruppa
         assignees: Per assegnatario
         events: Per evento
-        show_all: Mostra tutti
+        show_all: Mostra tutti gli eventi
       time_format: "%H:%M"

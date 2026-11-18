@@ -233,11 +233,13 @@ export default class extends Controller {
 
   // The cap is the server's now, so there is nothing here to toggle: what a
   // cell renders is what it shows. This announces the ask, and a host that
-  // gave `show_all_url:` never gets here — the toggle is a link.
+  // gave `show_all_url:` never gets here — the item is a link. The item is
+  // the panel's checkbox, and the menu's own `select` comes first in its
+  // `data-action`, so `aria-checked` already says what was asked for.
   showAll(event) {
-    const pressed = event.currentTarget.getAttribute("aria-pressed") === "true"
+    const checked = event.currentTarget.getAttribute("aria-checked") === "true"
 
-    this.dispatch("show-all", { detail: { showAll: !pressed } })
+    this.dispatch("show-all", { detail: { showAll: checked } })
   }
 
   // The saved view: a dialog asking the panel's questions for next time.

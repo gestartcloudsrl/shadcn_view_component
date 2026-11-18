@@ -101,7 +101,7 @@ Passed to a reading that does not take one, it lands on the root as
 |---|---|---|
 | `group:` | workload, week as rows, day | `:events`, `:assignees` |
 | `show_all:` | workload, week as rows, day as rows | `false`, `true` (every chip instead of a cap and "+N") |
-| `max_chips:` | workload, week as rows, day as rows | `3`, any number from 1: the chips a cell shows before its "+N". A person's preference, passed back in by the host; the dialog's field takes 1 to 99 (`Preferences::MAX_CHIPS_RANGE`). *Show all* is still the toggle past it. No `max_chips_url:`, because no control on the toolbar changes it: the host's own `*_url:` lambdas carry it like the rest of its state |
+| `max_chips:` | workload, week as rows, day as rows | `3`, any number from 1: the chips a cell shows before its "+N". A person's preference, passed back in by the host; the dialog's field takes 1 to 99 (`Preferences::MAX_CHIPS_RANGE`). *Show all events*, in the options panel, is still the way past it. No `max_chips_url:`, because no control on the toolbar changes it: the host's own `*_url:` lambdas carry it like the rest of its state |
 | `arrangement:` | workload, week | `:auto`, `:rows` |
 | `window:` | month and week timelines, day | `0..24`, any range of hours, e.g. `7..19` |
 | `shape:` | month and week timelines, day | `:chips`, `:bars` |
@@ -962,12 +962,30 @@ selection sits in a row of buttons, and it costs no class of ours. Not
 is already `bg-accent`, so pressed and hovered would be the same picture and an
 unpressed button under the mouse would read as on. `Toggle` does not have that
 problem because its own hover is `bg-muted`. This is what "Show all" was
-missing too.
+missing too, before it moved into the panel ([below](#show-all-events-in-the-panel)).
 
 The button is hidden below `lg` with `max-lg:hidden` rather than by a condition
 in Ruby. There the rows are already what is drawn, so it has nothing to change —
 and the server cannot know which side of the breakpoint it rendered for, so CSS
 is the only place that can decide.
+
+### *Show all events*, in the panel
+
+Every chip, or the cap and its "+N", is a checkbox in the options panel, behind
+a separator under the grouping (`Workload#show_all_item`, so the workload, the
+week as rows and the day as rows). It was a toggle on the toolbar labelled
+*Show all*, and Gestart found it unclear (2026-11-18): pressed, it was a solid
+button whose label named a state, which reads as well "showing all" as "press
+to show all". A checkbox says which, the setting sits beside the grouping as the
+cap it lifts sits in the preferences, and the toolbar is a button lighter on a
+phone. With `show_all_url:` the item is a link to the other state, and
+`aria-checked` is allowed on a link where the toggle's `aria-pressed` was not.
+Without it the item calls `showAll`, which reads `aria-checked` after the
+menu's own `select` has ticked it (`select` is first in the item's
+`data-action`) and dispatches `show-all` with that. The copy is
+`event_calendar.group.show_all`, now «Show all events». Specs: the component
+spec ("Show all events"), and `event_calendar_spec.rb` (the link ticking the box
+and lifting the cap, the event's `{ showAll }` both ways).
 
 ## Moving an event
 
@@ -1940,7 +1958,7 @@ save a set no reading draws.
 The chip limit is the person's: how many jobs a capped cell shows before its
 "+N". It is two radios. *At most* has a number field beside it
 (`type="number"`, `min=1 max=99 step=1`, `required`), and *All* is the
-toolbar's *Show all* kept for next time, so the dialog asks one question where
+panel's *Show all events* kept for next time, so the dialog asks one question where
 it used to ask "show all, yes or no". The field starts at the reading's own
 `max_chips` (3 by default), and *All* is checked when the reading draws
 `show_all: true`. A `max_chips:` above 99 starts the field at 99; the reading

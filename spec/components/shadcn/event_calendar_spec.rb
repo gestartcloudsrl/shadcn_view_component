@@ -1416,6 +1416,46 @@ RSpec.describe Shadcn::EventCalendar::Component do
   # *reading* owns, arriving at one that does not, was forwarded the same way —
   # so `reading: :auto, group: :events` rendered `group="events"`, an attribute
   # HTML has no idea what to do with.
+  # A checkbox in the options panel, under the grouping — no longer a toggle on
+  # the toolbar, whose pressed state read either way.
+  describe "Show all events" do
+    def item(**options)
+      render_inline(described_class.new(month: Date.new(2026, 8, 1), reading: :workload, **options))
+      painted.at_css("[data-slot=dropdown-menu-content] [role=menuitemcheckbox]")
+    end
+
+    it "is a checkbox in the panel and no button on the toolbar", :aggregate_failures do
+      expect(item.text.strip).to eq("Show all events")
+      expect(item["aria-checked"]).to eq("false")
+      expect(item["data-action"]).to include("shadcn--dropdown-menu#select", "shadcn--event-calendar#showAll")
+      expect(painted).to have_no_css("[data-slot=event-calendar-nav] [aria-pressed]")
+    end
+
+    it "is ticked while every chip is shown" do
+      expect(item(show_all: true)["aria-checked"]).to eq("true")
+    end
+
+    it "comes after the grouping, behind a separator" do
+      item
+      content = painted.at_css("[data-slot=dropdown-menu-content]").element_children
+
+      expect(content.to_a.last(2).map { _1["data-slot"] }).to eq(%w[dropdown-menu-separator dropdown-menu-checkbox-item])
+    end
+
+    it "is a link to the other state with show_all_url:", :aggregate_failures do
+      link = item(show_all: true, show_all_url: ->(all) { "/calendar?show_all=#{all}" })
+
+      expect(link.name).to eq("a")
+      expect(link["href"]).to eq("/calendar?show_all=false")
+      expect(link["data-action"]).not_to include("showAll")
+    end
+
+    it "is in the week as rows and the day as rows too", :aggregate_failures do
+      expect(item(reading: :weekly, arrangement: :rows)).to be_present
+      expect(item(reading: :daily, showing: :rows, selected: Date.new(2026, 8, 4))).to be_present
+    end
+  end
+
   describe "a keyword meant for another reading" do
     subject(:root) do
       render_inline(described_class.new(

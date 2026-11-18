@@ -34,7 +34,7 @@ module Shadcn
           safe_join([ shadcn_t("event_calendar.daily.rows"), grouping_label ], " · ")
         end
 
-        def reading_options = [ showing_items, grouping_items ].compact
+        def reading_options = [ showing_items, grouping_items, show_all_item ].compact
 
         def preference_values = { period: :daily, showing: :rows, group:, max_chips: (show_all ? :all : preference_chip_count) }
 

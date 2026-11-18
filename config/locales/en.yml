@@ -135,7 +135,7 @@ en:
         label: Group by
         assignees: By assignee
         events: By event
-        show_all: Show all
+        show_all: Show all events
       # Times never reach the shim — the server formats every one of them and
       # ships it with the event — so this may use any token `strftime` has.
       time_format: "%-l:%M %p"
