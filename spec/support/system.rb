@@ -24,6 +24,24 @@ Capybara.register_driver :shadcn_headless_chrome do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome, options:)
 end
 
+# Capybara 3.40.0 (the latest release) ends every Chrome reset with
+# `Storage.clearDataForOrigin` and `origin: "*"`
+# (`selenium/driver_specializations/chrome_driver.rb`, `reset!`), and Chrome
+# 158 rejects it: "invalid argument: * is not a valid URL", raised after every
+# example. The one origin these specs use is the app server's, so that is the
+# one cleared — the preferences specs rely on its local storage starting empty.
+# Remove once Capybara stops sending the wildcard.
+module ClearTheServersOrigin
+  def execute_cdp(command, params = {})
+    if command == "Storage.clearDataForOrigin" && params[:origin] == "*"
+      server = Capybara.current_session.server
+      params = params.merge(origin: "http://#{server.host}:#{server.port}") if server
+    end
+    super
+  end
+end
+Capybara::Selenium::Driver::ChromeDriver.prepend(ClearTheServersOrigin)
+
 # How long Capybara waits for a page to catch up before failing. Five is right
 # on a machine that is not busy; a loaded one — or a CI runner sharing a core —
 # needs more, and raising it there is better than a suite that fails on the
@@ -44,9 +62,31 @@ module SystemHelpers
 
   # Stimulus connects after the module graph loads; wait for it rather than
   # sleeping.
+  #
+  # Waiting for `window.Stimulus` is not enough, and the gap is not theoretical:
+  # the dummy assigns it on the line *before* `registerShadcnControllers`, so
+  # the application object exists for a moment in which no controller does. A
+  # click that lands in that moment does nothing at all — no error and no
+  # retry, because the element was simply not listening yet — and the example
+  # fails later, somewhere else, as an empty list.
+  #
+  # So this waits on the thing actually being asked for: every identifier the
+  # page names in a `data-controller` has a module registered to answer it.
   def wait_for_stimulus
     Timeout.timeout(Capybara.default_max_wait_time) do
-      sleep 0.05 until page.evaluate_script("!!window.Stimulus")
+      sleep 0.05 until page.evaluate_script(<<~JS)
+        (() => {
+          const application = window.Stimulus
+          if (!application) return false
+
+          const registered = new Set(application.router.modules.map((module) => module.identifier))
+
+          return [ ...document.querySelectorAll("[data-controller]") ]
+            .flatMap((element) => element.dataset.controller.trim().split(/\\s+/))
+            .filter(Boolean)
+            .every((identifier) => registered.has(identifier))
+        })()
+      JS
     end
   end
 

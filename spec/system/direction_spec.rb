@@ -94,4 +94,49 @@ RSpec.describe "Reading direction", :js do
         .to eq(items_on_page[0].text.strip)
     end
   end
+
+  # The other kind of direction-awareness, and the one nothing here covered: not
+  # a key that means something different, but an *edge*. A job that runs Tuesday
+  # to Saturday is cut on both sides, and which side each cut lands on is the
+  # whole of what the chip says about which day of it you are looking at. Write
+  # that with `border-l` and it says the same thing in both directions, which in
+  # one of them is a lie.
+  #
+  # Read off `getComputedStyle` rather than off the class list: `border-s-2`
+  # resolving to the correct *physical* edge is exactly the step being asserted,
+  # and the class name is identical either way.
+  describe "a crossing chip's cut edges" do
+    # A method rather than a `let`: it is read once before the direction changes
+    # and once after, and a `let` would hand back the first answer both times.
+    def rails_of_first_day
+      page.evaluate_script(<<~JS)
+        (() => {
+          const chip = [...document.querySelectorAll("[data-slot=event-calendar-day-item][data-continues-after]")]
+                .find((c) => !c.hasAttribute("data-continues-before"))
+          if (!chip) return null
+
+          const s = getComputedStyle(chip)
+          const railed = (width, colour) => width === "2px" && colour.includes("oklch")
+          return { left: railed(s.borderLeftWidth, s.borderLeftColor),
+                   right: railed(s.borderRightWidth, s.borderRightColor) }
+        })()
+      JS
+    end
+
+    before do
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/lookbook/preview/shadcn/event_calendar/density?view=grid&most=4&spanning=3&colored=true"
+      wait_for_stimulus
+    end
+
+    it "rails the right-hand edge of a job's first day while the page reads left to right" do
+      expect(rails_of_first_day).to eq("left" => false, "right" => true)
+    end
+
+    it "rails the left-hand edge instead once the page reads right to left" do
+      set_direction("rtl")
+
+      expect(rails_of_first_day).to eq("left" => true, "right" => false)
+    end
+  end
 end

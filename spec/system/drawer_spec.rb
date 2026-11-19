@@ -84,6 +84,34 @@ RSpec.describe "Drawer", :js do
     expect(page).to have_css("#{content}[data-state=closed]", visible: :all)
   end
 
+  # The same capture, one layer up. A Select's or a menu's content is in the
+  # top layer but still inside the panel in the DOM, so a press on an item
+  # bubbled to the drag, which captured the pointer and took the click away:
+  # picking with the mouse did nothing. Reported from a host's form in the
+  # agenda drawer, worked around there with `data-vaul-no-drag`.
+  describe "a layer opened inside it" do
+    before { open_drawer(:with_layers) }
+
+    it "lets a Select's item be picked with the mouse", :aggregate_failures do
+      find("#{content} [data-slot=select-trigger]").click
+      find("[data-slot=select-item]", text: "South").click
+
+      expect(find("#{content} [data-slot=select-trigger]")).to have_text("South")
+      expect(page).to have_no_css("[data-slot=select-content]", visible: :visible)
+      expect(page).to have_css("#{content}[data-state=open]", visible: :visible)
+    end
+
+    it "lets a menu's item be chosen with the mouse", :aggregate_failures do
+      find("#{content} [data-slot=dropdown-menu-trigger]").click
+      expect(page).to have_css("[data-slot=dropdown-menu-content]", visible: :visible)
+
+      find("[data-slot=dropdown-menu-item]", text: "Archive").click
+
+      expect(page).to have_no_css("[data-slot=dropdown-menu-content]", visible: :visible)
+      expect(page).to have_css("#{content}[data-state=open]", visible: :visible)
+    end
+  end
+
   it "opens from its trigger, bottom-anchored, with the handle showing" do
     open_drawer
 

@@ -23,7 +23,17 @@ const VERTICAL = new Set([ "top", "bottom" ])
 // own `[data-vaul-no-drag]` is the escape hatch for anything else — it was
 // already honoured, but only in `shouldDrag`, which runs on the first *move*,
 // and by then the capture below has already happened.
-const CONTROLS = "a, button, input, select, textarea, label, [data-vaul-no-drag]"
+//
+// The roles are the items of the gem's Select, Combobox and DropdownMenu,
+// which are `div`s: their content opens inside the panel in the DOM, so a press
+// on one bubbles here like a press on a button. `press` also leaves alone any
+// layer of its own in the top layer (`floating.js` wraps each in a `popover`),
+// whatever it holds; the roles are what still holds where the Popover API is
+// missing and that wrapper is a plain element.
+const CONTROLS = [
+  "a, button, input, select, textarea, label, [data-vaul-no-drag]",
+  "[role=option], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]"
+].join(", ")
 
 // The drag half of vaul's Drawer, which is the only half that is vaul's: the
 // rest of this component is Radix's Dialog, and runs on `shadcn--dialog`, whose
@@ -77,6 +87,12 @@ export default class extends Controller {
     // and so did Enter, because no pointer is involved: which is how this
     // arrived — "with the keyboard it submits, with the mouse nothing happens".
     if (event.target.closest?.(CONTROLS)) return
+    // A layer opened inside the panel — a select's list, a popover, a menu —
+    // is in the top layer, above the panel, and a press on it is never a drag
+    // of the panel. The panel itself is a `popover` too (`dialog_controller`
+    // promotes it), so only one that is not the panel counts.
+    const layer = event.target.closest?.("[popover]")
+    if (layer && layer !== this.contentTarget && this.contentTarget.contains(layer)) return
 
     this.dragging = true
     this.allowed = false

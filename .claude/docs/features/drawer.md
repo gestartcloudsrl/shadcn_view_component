@@ -68,6 +68,18 @@ that does not step in first — which is every platform this gem will actually
 ship to and none that it can be tested on here. See
 [testing](../decisions/03-testing.md).
 
+## Escape can be cancelled
+
+The shared `shadcn--dialog` controller dispatches a cancelable
+`shadcn--dialog:escape-key-down` on its own element when Escape reaches it,
+before it closes; a listener that calls `preventDefault()` keeps it open. It is
+the counterpart of the `onEscapeKeyDown` prop of Radix's `Dialog.Content`
+(`DismissableLayer`'s prop is the one vendored, in
+`vendor/radix/ui/hover-card.tsx`; Radix's dialog source is not). Pointer
+dismissal does not dispatch it, and only the top layer gets Escape.
+`spec/system/dialog_spec.rb` drives it on the Dialog and the Sheet; the Drawer
+shares the controller, and `drawer_spec.rb` still passes unchanged.
+
 ## The one addition: pointer capture
 
 vaul does not capture the pointer, and this port does. It is the only place
@@ -124,6 +136,20 @@ places.
 What it costs is dragging the panel by pressing on a control, which is not a
 gesture anyone makes deliberately. `spec/system/drawer_spec.rb` covers it with a
 real click, and the drag specs above it still pass unchanged.
+
+**The same, one layer up (2026-11-17).** The list wasn't complete: a Select's
+items, a Combobox's and a DropdownMenu's are `div`s with a role, and their
+content opens *inside* the panel in the DOM, in the top layer. A press on one
+bubbled to the drag, and picking with the mouse did nothing. A host reported it
+from a form in the event calendar's agenda drawer and had worked around it with
+`data-vaul-no-drag`. `press` now also leaves alone `[role=option]` and the three
+`menuitem` roles, and any `[popover]` inside the panel other than the panel
+itself: `floating.js` puts each layer in such a wrapper, and `dialog_controller`
+promotes the panel the same way. With the roles removed, the layer check alone
+passes the two specs; the roles are for a browser without the Popover API, where
+the wrapper is a plain element, and no spec runs one. The `with_layers` preview
+and two specs in `drawer_spec.rb` pick an item from a Select and from a menu
+with a real click.
 
 ## The exit starts where the finger left it
 

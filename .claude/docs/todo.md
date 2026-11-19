@@ -71,6 +71,13 @@ scroller's load behaviour is asserted, because it is the realistic case.
 
 ## Coverage gaps worth closing
 
+- [x] **The workload's «Show all» link carried `aria-pressed`.** With
+      `show_all_url:` it was an `<a>` from `nav_button(…, pressed: show_all)`,
+      which ARIA does not allow (axe's `aria-allowed-attr`). Gone with the
+      toggle: *Show all events* is now a `menuitemcheckbox` in the options
+      panel, whose `aria-checked` a link may carry
+      ([event-calendar](features/event-calendar.md#show-all-events-in-the-panel)).
+
 - [x] **Reverse parity.** `spec/reverse_parity_spec.rb` compares the classes
       rendered on each `data-slot` against the whole vendored corpus. Took three
       designs; the two that failed and the trade the third makes are in
@@ -425,6 +432,163 @@ noting that it would not have delivered the component that raised the question:
 
 ## Smaller things
 
+- [ ] **A row inside `agenda: :drawer` cannot open a host's Sheet.** The
+      documented recipe, `attributes: { data: { turbo_frame: "event", action:
+      "shadcn--dialog#open" } }`, resolves in Stimulus to the nearest
+      `shadcn--dialog` controller above the row, and inside the drawer that is
+      the agenda's own drawer. Found while checking that a Sheet stacks over the
+      drawer (228210c). The row click was observed not to open the Sheet while
+      building and is explained by Stimulus' scope resolution; no committed spec
+      clicks a row. What a spec does pin: a Sheet opened through its own
+      controller lands on top and Escape closes it first
+      (`spec/system/event_calendar_spec.rb`, "a Sheet over the drawer", which
+      calls the controller from script). What is not: any way to open it *from a
+      row* — none has been run, so none is documented. See
+      [the feature doc](features/event-calendar.md#the-agenda-in-a-drawer).
+      For an event's *detail*, `agenda_detail:` is the path and does not need
+      this; what stays open is a host's own Sheet from a row
+      ([the detail](features/event-calendar.md#an-events-detail-in-the-drawer)).
+
+- [ ] **`agenda: :drawer` follow-ups.** Link cells (`day_url:`) never announce
+      the selection: on a full-page link the navigation would cut it, and a
+      frame-backed drawer stays silent because `openDay` marks the cell without
+      calling `announceSelection`. And a Turbo morph while the drawer is open is
+      unverified (the morph may strip the open state, or the dialog may hide
+      without tearing down its scroll lock and dismiss layer).
+      [The feature doc](features/event-calendar.md#the-agenda-in-a-drawer).
+
+- [ ] **The event calendar's desktop month takes two clicks to open an event**
+      (the day, then the row), where it took one. Events open from the row in
+      the day's list and the chip stays decoration, see
+      [the feature doc](features/event-calendar.md#what-an-event-says-and-where-it-opens).
+      A product owner is deciding. **Trigger: if two clicks are refused, revisit
+      the month alone**; the week and the day ship either way. Nothing built
+      toward the alternative, and none is designed.
+
+- [x] **Profile the client-side redraw before optimising it.** Done, and the
+      answer is *don't*. A 2,000-event month redraws in **19.4 ms** — one frame,
+      for a density no host should be shipping in the first place, and against
+      54 ms for the server render of a smaller month. Where it goes, nested:
+
+      | | ms | of 19.4 |
+      |---|---|---|
+      | `ticksElement` | 9.5 | 49% |
+      | `segmentsIn` | 5.2 | 27% |
+      | `format` | 0.3 | 1.5% |
+      | `eventsOn` | 0.1 | — |
+
+      Inside `ticksElement`, sorting is **0.4 ms** and building the nodes 1.4;
+      the remaining ~7.7 ms is the DOM itself — cloning, writing `data-color`
+      onto two thousand spans, attaching them. No reordering touches that, and
+      the per-span cost is already as low as it goes: the strip carries the
+      classes, which is why a mark has two attributes and nothing else.
+
+      So the three optimisations that looked obvious are worth, measured: a
+      colour-rank `Map` instead of `colorsValue.indexOf` — **0.4 ms against
+      0.4 ms**, because it scans six elements; caching the locale arrays that
+      `format` rebuilds — 1.5% at the absolute most; a single pass over a week's
+      segments instead of nine — a slice of the 3.7 ms `fillDay` spends outside
+      `ticksElement`. The one with headroom is `segmentsIn`, six full scans of
+      every event per redraw, and it is 27% of a number that was never the
+      problem.
+
+      Kept as a closed entry rather than deleted, because the proposal is
+      re-derivable from the code in about a minute and the measurement is not.
+
+- [ ] **`agenda` means two things in `density`'s parameters.** It is a value of
+      `showing` — the daily reading's list half, labelled *List only* — and a
+      value of `turbo`, where the day view lands. They never collide in the UI,
+      because the label is "List only" and the panel never shows the second at
+      all; they collide in the URL, where `showing=agenda&turbo=agenda` is two
+      unrelated facts wearing one word. Renaming `turbo`'s value — `inline`,
+      say, for "in the flow of the page" — costs three spec URLs and takes a
+      word back. Found beside the `view`/`period` merge and left alone
+      deliberately: one incongruence at a time, and this one misleads a reader
+      rather than the code.
+
+- [ ] **The hours axis positions with `left`, and the family has never been
+      seen in RTL.** The crossing rail and the band's margins now use logical
+      edges, and `direction_spec` holds them — but `Hours::Component` places
+      chips and bars with `left-(--at)`, so a right-to-left locale gets a
+      correctly-cut chip on a timeline that still runs the other way. Flipping
+      it is a decision about behaviour, not a token swap: the ruler, the
+      gridlines, `axis_style` and the controller's own arithmetic all have to
+      agree, and `inset-inline-start` only moves the first of those. The rest of
+      the gem stays physical on purpose — upstream is, and diverging on class
+      strings is the thing this port does not do.
+
+- [ ] **Split `event_calendar_controller.js` — not yet, and here is the
+      trigger.** The split was built and thrown away rather than argued about,
+      so the numbers below are measured and not estimated. 570 lines came apart
+      cleanly into **298 frame + 308 drawing**: the frame walks between months,
+      selects, handles the keyboard and announces what the options panel asks
+      for; the drawing packs lanes, builds the index and fills the cells, which
+      three of the four readings never run.
+
+      Four things the spike found that the argument had not:
+
+      - **The dependency runs the wrong way.** The drawing asks the frame for
+        `mark` and `mod`, two helpers of three lines — and, since the focus fix,
+        for `cellFor` and `focusCell` as well, which is four rather than two but
+        the same shape. It is the frame that reaches into the drawing — `next`,
+        `previous`, `today` and `focusDay` through `goTo` to `render`, and
+        `select` to `eventsOn` and `renderAgenda`. Splitting therefore costs
+        three no-op hooks on the base.
+      - **Those hooks would be dead.** Only the subclass is ever registered, and
+        it overrides all three, so the base has one implementation and no
+        caller. It is an abstraction with nothing to abstract over yet.
+      - **`stimulus_contract_spec` goes blind** — 35 failures at once, because it
+        maps an identifier to *one* file by name and half the surface moves
+        elsewhere. Teaching it to follow the base costs about seven lines, and
+        introduces a hole of its own: `static targets` takes the first match, so
+        a subclass declaring its own would silently hide one of the two groups.
+      - **`get month()` is the member that gets misfiled**, and it did: a split
+        that lists methods by name misses the getter, which then travels with
+        whatever it was sitting next to. It went to the drawing, and `next` and
+        `previous` need it — so the base was broken and nothing said so, because
+        the base is never the class that runs. Whoever does this for real should
+        check the seam by *running the frame alone*, which is the one thing this
+        spike could not do.
+
+      **It saves no bytes** — `+835` of them, in fact, for the imports and the
+      class headers. `shadcn/index.js` imports all thirty-three controllers
+      eagerly, so the second file is imported too. A host that wants fewer
+      already has the door open, since `CONTROLLERS` is exported and every
+      controller is pinned individually; registering is not loading.
+
+      And the premise was false *then*: `calendar_controller.js` is **616 lines**
+      and unsplit, so 570 was never an outlier — it was second. Against the bar
+      this repo already holds itself to, that file was not too big.
+
+      **That half has since stopped being true, and the numbers should be read
+      with the date on them.** 570 was the file when the split was measured; the
+      focus fix took it to 647 and moving an event took it to **896**. It is not
+      second any more — it is the longest controller here by 45%, and the
+      measured 298/308 seam was cut through a file two thirds this size, so
+      those two numbers are stale as well.
+
+      What does *not* change is the rest of the entry, and that is the point: the
+      size was never the argument. The hooks would still be dead, the dependency
+      would still run the wrong way, and `stimulus_contract_spec` would still go
+      blind. Size was the one reason **against** splitting, and it has gone —
+      which moves this from "the case is weak" to "the case is untested", and
+      the test is a second reading drawn in the browser.
+
+      **What was going to change the answer was the week view, and it did
+      not.** This entry predicted the week would need a `render` of its own,
+      giving the base its second subclass and the three hooks a life. The week
+      is built and needs none: `Hours::Component#client_drawn?` is `false`, so
+      the server draws it whole and the controller's `render()` returns before
+      reaching it. The prediction was made before looking at which half of the
+      family the week would sit in.
+
+      The trigger is therefore a second **client-drawn** reading — something no
+      reading has needed yet, and not by accident: the events reading is the
+      only one drawn in the browser, and the other four — workload, hours, the
+      day and the week — are server-drawn because their data should not travel. Until one exists
+      the seam is worth having in the *order of the methods*, which is where it
+      now is, and not in a second file.
+
 - [x] **The Sidebar's mobile sheet has no role and no accessible name.** Fixed:
       the controller writes `role="dialog"`, `aria-modal` and both relationships
       while the sheet is open, and takes all four back when it closes — on
@@ -564,6 +728,31 @@ noting that it would not have delivered the component that raised the question:
 
 ## Deliberately not doing
 
+- **Two of the event calendar's four halves** — a "+2 more" popover and
+  recurrence. Each is named with its reason in
+  [features/event-calendar.md](features/event-calendar.md#not-done); the popover
+  would cost the one-tap-target-per-day property the mobile reading is built on,
+  and expanding a recurrence rule into occurrences is a job `ice_cube` already
+  does.
+
+  **Drag to move came off this list**, and what it cost to find that out is
+  worth keeping: the reason it was on it — that a write path is an application's
+  — turned out to be the easy half. See
+  [the design](specs/2026-08-27-event-calendar-drag-to-move-design.md) for what
+  actually blocked it and [the plan](plans/2026-08-27-event-calendar-drag-to-move.md)
+  for what building it corrected in both.
+
+  **Drag to resize is still not done**, and now for a smaller reason than it
+  had: the machinery exists — `movable:`, the identity, the value as the source
+  of truth, the two grips — and what is missing is a second gesture on the end
+  of a bar and a rule for what a resize means to a `to` that is inclusive.
+
+  The fourth was the week view, which went to *Smaller things* once the time
+  axis it was blocked on had been built, and has since been built itself, as a
+  timeline and as the month's rows (`arrangement: :rows`) — see the
+  [feature doc](features/event-calendar.md#the-period-the-week-and-the-day).
+  The day view came off this list the same way — it was named as deliberately not
+  done for a while after it was done.
 - **Reverse parity as a token-set diff** — measured, 12 of 13 families dirty with
   false positives.
 - **Portalling to `document.body`** — unbinds the Stimulus actions inside the

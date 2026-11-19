@@ -1,0 +1,33 @@
+<%# A Select and a DropdownMenu inside a drawer: picking an item with the mouse
+    has to reach the item, not start a drag. See `Preview#with_layers`. %>
+<%= render(Shadcn::Drawer::Component.new) do |d| %>
+  <% d.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Open drawer" } %>
+  <% d.with_dialog_content do |c| %>
+    <% c.with_header do |h| %>
+      <% h.with_title { "New job" } %>
+      <% h.with_description { "Pick a crew and an action." } %>
+    <% end %>
+    <div class="flex flex-col gap-4 p-4">
+      <%= render(Shadcn::Select::Component.new(name: "crew", placeholder: "Select a crew")) do |s| %>
+        <% s.with_trigger(class: "w-[200px]", "aria-label": "Crew") do |tr| %>
+          <% tr.with_value(placeholder: "Select a crew") %>
+        <% end %>
+        <% s.with_select_content do %>
+          <% %w[North South East].each do |crew| %>
+            <%= render(Shadcn::Select::Item::Component.new(value: crew.downcase)) { crew } %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <%= render(Shadcn::DropdownMenu::Component.new) do |m| %>
+        <% m.with_trigger(class: Shadcn::Button::Component.variant_classes(variant: :outline)) { "Actions" } %>
+        <% m.with_menu_content do %>
+          <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Duplicate" } %>
+          <%= render(Shadcn::DropdownMenu::Item::Component.new) { "Archive" } %>
+        <% end %>
+      <% end %>
+    </div>
+    <% c.with_footer do %>
+      <%= render(Shadcn::Drawer::Close::Component.new(class: Shadcn::Button::Component.variant_classes(variant: :outline))) { "Cancel" } %>
+    <% end %>
+  <% end %>
+<% end %>

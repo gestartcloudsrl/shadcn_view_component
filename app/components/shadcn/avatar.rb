@@ -17,11 +17,15 @@ module Shadcn
                           "group-data-[size=lg]/avatar:size-3 " \
                           "group-data-[size=lg]/avatar:[&>svg]:size-2"
 
-    part :group, slot: "avatar-group",
+    # `span`, not the default `div`: an avatar group turns up inside a `<button>`
+    # in the event calendar's day cell, and flow content inside a button is not
+    # allowed by the content model. Nothing about the group is block-level —
+    # `flex` does not care which element it is on.
+    part :group, tag: :span, slot: "avatar-group",
                  classes: "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 " \
                           "*:data-[slot=avatar]:ring-background"
 
-    part :group_count, slot: "avatar-group-count",
+    part :group_count, tag: :span, slot: "avatar-group-count",
                        classes: "relative flex size-8 shrink-0 items-center justify-center " \
                                 "rounded-full bg-muted text-sm text-muted-foreground ring-2 " \
                                 "ring-background group-has-data-[size=lg]/avatar-group:size-10 " \

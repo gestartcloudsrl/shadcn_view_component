@@ -1,0 +1,17 @@
+<%# The week as rows with `preferences: :local`: the panel ends in a
+    Preferences item, the dialog it opens is drawn (closed) beside the toolbar,
+    and the root carries the URL of every set the dialog can save — here each
+    one a `density` URL, so saving lands on that preview drawing it. `density`
+    is where to try it; this exists so the snapshot and the audit cover the
+    dialog's markup, which `density`, a method, would not give them. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      reading: :weekly,
+      arrangement: :rows,
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 5),
+      events: Shadcn::EventCalendar::Preview.workload_events,
+      preferences: :local,
+      preferences_url: lambda { |set|
+        "/lookbook/preview/shadcn/event_calendar/density?#{set.merge(preferences: :local).to_query}"
+      }
+    )) %>

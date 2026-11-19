@@ -1,0 +1,3 @@
+<%# What `save_preferences` kept, as JSON a spec can parse: the fields the
+    dialog sent, and only those, and whether the form carried its token. %>
+<pre id="calendar-preferences" data-token="<%= @token %>"><%= JSON.pretty_generate(@preferences) %></pre>

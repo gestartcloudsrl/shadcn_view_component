@@ -32,6 +32,49 @@ RSpec.describe "Dialog", :js do
     expect(page.evaluate_script("window.__escapes")).to eq(1)
   end
 
+  # Radix's `onEscapeKeyDown` on `Dialog.Content`: a host that wants Escape to
+  # step back instead of close cancels the event.
+  describe "the escape-key-down event" do
+    def record_escapes(cancel:)
+      page.execute_script(<<~JS, cancel)
+        const cancel = arguments[0]
+        window.__escapeEvents = []
+        document.addEventListener("shadcn--dialog:escape-key-down", (event) => {
+          window.__escapeEvents.push(event.target.querySelector("[data-slot=dialog-title], [data-slot=sheet-title]")?.textContent.trim())
+          if (cancel) event.preventDefault()
+        })
+      JS
+    end
+
+    it "keeps the dialog open when a listener cancels it" do
+      record_escapes(cancel: true)
+      click_button "Edit profile"
+      press(:escape)
+
+      expect(page.evaluate_script("window.__escapeEvents.length")).to eq(1)
+      expect(page).to have_css(content)
+      expect(state_of(content)).to eq("open")
+    end
+
+    it "dispatches once and still closes when nothing cancels it" do
+      record_escapes(cancel: false)
+      click_button "Edit profile"
+      press(:escape)
+
+      expect(page).to have_no_css(content)
+      expect(page.evaluate_script("window.__escapeEvents.length")).to eq(1)
+    end
+
+    it "is not dispatched for a pointer dismissal" do
+      record_escapes(cancel: true)
+      click_button "Edit profile"
+      click_outside
+
+      expect(page).to have_no_css(content)
+      expect(page.evaluate_script("window.__escapeEvents.length")).to eq(0)
+    end
+  end
+
   context "when opened from the trigger" do
     before { click_button "Edit profile" }
 
@@ -161,6 +204,24 @@ RSpec.describe "Sheet", :js do
     end
   end
 
+  # Only the top layer receives Escape, so only its dialog dispatches.
+  it "dispatches escape-key-down on the top layer only" do
+    page.execute_script(<<~JS)
+      window.__escapeTargets = []
+      document.addEventListener("shadcn--dialog:escape-key-down", (event) => {
+        window.__escapeTargets.push(event.target.querySelector("[data-slot=sheet-trigger]").textContent.trim())
+      })
+    JS
+    click_button "Left"
+    page.execute_script("document.querySelectorAll('[data-slot=sheet-trigger]')[3].click()")
+    expect(page).to have_css(content, count: 2, visible: true)
+
+    press(:escape)
+
+    expect(page.evaluate_script("window.__escapeTargets.length")).to eq(1)
+    expect(page.evaluate_script("window.__escapeTargets[0]")).not_to eq("Left")
+  end
+
   it "closes on Escape" do
     click_button "Right"
     expect(page).to have_css(content)
@@ -168,5 +229,54 @@ RSpec.describe "Sheet", :js do
     press(:escape)
 
     expect(page).to have_no_css(content)
+  end
+end
+
+# A `role="dialog"` with no name is announced as "dialog" and nothing else, and
+# a host's `getByRole("dialog", { name: … })` cannot find it. Every modal the
+# shared controller drives — Dialog, AlertDialog, Sheet, Drawer — takes its name
+# from its own Title and its description from its own Description.
+RSpec.describe "A modal's name", :js do
+  def named(content)
+    page.evaluate_script(<<~JS, content)
+      ((content) => {
+        const text = (attribute) => (content.getAttribute(attribute) || "").split(/\\s+/).filter(Boolean)
+          .map((id) => document.getElementById(id)?.textContent.trim()).join(" ")
+        return { name: text("aria-labelledby"), description: text("aria-describedby") }
+      })(arguments[0])
+    JS
+  end
+
+  {
+    dialog: [ "Edit profile", "Make changes to your profile here. Click save when you are done." ],
+    alert_dialog: [ "Are you absolutely sure?", "This action cannot be undone. It will permanently delete your account." ],
+    sheet: [ "Edit profile", "Make changes to your profile here." ],
+    drawer: [ "Move goal", "Set your daily activity goal." ]
+  }.each do |family, (title, description)|
+    it "names the #{family} from its title and describes it from its description", :aggregate_failures do
+      visit_preview(family)
+      wait_for_stimulus
+      slot = family.to_s.tr("_", "-")
+      first("[data-slot=#{slot}-trigger]").click
+      content = find("[data-slot=#{slot}-content][data-state=open]")
+
+      expect(named(content)).to eq("name" => title, "description" => description)
+    end
+  end
+
+  # A name the caller gave is the caller's. The controller has already wired
+  # the title at connect, so the example stands in for a server-rendered
+  # `aria-label` by swapping the two before the dialog renders again.
+  it "leaves an aria-label the caller set" do
+    visit_preview(:dialog)
+    wait_for_stimulus
+    page.execute_script(<<~JS)
+      const content = document.querySelector("[data-slot=dialog-content]")
+      content.removeAttribute("aria-labelledby")
+      content.setAttribute("aria-label", "Mine")
+    JS
+    click_button "Edit profile"
+
+    expect(find("[data-slot=dialog-content][data-state=open]")["aria-labelledby"]).to be_nil
   end
 end

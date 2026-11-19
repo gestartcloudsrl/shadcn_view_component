@@ -95,6 +95,10 @@ RSpec.describe "rendered output snapshots" do
 
       expect(fixture).to exist,
                          "no snapshot for #{name}; run SNAPSHOTS=overwrite bundle exec rspec"
+      # A golden records what the page said, so a missing key would be
+      # recorded too and then defended: the preferences dialog shipped
+      # "Translation missing: …show_all_true" that way.
+      expect(rendered).not_to include("Translation missing"), "#{name} renders a missing translation"
       expect(rendered).to eq(fixture.read)
     end
   end

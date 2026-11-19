@@ -24,6 +24,15 @@
     <% end %>
   <% end %>
 
+  <%# A month, because a morph refresh has to leave the keyboard where it was:
+      the controller redraws every cell, and the cell it redraws is the one
+      holding the focus and the roving tab stop. %>
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: Date.new(2026, 8, 1),
+        selected: Date.new(2026, 8, 3),
+        events: [ { title: "Standup", starts_at: Time.zone.local(2026, 8, 4, 9, 30) } ]
+      )) %>
+
   <%= render(Shadcn::Accordion::Component.new(type: :single, collapsible: true, class: "w-[420px]")) do |acc| %>
     <% acc.with_item(value: "a") do |item| %>
       <% item.with_trigger { "Is it accessible?" } %>

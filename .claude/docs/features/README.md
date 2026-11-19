@@ -34,7 +34,7 @@ here would create a copy nobody updates. These files carry what a machine cannot
 API.
 
 **Anything unmeasured.** An absent entry means *not yet assessed*, never "1:1".
-There are 63 families under `app/components/shadcn/` and thirteen have been
+There are 64 families under `app/components/shadcn/` and fourteen have been
 examined closely enough to write down; claiming the rest match would be exactly the kind of sentence this project
 keeps catching itself in.
 
@@ -45,7 +45,7 @@ keeps catching itself in.
 | [sidebar.md](sidebar.md) | **ours** / adapted | no Radix Sidebar exists; the runtime mobile branch cannot survive server rendering |
 | [navigation-menu.md](navigation-menu.md) | **adapted** | upstream's shared viewport needs a portal, so this ships the `viewport={false}` configuration shadcn also supports |
 | [message-scroller.md](message-scroller.md) | **adapted** | shadcn's own primitive rather than a Radix one; two surfaces deliberately not reproduced, and one difference server rendering forces |
-| [drawer.md](drawer.md) | **adapted** | built on vaul rather than Radix: the drag is ported, four of vaul's features are not, and its stylesheet had to be reproduced |
+| [drawer.md](drawer.md) | **adapted** | built on vaul rather than Radix: the drag is ported, four of vaul's features are not, and its stylesheet had to be reproduced. Also documents the cancelable `shadcn--dialog:escape-key-down`, which Dialog, AlertDialog and Sheet share ([Escape can be cancelled](drawer.md#escape-can-be-cancelled)) |
 | [form.md](form.md) | **ours** | react-hook-form's field state has no server counterpart; the family is `ShadcnViewComponent::FormBuilder` over `Field` |
 | [carousel.md](carousel.md) | **adapted** | embla's 3,170 lines answer six questions a scroll container already answers; no loop, no plugins, no mouse drag |
 | [input-otp.md](input-otp.md) | **adapted** | one real input under the boxes, which is what the package is; the browser workarounds are not ported |
@@ -55,6 +55,7 @@ keeps catching itself in.
 | [chart.md](chart.md) | **adapted** / ours | `chart.tsx` is a frame around recharts and draws nothing; the frame is 1:1 and the pie, bar, line and area are drawn here |
 | [calendar.md](calendar.md) | **adapted** | `react-day-picker` is mostly date arithmetic and locale data, which Ruby has; the markup is 1:1 and the grid is rendered on both sides |
 | [toaster.md](toaster.md) | **ours** | `sonner.tsx` emits no markup at all, so there is nothing to be 1:1 with; sonner's measurements and stacking, Rails' three ways in |
+| [event-calendar.md](event-calendar.md) | **ours** | shadcn has the day picker and no event calendar; FullCalendar's `dayGridMonth` as the reference, the lane packing in Ruby, a cell that either names its events or shows their shape, a third reading that measures the day rather than listing it, and `movable:` — a keyboard hand through the agenda and a pointer's through a grip |
 
 Components with a known divergence but no file yet — write one before claiming
 anything about them:
@@ -62,6 +63,11 @@ anything about them:
 - **select** — *extended*: `searchable:` is this gem's own component
   (`decisions/01-architecture.md`). Everything else measured against Radix
   matches, including the typeahead.
+- **dialog, alert-dialog, sheet** — *extended* by one event: Escape dispatches
+  a cancelable `shadcn--dialog:escape-key-down` on the root before it closes,
+  the port of Radix's `onEscapeKeyDown` on `Dialog.Content`. The four modal
+  families share `dialog_controller.js`, so it is documented once, in
+  [drawer.md](drawer.md#escape-can-be-cancelled).
 - **dropdown-menu** — *extended*: `loop:` exposes what Radix has as a prop and
   shadcn does not pass.
 

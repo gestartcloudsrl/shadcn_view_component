@@ -84,7 +84,10 @@ RSpec.describe "reduced motion in the compiled bundle" do
   # compiler rather than about this gem. For those, the assertion is that the
   # class itself appears inside a reduced-motion block with the collapse —
   # per usage, exactly as for the shapes below, and without inventing the
-  # selector around it.
+  # selector around it — nor where in that selector the class sits. Tailwind
+  # 4.3.3 wrote it first, `.cls:is(:where(.group\/name)[attr] *)`; 4.3.4 moved
+  # it inside, `:is(:where(.group\/name)[attr] .cls)`, and an assertion
+  # anchored at the start of the selector went red with the collapse intact.
   reconstructable = ->(token) { !token.include?("/") && !token.include?("^") }
 
   compiled_selector = lambda do |token|
@@ -117,7 +120,7 @@ RSpec.describe "reduced motion in the compiled bundle" do
     it "collapses `#{token}` under reduced motion" do
       unless reconstructable.call(token)
         css = bundle_path.read
-        pattern = /@media \(prefers-reduced-motion:reduce\)\{\.#{Regexp.escape(escape.call(token))}[^{]*\{animation-duration:\.01ms/
+        pattern = /@media \(prefers-reduced-motion:reduce\)\{[^{}]*\.#{Regexp.escape(escape.call(token))}[^{]*\{animation-duration:\.01ms/
 
         expect(css).to match(pattern), "no reduced-motion collapse compiled for `#{token}`"
         next

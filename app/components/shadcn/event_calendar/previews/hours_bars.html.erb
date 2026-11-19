@@ -1,0 +1,17 @@
+<%# The hours reading at its other shape: a bar is as wide as the job lasts and
+    says nothing else, where a chip says who and for whom.
+
+    A fixture rather than an example — `@hidden`, like `hours` and `workload` —
+    and it exists because `shape: :bars` reached no golden and no axe run at
+    all. `reverse_parity_spec` listed five classes for a slot no fixture drew,
+    which is a registry describing something nothing checks. %>
+<%= render(Shadcn::EventCalendar::Component.new(
+      month: Date.new(2026, 8, 1),
+      selected: Date.new(2026, 8, 20),
+      reading: :hours,
+      window: (7..19),
+      shape: :bars,
+      events: Shadcn::EventCalendar::Preview.workload_events(per_day: 0..3, crew: 1..3,
+                                                             colored: true, durations: true,
+                                                             all_day: 1)
+    )) %>

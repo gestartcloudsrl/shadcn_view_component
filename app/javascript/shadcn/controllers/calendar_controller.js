@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { readDirection } from "shadcn/direction"
+import { iso, parse, shiftMonths, strftime } from "shadcn/dates"
 
 // The calendar is rendered by the server — a month is a `<table>`, and Ruby
 // builds it in `Calendar::Month`. This moves it: the nav, the two dropdowns and
@@ -563,14 +564,12 @@ export default class extends Controller {
 
   // --- dates ----------------------------------------------------------------
 
-  parse(iso) {
-    const [ year, month, day ] = iso.split("-").map(Number)
-
-    return new Date(year, month - 1, day)
+  parse(value) {
+    return parse(value)
   }
 
   shiftMonths(date, by) {
-    return new Date(date.getFullYear(), date.getMonth() + by, 1)
+    return shiftMonths(date, by)
   }
 
   offsetInWeek(date) {
@@ -578,11 +577,7 @@ export default class extends Controller {
   }
 
   iso(date) {
-    return [
-      date.getFullYear(),
-      String(date.getMonth() + 1).padStart(2, "0"),
-      String(date.getDate()).padStart(2, "0")
-    ].join("-")
+    return iso(date)
   }
 
   // ISO-8601, matching `Date#cweek` on the Ruby side: the week holding the
@@ -607,27 +602,15 @@ export default class extends Controller {
     return this.format(date, this.monthFormatValue)
   }
 
-  // Enough `strftime` to read the formats Rails' own locales are written in,
-  // and no more. The pattern comes from `I18n` with the rest of the text, so a
-  // host that has translated `date.formats.long` gets its own order and its own
-  // punctuation here rather than this file's idea of them.
+  // Shared with the event calendar, which spells its months from the same
+  // `I18n` values — see `shadcn/dates.js` for why the pattern crosses rather
+  // than the sentence.
   format(date, pattern) {
-    const day = date.getDate()
-    const month = date.getMonth() + 1
-    const tokens = {
-      "%A": this.dayNamesValue[date.getDay()],
-      "%a": this.shortDayNamesValue[date.getDay()],
-      "%B": this.monthNamesValue[date.getMonth()],
-      "%b": this.shortMonthNamesValue[date.getMonth()],
-      "%d": String(day).padStart(2, "0"),
-      "%-d": String(day),
-      "%e": String(day).padStart(2, " "),
-      "%m": String(month).padStart(2, "0"),
-      "%-m": String(month),
-      "%Y": String(date.getFullYear()),
-      "%y": String(date.getFullYear()).slice(-2)
-    }
-
-    return pattern.replace(/%-?[A-Za-z]/g, (token) => (token in tokens ? tokens[token] : token))
+    return strftime(date, pattern, {
+      dayNames: this.dayNamesValue,
+      shortDayNames: this.shortDayNamesValue,
+      monthNames: this.monthNamesValue,
+      shortMonthNames: this.shortMonthNamesValue
+    })
   }
 }

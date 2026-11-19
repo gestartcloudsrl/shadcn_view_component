@@ -1,0 +1,10 @@
+<%# The agenda in a drawer, at a phone's width. The 20th is selected, so the
+    next press on it is the one that opens the drawer. See `Preview#agenda_drawer`. %>
+<div class="mx-auto w-full max-w-[390px]">
+  <%= render(Shadcn::EventCalendar::Component.new(
+        month: Date.new(2026, 8, 1),
+        selected: Date.new(2026, 8, 20),
+        agenda: :drawer,
+        events: Shadcn::EventCalendar::Preview.workload_events(month: Date.new(2026, 8, 1), per_day: 0..4, crew: 1..3)
+      )) %>
+</div>

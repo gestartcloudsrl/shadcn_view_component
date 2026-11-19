@@ -1,0 +1,88 @@
+<%# What a day link answers with. The `<turbo-frame id="day">` matches the one
+    inside the Sheet, so Turbo swaps this into it — and without Turbo the
+    browser lands on this page instead, which is why the cell is a link and not
+    a listener. %>
+<turbo-frame id="day" class="flex flex-col gap-3 overflow-y-auto p-4">
+  <%# `pe-8` so the count clears the sheet's own close button, which sits over
+      this corner. %>
+  <div class="flex items-baseline justify-between gap-2 pe-8">
+    <h2 class="text-base font-semibold"><%= l(@date, format: "%A, %B %-d") %></h2>
+    <span class="text-xs text-muted-foreground">
+      <%= t("shadcn_view_component.event_calendar.event_count", count: @appointments.size) %>
+    </span>
+  </div>
+
+  <% if @appointments.empty? %>
+    <p class="px-2 py-8 text-center text-sm text-muted-foreground">
+      <%= t("shadcn_view_component.event_calendar.empty") %>
+    </p>
+  <% end %>
+
+  <%# Four fields the calendar never carried: where it is, who to ring, what
+      state it is in, and the note from last time. That is the example — a cell
+      shows what a cell can show, and the rest is one request away.
+
+      An `ItemGroup` rather than a stack of Cards. A Card is a surface for one
+      thing; this is a list of several, and Item is the family shadcn gives a
+      list of things: media, content, actions, with a separator between rather
+      than a border around each. It also puts the three parts in fixed places,
+      so a long client name and a short one line up. %>
+  <%# `COLOR_TOKENS` because the calendar declares `--event-color` as a
+      *descendant* rule on its own root, and this list is the Sheet's child, not
+      the calendar's — so the dot came out transparent, in the Card version too.
+      The gem's own constant rather than a copy of the palette, so a host
+      wanting an event's colour outside the calendar cannot drift from it.
+
+      On the group and not on the `<turbo-frame>`: Turbo replaces a frame's
+      *contents*, and the element that stays is the one the Sheet rendered, with
+      the classes it was given. Anything written on this frame's own tag is
+      discarded on the first swap — which is why the first attempt changed
+      nothing. %>
+  <%= render(Shadcn::Item::Group::Component.new(
+        class: Shadcn::EventCalendar::Component::COLOR_TOKENS)) do |group| %>
+    <% @appointments.each_with_index do |appointment, index| %>
+      <% group.with_separator if index.positive? %>
+
+      <% group.with_item(size: :sm, class: "items-start") do %>
+        <%= render(Shadcn::Item::Content::Component.new) do %>
+          <%= render(Shadcn::Item::Title::Component.new) do %>
+            <span class="size-2 shrink-0 rounded-full bg-(--event-color)"
+                  data-color="<%= appointment.color %>"></span>
+            <%= appointment.title %>
+          <% end %>
+          <%= render(Shadcn::Item::Description::Component.new(class: "line-clamp-none")) do %>
+            <%= l(appointment.starts_at, format: "%-l:%M %p") %> –
+            <%= l(appointment.ends_at, format: "%-l:%M %p") %> · <%= appointment.location %>
+          <% end %>
+          <%= render(Shadcn::Item::Description::Component.new(class: "line-clamp-none")) do %>
+            <%= appointment.notes %>
+            <a href="tel:<%= appointment.phone.delete(' ') %>"><%= appointment.phone %></a>
+          <% end %>
+        <% end %>
+
+        <%= render(Shadcn::Item::Actions::Component.new) do %>
+          <%= render(Shadcn::Badge::Component.new(
+                variant: appointment.status == "done" ? :secondary : :outline)) { appointment.status } %>
+        <% end %>
+
+        <%# The crew reads last, in the footer: `ItemFooter` is `basis-full`, so
+            it takes its own line under the rest rather than a column beside it.
+            Who is going matters less than what and when, and it is the one
+            field whose length varies most — a crew of five stretched the media
+            column and pushed the title in. %>
+        <%= render(Shadcn::Item::Footer::Component.new(class: "justify-start gap-2")) do %>
+          <%= render(Shadcn::Avatar::Group::Component.new) do %>
+            <% appointment.assignees.each do |name| %>
+              <%= render(Shadcn::Avatar::Component.new(size: :sm)) do |avatar| %>
+                <% avatar.with_fallback(class: "bg-background text-[0.6rem]") do %>
+                  <%= name.split.first(2).map { |part| part[0] }.join %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+          <span class="text-xs text-muted-foreground"><%= appointment.assignees.to_sentence %></span>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</turbo-frame>

@@ -1,0 +1,16 @@
+<%# The day at a phone's width, in Italian. See `Preview#phone` for why it is
+    this case and what the frame does and does not show. %>
+<div class="mx-auto w-full max-w-[390px]">
+  <% I18n.with_locale(:it) do %>
+    <%= render(Shadcn::EventCalendar::Component.new(
+          reading: :daily,
+          month: Date.new(2026, 9, 1),
+          selected: Date.new(2026, 9, 30),
+          showing: :both,
+          group: :assignees,
+          window: (7..19),
+          events: Shadcn::EventCalendar::Preview.workload_events(month: Date.new(2026, 9, 1), per_day: 0..4,
+                                                                 crew: 1..4, durations: true)
+        )) %>
+  <% end %>
+</div>
