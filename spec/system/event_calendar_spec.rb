@@ -2944,4 +2944,132 @@ RSpec.describe "Event calendar", :js do
       expect(page).to have_no_css(dialog, visible: :visible)
     end
   end
+
+  # A row reading's day is a strip that scrolls sideways with its bar hidden:
+  # the trackpad reaches past its edge, a mouse wheel did not, and scrolled the
+  # page instead. Over a strip the wheel now scrolls the strip, always — even at
+  # the edge and even when everything fits — so the page holds still while the
+  # pointer stays on it. A real wheel, through WebDriver, because what is being
+  # proved is the page *not* scrolling, and only the browser's own default can
+  # fail to happen.
+  describe "the wheel over a row reading's strip" do
+    before do
+      page.driver.browser.manage.window.resize_to(820, 700)
+    end
+
+    after { page.driver.browser.manage.window.resize_to(1400, 1000) }
+
+    let(:strips) { "[data-slot=event-calendar-day-assignees], [data-slot=event-calendar-day-items]" }
+
+    # Tags a strip that overflows as `over`, and gives the page room to scroll
+    # whichever way the wheel takes it.
+    def tag_strips
+      page.execute_script(<<~JS)
+        document.body.style.paddingBottom = "3000px"
+        const strips = [...document.querySelectorAll(#{strips.to_json})].filter((strip) => strip.offsetParent)
+        strips.find((strip) => strip.scrollWidth > strip.clientWidth + 1)?.setAttribute("data-wheel", "over")
+      JS
+    end
+
+    # Centres the strip, turns the wheel down over it, and answers once the
+    # browser has had two frames to act on it: where the page and the strip
+    # ended up, and whether anything cancelled the page's own scroll.
+    def wheel_over(strip)
+      element = find("[data-wheel=#{strip}]")
+      page.execute_script(<<~JS, element)
+        arguments[0].scrollIntoView({ block: "center", inline: "nearest" })
+        window.wheelSeen = []
+        window.addEventListener("wheel", (event) => window.wheelSeen.push(event.defaultPrevented))
+      JS
+      before = page.evaluate_script("[window.scrollY, document.querySelector('[data-wheel=#{strip}]').scrollLeft]")
+
+      origin = Selenium::WebDriver::WheelActions::ScrollOrigin.element(element.native)
+      page.driver.browser.action.scroll_from(origin, 0, 240).perform
+
+      page.document.synchronize { raise Capybara::ExpectationNotMet if page.evaluate_script("window.wheelSeen.length").zero? }
+      after = page.evaluate_async_script(<<~JS)
+        const done = arguments[arguments.length - 1]
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() =>
+          done([window.scrollY, document.querySelector("[data-wheel=#{strip}]").scrollLeft]), 150)))
+      JS
+
+      { page: after[0] - before[0], strip: after[1] - before[1], prevented: page.evaluate_script("window.wheelSeen") }
+    end
+
+    def synthetic_wheel(strip, **keys)
+      page.evaluate_script(<<~JS)
+        (() => {
+          const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true, ...#{keys.to_json} })
+          document.querySelector("[data-wheel=#{strip}]").dispatchEvent(event)
+          return event.defaultPrevented
+        })()
+      JS
+    end
+
+    {
+      "the week as rows" => "period=weekly&view=rows",
+      "the day as rows" => "period=daily&showing=rows"
+    }.each do |reading, query|
+      %w[events assignees].each do |group|
+        context "with #{reading} cut by #{group}" do
+          before do
+            visit "/lookbook/preview/shadcn/event_calendar/density?#{query}&group=#{group}&most=12&show_all=true"
+            wait_for_stimulus
+            tag_strips
+          end
+
+          it "scrolls the strip sideways and leaves the page where it was", :aggregate_failures do
+            moved = wheel_over("over")
+
+            expect(moved[:strip]).to be_positive
+            expect(moved[:page]).to eq(0)
+          end
+
+          it "holds the page still at the strip's right edge", :aggregate_failures do
+            page.execute_script("const s = document.querySelector('[data-wheel=over]'); s.scrollLeft = s.scrollWidth")
+
+            moved = wheel_over("over")
+
+            expect(moved[:prevented]).to all(be(true))
+            expect(moved[:page]).to eq(0)
+          end
+
+          # The overflowing strip cut down to its first chip, rather than
+          # hoping the generator left a quiet day in this reading.
+          it "holds the page still over a strip with nothing past its edge", :aggregate_failures do
+            fits = page.evaluate_script(<<~JS)
+              (() => {
+                const strip = document.querySelector("[data-wheel=over]")
+                while (strip.children.length > 1) strip.lastElementChild.remove()
+                return strip.scrollWidth <= strip.clientWidth
+              })()
+            JS
+
+            expect(fits).to be(true)
+            expect(wheel_over("over")[:page]).to eq(0)
+          end
+
+          it "leaves Shift and Ctrl to the browser", :aggregate_failures do
+            expect(synthetic_wheel("over")).to be(true)
+            expect(synthetic_wheel("over", shiftKey: true)).to be(false)
+            expect(synthetic_wheel("over", ctrlKey: true)).to be(false)
+          end
+        end
+      end
+    end
+
+    # Above `lg`, without `arrangement: :rows`, the month is a grid: a cell's
+    # chips stack and its overflow is visible, so there is no strip to scroll.
+    it "scrolls the page as before over the month's grid" do
+      page.driver.browser.manage.window.resize_to(1400, 700)
+      visit "/lookbook/preview/shadcn/event_calendar/workload"
+      wait_for_stimulus
+      page.execute_script(<<~JS)
+        document.body.style.paddingBottom = "3000px"
+        document.querySelector(#{strips.to_json}).setAttribute("data-wheel", "grid")
+      JS
+
+      expect(wheel_over("grid")[:page]).to be_positive
+    end
+  end
 end

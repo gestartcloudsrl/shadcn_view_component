@@ -2,6 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 import { addDays, iso, parse, shiftMonths, strftime } from "shadcn/dates"
 import { tabbable } from "shadcn/focus"
 
+// A line of wheel, in pixels, for a browser that reports the wheel in lines.
+const WHEEL_LINE = 16
+
 // The month the server drew, moved.
 //
 // It is written to the two rules `calendar_controller.js` is written to, and
@@ -145,6 +148,50 @@ export default class extends Controller {
     } catch {
       this.plurals = new Intl.PluralRules()
     }
+
+    // On the root and delegated, so a strip the server redraws inside it is
+    // still covered. Not passive: turning the wheel into a sideways scroll
+    // means cancelling the page's own.
+    this.onWheel = this.stripWheel.bind(this)
+    this.element.addEventListener("wheel", this.onWheel, { passive: false })
+  }
+
+  disconnect() {
+    this.element.removeEventListener("wheel", this.onWheel, { passive: false })
+  }
+
+  // A row reading's day is a strip of chips that scrolls sideways with its
+  // scrollbar hidden: a trackpad or a finger can reach past its edge, a mouse
+  // wheel cannot, and there is no bar to drag. So over a strip the vertical
+  // wheel scrolls the strip — always, even at its edge and even when every
+  // chip fits, so the page never moves while the pointer stays on it. The page
+  // scrolls from the dates column or from outside the rows.
+  //
+  // A strip is one only while its overflow is not `visible`: that follows the
+  // `rows` variant (below `lg`, or `data-arrangement="rows"`) without
+  // repeating shadcn.css's breakpoint here. Shift (already sideways), Ctrl
+  // (zoom, a trackpad's pinch included) and a gesture that is already mostly
+  // sideways are the browser's.
+  stripWheel(event) {
+    if (event.shiftKey || event.ctrlKey) return
+    if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return
+
+    const strip = event.target.closest?.(
+      "[data-slot='event-calendar-day-assignees'], [data-slot='event-calendar-day-items']"
+    )
+    if (!strip || !this.element.contains(strip)) return
+    if (getComputedStyle(strip).overflowX === "visible") return
+
+    event.preventDefault()
+    strip.scrollLeft += this.wheelPixels(event, strip)
+  }
+
+  // `deltaMode` 1 is lines (Firefox's mouse wheel) and 2 is pages.
+  wheelPixels(event, strip) {
+    const delta = event.deltaY
+    if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) return delta * WHEEL_LINE
+    if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) return delta * strip.clientWidth
+    return delta
   }
 
   readPrototypes() {

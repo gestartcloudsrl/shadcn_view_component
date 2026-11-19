@@ -987,6 +987,38 @@ menu's own `select` has ticked it (`select` is first in the item's
 spec ("Show all events"), and `event_calendar_spec.rb` (the link ticking the box
 and lifting the cap, the event's `{ showAll }` both ways).
 
+### The wheel over a strip
+
+A row's day is a strip of chips that scrolls sideways with its bar hidden
+(`STRIP_TOKENS` in `Workload::Component`). A trackpad or a finger reaches past
+its edge; a mouse wheel scrolled the page instead, and with no bar to drag a
+mouse could not see the chips beyond the border. So over a strip the vertical
+wheel scrolls the strip — **always**, at its edge and when every chip fits too,
+so the page holds still while the pointer stays on it and scrolls from the
+dates column or from outside the rows. That is Gestart's choice (2026-11-18),
+over handing the wheel back to the page at the edge.
+
+One `wheel` listener on the root, `passive: false`, delegated through
+`closest` on the two strip slots, so a strip the server redraws inside the root
+is still covered (`stripWheel` in the controller). It acts only while the
+strip's computed `overflow-x` is not `visible`: that follows the `rows` variant
+— below `lg`, or `data-arrangement="rows"` — without repeating `shadcn.css`'s
+breakpoint in JavaScript, and leaves the month's grid alone. Shift (already
+sideways), Ctrl (zoom, a trackpad's pinch included) and a gesture that is
+already mostly sideways (`|deltaX| >= |deltaY|`) stay the browser's. The delta
+is read through `deltaMode`: pixels as they are, lines at 16px, pages at the
+strip's `clientWidth`.
+
+The hourly timeline (`Hours`, `[data-slot=event-calendar-grid]`) also scrolls
+sideways but is not a row reading, and is left as it was.
+
+Specs: `event_calendar_spec.rb`, "the wheel over a row reading's strip" — a real
+WebDriver wheel over the week and the day as rows, by event and by assignee
+(the strip moves and the page does not; the same at the right edge and over a
+strip cut down to fit), Shift and Ctrl left uncancelled, and the month's grid
+scrolling the page. Without the `preventDefault` the first three fail; without
+the `overflow-x` check the grid's does.
+
 ## Moving an event
 
 `movable: true` and nothing else. The calendar dispatches
