@@ -965,16 +965,25 @@ RSpec.describe Shadcn::EventCalendar::Component do
         { "color" => "amber", "label" => "From a YAML file" } ]
     end
 
-    it "puts an icon button in the nav that opens a dialog titled Legend", :aggregate_failures do
+    it "puts an info button labelled Legend in the nav that opens a dialog titled Legend", :aggregate_failures do
       doc = calendar_with(legend)
       nav = doc.at_css("[data-slot=event-calendar-nav]")
       trigger = nav.at_css("[data-slot=dialog-trigger]")
 
-      expect(trigger.at_css("svg.lucide-circle-question-mark")).not_to be_nil
-      expect(trigger.at_css(".sr-only").text).to eq("Legend")
+      expect(trigger.at_css("svg.lucide-info")).not_to be_nil
+      expect(trigger.at_css("span").text).to eq("Legend")
       expect(trigger.parent["data-slot"]).to eq("dialog")
       expect(trigger.parent.parent).to eq(nav)
       expect(doc.at_css("[data-slot=dialog-title]").text).to eq("Legend")
+    end
+
+    # The word goes on a phone and the name stays; the button becomes the 32px
+    # square the panel's trigger is.
+    it "keeps only the icon below sm, with the word still its name", :aggregate_failures do
+      trigger = calendar_with(legend).at_css("[data-slot=event-calendar-nav] [data-slot=dialog-trigger]")
+
+      expect(trigger.at_css("span")["class"]).to eq("max-sm:sr-only")
+      expect(trigger["class"].split).to include("h-8", "max-sm:size-8")
     end
 
     it "lists each entry with its colour, the swatch hidden from assistive technology", :aggregate_failures do
@@ -1019,7 +1028,7 @@ RSpec.describe Shadcn::EventCalendar::Component do
       doc = calendar_with_content(nil)
       body = doc.at_css("[data-slot=event-calendar-legend-content]")
 
-      expect(doc.at_css("[data-slot=event-calendar-nav] [data-slot=dialog-trigger] .sr-only").text).to eq("Legend")
+      expect(doc.at_css("[data-slot=event-calendar-nav] [data-slot=dialog-trigger] span").text).to eq("Legend")
       expect(doc.at_css("[data-slot=dialog-title]").text).to eq("Legend")
       expect(body.at_css("p.host-note").text).to eq("Ask the office.")
       expect(doc.at_css("[data-slot=event-calendar-legend-list]")).to be_nil

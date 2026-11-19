@@ -506,6 +506,10 @@ RSpec.describe "reverse parity" do
     # here it is the event's colour, set by the same `data-color` rules or the
     # host's property, so a swatch and an event given one value match.
     "event-calendar-legend-swatch" => %w[bg-(--event-color)],
+    # The event calendar's legend trigger: an `sm` button with its word, which
+    # below `sm` drops the word and takes `icon-sm`'s `size-8` under a variant
+    # no vendored source writes. `LEGEND_TRIGGER_CLASS`.
+    "dialog-trigger" => %w[max-sm:size-8],
     # Under `agenda: :drawer`, upstream's drawer-demo column (`mx-auto w-full
     # max-w-sm`, examples/drawer-demo.tsx — not vendored) one step wider,
     # because a row carries a time and a subtitle. `AGENDA_DRAWER_CLASS`.

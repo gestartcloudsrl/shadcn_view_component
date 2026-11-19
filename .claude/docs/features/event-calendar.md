@@ -487,11 +487,18 @@ if the host draws it in `--event-color` through the same `data-color` or custom
 property, which nothing in the gem checks. A slot rather than a lambda, as
 `agenda_footer:` is, because nothing in it depends on the day.
 
-**The button.** An `icon-sm` outline button with lucide's
-`circle-question-mark` (lucide-static 1.31.0, the version `vendor/lucide`
-records), named «Legend» by an `sr-only` span the way the panel's trigger is
-(`event_calendar.legend`; the dummy app carries «Legenda»). It sits after the
-panel and the preferences, before Today, in every reading's nav.
+**The button.** An `sm` outline button with lucide's `info` and the word
+«Legend» (`event_calendar.legend`; the dummy app carries «Legenda»). It sits
+after the panel and the preferences, before Today, in every reading's nav. It
+was an `icon-sm` with `circle-question-mark`, and Gestart found the question
+mark read as help rather than as what the colours mean (2026-11-19); `info` was
+picked over `swatch-book`, `palette` and `map` because it was already vendored
+and the word beside it says the rest. Below `sm` the word is `max-sm:sr-only`
+and the button is the 32px square of the panel's trigger (`max-sm:size-8`; the
+icon stays centred under `sm`'s own padding, measured), so the phone's toolbar
+is as wide as it was and the button keeps its name. Specs: the component spec
+(`legend:`), and `event_calendar_spec.rb` (32px and centred at 390px, named
+«Legend», the word back at 1400px).
 
 **The dialog.** The gem's Dialog, so Escape, the focus return to the button and
 its own layer in the dismiss stack are the Dialog's. Titled «Legend», no

@@ -258,6 +258,10 @@ module Shadcn
       # `vendor/shadcn/ui/chart.tsx`), stacked, a step wider apart since each is
       # a sentence rather than a series name.
       LEGEND_CONTENT_CLASS = "sm:max-w-sm"
+      # The trigger below `sm`: `icon-sm`'s `size-8`. `sm`'s icon padding stays;
+      # the icon is wider than what it leaves, and the flex centring spreads the
+      # difference evenly, so it sits in the middle anyway (measured at 390px).
+      LEGEND_TRIGGER_CLASS = "max-sm:size-8"
       LEGEND_LIST_CLASS = "flex flex-col gap-2.5 text-sm"
       LEGEND_ITEM_CLASS = "flex items-center gap-1.5"
       LEGEND_SWATCH_CLASS = "h-2 w-2 shrink-0 rounded-[2px] bg-(--event-color)"
@@ -878,18 +882,21 @@ module Shadcn
         end
       end
 
-      # What the colours mean, behind a `circle-question-mark` beside the panel
-      # — an icon button named the way the panel's trigger is, by an `sr-only`
-      # span. The dialog is the gem's Dialog: its Escape, its focus return to
+      # What the colours mean, behind an `info` and the word «Legend» beside the
+      # panel. A question mark read as help, not as what the colours mean
+      # (Gestart, 2026-11-19). Below `sm` the word is `sr-only` and the button
+      # is the 32px square the panel's trigger is, so the phone's toolbar keeps
+      # its width and the button keeps its name. The dialog is the gem's Dialog: its Escape, its focus return to
       # the button, and a layer of its own in the dismiss stack, apart from the
       # agenda's drawer. The swatch is upstream's chart legend square (`h-2 w-2
       # shrink-0 rounded-[2px]`, `vendor/shadcn/ui/chart.tsx`) in the event's
       # colour, `aria-hidden`: the label is what it means.
       def legend_dialog
         render(Dialog::Component.new) do |dialog|
-          dialog.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :"icon-sm")) do
-            safe_join([ render(Icon::Component.new("circle-question-mark")),
-                        tag.span(shadcn_t("event_calendar.legend"), class: "sr-only") ])
+          dialog.with_trigger(class: Button::Component.variant_classes(variant: :outline, size: :sm,
+                                                                       class: LEGEND_TRIGGER_CLASS)) do
+            safe_join([ render(Icon::Component.new("info")),
+                        tag.span(shadcn_t("event_calendar.legend"), class: "max-sm:sr-only") ])
           end
           dialog.with_dialog_content(class: LEGEND_CONTENT_CLASS) do |content|
             content.with_header { |header| header.with_title { shadcn_t("event_calendar.legend") } }

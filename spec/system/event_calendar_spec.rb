@@ -1323,6 +1323,41 @@ RSpec.describe "Event calendar", :js do
       end
     end
 
+    # The word goes below `sm` and the button is the panel trigger's 32px
+    # square, its icon centred; at a desktop width the word is back.
+    it "draws the legend's button as an icon on a phone and with its word on a desktop", :aggregate_failures do
+      measure = <<~JS
+        (() => {
+          const button = [...document.querySelectorAll("[data-slot=event-calendar-nav] [data-slot=dialog-trigger]")]
+                           .find((trigger) => trigger.textContent.trim() === "Legend")
+          const [box, icon] = [button.getBoundingClientRect(), button.querySelector("svg").getBoundingClientRect()]
+          return { width: Math.round(box.width), height: Math.round(box.height),
+                   offset: Math.round((icon.left + icon.width / 2) - (box.left + box.width / 2)),
+                   word: button.querySelector("span").getClientRects().length > 0 &&
+                         getComputedStyle(button.querySelector("span")).position !== "absolute",
+                   name: button.computedName ?? button.textContent.trim() }
+        })()
+      JS
+
+      at_width(390) do
+        visit "/lookbook/preview/shadcn/event_calendar/density?legend=true"
+        wait_for_stimulus
+        phone = page.evaluate_script(measure)
+
+        expect(phone.slice("width", "height", "offset", "word")).to eq("width" => 32, "height" => 32, "offset" => 0, "word" => false)
+        expect(find("#{calendar} [data-slot=event-calendar-nav] [data-slot=dialog-trigger]", text: "Legend").native.accessible_name)
+          .to eq("Legend")
+      end
+
+      page.driver.browser.manage.window.resize_to(1400, 1000)
+      visit "/lookbook/preview/shadcn/event_calendar/density?legend=true"
+      wait_for_stimulus
+      desktop = page.evaluate_script(measure)
+
+      expect(desktop["word"]).to be(true)
+      expect(desktop["width"]).to be > 32
+    end
+
     it "keeps every control whole, wrapping onto lines of its own" do
       at_width(390) do
         visit "/lookbook/preview/shadcn/event_calendar/phone"

@@ -14,7 +14,6 @@ module ShadcnViewComponent
       "chevron-right" => %(<path d="m9 18 6-6-6-6"/>),
       "chevron-up" => %(<path d="m18 15-6-6-6 6"/>),
       "circle-check" => %(<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>),
-      "circle-question-mark" => %(<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>),
       "circle" => %(<circle cx="12" cy="12" r="10"/>),
       "ellipsis" => %(<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>),
       "grip-vertical" => %(<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>),
